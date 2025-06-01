@@ -1,0 +1,22 @@
+# Framework web et ASGI
+fastapi>=0.111
+uvicorn[standard]>=0.30
+
+# LLM & Haystack
+openai>=1.30
+haystack-ai>=2.14
+haystack-experimental>=0.10
+
+# Validation de données & I/O
+pydantic>=2.7
+aiofiles>=23.2
+python-dotenv>=1.0
+
+# Tests et qualité de code
+pytest>=8.2
+pytest-asyncio>=0.23
+coverage>=7.5
+ruff>=0.4
+black>=24.4
+
+# (LangChain supprimé, migration Haystack 3.x)

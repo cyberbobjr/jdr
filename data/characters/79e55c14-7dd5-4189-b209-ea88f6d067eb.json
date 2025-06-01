@@ -1,0 +1,70 @@
+{
+  "state": {
+    "concept": "Prêtre humain guérisseur itinérant",
+    "race": "Elfe Sylvain",
+    "culture": "Rurale",
+    "profession": "Aventurier",
+    "caracteristiques": {
+      "Force": 69,
+      "Constitution": 69,
+      "Agilité": 69,
+      "Rapidité": 69,
+      "Volonté": 69,
+      "Raisonnement": 69,
+      "Intuition": 68,
+      "Présence": 68
+    },
+    "competences": {
+      "Comédie": 21
+    },
+    "talents": [],
+    "equipment": [
+      "Bandoulière",
+      "Coutelas",
+      "Bottes de cuir",
+      "Gants de cuir",
+      "Tenue de voyage",
+      "Aiguille à coudre"
+    ],
+    "spells": [
+      "Voies du Verrouillage",
+      "Teintes",
+      "Accrochage"
+    ],
+    "current_step": "validation",
+    "equipment_summary": {
+      "total_cost": 4.8,
+      "total_weight": 5.2,
+      "remaining_money": 15.2,
+      "starting_money": 20
+    },
+    "culture_bonuses": {
+      "Artisanat": 3,
+      "Endurance": 1,
+      "Soins": 1,
+      "Herboristerie": 1,
+      "Connaissance Générale": 2,
+      "Équitation": 1,
+      "Natation": 2
+    },
+    "name": "Galadhwen",
+    "bonus_race": {
+      "Force": 1,
+      "Constitution": 1,
+      "Agilité": 4,
+      "Rapidité": 4,
+      "Volonté": 2,
+      "Raisonnement": 1,
+      "Intuition": 1,
+      "Présence": 1,
+      "bonus_endurance": 40,
+      "bonus_pp": 30,
+      "resistance_corps": 15,
+      "resistance_esprit": 15,
+      "resistance_magie": 20
+    },
+    "hp": 109
+  },
+  "created_at": "2025-05-29T21:21:50.892906",
+  "last_update": "2025-05-31T01:28:05.686889"
+}
