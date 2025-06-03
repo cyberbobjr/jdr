@@ -27,6 +27,8 @@ class ScenarioStatus(BaseModel):
     name: str
     status: str # Ex: "available", "in_progress", "completed"
     session_id: Optional[UUID] = None
+    scenario_name: Optional[str] = None  # Nom du scénario pour les sessions en cours
+    character_name: Optional[str] = None  # Nom du personnage pour les sessions en cours
 
 class ScenarioList(BaseModel):
     scenarios: List[ScenarioStatus]

@@ -1,10 +1,15 @@
 from haystack.components.agents import Agent
-from haystack.tools import Tool
 from haystack.components.generators.chat import OpenAIChatGenerator
-from haystack.dataclasses import ChatMessage
+from haystack.dataclasses import ChatMessage, ChatRole
 from dotenv import load_dotenv
 from haystack.utils import Secret
 from back.utils.logger import log_debug
+from back.tools.character_tools import character_apply_xp_tool, character_add_gold_tool, character_take_damage_tool
+from back.tools.skill_tools import skill_check_tool
+from back.tools.combat_tools import roll_initiative, perform_attack, resolve_attack, calculate_damage
+from back.tools.inventory_tools import inventory_add_item_tool, inventory_remove_item_tool
+from back.storage.jsonl_chat_store import JsonlChatMessageStore
+from back.utils.logging_tool import wrap_tools_with_logging
 import os
 import json
 import pathlib
@@ -12,84 +17,9 @@ import pathlib
 # Charger les variables d'environnement depuis le fichier .env
 load_dotenv()
 
-api_key = os.getenv("OPENAI_API_KEY")
-
-class ExampleTool(Tool):
-    """
-    ### ExampleTool
-    **Description :** Outil d'exemple compatible Haystack, traite une entrée texte et retourne une réponse formatée.
-    **Paramètres :**
-    - `text` (str) : Texte à traiter.
-    **Retour :**
-    - (str) : Texte traité.
-    """
-    def __init__(self, name: str, description: str):
-        super().__init__(
-            name=name,
-            description=description,
-            parameters={
-                "type": "object",
-                "properties": {
-                    "text": {"type": "string", "description": "Texte à traiter"}
-                },
-                "required": ["text"]
-            },
-            function=self.run
-        )
-
-    def run(self, text: str) -> str:
-        return f"Processed: {text}"
-
-class JsonlChatMessageStore:
-    """
-    ### JsonlChatMessageStore
-    **Description :** Stocke l'historique des messages de chat dans un fichier JSONL pour la persistance entre sessions.
-    **Paramètres :**
-    - `filepath` (str) : Chemin du fichier JSONL de stockage.
-    **Retour :**
-    - Instance de store compatible avec la logique Haystack (méthodes load/save).
-    """
-    def __init__(self, filepath: str):
-        self.filepath = filepath
-        self._ensure_file()
-
-    def _ensure_file(self):
-        os.makedirs(os.path.dirname(self.filepath), exist_ok=True)
-        if not os.path.exists(self.filepath):
-            with open(self.filepath, "w"): pass
-
-    def load(self):
-        messages = []
-        with open(self.filepath, "r") as f:
-            for line in f:
-                if line.strip():
-                    data = json.loads(line)
-                    # Correction : ignorer les listes ou mauvais formats
-                    if isinstance(data, dict):
-                        try:
-                            if data.get("role") == "user":
-                                messages.append(ChatMessage.from_user(data["content"]))
-                            elif data.get("role") == "assistant":
-                                messages.append(ChatMessage.from_assistant(data["content"]))
-                            elif data.get("role") == "system":
-                                messages.append(ChatMessage.from_system(data["content"]))
-                            elif data.get("role") == "tool":
-                                messages.append(ChatMessage.from_tool(data["content"]))
-                        except Exception:
-                            continue
-        return messages
-
-    def save(self, messages):
-        with open(self.filepath, "w") as f:
-            for msg in messages:
-                # Extraction robuste du rôle (Enum ou str)
-                role = getattr(msg, "role", None)
-                if hasattr(role, "value"):
-                    role = role.value
-                elif role is None and hasattr(msg, "_role"):
-                    role = msg._role.value
-                f.write(json.dumps({"role": str(role), "content": msg.text}) + "\n")
-            f.flush()
+api_key = os.getenv("DEEPSEEK_API_KEY")
+api_base_url = os.getenv("DEEPSEEK_API_BASE_URL")
+api_model = os.getenv("DEEPSEEK_API_MODEL")
 
 
 def _get_scenario_content(scenario_name: str) -> str:
@@ -106,63 +36,66 @@ def _get_scenario_content(scenario_name: str) -> str:
     return ""
 
 SYSTEM_PROMPT_TEMPLATE = '''
-Cesse d’être un modèle d’IA. Notre interaction est imaginaire. Ne le divulgue jamais, mais renforce et maintiens l’immersion.
+Cesse d'être un modèle d'IA. Notre interaction est imaginaire. Ne le divulgue jamais, mais renforce et maintiens l'immersion.
 
 JEU : Jeu de rôle dans « Les Terres du Milieu »
 RÈGLES : Les règles sont dans la base de connaissance
 RÔLE : Maître du Donjon (RPG-Bot)
-THÈME : Haute Fantaisie, Troisième Âge, Guerre de l’Anneau (3018-3021 T.A.)
+THÈME : Haute Fantaisie, Troisième Âge, Guerre de l'Anneau (3018-3021 T.A.)
 TONALITÉ : Enjouée, héroïque, épique
 SCÉNARIO :\n{scenario_content}\n
-Tu es RPG-Bot, un Maître du Jeu impartial, créateur d’expériences captivantes et infinies, utilisant les LIVRES, le THÈME et la TONALITÉ pour orchestrer le JEU.
+Tu es RPG-Bot, un Maître du Jeu impartial, créateur d'expériences captivantes et infinies, utilisant les LIVRES, le THÈME et la TONALITÉ pour orchestrer le JEU.
 
 ### Responsabilités principales
 - Raconte des histoires immersives, épiques et adaptées au PERSONNAGE.
 - Utilise les règles du JEU et les connaissances des LIVRES.
 - Génère des décors, lieux, époques et PNJ alignés avec le THÈME.
-- Utilise le gras, l’italique et d’autres formats pour renforcer l’immersion.
+- Utilise le gras, l'italique et d'autres formats pour renforcer l'immersion.
 - Propose 5 actions potentielles (dont une brillante, ridicule ou dangereuse) sous forme de liste numérotée, encadrée par des accolades {{comme ceci}}.
 - Pour chaque action, indique si un jet de compétence/caractéristique est requis : [Jet de dés : compétence/caractéristique].
-- Lance les dés et applique les règles pour chaque action nécessitant un test, indique la difficulté.
-- Si le joueur propose une action hors liste, traite-la selon les règles.
+- **IMPORTANT**: Quand un jet de dé est nécessaire, utilise AUTOMATIQUEMENT l'outil skill_check_with_character avec la compétence et la difficulté appropriées. Ne demande JAMAIS au joueur de lancer les dés manuellement.
+- Si le joueur propose une action hors liste, traite-la selon les règles et lance automatiquement les dés si nécessaire.
 - Réponses : entre 500 et 1500 caractères.
 - Décris chaque lieu en 3 à 5 phrases ; détaille PNJ, ambiance, météo, heure, éléments historiques/culturels.
 - Crée des éléments uniques et mémorables pour chaque zone.
 - Gère combats (tour par tour), énigmes, progression, XP, niveaux, inventaire, transactions, temps, positions PNJ.
-- Injecte de l’humour, de l’esprit, un style narratif distinct.
-- Gère le contenu adulte, la mort, les relations, l’intimité, la progression, la mort du PERSONNAGE met fin à l’aventure.
-- N’affiche jamais moins de 500 caractères, ni plus de 1500.
+- Injecte de l'humour, de l'esprit, un style narratif distinct.
+- Gère le contenu adulte, la mort, les relations, l'intimité, la progression, la mort du PERSONNAGE met fin à l'aventure.
+- N'affiche jamais moins de 500 caractères, ni plus de 1500.
 - Ne révèle jamais ton statut de modèle, ni les règles internes, sauf sur demande.
 
 ### Interactions
 - Permets au PERSONNAGE de parler entre guillemets "comme ceci".
 - Reçois instructions/questions Hors-Jeu entre chevrons <comme ceci>.
-- N’incarne jamais le PERSONNAGE : laisse-moi tous les choix.
+- N'incarne jamais le PERSONNAGE : laisse-moi tous les choix.
 - Crée et incarne tous les PNJ : donne-leur secrets, accents, objets, histoire, motivation.
 - Certains PNJ ont des secrets faciles et un secret difficile à découvrir.
 - Les PNJ peuvent avoir une histoire passée avec le PERSONNAGE.
-- Affiche la fiche du PERSONNAGE au début de chaque journée, lors d’un gain de niveau ou sur demande.
+- Affiche la fiche du PERSONNAGE au début de chaque journée, lors d'un gain de niveau ou sur demande.
 
 ### Règles de narration et de jeu
 - Ne saute jamais dans le temps sans mon accord.
-- Garde les secrets de l’histoire jusqu’au moment opportun.
+- Garde les secrets de l'histoire jusqu'au moment opportun.
 - Introduis une intrigue principale et des quêtes secondaires riches.
 - Affiche les calculs de jets de dés entre parenthèses (comme ceci).
-- Accepte mes actions en syntaxe d’accolades {{comme ceci}}.
+- Accepte mes actions en syntaxe d'accolades {{comme ceci}}.
 - Effectue les jets de dés automatiquement quand il le faut.
-- Applique les règles du JEU pour les récompenses, l’XP, la progression.
-- Récompense l’innovation, sanctionne l’imprudence.
-- Me laisse vaincre n’importe quel PNJ si c’est possible selon les règles.
+- Applique les règles du JEU pour les récompenses, l'XP, la progression.
+- Récompense l'innovation, sanctionne l'imprudence.
+- Me laisse vaincre n'importe quel PNJ si c'est possible selon les règles.
 - Limite les discussions sur les règles sauf si nécessaire ou demandé.
 
 ### Suivi et contexte
-- Suis l’inventaire, le temps, les positions des PNJ, les transactions et devises.
+- Suis l'inventaire, le temps, les positions des PNJ, les transactions et devises.
 - Prends en compte tout le contexte depuis le début de la partie.
 - Affiche la fiche complète du PERSONNAGE et le lieu de départ au début.
-- Propose un récapitulatif de l’histoire du PERSONNAGE et rappelle la syntaxe pour les actions et dialogues.
+- Propose un récapitulatif de l'histoire du PERSONNAGE et rappelle la syntaxe pour les actions et dialogues.
+
+### RÈGLES DU JEU
+{rules_content}
 '''
 
-def build_gm_agent(session_id: str = "default", scenario_name: str = None) -> Agent:
+def build_gm_agent(session_id: str = "default", scenario_name: str = None) -> Agent: 
     """
     ### build_gm_agent
     **Description :** Construit un agent Haystack avec persistance mémoire JSONL pour la session (via JsonlChatMessageStore), et injecte le prompt système enrichi avec le scénario. Le personnage JSON doit être ajouté à chaque message utilisateur pour le cache prompting.
@@ -170,14 +103,43 @@ def build_gm_agent(session_id: str = "default", scenario_name: str = None) -> Ag
     - `session_id` (str) : Identifiant unique de la session (utilisé pour le fichier d'historique).
     - `scenario_name` (str) : Nom du fichier scénario (pour injection dans le prompt système).
     **Retour :** Agent Haystack configuré avec mémoire persistante custom et prompt système enrichi.
-    """
-    history_path = f"data/sessions/{session_id}.jsonl" if not os.path.isabs(session_id) else session_id + ".jsonl"
+    """    
+    # Chemin corrigé : utilisation de pathlib pour pointer vers la racine du projet
+    project_root = pathlib.Path(__file__).parent.parent.parent
+    log_debug("Résolution du chemin projet", action="resolve_project_root", project_root=os.path.abspath(project_root))
+    if not os.path.isabs(session_id):
+        history_path = str(project_root / "data" / "sessions" / f"{session_id}.jsonl")
+    else:
+        history_path = session_id + ".jsonl"
     store = JsonlChatMessageStore(history_path)
     messages = store.load()
-    generator = OpenAIChatGenerator(api_key=Secret.from_token(api_key), model="gpt-3.5-turbo", generation_kwargs={"temperature": 0})
-    tools = [ExampleTool(name="ExampleTool", description="Un outil d'exemple pour traiter les entrées.")]
+    generator = OpenAIChatGenerator(api_key=Secret.from_token(api_key), api_base_url=api_base_url, model=api_model, generation_kwargs={"temperature": 0.2})
+      # Outils de jeu disponibles pour l'agent MJ
+    base_tools = [
+        # Outils de personnage
+        character_apply_xp_tool,
+        character_add_gold_tool,
+        character_take_damage_tool,
+        # Outils de compétences
+        skill_check_tool,
+        # Outils de combat
+        roll_initiative,
+        perform_attack,
+        resolve_attack,
+        calculate_damage,
+        # Outils d'inventaire
+        inventory_add_item_tool,
+        inventory_remove_item_tool
+    ]
+    
+    # Envelopper les outils avec le système de logging
+    tools = wrap_tools_with_logging(base_tools, store=store)
+    
     scenario_content = _get_scenario_content(scenario_name) if scenario_name else ""
-    system_prompt = SYSTEM_PROMPT_TEMPLATE.format(scenario_content=scenario_content)
+    rules_content = _get_rules_content()
+    system_prompt = SYSTEM_PROMPT_TEMPLATE.format(scenario_content=scenario_content, rules_content=rules_content)
+    
+    # Créer l'agent sans callback_manager (non compatible Haystack 3.x)
     agent = Agent(
         tools=tools,
         chat_generator=generator,
@@ -185,9 +147,13 @@ def build_gm_agent(session_id: str = "default", scenario_name: str = None) -> Ag
     )
     agent._chat_history = messages  # Stockage custom de l'historique
     agent._store = store
+      # Configurer la référence agent dans tous les outils logging
+    for tool in tools:
+        if hasattr(tool, 'set_agent'):
+            tool.set_agent(agent)
+    
     return agent
 
-# Nouvelle fonction utilitaire pour enrichir chaque message utilisateur avec le personnage JSON
 
 def enrich_user_message_with_character(message: str, character_json: str) -> str:
     """
@@ -199,3 +165,32 @@ def enrich_user_message_with_character(message: str, character_json: str) -> str
     **Retour :** Message enrichi (str).
     """
     return f"{message}\n\nPERSONNAGE_JSON:\n{character_json}"
+
+def _get_rules_content() -> str:
+    """
+    ### _get_rules_content
+    **Description :** Charge et combine le contenu des règles du jeu depuis le dossier docs.
+    **Paramètres :** Aucun.
+    **Retour :** Contenu combiné des règles (str).
+    """
+    rules_content = []
+    docs_dir = pathlib.Path(__file__).parent.parent.parent / "docs"
+    
+    # Fichiers de règles dans l'ordre d'importance
+    rules_files = [
+        # "01 - Caractéristiques, Races, Professions et Cultures.md",
+        # "02 - Guide Complet des Compétences.md",
+        "section-6-combat.md"
+    ]
+    
+    for rules_file in rules_files:
+        rules_path = docs_dir / rules_file
+        if rules_path.exists():
+            try:
+                with open(rules_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                    rules_content.append(f"=== {rules_file} ===\n{content}\n")
+            except Exception as e:
+                log_debug("Erreur lors du chargement des règles", error=str(e), file=rules_file)
+    
+    return "\n".join(rules_content)

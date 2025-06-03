@@ -1,5 +1,4 @@
 from back.utils.dice import roll_attack
-from back.tools.skill_tools import skill_check
 
 class CombatManager:
     """

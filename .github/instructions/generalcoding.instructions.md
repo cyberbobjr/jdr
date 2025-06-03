@@ -4,7 +4,8 @@ applyTo: '**'
 # Instructions for Code Documentation
 [README.md](../../README.md) contain the information about the Project
 [openai-instructions.md](../../instructions/openai-instructions.md) contain the detailed technical information about the Project
-pour Haystack, la documentation est : 
+
+For Haystack, the code documentation are:
 [Haystack Documentation](https://docs.haystack.deepset.ai/docs/introduction) (for general Haystack documentation)
 [Haystack Tools documentation](https://docs.haystack.deepset.ai/docs/tool) (for tools documentation)
 [Haystack Agent documentation](https://docs.haystack.deepset.ai/docs/agents) (for Agent documentation)

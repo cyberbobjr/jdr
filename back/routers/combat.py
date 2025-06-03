@@ -5,11 +5,6 @@ from back.utils.logger import log_debug
 router = APIRouter()
 combat_manager = CombatManager()
 
-@router.get("/example")
-async def example_endpoint():
-    log_debug("Appel endpoint combat/example_endpoint")
-    return {"message": "Example endpoint for combat"}
-
 @router.post("/attack")
 async def attack_endpoint(dice: str):
     """

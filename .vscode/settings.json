@@ -1,0 +1,9 @@
+{
+    "python-envs.pythonProjects": [],
+    "[python]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true,
+            "source.unusedImports": true
+        }
+    }
+}

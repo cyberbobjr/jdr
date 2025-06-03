@@ -1,6 +1,5 @@
 import pytest
 from back.tools.skill_tools import skill_check_tool
-from langchain.tools import tool
 from unittest.mock import patch
 
 @patch('random.randint', return_value=60)

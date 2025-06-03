@@ -22,7 +22,13 @@ def roll_initiative_tool(characters: list[dict]) -> list:
 roll_initiative = Tool(
     name="roll_initiative",
     description="Calcule l'ordre d'initiative des personnages.",
-    parameters={"characters": {"type": "array", "description": "Liste des personnages"}},
+    parameters={
+        "type": "object",
+        "properties": {
+            "characters": {"type": "array", "description": "Liste des personnages", "items": {"type": "object"}}
+        },
+        "required": ["characters"]
+    },
     function=roll_initiative_tool
 )
 
@@ -41,7 +47,13 @@ def perform_attack_tool(dice: str) -> int:
 perform_attack = Tool(
     name="perform_attack",
     description="Effectue un jet d'attaque.",
-    parameters={"dice": {"type": "string", "description": "Notation des dés à lancer (ex: 1d20)"}},
+    parameters={
+        "type": "object",
+        "properties": {
+            "dice": {"type": "string", "description": "Notation des dés à lancer (ex: 1d20)"}
+        },
+        "required": ["dice"]
+    },
     function=perform_attack_tool
 )
 
@@ -62,8 +74,12 @@ resolve_attack = Tool(
     name="resolve_attack",
     description="Résout une attaque (attaque > défense).",
     parameters={
-        "attack_roll": {"type": "integer", "description": "Jet d'attaque"},
-        "defense_roll": {"type": "integer", "description": "Jet de défense"}
+        "type": "object",
+        "properties": {
+            "attack_roll": {"type": "integer", "description": "Jet d'attaque"},
+            "defense_roll": {"type": "integer", "description": "Jet de défense"}
+        },
+        "required": ["attack_roll", "defense_roll"]
     },
     function=resolve_attack_tool
 )
@@ -85,8 +101,12 @@ calculate_damage = Tool(
     name="calculate_damage",
     description="Calcule les dégâts infligés en tenant compte des modificateurs.",
     parameters={
-        "base_damage": {"type": "integer", "description": "Dégâts de base de l'attaque"},
-        "bonus": {"type": "integer", "description": "Bonus/malus de dégâts", "default": 0}
+        "type": "object",
+        "properties": {
+            "base_damage": {"type": "integer", "description": "Dégâts de base de l'attaque"},
+            "bonus": {"type": "integer", "description": "Bonus/malus de dégâts", "default": 0}
+        },
+        "required": ["base_damage"]
     },
     function=calculate_damage_tool
 )

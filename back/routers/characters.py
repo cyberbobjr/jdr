@@ -5,11 +5,6 @@ from back.utils.logger import log_debug
 
 router = APIRouter()
 
-@router.get("/example")
-async def example_endpoint():
-    log_debug("Appel endpoint characters/example_endpoint")
-    return {"message": "Example endpoint for characters"}
-
 @router.get("/", response_model=CharacterList)
 def list_characters():
     """
