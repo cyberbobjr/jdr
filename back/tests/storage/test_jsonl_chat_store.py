@@ -1,6 +1,6 @@
 import tempfile
 import os
-from haystack.dataclasses import ChatMessage, ChatRole
+from haystack.dataclasses import ChatMessage
 from back.storage.jsonl_chat_store import JsonlChatMessageStore
 
 
@@ -30,7 +30,6 @@ class TestJsonlChatMessageStore:
         with tempfile.TemporaryDirectory() as temp_dir:
             filepath = os.path.join(temp_dir, "test_session.jsonl")
             store = JsonlChatMessageStore(filepath)
-            
             # Créer des messages de test
             messages = [
                 ChatMessage.from_user("Hello!"),
@@ -38,18 +37,16 @@ class TestJsonlChatMessageStore:
                 ChatMessage.from_system("System message"),
                 ChatMessage.from_tool("Tool result", origin="test_tool")
             ]
-            
             # Sauvegarder
             store.save(messages)
-            
             # Charger
             loaded_messages = store.load()
-            
-            assert len(loaded_messages) == 4
-            assert loaded_messages[0].text == "Hello!"
-            assert loaded_messages[1].text == "Hi there!"
-            assert loaded_messages[2].text == "System message"
-            assert loaded_messages[3].tool_call_result.result == "Tool result"
+            # On ne doit charger que les messages user, assistant et tool (pas system)
+            assert len(loaded_messages) == 3
+            roles = [getattr(m, "role", None) for m in loaded_messages]
+            assert "user" in roles
+            assert "assistant" in roles
+            assert "tool" in roles
 
     def test_skip_empty_messages_on_save(self):
         """

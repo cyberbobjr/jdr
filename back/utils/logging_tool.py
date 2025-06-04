@@ -1,7 +1,7 @@
 from haystack.tools import Tool
-from haystack.dataclasses import ChatMessage, ChatRole
+from haystack.dataclasses import ChatMessage
 from back.utils.logger import log_debug
-from typing import Any, Dict, Callable
+from typing import Any
 import json
 
 

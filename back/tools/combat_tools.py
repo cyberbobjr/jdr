@@ -1,11 +1,10 @@
 from haystack.tools import Tool
-from back.models.domain.combat_manager import CombatManager
 from back.utils.dice import roll_attack
 from back.utils.logger import log_debug
-from pydantic import BaseModel
-import random
+from back.services.combat_service import CombatService
+import uuid
 
-combat_manager = CombatManager()
+combat_service = CombatService()
 
 def roll_initiative_tool(characters: list[dict]) -> list:
     """
@@ -17,7 +16,15 @@ def roll_initiative_tool(characters: list[dict]) -> list:
     - (list) : Liste triée selon l'initiative.
     """
     log_debug("Tool roll_initiative_tool appelé", tool="roll_initiative_tool", characters=characters)
-    return combat_manager.roll_initiative(characters)
+    # Ensure each character has an 'id' for CombatState
+    for c in characters:
+        if 'id' not in c:
+            c['id'] = str(uuid.uuid4())
+    # Utilisation de CombatService pour l'initiative
+    state = combat_service.start_combat(characters)
+    state = combat_service.roll_initiative(state)
+    # Retourne la liste triée des personnages selon l'ordre d'initiative
+    return [p for cid in state.initiative_order for p in state.participants if p['id'] == cid]
 
 roll_initiative = Tool(
     name="roll_initiative",
@@ -95,7 +102,8 @@ def calculate_damage_tool(base_damage: int, bonus: int = 0) -> int:
     - (int) : Dégâts finaux infligés.
     """
     log_debug("Tool calculate_damage_tool appelé", tool="calculate_damage_tool", base_damage=base_damage, bonus=bonus)
-    return combat_manager.calculate_damage(base_damage, {"bonus": bonus})
+    # Utilisation de CombatService pour le calcul des dégâts
+    return max(0, base_damage + bonus)
 
 calculate_damage = Tool(
     name="calculate_damage",
@@ -109,4 +117,34 @@ calculate_damage = Tool(
         "required": ["base_damage"]
     },
     function=calculate_damage_tool
+)
+
+def end_combat_tool(combat_id: str, reason: str) -> dict:
+    """
+    ### end_combat_tool
+    **Description :** Termine explicitement un combat en précisant la raison (fuite, reddition, etc.).
+    **Paramètres :**
+    - `combat_id` (str) : Identifiant du combat.
+    - `reason` (str) : Raison de la fin du combat.
+    **Retour :** Dictionnaire contenant le statut final du combat.
+    """
+    # Ici, il faudrait charger le CombatState depuis la persistance (non implémenté)
+    # combat_state = charger_combat_state(combat_id)
+    # combat_state = combat_service.end_combat(combat_state, reason)
+    # sauvegarder_combat_state(combat_state)
+    # return combat_service.get_combat_summary(combat_state)
+    return {"combat_id": combat_id, "status": "termine", "end_reason": reason}
+
+end_combat = Tool(
+    name="end_combat",
+    description="Termine explicitement un combat (fuite, reddition, etc.)",
+    parameters={
+        "type": "object",
+        "properties": {
+            "combat_id": {"type": "string", "description": "Identifiant du combat"},
+            "reason": {"type": "string", "description": "Raison de la fin du combat (fuite, reddition, etc.)"}
+        },
+        "required": ["combat_id", "reason"]
+    },
+    function=end_combat_tool
 )

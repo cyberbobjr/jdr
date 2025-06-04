@@ -157,13 +157,12 @@ async def play_scenario(session_id: UUID, request: PlayScenarioRequest):
         # Sauvegarder l'historique complet (incluant la nouvelle réponse)
         store.save(result["messages"])
         # Extraire les réponses d'outils et la réponse finale du LLM
-        tool_responses = None
+        tool_response = None
         final_llm_response = None
         # On parcourt les messages pour extraire la dernière réponse d'outil (role == 'tool') et la dernière réponse assistant
         for msg in reversed(result["messages"]):
             if hasattr(msg, "role") and msg.role == "tool":
-                tool_result = msg.tool_call_results[0].result if len(msg.tool_call_results) > 0 else None
-                tool_responses = tool_result
+                tool_response = msg.tool_call_results[0].result if len(msg.tool_call_results) > 0 else None
                 break
         # La dernière réponse assistant est la réponse finale du LLM
         for msg in reversed(result["messages"]):
@@ -173,7 +172,7 @@ async def play_scenario(session_id: UUID, request: PlayScenarioRequest):
         log_debug("Réponse LLM générée", action="play_scenario", session_id=str(session_id), character_id=character_id, scenario_name=scenario_name, user_message=request.message)
         return {
             "response": final_llm_response,
-            "tool_responses": tool_responses
+            "tool_response": tool_response
         }
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))

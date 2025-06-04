@@ -1,5 +1,4 @@
 import sys
-import os
 from pathlib import Path
 
 # Ajouter le répertoire parent au PYTHONPATH pour permettre l'import du module back

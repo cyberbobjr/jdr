@@ -1,12 +1,8 @@
 # back/app.py
-from fastapi import FastAPI, Body
-from routers import characters, inventory, combat, scenarios
-from back.agents.gm_agent import build_gm_agent, JsonlChatMessageStore, enrich_user_message_with_character
-from haystack.dataclasses import ChatMessage
-from uuid import UUID
+from fastapi import FastAPI
+from back.routers import characters, inventory, combat, scenarios
+from back.agents.gm_agent import build_gm_agent
 from fastapi.openapi.utils import get_openapi
-from back.services.character_service import CharacterService
-from back.utils.logger import log_debug
 
 app = FastAPI(title="JdR – Terres du Milieu")
 

@@ -37,9 +37,9 @@ class JsonlChatMessageStore:
     def load(self):
         """
         ### load
-        **Description :** Charge l'historique des messages depuis le fichier JSONL.
+        **Description :** Charge l'historique des messages depuis le fichier JSONL, en ignorant les messages de rôle 'system'.
         **Paramètres :** Aucun.
-        **Retour :** Liste des messages ChatMessage chargés depuis le fichier.
+        **Retour :** Liste des messages ChatMessage chargés depuis le fichier (hors prompt système).
         """
         log_debug("Chargement de l'historique des messages", action="load_messages", filepath=os.path.abspath(self.filepath))
         messages = []
@@ -56,12 +56,11 @@ class JsonlChatMessageStore:
                                 if content is None or content == "":
                                     log_debug("Message ignoré : contenu vide", action="skip_empty_message", line_data=str(data))
                                     continue
+                                # Ne jamais charger les messages de rôle 'system' (prompt système)
                                 if data.get("role") == "user":
                                     messages.append(ChatMessage.from_user(content))
                                 elif data.get("role") == "assistant":
                                     messages.append(ChatMessage.from_assistant(content))
-                                elif data.get("role") == "system":
-                                    messages.append(ChatMessage.from_system(content))
                                 elif data.get("role") == "tool":
                                     # Pour les messages tool, nous avons besoin d'un origin
                                     # Si pas d'origin spécifié, on utilise un défaut
@@ -69,11 +68,9 @@ class JsonlChatMessageStore:
                                     content = data.get("content")
                                     messages.append(ChatMessage.from_tool(content, origin=origin))
                             except Exception as e:
-                                log_debug("Erreur lors du parsing d'un message", action="parse_message_error", error=str(e), line_data=str(data))
-                                continue
+                                log_debug("Erreur lors du parsing d'une ligne de message", error=str(e), line=line)
                     except Exception as e:
-                        log_debug("Erreur lors du parsing d'un message", action="parse_message_error", error=str(e), line_data=str(data))
-                        continue
+                        log_debug("Erreur lors du chargement d'une ligne JSONL", error=str(e), line=line)
         log_debug("Historique chargé avec succès", action="load_messages_success", filepath=os.path.abspath(self.filepath), message_count=len(messages))
         return messages
 
@@ -131,7 +128,9 @@ class JsonlChatMessageStore:
                         role = role.value
                     elif role is None and hasattr(msg, "_role"):
                         role = msg._role.value
-                        
+                    if role == ChatRole.SYSTEM:
+                        log_debug("Message de rôle 'system' ignoré à la sauvegarde", action="skip_save_system_message")
+                        continue
                     data_to_save = {"role": str(role), "content": msg.text}
                     
                 f.write(json.dumps(data_to_save) + "\n")
