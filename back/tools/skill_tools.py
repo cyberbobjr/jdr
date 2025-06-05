@@ -1,4 +1,3 @@
-from haystack.tools import Tool
 import random
 import json
 from back.utils.logger import log_debug
@@ -138,31 +137,4 @@ def skill_check_with_character(skill_name: str, character_json: str, difficulty_
         return error_msg
 
 # Outil principal à utiliser avec les données complètes du personnage
-skill_check_tool = Tool(
-    name="skill_check_with_character",
-    description="Effectue un test de compétence/caractéristique en utilisant les données complètes du personnage. À utiliser AUTOMATIQUEMENT chaque fois qu'un test est requis dans la narration. Utilise la compétence spécialisée si disponible, sinon la caractéristique de base correspondante.",
-    parameters={
-        "type": "object",
-        "properties": {
-            "skill_name": {
-                "type": "string", 
-                "description": "Nom de la compétence ou caractéristique testée (ex: Perception, Force, Discrétion, Commandement, Investigation, etc.)"
-            },
-            "character_json": {
-                "type": "string",
-                "description": "Données complètes du personnage au format JSON (extrait de PERSONNAGE_JSON dans le message utilisateur)"
-            },
-            "difficulty_name": {
-                "type": "string",
-                "enum": ["Facile", "Moyenne", "Difficile", "Très Difficile", "Impossible"],
-                "description": "Niveau de difficulté du test"
-            },
-            "difficulty_modifier": {
-                "type": "integer",
-                "description": "Modificateur additionnel de difficulté (optionnel, défaut 0)"
-            }
-        },
-        "required": ["skill_name", "character_json", "difficulty_name"]
-    },
-    function=skill_check_with_character
-)
+# Tool definition removed - now handled directly by PydanticAI agent

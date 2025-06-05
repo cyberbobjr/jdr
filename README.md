@@ -589,6 +589,260 @@ Retourne le contenu du fichier `data/scenarios/Les_Pierres_du_Passe.md`.
 - L'agent charge l'historique au démarrage et le sauvegarde explicitement après chaque interaction.
 - Pour la personnalisation avancée (fenêtrage, résumé, etc.), voir la documentation Haystack sur la mémoire.
 
+## Migration LangChain → Haystack
+
+- **LangChain** a été supprimé du projet (voir `requirements.txt`).
+- Tous les outils et l'agent MJ sont désormais compatibles Haystack 3.x.
+- Les tests et la documentation ont été adaptés à la nouvelle stack.
+
+## Tests
+
+- Les tests unitaires et d'intégration sont dans `back/tests/`.
+- Exemple : `back/tests/agents/test_gm_agent_memory.py` vérifie la persistance mémoire de l'agent MJ.
+
+## Système de Prévention des Sessions Dupliquées (2025)
+
+### Fonctionnalité
+Le système empêche automatiquement la création de sessions dupliquées en détectant les combinaisons existantes de `character_name` + `scenario_name`. Cette protection évite les conflits de données et assure l'intégrité des sessions de jeu.
+
+### Implémentation technique
+
+#### Vérification automatique (`ScenarioService.check_existing_session()`)
+- **Localisation** : `back/services/scenario_service.py`
+- **Fonctionnement** : Parcourt tous les dossiers de session UUID existants
+- **Vérification** : Compare les fichiers `scenario.txt` et `character.txt` avec les paramètres de la nouvelle session
+- **Gestion d'erreurs** : Gestion robuste avec logging des erreurs d'accès fichier
+
+#### Endpoint `/api/scenarios/start` amélioré
+- **Vérification préalable** : Contrôle automatique avant création de session
+- **Code d'erreur HTTP 409** : Retourné en cas de session dupliquée détectée
+- **Message explicite** : Indique clairement quelle combinaison personnage/scénario existe déjà
+
+### Codes de réponse
+
+| Code HTTP | Signification | Description |
+|-----------|---------------|-------------|
+| **200** | Succès | Session créée avec succès |
+| **404** | Scénario introuvable | Le fichier de scénario n'existe pas |
+| **409** | Session dupliquée | Une session existe déjà pour cette combinaison personnage/scénario |
+
+### Exemples d'utilisation
+
+#### Première session (succès)
+```bash
+curl -X POST http://localhost:8000/api/scenarios/start \
+  -H "content-type: application/json" \
+  -d '{"scenario_name": "Les_Pierres_du_Passe.md", "character_name": "Aragorn"}'
+```
+
+**Réponse (200) :**
+```json
+{
+  "session_id": "b1e2c3d4-5678-1234-9abc-abcdef123456",
+  "scenario_name": "Les_Pierres_du_Passe.md",
+  "character_id": "Aragorn",
+  "message": "Scénario 'Les_Pierres_du_Passe.md' démarré avec succès pour le personnage Aragorn."
+}
+```
+
+#### Tentative de session dupliquée (erreur)
+```bash
+# Même appel que précédemment
+curl -X POST http://localhost:8000/api/scenarios/start \
+  -H "content-type: application/json" \
+  -d '{"scenario_name": "Les_Pierres_du_Passe.md", "character_name": "Aragorn"}'
+```
+
+**Réponse (409) :**
+```json
+{
+  "detail": "Une session existe déjà pour le personnage 'Aragorn' dans le scénario 'Les_Pierres_du_Passe.md'"
+}
+```
+
+## Tableau synthétique des routes API
+
+| Méthode | Endpoint                              | Arguments d'entrée                                                                 | Retour principal / Description                                      |
+|---------|---------------------------------------|-------------------------------------------------------------------------------------|---------------------------------------------------------------------|
+| GET     | /api/scenarios/                      | Aucun                                                                              | Liste des scénarios (`ScenarioList`)                                |
+| GET     | /api/scenarios/{scenario_file}       | scenario_file (str, path)                                                          | Contenu du fichier Markdown du scénario                             |
+| POST    | /api/scenarios/start                 | scenario_name (str), character_id (str) (body JSON)                                | session_id, scenario_name, character_id, message, llm_response      |
+| POST    | /api/scenarios/play                  | session_id (UUID, query), message (str, body JSON)                                 | responses (list de messages générés par l'agent)                    |
+| GET     | /api/scenarios/history/{session_id}  | session_id (UUID, path)                                                            | history (list de tous les messages de la session)                   |
+| GET     | /api/characters/                     | Aucun                                                                              | Liste des personnages (`CharacterList`)                             |
+| POST    | /api/combat/attack                   | attacker_id (str), target_id (str), attack_value (int), combat_state (dict, body)  | combat_state (état du combat mis à jour)                            |
+
+> Les routes sont toutes documentées en détail dans le code source et la documentation technique.
+
+---
+
+*Ce README sera mis à jour au fur et à mesure de l'avancement du projet.*
+
+## Routes pour les scénarios
+
+#### `/api/scenarios/{scenario_file}`
+**Description :** Récupère le contenu d'un scénario à partir de son nom de fichier Markdown (ex : `Les_Pierres_du_Passe.md`).
+
+**Méthode :** GET
+
+**Paramètre d'URL :**
+- `scenario_file` (str) : Nom du fichier du scénario (doit exister dans `data/scenarios/`).
+
+**Réponse :**
+- Succès : Contenu brut du fichier Markdown.
+- Erreur 404 : Si le fichier n'existe pas.
+
+Exemple :
+```
+GET /api/scenarios/Les_Pierres_du_Passe.md
+```
+Retourne le contenu du fichier `data/scenarios/Les_Pierres_du_Passe.md`.
+
+## Nouveaux Endpoints
+
+### Combat
+- **POST /attack** : Effectue un jet d'attaque en lançant des dés selon une notation donnée (ex: "1d20").
+
+### Compétences
+- **POST /skill-check** : Effectue un test de compétence en comparant un jet de dé au niveau de compétence et à la difficulté.
+
+## Gestion des Combats
+
+### CombatManager
+- **Description** : Classe pour gérer les combats, située dans `back/models/domain/combat_manager.py`.
+- **Méthodes** :
+  - `roll_initiative(characters)` : Calcule l'ordre d'initiative pour les personnages.
+  - `next_turn()` : Passe au tour suivant dans l'ordre d'initiative.
+  - `reset_combat()` : Réinitialise le combat.
+  - `calculate_initiative(character_stats)` : Calcule l'initiative d'un personnage en fonction de ses statistiques.
+  - `resolve_attack(attack_roll, defense_roll)` : Résout une attaque en comparant les jets d'attaque et de défense.
+  - `calculate_damage(base_damage, modifiers)` : Calcule les dégâts infligés en tenant compte des modificateurs.
+
+### `back/models/domain/combat_manager.py`
+**Objectif :** Gère les mécaniques de combat, y compris l'ordre d'initiative, la gestion des tours et les actions des personnages.
+
+- **`roll_initiative(characters: dict) -> list`** :
+  - **Description :** Calcule l'ordre d'initiative des personnages en fonction de leurs statistiques.
+  - **Paramètres :**
+    - `characters` (dict) : Dictionnaire contenant les personnages et leurs statistiques d'initiative.
+  - **Retourne :** Une liste triée des personnages avec leurs initiatives.
+
+- **`next_turn() -> object`** :
+  - **Description :** Passe au tour suivant dans l'ordre d'initiative.
+  - **Retourne :** Le personnage dont c'est le tour.
+
+### `back/tools/combat_tools.py`
+**Objectif :** Fournit des outils LangChain pour les actions de combat.
+
+- **`roll_initiative_tool(input: InitiativeInput) -> list`** :
+  - **Description :** Calcule l'ordre d'initiative des personnages via un outil LangChain.
+  - **Paramètres :**
+    - `input` (InitiativeInput) : Modèle contenant les personnages.
+  - **Retourne :** Une liste triée des personnages avec leurs initiatives.
+
+- **`perform_attack_tool(input: AttackInput) -> int`** :
+  - **Description :** Effectue un jet d'attaque via un outil LangChain.
+  - **Paramètres :**
+    - `input` (AttackInput) : Modèle contenant la notation des dés.
+  - **Retourne :** Le résultat du jet d'attaque.
+
+- **`resolve_attack_tool(input: ResolveAttackInput) -> bool`** :
+  - **Description :** Résout une attaque en comparant les jets d'attaque et de défense via un outil LangChain.
+  - **Paramètres :**
+    - `input` (ResolveAttackInput) : Modèle contenant les jets d'attaque et de défense.
+  - **Retourne :** `True` si l'attaque réussit, sinon `False`.
+
+- **`calculate_damage_tool(input: DamageInput) -> int`** :
+  - **Description :** Calcule les dégâts infligés en tenant compte des modificateurs via un outil LangChain.
+  - **Paramètres :**
+    - `input` (DamageInput) : Modèle contenant les dégâts de base et les modificateurs.
+  - **Retourne :** Les dégâts finaux infligés.
+
+### Inventaire (`back/tools/inventory_tools.py`)
+- **inventory_add_item**  
+  Ajoute un objet à l’inventaire d’un joueur.  
+  **Paramètres :**
+  - `player_id` (UUID, string) : Identifiant du joueur
+  - `item_id` (string) : Identifiant de l’objet à acquérir
+  - `qty` (int, optionnel, défaut : 1) : Quantité à ajouter
+  **Retour :** Résumé de l’inventaire mis à jour (dict)
+
+- **inventory_remove_item**  
+  Retire un objet de l’inventaire d’un joueur.  
+  **Paramètres :**
+  - `player_id` (UUID, string) : Identifiant du joueur
+  - `item_id` (string) : Identifiant de l’objet à retirer
+  - `qty` (int, optionnel, défaut : 1) : Quantité à retirer
+  **Retour :** Résumé de l’inventaire mis à jour (dict)
+
+### Personnage (`back/tools/character_tools.py`)
+- **character_apply_xp**  
+  Ajoute de l’XP à un personnage.  
+  **Paramètres :**
+  - `player_id` (UUID, string) : Identifiant du personnage
+  - `xp` (int) : Points d’expérience à ajouter
+  **Retour :** Fiche personnage mise à jour (dict)
+
+- **character_add_gold**  
+  Ajoute de l’or au portefeuille du personnage.  
+  **Paramètres :**
+  - `player_id` (UUID, string) : Identifiant du personnage
+  - `gold` (int) : Montant d’or à ajouter
+  **Retour :** Fiche personnage mise à jour (dict)
+
+- **character_take_damage**  
+  Applique des dégâts à un personnage (réduit ses PV).  
+  **Paramètres :**
+  - `player_id` (UUID, string) : Identifiant du personnage
+  - `amount` (int) : Points de dégâts à appliquer
+  - `source` (string, optionnel, défaut : "combat") : Source des dégâts
+  **Retour :** Fiche personnage mise à jour (dict)
+
+### Compétences (`back/tools/skill_tools.py`)
+- **skill_check**  
+  Effectue un test de compétence (1d100 <= skill_level - difficulty).  
+  **Paramètres :**
+  - `skill_level` (int) : Niveau de compétence du personnage
+  - `difficulty` (int) : Difficulté du test
+  **Retour :** Booléen (succès/échec)
+
+### Combat (`back/tools/combat_tools.py`)
+- **roll_initiative**  
+  Calcule l’ordre d’initiative des personnages.  
+  **Paramètres :**
+  - `characters` (list[dict]) : Liste des personnages
+  **Retour :** Liste triée selon l’initiative
+
+- **perform_attack**  
+  Effectue un jet d’attaque.  
+  **Paramètres :**
+  - `dice` (string) : Notation des dés à lancer (ex : "1d20")
+  **Retour :** Résultat du jet d’attaque (int)
+
+- **resolve_attack**  
+  Résout une attaque (attaque > défense).  
+  **Paramètres :**
+  - `attack_roll` (int) : Jet d’attaque
+  - `defense_roll` (int) : Jet de défense
+  **Retour :** Booléen (succès/échec)
+
+- **calculate_damage**  
+  Calcule les dégâts infligés en tenant compte des modificateurs.  
+  **Paramètres :**
+  - `base_damage` (int) : Dégâts de base de l’attaque
+  - `bonus` (int, optionnel, défaut : 0) : Bonus/malus de dégâts
+  **Retour :** Dégâts finaux infligés (int)
+
+### Scénario
+- Aucun tool Haystack : la gestion des scénarios se fait via l’API REST, le LLM a toujours le contexte système.
+
+## Agent MJ Haystack et gestion de la mémoire
+
+- Le fichier `back/agents/gm_agent.py` définit l'agent Maître du Jeu (MJ) basé sur Haystack 3.x.
+- La mémoire persistante est gérée via un store custom `JsonlChatMessageStore` (voir [HaystackMemoryDoc.md](./HaystackMemoryDoc.md)), qui stocke l'historique des messages dans un fichier JSONL par session.
+- L'agent charge l'historique au démarrage et le sauvegarde explicitement après chaque interaction.
+- Pour la personnalisation avancée (fenêtrage, résumé, etc.), voir la documentation Haystack sur la mémoire.
+
 ## Changements récents (2025) - Amélioration de l'agent MJ
 
 ### Nouvelles fonctionnalités implémentées
@@ -743,3 +997,45 @@ Le projet suit les standards de développement modernes avec une architecture mo
 ---
 
 *Dernière mise à jour : juin 2025 – Migration complète vers Haystack 3.x avec nouvelle API simplifiée, outils de jeu réels et système de cache prompting optimisé.*
+
+## Migration Haystack → PydanticAI (2025)
+
+> **✅ MIGRATION TERMINÉE** : Transition complète de Haystack vers PydanticAI réussie avec succès !
+
+### Statut de la migration
+
+- ✅ **Agent GM Principal** : Migré vers PydanticAI avec 10 outils complets
+- ✅ **Outils de combat** : Migrés (roll_initiative, perform_attack, resolve_attack, calculate_damage, end_combat)
+- ✅ **Outils d'inventaire** : Migrés (inventory_add, inventory_remove)
+- ✅ **Outils de personnage** : Migrés (apply_xp, add_gold, apply_damage, perform_skill_check)
+- ✅ **Store PydanticAI** : Nouveau système de stockage JSONL compatible
+- ✅ **Routeurs FastAPI** : Endpoints PydanticAI disponibles sur `/api/scenarios-pydantic/`
+- ✅ **Tests et validation** : 26/26 tests passent, validation complète
+
+### Avantages de PydanticAI
+
+1. **🎯 Simplicité** : Configuration plus directe, moins de boilerplate
+2. **🔒 Typage strict** : Validation automatique avec Pydantic, meilleure intégration IDE  
+3. **⚡ Async natif** : Conçu pour l'asynchrone dès le départ
+4. **🛠️ Outils déclaratifs** : Définition via décorateurs, plus lisible
+5. **📦 Dépendances intégrées** : Système de dépendances via `RunContext`
+
+### Fichiers de migration
+
+- **`back/agents/gm_agent_pydantic.py`** : Nouvel agent GM utilisant PydanticAI (✅ COMPLET)
+- **`back/storage/pydantic_jsonl_store.py`** : Store adapté pour PydanticAI (✅ COMPLET)
+- **`back/routers/scenarios_pydantic.py`** : Routeur FastAPI PydanticAI (✅ COMPLET)
+- **`back/agents/gm_agent_example.py`** : Exemple d'utilisation du nouvel agent
+- **`back/agents/migration_comparison.py`** : Comparaison détaillée Haystack vs PydanticAI
+
+### Utilisation
+
+Les deux systèmes coexistent :
+- **Haystack** : `/api/scenarios/` (système original)
+- **PydanticAI** : `/api/scenarios-pydantic/` (système migré)
+
+### Documentation PydanticAI
+
+- [PydanticAI Documentation](./pydanticai.md) : Documentation complète et concepts
+- [Guide de migration](./back/agents/migration_comparison.py) : Comparaison des approches
+- [Rapport de migration](./MIGRATION_STATUS_REPORT.md) : Rapport détaillé de la migration

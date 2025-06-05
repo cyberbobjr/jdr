@@ -2,10 +2,11 @@
 fastapi>=0.111
 uvicorn[standard]>=0.30
 
-# LLM & Haystack
+# LLM & AI
 openai>=1.30
-haystack-ai>=2.14
-haystack-experimental>=0.10
+
+# Migration vers PydanticAI
+pydantic-ai
 
 # Validation de données & I/O
 pydantic>=2.7
@@ -19,4 +20,4 @@ coverage>=7.5
 ruff>=0.4
 black>=24.4
 
-# (LangChain supprimé, migration Haystack 3.x)
+# (Haystack supprimé, migration vers PydanticAI complète)

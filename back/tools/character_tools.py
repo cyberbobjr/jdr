@@ -1,4 +1,3 @@
-from haystack.tools import Tool
 from uuid import UUID
 from back.services.character_service import CharacterService
 from back.utils.logger import log_debug
@@ -18,19 +17,7 @@ def character_apply_xp(player_id: UUID, xp: int) -> dict:
     log_debug("Tool character_apply_xp appelé", tool="character_apply_xp", player_id=str(player_id), xp=xp)
     return svc.apply_xp(player_id, xp)
 
-character_apply_xp_tool = Tool(
-    name="character_apply_xp",
-    description="Ajoute de l'XP à un personnage.",
-    parameters={
-        "type": "object",
-        "properties": {
-            "player_id": {"type": "string", "description": "Identifiant du personnage (UUID)"},
-            "xp": {"type": "integer", "description": "Points d'expérience à ajouter"}
-        },
-        "required": ["player_id", "xp"]
-    },
-    function=character_apply_xp
-)
+# Tool definitions removed - now handled directly by PydanticAI agent
 
 def character_add_gold(player_id: UUID, gold: int) -> dict:
     """
@@ -45,19 +32,7 @@ def character_add_gold(player_id: UUID, gold: int) -> dict:
     log_debug("Tool character_add_gold appelé", tool="character_add_gold", player_id=str(player_id), gold=gold)
     return svc.add_gold(player_id, gold)
 
-character_add_gold_tool = Tool(
-    name="character_add_gold",
-    description="Ajoute de l'or au portefeuille du personnage.",
-    parameters={
-        "type": "object",
-        "properties": {
-            "player_id": {"type": "string", "description": "Identifiant du personnage (UUID)"},
-            "gold": {"type": "integer", "description": "Montant d'or à ajouter"}
-        },
-        "required": ["player_id", "gold"]
-    },
-    function=character_add_gold
-)
+# Tool definition removed - now handled directly by PydanticAI agent
 
 def character_take_damage(player_id: UUID, amount: int, source: str = "combat") -> dict:
     """
@@ -73,17 +48,4 @@ def character_take_damage(player_id: UUID, amount: int, source: str = "combat") 
     log_debug("Tool character_take_damage appelé", tool="character_take_damage", player_id=str(player_id), amount=amount, source=source)
     return svc.take_damage(player_id, amount, source)
 
-character_take_damage_tool = Tool(
-    name="character_take_damage",
-    description="Applique des dégâts à un personnage (réduit ses PV).",
-    parameters={
-        "type": "object",
-        "properties": {
-            "player_id": {"type": "string", "description": "Identifiant du personnage (UUID)"},
-            "amount": {"type": "integer", "description": "Points de dégâts à appliquer"},
-            "source": {"type": "string", "description": "Source des dégâts", "default": "combat"}
-        },
-        "required": ["player_id", "amount"]
-    },
-    function=character_take_damage
-)
+# Tool definition removed - now handled directly by PydanticAI agent

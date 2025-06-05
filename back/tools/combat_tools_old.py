@@ -25,7 +25,18 @@ def roll_initiative_tool(characters: list[dict]) -> list:
     # Retourne la liste triée des personnages selon l'ordre d'initiative
     return [p for cid in state.initiative_order for p in state.participants if p['id'] == cid]
 
-# Tool definition removed - now handled directly by PydanticAI agent
+roll_initiative = Tool(
+    name="roll_initiative",
+    description="Calcule l'ordre d'initiative des personnages.",
+    parameters={
+        "type": "object",
+        "properties": {
+            "characters": {"type": "array", "description": "Liste des personnages", "items": {"type": "object"}}
+        },
+        "required": ["characters"]
+    },
+    function=roll_initiative_tool
+)
 
 def perform_attack_tool(dice: str) -> int:
     """
@@ -39,7 +50,18 @@ def perform_attack_tool(dice: str) -> int:
     log_debug("Tool perform_attack_tool appelé", tool="perform_attack_tool", dice=dice)
     return roll_attack(dice)
 
-# Tool definition removed - now handled directly by PydanticAI agent
+perform_attack = Tool(
+    name="perform_attack",
+    description="Effectue un jet d'attaque.",
+    parameters={
+        "type": "object",
+        "properties": {
+            "dice": {"type": "string", "description": "Notation des dés à lancer (ex: 1d20)"}
+        },
+        "required": ["dice"]
+    },
+    function=perform_attack_tool
+)
 
 def resolve_attack_tool(attack_roll: int, defense_roll: int) -> bool:
     """
@@ -54,7 +76,19 @@ def resolve_attack_tool(attack_roll: int, defense_roll: int) -> bool:
     log_debug("Tool resolve_attack_tool appelé", tool="resolve_attack_tool", attack_roll=attack_roll, defense_roll=defense_roll)
     return attack_roll > defense_roll
 
-# Tool definition removed - now handled directly by PydanticAI agent
+resolve_attack = Tool(
+    name="resolve_attack",
+    description="Résout une attaque (attaque > défense).",
+    parameters={
+        "type": "object",
+        "properties": {
+            "attack_roll": {"type": "integer", "description": "Jet d'attaque"},
+            "defense_roll": {"type": "integer", "description": "Jet de défense"}
+        },
+        "required": ["attack_roll", "defense_roll"]
+    },
+    function=resolve_attack_tool
+)
 
 def calculate_damage_tool(base_damage: int, bonus: int = 0) -> int:
     """
@@ -70,7 +104,19 @@ def calculate_damage_tool(base_damage: int, bonus: int = 0) -> int:
     # Utilisation de CombatService pour le calcul des dégâts
     return max(0, base_damage + bonus)
 
-# Tool definition removed - now handled directly by PydanticAI agent
+calculate_damage = Tool(
+    name="calculate_damage",
+    description="Calcule les dégâts infligés en tenant compte des modificateurs.",
+    parameters={
+        "type": "object",
+        "properties": {
+            "base_damage": {"type": "integer", "description": "Dégâts de base de l'attaque"},
+            "bonus": {"type": "integer", "description": "Bonus/malus de dégâts", "default": 0}
+        },
+        "required": ["base_damage"]
+    },
+    function=calculate_damage_tool
+)
 
 def end_combat_tool(combat_id: str, reason: str) -> dict:
     """
@@ -88,4 +134,16 @@ def end_combat_tool(combat_id: str, reason: str) -> dict:
     # return combat_service.get_combat_summary(combat_state)
     return {"combat_id": combat_id, "status": "termine", "end_reason": reason}
 
-# Tool definition removed - now handled directly by PydanticAI agent
+end_combat = Tool(
+    name="end_combat",
+    description="Termine explicitement un combat (fuite, reddition, etc.)",
+    parameters={
+        "type": "object",
+        "properties": {
+            "combat_id": {"type": "string", "description": "Identifiant du combat"},
+            "reason": {"type": "string", "description": "Raison de la fin du combat (fuite, reddition, etc.)"}
+        },
+        "required": ["combat_id", "reason"]
+    },
+    function=end_combat_tool
+)

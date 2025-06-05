@@ -1,7 +1,7 @@
 # back/app.py
 from fastapi import FastAPI
-from back.routers import characters, inventory, combat, scenarios
-from back.agents.gm_agent import build_gm_agent
+from back.routers import characters, inventory, combat
+from back.routers import scenarios_pydantic as scenarios  # PydanticAI router as main
 from fastapi.openapi.utils import get_openapi
 
 app = FastAPI(title="JdR – Terres du Milieu")
@@ -11,12 +11,6 @@ app.include_router(characters.router, prefix="/api/characters")
 app.include_router(inventory.router,  prefix="/api/inventory")
 app.include_router(combat.router,     prefix="/api/combat")
 app.include_router(scenarios.router,  prefix="/api/scenarios")
-
-# Agent LangChain
-gm_agent = build_gm_agent()
-
-# Old route removed - use /api/scenarios/play instead
-# The new route automatically retrieves character and scenario info from session_id
 
 # Ajout de la documentation Swagger personnalisée
 @app.get("/openapi.json", include_in_schema=False)

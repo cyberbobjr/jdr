@@ -6,10 +6,7 @@ applyTo: '**'
 [openai-instructions.md](../../instructions/openai-instructions.md) contain the detailed technical information about the Project
 
 For Haystack, the code documentation are:
-[Haystack Documentation](https://docs.haystack.deepset.ai/docs/introduction) (for general Haystack documentation)
-[Haystack Tools documentation](https://docs.haystack.deepset.ai/docs/tool) (for tools documentation)
-[Haystack Agent documentation](https://docs.haystack.deepset.ai/docs/agents) (for Agent documentation)
-[Haystack Memory documentation](../../HaystackMemoryDoc.md) (for Memory documentation)
+[PydanticAi documentation](../../pydanticai.md) (for PydanticAi documentation)
 Description and documentation should be written in French.
 Methods name, class names, and variable names should be in English.
 
