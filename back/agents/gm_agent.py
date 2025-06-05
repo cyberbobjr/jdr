@@ -1,17 +1,15 @@
 from haystack.components.agents import Agent
 from haystack.components.generators.chat import OpenAIChatGenerator
-from haystack.dataclasses import ChatMessage, ChatRole
 from dotenv import load_dotenv
 from haystack.utils import Secret
 from back.utils.logger import log_debug
 from back.tools.character_tools import character_apply_xp_tool, character_add_gold_tool, character_take_damage_tool
 from back.tools.skill_tools import skill_check_tool
-from back.tools.combat_tools import roll_initiative, perform_attack, resolve_attack, calculate_damage
+from back.tools.combat_tools import roll_initiative, perform_attack, resolve_attack, calculate_damage, end_combat
 from back.tools.inventory_tools import inventory_add_item_tool, inventory_remove_item_tool
 from back.storage.jsonl_chat_store import JsonlChatMessageStore
 from back.utils.logging_tool import wrap_tools_with_logging
 import os
-import json
 import pathlib
 
 # Charger les variables d'environnement depuis le fichier .env
@@ -127,6 +125,7 @@ def build_gm_agent(session_id: str = "default", scenario_name: str = None) -> Ag
         perform_attack,
         resolve_attack,
         calculate_damage,
+        end_combat,
         # Outils d'inventaire
         inventory_add_item_tool,
         inventory_remove_item_tool

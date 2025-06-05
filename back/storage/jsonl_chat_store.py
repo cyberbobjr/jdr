@@ -1,5 +1,6 @@
-from haystack.dataclasses import ChatMessage, ChatRole
+from haystack.dataclasses import ChatMessage
 from back.utils.logger import log_debug
+from back.utils.message_adapter import extract_message_text
 import os
 import json
 
@@ -28,7 +29,7 @@ class JsonlChatMessageStore:
         """
         os.makedirs(os.path.dirname(self.filepath), exist_ok=True)
         if not os.path.exists(self.filepath):
-            with open(self.filepath, "w"): 
+            with open(self.filepath, "w", encoding="utf-8"): 
                 pass
             log_debug("Création du fichier de session", action="create_session_file", filepath=os.path.abspath(self.filepath))
         else:
@@ -43,7 +44,7 @@ class JsonlChatMessageStore:
         """
         log_debug("Chargement de l'historique des messages", action="load_messages", filepath=os.path.abspath(self.filepath))
         messages = []
-        with open(self.filepath, "r") as f:
+        with open(self.filepath, "r", encoding="utf-8") as f:
             for line in f:
                 if line.strip():
                     try:
@@ -83,56 +84,26 @@ class JsonlChatMessageStore:
         **Retour :** Aucun.
         """
         log_debug("Sauvegarde de l'historique des messages", action="save_messages", filepath=os.path.abspath(self.filepath), message_count=len(messages))
-        with open(self.filepath, "w") as f:
+        with open(self.filepath, "w", encoding="utf-8") as f:
             for msg in messages:
-                # Gestion spéciale pour les messages d'outils dans Haystack 3.x
-                if msg.role.value == ChatRole.TOOL and hasattr(msg, 'tool_call_results') and msg.tool_call_results:
-                    tool_result = msg.tool_call_results[0]
-                    content = tool_result.result
-                    """
-                        tool_result.origin = ToolCall ou tool_result = ToolCallResult
-                    """
-                    # Gestion des différents cas d'origin/tool_result
-                    if hasattr(tool_result, 'tool_name') and hasattr(tool_result, 'tool_call_id') and hasattr(tool_result, 'arguments'):
-                        origin = {
-                            "tool_name": tool_result.tool_name,
-                            "tool_call_id": tool_result.tool_call_id,
-                            "arguments": tool_result.arguments
-                        }
-                    elif hasattr(tool_result, 'origin'):
-                        if hasattr(tool_result.origin, 'tool_name') and hasattr(tool_result.origin, 'tool_call_id') and hasattr(tool_result.origin, 'arguments'):
-                            origin = {
-                                "tool_name": tool_result.origin.tool_name,
-                                "tool_call_id": tool_result.origin.tool_call_id,
-                                "arguments": tool_result.origin.arguments
-                            }
-                        elif isinstance(tool_result.origin, str):
-                            origin = tool_result.origin
-                        else:
-                            origin = "unknown_tool"
-                    else:
-                        origin = "unknown_tool"
-                    if content is None or content == "":
-                        log_debug("Message tool ignoré à la sauvegarde : contenu vide", action="skip_save_empty_tool_message")
-                        continue
-                    data_to_save = {"role": "tool", "content": content, "origin": origin}
-                else:
-                    # Vérifier que le message a un contenu valide
-                    if not hasattr(msg, 'text') or msg.text is None or msg.text == "":
-                        log_debug(f"Message ignoré à la sauvegarde : contenu vide - {msg.role.value}", action="skip_save_empty_message", message_type=type(msg).__name__)
-                        continue
-                        
-                    # Extraction robuste du rôle (Enum ou str)
-                    role = getattr(msg, "role", None)
-                    if hasattr(role, "value"):
-                        role = role.value
-                    elif role is None and hasattr(msg, "_role"):
-                        role = msg._role.value
-                    if role == ChatRole.SYSTEM:
-                        log_debug("Message de rôle 'system' ignoré à la sauvegarde", action="skip_save_system_message")
-                        continue
-                    data_to_save = {"role": str(role), "content": msg.text}
-                    
-                f.write(json.dumps(data_to_save) + "\n")
+                # Utiliser extract_message_text pour sérialiser chaque message
+                data_to_save = extract_message_text(msg)
+                # Pour compatibilité Haystack, ajouter l'origin si tool
+                if data_to_save["role"] == "system":
+                    log_debug(json.dumps(data_to_save, ensure_ascii=False), action="skip_system_message")
+                    continue
+                f.write(json.dumps(data_to_save, ensure_ascii=False) + "\n")
             f.flush()
         log_debug("Historique sauvegardé avec succès", action="save_messages_success", filepath=os.path.abspath(self.filepath))
+
+    def append_message(self, message: dict):
+        """
+        ### append_message
+        **Description :** Ajoute un message unique (par exemple tool_call ou tool_result) à la fin du fichier JSONL, sans réécrire tout l'historique. Permet la persistance incrémentale des messages critiques pour la traçabilité (ex : [TOOL_CALL], [TOOL_RESULT]).
+        **Paramètres :**
+        - `message` (dict) : Message à ajouter (doit être sérializable en JSON).
+        **Retour :** Aucun.
+        """
+        with open(self.filepath, "a", encoding="utf-8") as f:
+            f.write(json.dumps(message, ensure_ascii=False) + "\n")
+        log_debug("Message ajouté au store JSONL", action="append_message", message=message)

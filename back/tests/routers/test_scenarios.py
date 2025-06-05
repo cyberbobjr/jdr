@@ -1,4 +1,3 @@
-
 def test_start_scenario(client, session_manager, isolated_data_dir):
     """
     ### test_start_scenario
@@ -82,7 +81,7 @@ def test_start_scenario_returns_session_id(client, session_manager, isolated_dat
 def test_play_scenario_returns_llm_response(tmp_path, monkeypatch, client):
     """
     ### test_play_scenario_returns_llm_response
-    **Description:** Vérifie que l'endpoint /api/scenarios/play retourne bien une réponse du LLM et persiste l'historique.
+    **Description:** Vérifie que l'endpoint /api/scenarios/play retourne bien tous les nouveaux messages générés (delta complet) dans la clé 'responses' et persiste l'historique.
     **Paramètres :**
     - `tmp_path` (Path) : Dossier temporaire pytest pour stocker les fichiers de session.
     - `monkeypatch` (pytest fixture) : Pour patcher les chemins d'accès aux dossiers de données.
@@ -92,22 +91,22 @@ def test_play_scenario_returns_llm_response(tmp_path, monkeypatch, client):
     import uuid
     import os
     from unittest.mock import patch, MagicMock
-    
+
     session_id = str(uuid.uuid4())
     scenario_name = "TestScenario.md"
     character_id = str(uuid.uuid4())
-    
+
     # Préparer le dossier scénario temporaire
     scenarios_dir = tmp_path / "scenarios"
     scenarios_dir.mkdir()
     (scenarios_dir / scenario_name).write_text("# Test\nContenu du scénario de test.", encoding="utf-8")
-    
+
     # Créer les fichiers de session pour simuler une session existante
     sessions_dir = tmp_path / "sessions" / session_id
     sessions_dir.mkdir(parents=True)
     (sessions_dir / "character.txt").write_text(character_id, encoding="utf-8")
     (sessions_dir / "scenario.txt").write_text(scenario_name, encoding="utf-8")
-    
+
     # Patch le chemin de base pour pointer sur le dossier temporaire
     import back.services.scenario_service as scenario_service
     base_dir = tmp_path
@@ -115,36 +114,39 @@ def test_play_scenario_returns_llm_response(tmp_path, monkeypatch, client):
     monkeypatch.setattr(scenario_service.os.path, "join", os.path.join)
     monkeypatch.setattr(scenario_service.os.path, "exists", os.path.exists)
     monkeypatch.setattr(scenario_service.os, "makedirs", os.makedirs)
-    
+
     # Mock de l'agent LLM pour éviter les appels réels à OpenAI
     mock_agent = MagicMock()
-    mock_message = MagicMock()
-    mock_message.text = "Tu découvres un coffre ancien dissimulé sous la table."
-    mock_agent.run.return_value = {"messages": [MagicMock(), mock_message]}
+    mock_message1 = MagicMock()
+    mock_message1.model_dump.return_value = {"role": "tool", "text": "Résultat d'outil"}
+    mock_message2 = MagicMock()
+    mock_message2.model_dump.return_value = {"role": "assistant", "text": "Réponse finale du LLM"}
+    mock_agent.run.return_value = {"messages": [MagicMock(), mock_message1, mock_message2]}
     mock_store = MagicMock()
     mock_agent._store = mock_store
     mock_store.load.return_value = []
-    
+
     # Patch pour éviter l'appel réel au service de personnage
     with patch('back.routers.scenarios.CharacterService.get_character') as mock_char_service, \
          patch('back.routers.scenarios.build_gm_agent', return_value=mock_agent):
-        
         # Mock du personnage
         mock_character = MagicMock()
         mock_character.json.return_value = '{"name": "Test Character"}'
         mock_char_service.return_value = mock_character
-        
+
         # Appel API
         response = client.post(f"/api/scenarios/play?session_id={session_id}", json={"message": "Je fouille la pièce."})
-        
+
         assert response.status_code == 200
         data = response.json()
-        assert "response" in data
-        # Accepte None ou str vide comme réponse valide pour les mocks
-        assert data["response"] is None or isinstance(data["response"], str)
-        # Si la réponse est une chaîne, elle doit être non vide
-        if isinstance(data["response"], str):
-            assert len(data["response"]) > 0
+        assert "responses" in data
+        assert isinstance(data["responses"], list)
+        assert len(data["responses"]) > 0
+        # Vérifie que chaque élément du delta est bien un dict (issu de model_dump)
+        for msg in data["responses"]:
+            assert isinstance(msg, dict)
+            assert "role" in msg
+            assert "text" in msg
 
 def test_start_scenario_with_llm_response(tmp_path, monkeypatch, client):
     """

@@ -254,7 +254,7 @@ for combatant in turn_order:
     action = self._choose_action_ai(combatant, state)  # ou input joueur
     round_log = self._execute_action(combatant, action, state)
     state.log.append(round_log)
-````
+```
 
 ### 4.3. Exemple narratif (tour unique)
 
@@ -361,6 +361,39 @@ else:
 ## 7. Attribution d’XP
 
 `character_service.apply_xp` stocke l’XP, déclenche les montées de niveau et persiste la fiche personnage.
+
+---
+
+## 8. Endpoint : Récupération de l'historique d'une session de jeu
+
+### GET /api/scenarios/history/{session_id}
+
+Permet de récupérer l'historique complet des messages (utilisateur, assistant, outils, etc.) pour une session de jeu donnée. Utile pour restaurer l'état de la conversation côté front après un rafraîchissement ou une reconnexion.
+
+**Paramètres :**
+- `session_id` (UUID, path) : Identifiant unique de la session de jeu.
+
+**Réponse :**
+```json
+{
+  "history": [
+    { "role": "user", "text": "Bonjour" },
+    { "role": "assistant", "text": "Bienvenue !" },
+    { "role": "tool", "text": "Résultat d'outil" }
+    // ...
+  ]
+}
+```
+
+**Codes de retour :**
+- 200 : Succès, historique retourné.
+- 404 : Session non trouvée.
+- 500 : Erreur interne.
+
+**Notes :**
+- L'ordre des messages est chronologique.
+- Chaque message est un dictionnaire issu de la méthode `model_dump()` de Haystack.
+- Cette route ne modifie pas l'état de la session.
 
 ---
 

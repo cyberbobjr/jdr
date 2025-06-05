@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from uuid import UUID
 from haystack.dataclasses import ChatMessage
+import traceback
 
 from back.services.scenario_service import ScenarioService
 from back.models.schema import ScenarioList
@@ -123,10 +124,10 @@ async def play_scenario(session_id: UUID, request: PlayScenarioRequest):
     **Paramètres:**
     - `session_id` (UUID): Identifiant de la session de jeu (query parameter).
     - `request` (PlayScenarioRequest): Contient le message du joueur.
-    **Retour:** Réponse générée par le LLM, incluant les réponses d'outils éventuelles.
+    **Retour:**
+    - `responses` (list): Liste ordonnée de tous les nouveaux messages générés par l'agent lors de ce tour (assistant, tool, etc.)
     """
     log_debug("Appel endpoint scenarios/play_scenario", session_id=str(session_id))
-    
     try:
         # Récupérer les informations de session
         session_info = ScenarioService.get_session_info(str(session_id))
@@ -152,30 +153,53 @@ async def play_scenario(session_id: UUID, request: PlayScenarioRequest):
             user_message = ChatMessage.from_user(request.message)
         # Ajouter le nouveau message à la liste existante
         messages.append(user_message)
+        # ---
+        # Calculer l'index de départ pour le delta
+        prev_len = len(messages)
         # Appeler l'agent Haystack avec tout l'historique
         result = agent.run(messages=messages)
         # Sauvegarder l'historique complet (incluant la nouvelle réponse)
         store.save(result["messages"])
-        # Extraire les réponses d'outils et la réponse finale du LLM
-        tool_response = None
-        final_llm_response = None
-        # On parcourt les messages pour extraire la dernière réponse d'outil (role == 'tool') et la dernière réponse assistant
-        for msg in reversed(result["messages"]):
-            if hasattr(msg, "role") and msg.role == "tool":
-                tool_response = msg.tool_call_results[0].result if len(msg.tool_call_results) > 0 else None
-                break
-        # La dernière réponse assistant est la réponse finale du LLM
-        for msg in reversed(result["messages"]):
-            if hasattr(msg, "role") and msg.role == "assistant":
-                final_llm_response = msg.text
-                break
-        log_debug("Réponse LLM générée", action="play_scenario", session_id=str(session_id), character_id=character_id, scenario_name=scenario_name, user_message=request.message)
-        return {
-            "response": final_llm_response,
-            "tool_response": tool_response
-        }
+        # Extraire tous les nouveaux messages générés (delta complet)
+        new_messages = result["messages"][prev_len:]
+        # Retourner tous les nouveaux messages générés (assistant, tool, etc.)
+        log_debug("Réponses générées (delta complet)", action="play_scenario", session_id=str(session_id), character_id=character_id, scenario_name=scenario_name, user_message=request.message)
+        responses = [m.text for m in new_messages]
+        return {"responses": responses}
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
-        log_debug("Erreur lors du jeu de scénario", error=str(e), session_id=str(session_id))
+        log_debug(
+            "Erreur lors du jeu de scénario",
+            error=str(e),
+            traceback=traceback.format_exc(),
+            session_id=str(session_id)
+        )
+        raise HTTPException(status_code=500, detail=f"Erreur interne: {str(e)}")
+
+@router.get("/history/{session_id}")
+async def get_scenario_history(session_id: UUID):
+    """
+    ### get_scenario_history
+    **Description:** Récupère l'historique complet des messages de la session de jeu spécifiée.
+    **Parameters:**
+    - `session_id` (UUID): Identifiant de la session de jeu.
+    **Returns:**
+    - `history` (list): Liste ordonnée de tous les messages (user, assistant, tool, etc.) de la session.
+    """
+    log_debug("Appel endpoint scenarios/get_scenario_history", session_id=str(session_id))
+    try:
+        # Récupérer les informations de session (vérifie l'existence)
+        session_info = ScenarioService.get_session_info(str(session_id))
+        scenario_name = session_info["scenario_name"]
+        # Construire l'agent et accéder au store
+        agent = build_gm_agent(str(session_id), scenario_name)
+        store = agent._store
+        messages = store.load()
+        # Retourner tous les messages de la session
+        return {"history": [m.model_dump() if hasattr(m, 'model_dump') else str(m) for m in messages]}
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        log_debug("Erreur lors de la récupération de l'historique de session", error=str(e), session_id=str(session_id))
         raise HTTPException(status_code=500, detail=f"Erreur interne: {str(e)}")

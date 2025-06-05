@@ -78,8 +78,8 @@ class LoggingTool(Tool):
                 self.agent._chat_history.append(tool_result_message)
                 
                 # Sauvegarder l'historique complet
-                if self.store:
-                    self.store.save(self.agent._chat_history)
+                # if self.store:
+                    # self.store.save(self.agent._chat_history)
             
             return result
             
