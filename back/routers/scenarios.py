@@ -93,12 +93,15 @@ async def start_scenario(request: StartScenarioRequest):
         else:
             enriched_message = start_message
         
-        # Appeler l'agent PydanticAI pour obtenir la réponse initiale
-        result = await agent.run(enriched_message, deps=deps)
+        # Appeler l'agent PydanticAI avec l'historique existant (vide pour un nouveau scénario)
+        result = await agent.run(
+            enriched_message, 
+            deps=deps,
+            message_history=deps.message_history  # Utiliser l'historique chargé
+        )
         
-        # Sauvegarder les messages dans l'historique via le store des dépendances
-        deps.store.save_user_message(enriched_message)
-        deps.store.save_assistant_message(result.data)
+        # Sauvegarder les nouveaux messages dans l'historique
+        deps.save_to_history(result.new_messages())
         
         # Retourner les informations de session + la réponse du LLM
         response_data = {
@@ -157,23 +160,37 @@ async def play_scenario(session_id: UUID, request: PlayScenarioRequest):
         else:
             enriched_message = request.message
         
-        # Appeler l'agent PydanticAI
-        result = await agent.run(enriched_message, deps=deps)
+        # Appeler l'agent PydanticAI avec l'historique de la session
+        result = await agent.run(
+            enriched_message,
+            deps=deps,
+            message_history=deps.message_history  # Utiliser l'historique chargé depuis le store
+        )
         
-        # Sauvegarder dans l'historique
-        deps.store.save_user_message(enriched_message)
-        deps.store.save_assistant_message(result.data)
+        # Sauvegarder les nouveaux messages dans l'historique
+        deps.save_to_history(result.new_messages())
         
-        # Extraire les informations sur les appels d'outils si présents
+        # Extraire les informations sur les appels d'outils
         tool_calls = []
-        if hasattr(result, 'all_messages'):
-            for msg in result.all_messages():
-                if hasattr(msg, 'kind') and msg.kind == 'tool-call':
-                    tool_calls.append({
-                        "tool_name": msg.tool_name,
-                        "arguments": msg.args,
-                        "result": msg.result if hasattr(msg, 'result') else None
-                    })
+        for msg in result.new_messages():
+            if msg.role == 'model':
+                for part in msg.parts:
+                    if hasattr(part, 'tool_name'):  # ModelToolCall
+                        tool_calls.append({
+                            "tool_name": part.tool_name,
+                            "arguments": part.args,
+                            "tool_call_id": part.tool_call_id
+                        })
+        
+        # Ajouter les résultats des outils
+        for msg in result.new_messages():
+            if msg.role == 'tool-return':
+                for part in msg.parts:
+                    if hasattr(part, 'tool_call_id'):  # ToolReturnPart
+                        # Retrouver l'appel correspondant
+                        for tool_call in tool_calls:
+                            if tool_call['tool_call_id'] == part.tool_call_id:
+                                tool_call['result'] = part.content
         
         log_debug("Réponse générée", action="play_scenario", session_id=str(session_id), character_id=character_id, scenario_name=scenario_name, user_message=request.message)
         

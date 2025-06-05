@@ -1,3 +1,4 @@
+###### FICHIER DEPRECATED ?
 """
 Exemple d'utilisation de l'agent GM migré vers PydanticAI.
 Ce fichier montre comment utiliser le nouvel agent dans l'application.

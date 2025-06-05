@@ -21,6 +21,7 @@ class PydanticJsonlStore:
     - `save_assistant_message(message)` : Sauvegarde un message assistant
     - `save_tool_message(tool_name, args, result)` : Sauvegarde un appel d'outil
     - `get_messages()` : Retourne tous les messages chargés
+    - `get_pydantic_messages()` : Retourne les messages au format PydanticAI
     """
     
     def __init__(self, filepath: str):
@@ -161,6 +162,70 @@ class PydanticJsonlStore:
         with open(self.filepath, "w", encoding="utf-8"):
             pass
         log_debug("Store PydanticAI vidé", action="clear_store", filepath=os.path.abspath(self.filepath))
+
+    def get_pydantic_messages(self) -> List[Dict[str, Any]]:
+        """
+        ### get_pydantic_messages
+        **Description :** Retourne les messages dans un format compatible avec PydanticAI.
+        **Retour :** Liste des messages formatés pour PydanticAI.
+        """
+        pydantic_messages = []
+        
+        for msg in self._messages:
+            if isinstance(msg, dict):
+                role = msg.get('role', '')
+                content = msg.get('content', '')
+                
+                if role == 'user':
+                    pydantic_messages.append({
+                        'role': 'user',
+                        'content': content
+                    })
+                elif role == 'assistant':
+                    pydantic_messages.append({
+                        'role': 'assistant', 
+                        'content': content
+                    })
+                elif role == 'tool':
+                    # Format spécial pour les appels d'outils
+                    tool_name = msg.get('tool_name', '')
+                    args = msg.get('args', {})
+                    result = msg.get('result', '')
+                    
+                    pydantic_messages.append({
+                        'role': 'tool_use',
+                        'tool_name': tool_name,
+                        'arguments': args,
+                        'result': result,
+                        'content': content
+                    })
+        
+        return pydantic_messages
+
+    def append_pydantic_messages(self, messages: List[Any]):
+        """
+        ### append_pydantic_messages
+        **Description :** Ajoute des messages au format PydanticAI dans le store.
+        **Paramètres :**
+        - `messages` (List[Any]) : Messages PydanticAI à ajouter.
+        """
+        for msg in messages:
+            # Conversion selon le type de message PydanticAI
+            if hasattr(msg, 'role') and hasattr(msg, 'parts'):
+                if msg.role == 'user':
+                    for part in msg.parts:
+                        if hasattr(part, 'content'):
+                            self.save_user_message(part.content)
+                elif msg.role == 'model':
+                    for part in msg.parts:
+                        if hasattr(part, 'content'):
+                            self.save_assistant_message(part.content)
+                        elif hasattr(part, 'tool_name'):
+                            # Stockage temporaire de l'appel d'outil
+                            pass
+                elif msg.role == 'tool-return':
+                    # Gérer le retour d'outil
+                    pass
 
     # Méthodes de compatibilité pour l'interface Haystack existante
     def save(self, messages):

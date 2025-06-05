@@ -6,12 +6,14 @@ uvicorn[standard]>=0.30
 openai>=1.30
 
 # Migration vers PydanticAI
-pydantic-ai
+pydantic-ai>=0.0.1
 
 # Validation de données & I/O
 pydantic>=2.7
 aiofiles>=23.2
 python-dotenv>=1.0
+httpx>=0.27.0
+google-auth>=2.35.0
 
 # Tests et qualité de code
 pytest>=8.2

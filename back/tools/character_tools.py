@@ -1,6 +1,7 @@
 from uuid import UUID
 from back.services.character_service import CharacterService
 from back.utils.logger import log_debug
+from back.tools.skill_tools import skill_check_with_character
 
 svc = CharacterService()
 
@@ -47,5 +48,44 @@ def character_take_damage(player_id: UUID, amount: int, source: str = "combat") 
     """
     log_debug("Tool character_take_damage appelé", tool="character_take_damage", player_id=str(player_id), amount=amount, source=source)
     return svc.take_damage(player_id, amount, source)
+
+# Tool definition removed - now handled directly by PydanticAI agent
+
+def character_perform_skill_check(player_id: UUID, skill_name: str, difficulty_name: str = "Moyenne", difficulty_modifier: int = 0) -> str:
+    """
+    ### character_perform_skill_check
+    **Description :** Effectue un jet de compétence pour un personnage spécifique.
+    **Paramètres :**
+    - `player_id` (UUID) : Identifiant du personnage
+    - `skill_name` (str) : Nom de la compétence à tester
+    - `difficulty_name` (str) : Niveau de difficulté (Facile, Moyenne, Difficile, Très difficile, Impossible)
+    - `difficulty_modifier` (int) : Modificateur additionnel de difficulté
+    **Retour :**
+    - (str) : Résultat du jet de compétence
+    """
+    log_debug("character_perform_skill_check appelé", 
+              tool="character_perform_skill_check", 
+              player_id=str(player_id), 
+              skill_name=skill_name,
+              difficulty_name=difficulty_name,
+              difficulty_modifier=difficulty_modifier)
+    
+    try:
+        # Récupérer la fiche du personnage
+        character = svc.get_character(player_id)
+        character_json = character.model_dump_json()
+        
+        # Effectuer le jet de compétence
+        result = skill_check_with_character(
+            skill_name=skill_name, 
+            character_json=character_json, 
+            difficulty_name=difficulty_name, 
+            difficulty_modifier=difficulty_modifier
+        )
+        
+        return result
+    except Exception as e:
+        log_debug("Erreur lors du jet de compétence", error=str(e), player_id=str(player_id))
+        return f"Erreur lors du jet de compétence : {str(e)}"
 
 # Tool definition removed - now handled directly by PydanticAI agent

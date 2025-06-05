@@ -1,7 +1,6 @@
 # back/app.py
 from fastapi import FastAPI
-from back.routers import characters, inventory, combat
-from back.routers import scenarios_pydantic as scenarios  # PydanticAI router as main
+from back.routers import characters, inventory, combat, scenarios
 from fastapi.openapi.utils import get_openapi
 
 app = FastAPI(title="JdR – Terres du Milieu")

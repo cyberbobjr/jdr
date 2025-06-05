@@ -5,13 +5,14 @@ Migration progressive de Haystack vers PydanticAI.
 
 import os
 import pathlib
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from dotenv import load_dotenv
 from pydantic_ai import Agent, RunContext
+from pydantic_ai.messages import ModelMessage, UserPromptPart, ToolReturnPart, ModelTextResponse, ModelToolCall
+from uuid import UUID
 
 from back.utils.logger import log_debug
-from back.tools.character_tools import character_apply_xp, character_add_gold, character_take_damage
-from back.tools.skill_tools import skill_check_with_character
+from back.tools.character_tools import character_apply_xp, character_add_gold, character_take_damage, character_perform_skill_check
 from back.tools.combat_tools import roll_initiative_tool, perform_attack_tool, resolve_attack_tool, calculate_damage_tool, end_combat_tool
 from back.tools.inventory_tools import inventory_add_item, inventory_remove_item
 from back.storage.pydantic_jsonl_store import PydanticJsonlStore
@@ -31,7 +32,8 @@ class GMAgentDependencies:
     **Attributs :**
     - `session_id` (str) : Identifiant de session
     - `character_data` (Dict[str, Any]) : Données du personnage
-    - `store` (JsonlChatMessageStore) : Store pour l'historique des messages
+    - `store` (PydanticJsonlStore) : Store pour l'historique des messages
+    - `message_history` (List[ModelMessage]) : Historique des messages PydanticAI
     """
     
     def __init__(self, session_id: str, character_data: Optional[Dict[str, Any]] = None):
@@ -44,6 +46,103 @@ class GMAgentDependencies:
         else:
             history_path = session_id + ".jsonl"
         self.store = PydanticJsonlStore(history_path)
+        self.message_history: List[ModelMessage] = self._load_message_history()
+    
+    def _load_message_history(self) -> List[ModelMessage]:
+        """
+        ### _load_message_history
+        **Description :** Charge l'historique depuis le store et le convertit en format PydanticAI.
+        **Retour :** Liste de ModelMessage pour PydanticAI.
+        """
+        messages = []
+        stored_messages = self.store.get_messages()
+        
+        for msg in stored_messages:
+            if isinstance(msg, dict):
+                role = msg.get('role', '')
+                content = msg.get('content', '')
+                
+                if role == 'user':
+                    # Créer un message utilisateur
+                    messages.append(ModelMessage(
+                        role='user',
+                        parts=[UserPromptPart(content=content)]
+                    ))
+                elif role == 'assistant':
+                    # Créer un message assistant
+                    messages.append(ModelMessage(
+                        role='model',
+                        parts=[ModelTextResponse(content=content)]
+                    ))
+                elif role == 'tool':
+                    # Gérer les appels d'outils
+                    tool_name = msg.get('tool_name', '')
+                    args = msg.get('args', {})
+                    result = msg.get('result', '')
+                    
+                    # Ajouter l'appel d'outil
+                    messages.append(ModelMessage(
+                        role='model',
+                        parts=[ModelToolCall(
+                            tool_name=tool_name,
+                            args=args,
+                            tool_call_id=f"{tool_name}_{len(messages)}"
+                        )]
+                    ))
+                    
+                    # Ajouter le résultat de l'outil
+                    messages.append(ModelMessage(
+                        role='tool-return',
+                        parts=[ToolReturnPart(
+                            tool_call_id=f"{tool_name}_{len(messages)-1}",
+                            content=str(result)
+                        )]
+                    ))
+        
+        return messages
+    
+    def save_to_history(self, new_messages: List[ModelMessage]):
+        """
+        ### save_to_history
+        **Description :** Sauvegarde les nouveaux messages dans le store.
+        **Paramètres :**
+        - `new_messages` (List[ModelMessage]) : Messages à sauvegarder.
+        """
+        for msg in new_messages:
+            if msg.role == 'user':
+                # Extraire le contenu utilisateur
+                for part in msg.parts:
+                    if isinstance(part, UserPromptPart):
+                        self.store.save_user_message(part.content)
+            elif msg.role == 'model':
+                # Extraire le contenu du modèle
+                for part in msg.parts:
+                    if isinstance(part, ModelTextResponse):
+                        self.store.save_assistant_message(part.content)
+                    elif isinstance(part, ModelToolCall):
+                        # Sera traité avec le ToolReturnPart correspondant
+                        pass
+            elif msg.role == 'tool-return':
+                # Extraire les informations de l'outil
+                for i, part in enumerate(msg.parts):
+                    if isinstance(part, ToolReturnPart):
+                        # Retrouver l'appel d'outil correspondant
+                        tool_call = self._find_tool_call(new_messages, part.tool_call_id)
+                        if tool_call:
+                            self.store.save_tool_message(
+                                tool_name=tool_call.tool_name,
+                                args=tool_call.args,
+                                result=part.content
+                            )
+    
+    def _find_tool_call(self, messages: List[ModelMessage], tool_call_id: str) -> Optional[ModelToolCall]:
+        """Retrouve un appel d'outil par son ID."""
+        for msg in messages:
+            if msg.role == 'model':
+                for part in msg.parts:
+                    if isinstance(part, ModelToolCall) and part.tool_call_id == tool_call_id:
+                        return part
+        return None
 
 
 def _get_scenario_content(scenario_name: str) -> str:
@@ -176,7 +275,7 @@ def _create_gm_agent(system_prompt: Optional[str] = None) -> Agent:
     """
     prompt = system_prompt or _build_system_prompt()
     agent = Agent(
-        model=f"openai:{api_model}",
+        model=f"deepseek:{api_model}",
         deps_type=GMAgentDependencies,
         system_prompt=prompt
     )
@@ -194,116 +293,255 @@ def _add_tools_to_agent(agent: Agent) -> None:
     - `agent` (Agent) : L'agent auquel ajouter les outils
     **Retour :** Aucun.
     """
-      @agent.tool
+    @agent.tool
     async def apply_xp_to_character(ctx: RunContext[GMAgentDependencies], xp_amount: int, reason: str) -> str:
         """Applique des points d'expérience au personnage."""
         try:
-            from uuid import UUID
-            player_id = UUID(ctx.deps.session_id) if ctx.deps.session_id != "default" else UUID("00000000-0000-0000-0000-000000000000")
-            result = character_apply_xp(player_id=player_id, xp=xp_amount)
-            log_debug("XP appliqués via PydanticAI", character_id=ctx.deps.session_id, xp=xp_amount, reason=reason)
+            # Utiliser character_id depuis la session plutôt que session_id
+            character_id = ctx.deps.session_id
+            result = character_apply_xp(player_id=UUID(character_id), xp=xp_amount)
+            
+            # Sauvegarder l'appel d'outil
+            ctx.deps.store.save_tool_message(
+                tool_name="apply_xp_to_character",
+                args={"xp_amount": xp_amount, "reason": reason},
+                result=result
+            )
+            
+            log_debug("XP appliqués via PydanticAI", character_id=character_id, xp=xp_amount, reason=reason)
             return f"XP appliqués : {result}"
         except Exception as e:
             log_debug("Erreur lors de l'application des XP", error=str(e))
             return f"Erreur lors de l'application des XP : {str(e)}"
-
+    
     @agent.tool
     async def add_gold_to_character(ctx: RunContext[GMAgentDependencies], gold_amount: int, reason: str) -> str:
         """Ajoute de l'or au personnage."""
         try:
-            result = character_add_gold_tool(character_id=ctx.deps.session_id, gold_amount=gold_amount, reason=reason)
-            log_debug("Or ajouté via PydanticAI", character_id=ctx.deps.session_id, gold=gold_amount, reason=reason)
-            return result
+            character_id = ctx.deps.session_id
+            result = character_add_gold(player_id=UUID(character_id), gold=gold_amount)
+            
+            ctx.deps.store.save_tool_message(
+                tool_name="add_gold_to_character",
+                args={"gold_amount": gold_amount, "reason": reason},
+                result=result
+            )
+            
+            log_debug("Or ajouté via PydanticAI", character_id=character_id, gold=gold_amount, reason=reason)
+            return f"Or ajouté : {result}"
         except Exception as e:
             log_debug("Erreur lors de l'ajout d'or", error=str(e))
             return f"Erreur lors de l'ajout d'or : {str(e)}"
-
+    
     @agent.tool
     async def apply_damage_to_character(ctx: RunContext[GMAgentDependencies], damage_amount: int, damage_type: str = "physique") -> str:
         """Applique des dégâts au personnage."""
         try:
-            result = character_take_damage_tool(character_id=ctx.deps.session_id, damage_amount=damage_amount, damage_type=damage_type)
-            log_debug("Dégâts appliqués via PydanticAI", character_id=ctx.deps.session_id, damage=damage_amount, type=damage_type)
-            return result
+            character_id = ctx.deps.session_id
+            result = character_take_damage(player_id=UUID(character_id), amount=damage_amount, source=damage_type)
+            
+            ctx.deps.store.save_tool_message(
+                tool_name="apply_damage_to_character",
+                args={"damage_amount": damage_amount, "damage_type": damage_type},
+                result=result
+            )
+            
+            log_debug("Dégâts appliqués via PydanticAI", character_id=character_id, damage=damage_amount, type=damage_type)
+            return f"Dégâts appliqués : {result}"
         except Exception as e:
             log_debug("Erreur lors de l'application des dégâts", error=str(e))
             return f"Erreur lors de l'application des dégâts : {str(e)}"
-
+    
     @agent.tool
-    async def perform_skill_check(ctx: RunContext[GMAgentDependencies], skill_name: str, difficulty: int, modifier: int = 0) -> str:
-        """Effectue un jet de compétence pour le personnage."""
+    async def perform_skill_check(ctx: RunContext[GMAgentDependencies], skill_name: str, difficulty_name: str = "Moyenne", difficulty_modifier: int = 0) -> str:
+        """Effectue un jet de compétence pour le personnage. 
+        
+        Args:
+            skill_name: Nom de la compétence à tester
+            difficulty_name: Niveau de difficulté (Facile, Moyenne, Difficile, Très difficile, Impossible)
+            difficulty_modifier: Modificateur additionnel de difficulté
+        """
         try:
-            result = skill_check_tool(character_id=ctx.deps.session_id, skill_name=skill_name, difficulty=difficulty, modifier=modifier)
-            log_debug("Jet de compétence via PydanticAI", character_id=ctx.deps.session_id, skill=skill_name, difficulty=difficulty)
+            character_id = ctx.deps.session_id
+            result = character_perform_skill_check(
+                player_id=UUID(character_id),
+                skill_name=skill_name,
+                difficulty_name=difficulty_name,
+                difficulty_modifier=difficulty_modifier
+            )
+            
+            ctx.deps.store.save_tool_message(
+                tool_name="perform_skill_check",
+                args={
+                    "skill_name": skill_name,
+                    "difficulty_name": difficulty_name,
+                    "difficulty_modifier": difficulty_modifier
+                },
+                result=result
+            )
+            
+            log_debug("Jet de compétence via PydanticAI", character_id=character_id, skill=skill_name, difficulty=difficulty_name)
             return result
         except Exception as e:
             log_debug("Erreur lors du jet de compétence", error=str(e))
             return f"Erreur lors du jet de compétence : {str(e)}"
-        
+    
     @agent.tool
     async def roll_initiative(ctx: RunContext[GMAgentDependencies], characters: list[dict]) -> str:
-        """Lance les dés pour déterminer l'initiative dans le combat."""
+        """Lance les dés pour déterminer l'initiative dans le combat.
+        
+        Args:
+            characters: Liste des personnages avec leurs bonus d'initiative
+        """
         try:
             result = roll_initiative_tool(characters=characters)
-            log_debug("Initiative roulée via PydanticAI", character_id=ctx.deps.session_id, initiative=result)
-            return f"Ordre d'initiative : {result}"
+            
+            ctx.deps.store.save_tool_message(
+                tool_name="roll_initiative",
+                args={"characters": characters},
+                result=result
+            )
+            
+            log_debug("Initiative roulée via PydanticAI", character_id=ctx.deps.session_id, result=result)
+            return result
         except Exception as e:
             log_debug("Erreur lors du roulage de l'initiative", error=str(e))
-            return f"Erreur lors du roulage de l'initiative : {str(e)}"    @agent.tool
+            return f"Erreur lors du roulage de l'initiative : {str(e)}"
+    
+    @agent.tool
     async def perform_attack(ctx: RunContext[GMAgentDependencies], dice: str) -> str:
-        """Effectue une attaque en lançant les dés."""
+        """Effectue une attaque en lançant les dés.
+        
+        Args:
+            dice: Format des dés (ex: "1d8+2", "2d6", "1d20")
+        """
         try:
             result = perform_attack_tool(dice=dice)
+            
+            ctx.deps.store.save_tool_message(
+                tool_name="perform_attack",
+                args={"dice": dice},
+                result=result
+            )
+            
             log_debug("Attaque effectuée via PydanticAI", character_id=ctx.deps.session_id, dice=dice, result=result)
-            return f"Jet d'attaque : {result}"
+            return result
         except Exception as e:
             log_debug("Erreur lors de l'attaque", error=str(e))
-            return f"Erreur lors de l'attaque : {str(e)}"    @agent.tool
+            return f"Erreur lors de l'attaque : {str(e)}"
+    
+    @agent.tool
     async def resolve_attack(ctx: RunContext[GMAgentDependencies], attack_roll: int, defense_roll: int) -> str:
-        """Résout une attaque en comparant les jets d'attaque et de défense."""
+        """Résout une attaque en comparant les jets d'attaque et de défense.
+        
+        Args:
+            attack_roll: Résultat du jet d'attaque
+            defense_roll: Résultat du jet de défense
+        """
         try:
             result = resolve_attack_tool(attack_roll=attack_roll, defense_roll=defense_roll)
+            
+            ctx.deps.store.save_tool_message(
+                tool_name="resolve_attack",
+                args={"attack_roll": attack_roll, "defense_roll": defense_roll},
+                result=result
+            )
+            
             log_debug("Attaque résolue via PydanticAI", attack_roll=attack_roll, defense_roll=defense_roll, result=result)
-            return f"Attaque {'réussie' if result else 'échouée'}"
+            return result
         except Exception as e:
             log_debug("Erreur lors de la résolution de l'attaque", error=str(e))
-            return f"Erreur lors de la résolution de l'attaque : {str(e)}"    @agent.tool
+            return f"Erreur lors de la résolution de l'attaque : {str(e)}"
+    
+    @agent.tool
     async def calculate_damage(ctx: RunContext[GMAgentDependencies], base_damage: int, bonus: int = 0) -> str:
-        """Calcule les dégâts infligés par une attaque."""
+        """Calcule les dégâts infligés par une attaque.
+        
+        Args:
+            base_damage: Dégâts de base
+            bonus: Bonus aux dégâts
+        """
         try:
             result = calculate_damage_tool(base_damage=base_damage, bonus=bonus)
-            log_debug("Dégâts calculés via PydanticAI", character_id=ctx.deps.session_id, damage=result)
-            return f"Dégâts infligés : {result}"
+            
+            ctx.deps.store.save_tool_message(
+                tool_name="calculate_damage",
+                args={"base_damage": base_damage, "bonus": bonus},
+                result=result
+            )
+            
+            log_debug("Dégâts calculés via PydanticAI", character_id=ctx.deps.session_id, result=result)
+            return result
         except Exception as e:
             log_debug("Erreur lors du calcul des dégâts", error=str(e))
-            return f"Erreur lors du calcul des dégâts : {str(e)}"    @agent.tool
+            return f"Erreur lors du calcul des dégâts : {str(e)}"
+    
+    @agent.tool
     async def end_combat(ctx: RunContext[GMAgentDependencies], combat_id: str, reason: str) -> str:
-        """Met fin au combat en cours."""
+        """Met fin au combat en cours.
+        
+        Args:
+            combat_id: Identifiant du combat
+            reason: Raison de la fin du combat
+        """
         try:
             result = end_combat_tool(combat_id=combat_id, reason=reason)
+            
+            ctx.deps.store.save_tool_message(
+                tool_name="end_combat",
+                args={"combat_id": combat_id, "reason": reason},
+                result=result
+            )
+            
             log_debug("Combat terminé via PydanticAI", character_id=ctx.deps.session_id, combat_id=combat_id, reason=reason)
-            return f"Combat terminé : {result}"
+            return result
         except Exception as e:
             log_debug("Erreur lors de la fin du combat", error=str(e))
-            return f"Erreur lors de la fin du combat : {str(e)}"    @agent.tool
+            return f"Erreur lors de la fin du combat : {str(e)}"
+    
+    @agent.tool
     async def inventory_add(ctx: RunContext[GMAgentDependencies], item_id: str, qty: int = 1) -> str:
-        """Ajoute un objet à l'inventaire du personnage."""
+        """Ajoute un objet à l'inventaire du personnage.
+        
+        Args:
+            item_id: Identifiant de l'objet
+            qty: Quantité à ajouter
+        """
         try:
-            from uuid import UUID
-            player_id = UUID(ctx.deps.session_id) if ctx.deps.session_id != "default" else UUID("00000000-0000-0000-0000-000000000000")
-            result = inventory_add_item(player_id=player_id, item_id=item_id, qty=qty)
-            log_debug("Objet ajouté à l'inventaire via PydanticAI", character_id=ctx.deps.session_id, item=item_id, quantity=qty)
+            character_id = ctx.deps.session_id
+            result = inventory_add_item(player_id=UUID(character_id), item_id=item_id, qty=qty)
+            
+            ctx.deps.store.save_tool_message(
+                tool_name="inventory_add",
+                args={"item_id": item_id, "qty": qty},
+                result=result
+            )
+            
+            log_debug("Objet ajouté à l'inventaire via PydanticAI", character_id=character_id, item=item_id, quantity=qty)
             return f"Objet ajouté à l'inventaire : {result}"
         except Exception as e:
             log_debug("Erreur lors de l'ajout d'objet à l'inventaire", error=str(e))
-            return f"Erreur lors de l'ajout d'objet à l'inventaire : {str(e)}"    @agent.tool
+            return f"Erreur lors de l'ajout d'objet à l'inventaire : {str(e)}"
+    
+    @agent.tool
     async def inventory_remove(ctx: RunContext[GMAgentDependencies], item_id: str, qty: int = 1) -> str:
-        """Retire un objet de l'inventaire du personnage."""
+        """Retire un objet de l'inventaire du personnage.
+        
+        Args:
+            item_id: Identifiant de l'objet
+            qty: Quantité à retirer
+        """
         try:
-            from uuid import UUID
-            player_id = UUID(ctx.deps.session_id) if ctx.deps.session_id != "default" else UUID("00000000-0000-0000-0000-000000000000")
-            result = inventory_remove_item(player_id=player_id, item_id=item_id, qty=qty)
-            log_debug("Objet retiré de l'inventaire via PydanticAI", character_id=ctx.deps.session_id, item=item_id, quantity=qty)
+            character_id = ctx.deps.session_id
+            result = inventory_remove_item(player_id=UUID(character_id), item_id=item_id, qty=qty)
+            
+            ctx.deps.store.save_tool_message(
+                tool_name="inventory_remove",
+                args={"item_id": item_id, "qty": qty},
+                result=result
+            )
+            
+            log_debug("Objet retiré de l'inventaire via PydanticAI", character_id=character_id, item=item_id, quantity=qty)
             return f"Objet retiré de l'inventaire : {result}"
         except Exception as e:
             log_debug("Erreur lors du retrait d'objet de l'inventaire", error=str(e))
@@ -323,17 +561,22 @@ def build_gm_agent_pydantic(session_id: str = "default", scenario_name: Optional
     - `scenario_name` (str, optionnel) : Nom du fichier scénario à charger
     **Retour :** Tuple contenant l'agent configuré et ses dépendances.
     """
-    # Créer les dépendances
+    # Créer les dépendances avec l'historique chargé
     deps = GMAgentDependencies(session_id=session_id)
     
     # Si un scénario spécifique est demandé, créer un nouvel agent avec ce scénario
     if scenario_name:
         updated_prompt = _build_system_prompt(scenario_name)
         scenario_agent = _create_gm_agent(system_prompt=updated_prompt)
-        log_debug("Agent GM PydanticAI créé avec scénario", session_id=session_id, scenario=scenario_name)
+        log_debug("Agent GM PydanticAI créé avec scénario et historique", 
+                 session_id=session_id, 
+                 scenario=scenario_name,
+                 history_size=len(deps.message_history))
         return scenario_agent, deps
     else:
-        log_debug("Agent GM PydanticAI par défaut utilisé", session_id=session_id)
+        log_debug("Agent GM PydanticAI par défaut utilisé avec historique", 
+                 session_id=session_id,
+                 history_size=len(deps.message_history))
         return gm_agent, deps
 
 

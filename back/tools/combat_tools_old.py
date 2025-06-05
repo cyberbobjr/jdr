@@ -1,3 +1,4 @@
+###### FICHIER DEPRECATED ?
 from back.utils.dice import roll_attack
 from back.utils.logger import log_debug
 from back.services.combat_service import CombatService

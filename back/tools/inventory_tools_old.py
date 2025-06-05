@@ -1,3 +1,4 @@
+###### FICHIER DEPRECATED ?
 from uuid import UUID
 from ..services.inventory_service import InventoryService
 from back.utils.logger import log_debug
