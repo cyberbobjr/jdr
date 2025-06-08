@@ -6,7 +6,7 @@ uvicorn[standard]>=0.30
 openai>=1.30
 
 # Migration vers PydanticAI
-pydantic-ai>=0.0.1
+pydantic-ai
 
 # Validation de données & I/O
 pydantic>=2.7

@@ -8,7 +8,7 @@ import pathlib
 from typing import Optional, Dict, Any, List
 from dotenv import load_dotenv
 from pydantic_ai import Agent, RunContext
-from pydantic_ai.messages import ModelMessage, UserPromptPart, ToolReturnPart, ModelTextResponse, ModelToolCall
+from pydantic_ai.messages import ModelMessage, UserPromptPart, ToolReturnPart, ToolCallPart, TextPart
 from uuid import UUID
 
 from back.utils.logger import log_debug
@@ -72,7 +72,7 @@ class GMAgentDependencies:
                     # Créer un message assistant
                     messages.append(ModelMessage(
                         role='model',
-                        parts=[ModelTextResponse(content=content)]
+                        parts=[TextPart(content=content)]
                     ))
                 elif role == 'tool':
                     # Gérer les appels d'outils
@@ -83,7 +83,7 @@ class GMAgentDependencies:
                     # Ajouter l'appel d'outil
                     messages.append(ModelMessage(
                         role='model',
-                        parts=[ModelToolCall(
+                        parts=[ToolCallPart(
                             tool_name=tool_name,
                             args=args,
                             tool_call_id=f"{tool_name}_{len(messages)}"
@@ -109,6 +109,9 @@ class GMAgentDependencies:
         - `new_messages` (List[ModelMessage]) : Messages à sauvegarder.
         """
         for msg in new_messages:
+            # Ignorer les objets qui n'ont pas d'attribut 'role' (ex: ModelRequest)
+            if not hasattr(msg, 'role'):
+                continue
             if msg.role == 'user':
                 # Extraire le contenu utilisateur
                 for part in msg.parts:
@@ -117,9 +120,9 @@ class GMAgentDependencies:
             elif msg.role == 'model':
                 # Extraire le contenu du modèle
                 for part in msg.parts:
-                    if isinstance(part, ModelTextResponse):
+                    if isinstance(part, TextPart):
                         self.store.save_assistant_message(part.content)
-                    elif isinstance(part, ModelToolCall):
+                    elif isinstance(part, ToolCallPart):
                         # Sera traité avec le ToolReturnPart correspondant
                         pass
             elif msg.role == 'tool-return':
@@ -135,12 +138,12 @@ class GMAgentDependencies:
                                 result=part.content
                             )
     
-    def _find_tool_call(self, messages: List[ModelMessage], tool_call_id: str) -> Optional[ModelToolCall]:
+    def _find_tool_call(self, messages: List[ModelMessage], tool_call_id: str) -> Optional[ToolCallPart]:
         """Retrouve un appel d'outil par son ID."""
         for msg in messages:
             if msg.role == 'model':
                 for part in msg.parts:
-                    if isinstance(part, ModelToolCall) and part.tool_call_id == tool_call_id:
+                    if isinstance(part, ToolCallPart) and part.tool_call_id == tool_call_id:
                         return part
         return None
 
