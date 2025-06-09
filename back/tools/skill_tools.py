@@ -1,6 +1,8 @@
 import random
-import json
+from pydantic_ai import RunContext
 from back.utils.logger import log_debug
+from back.services.session_service import SessionService
+from back.services.character_service import CharacterService
 
 # Mapping des compétences vers les caractéristiques de base
 SKILL_TO_CHARACTERISTIC = {
@@ -33,21 +35,23 @@ SKILL_TO_CHARACTERISTIC = {
     "Comédie": "Présence"
 }
 
-def skill_check_with_character(skill_name: str, character_json: str, difficulty_name: str = "Moyenne", difficulty_modifier: int = 0) -> str:
+def skill_check_with_character(ctx: RunContext[SessionService], skill_name: str, difficulty_name: str = "Moyenne", difficulty_modifier: int = 0) -> str:
     """
-    ### skill_check_with_character
-    **Description :** Effectue un test de compétence en utilisant les données complètes du personnage. Utilise automatiquement la compétence si disponible, sinon la caractéristique de base.
-    **Paramètres :**
-    - `skill_name` (str) : Nom de la compétence/caractéristique testée (ex: "Perception", "Force", "Discrétion").
-    - `character_json` (str) : Données complètes du personnage au format JSON.
-    - `difficulty_name` (str) : Nom de la difficulté ("Facile", "Moyenne", "Difficile", "Très Difficile").
-    - `difficulty_modifier` (int) : Modificateur additionnel de difficulté (optionnel, par défaut 0).
-    **Retour :**
-    - (str) : Résultat détaillé du test avec jet de dé, calculs et interprétation.
+    Effectue un test de compétence en utilisant les données du personnage de la session.
+
+    Args:
+        skill_name (str): Nom de la compétence/caractéristique testée (ex: "Perception", "Force", "Discrétion").
+        difficulty_name (str): Nom de la difficulté ("Facile", "Moyenne", "Difficile", "Très Difficile").
+        difficulty_modifier (int): Modificateur additionnel de difficulté (optionnel, par défaut 0).
+    
+    Returns:
+        str: Résultat détaillé du test avec jet de dé, calculs et interprétation.
     """
     try:
-        # Parse des données du personnage
-        character_data = json.loads(character_json)
+        # Récupérer la fiche du personnage via CharacterService
+        character_service = CharacterService()
+        character = character_service.get_character(ctx.deps.character_id)
+        character_data = character.dict()  # Convertir en dict Python
         
         # Extraction des compétences et caractéristiques
         competences = character_data.get("competences", {})
@@ -123,17 +127,18 @@ def skill_check_with_character(skill_name: str, character_json: str, difficulty_
                 degree = "Échec Moyen"
             else:
                 degree = "Échec Simple"
-        
         result = f"Test de {skill_name}: {source_used} = {skill_value}, Jet 1d100 = {roll}, Seuil = {target} ({skill_value} - {total_difficulty}), Résultat: **{degree}**"
         
-        log_debug("Tool skill_check_with_character appelé", tool="skill_check_with_character", skill_name=skill_name, 
+        log_debug("Tool skill_check_with_character appelé", tool="skill_check_with_character", 
+                  player_id=str(ctx.deps.character_id), skill_name=skill_name, 
                   source_used=source_used, skill_value=skill_value, difficulty_name=difficulty_name, 
                   roll=roll, target=target, success=success, degree=degree)
         return result
         
     except Exception as e:
         error_msg = f"Erreur lors du test de {skill_name}: {str(e)}"
-        log_debug("Erreur dans skill_check_with_character", error=str(e), skill_name=skill_name)
+        log_debug("Erreur dans skill_check_with_character", error=str(e), 
+                  player_id=str(ctx.deps.character_id), skill_name=skill_name)
         return error_msg
 
 # Outil principal à utiliser avec les données complètes du personnage

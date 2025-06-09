@@ -96,12 +96,11 @@ async def start_scenario(request: StartScenarioRequest):
         # Appeler l'agent PydanticAI avec l'historique existant (vide pour un nouveau scénario)
         result = await agent.run(
             enriched_message, 
-            deps=deps,
-            message_history=deps.message_history  # Utiliser l'historique chargé
+            deps=deps
         )
         
-        # Sauvegarder les nouveaux messages dans l'historique
-        deps.save_to_history(result.new_messages())
+        # Sauvegarder l'historique complet après la réponse
+        deps.store.save_pydantic_history(result.all_messages())
         
         # Retourner les informations de session + la réponse du LLM
         response_data = {
@@ -134,7 +133,9 @@ async def play_scenario(session_id: UUID, request: PlayScenarioRequest):
     **Retour :**
     - `response` (str) : Réponse du Maître du Jeu
     - `tool_calls` (list) : Liste des appels d'outils effectués (si applicable)
+    
     """
+    
     log_debug("Appel endpoint scenarios/play_scenario", session_id=str(session_id))
     try:
         # Récupérer les informations de session
@@ -159,44 +160,23 @@ async def play_scenario(session_id: UUID, request: PlayScenarioRequest):
             enriched_message = enrich_user_message_with_character(request.message, character_json)
         else:
             enriched_message = request.message
-        
+
+        history = deps.store.load_pydantic_history()
+
         # Appeler l'agent PydanticAI avec l'historique de la session
         result = await agent.run(
             enriched_message,
             deps=deps,
-            message_history=deps.message_history  # Utiliser l'historique chargé depuis le store
+            message_history=history  # Utiliser l'historique chargé depuis le store
         )
         
         # Sauvegarder les nouveaux messages dans l'historique
-        deps.save_to_history(result.new_messages())
-        
-        # Extraire les informations sur les appels d'outils
-        tool_calls = []
-        for msg in result.new_messages():
-            if msg.role == 'model':
-                for part in msg.parts:
-                    if hasattr(part, 'tool_name'):  # ModelToolCall
-                        tool_calls.append({
-                            "tool_name": part.tool_name,
-                            "arguments": part.args,
-                            "tool_call_id": part.tool_call_id
-                        })
-        
-        # Ajouter les résultats des outils
-        for msg in result.new_messages():
-            if msg.role == 'tool-return':
-                for part in msg.parts:
-                    if hasattr(part, 'tool_call_id'):  # ToolReturnPart
-                        # Retrouver l'appel correspondant
-                        for tool_call in tool_calls:
-                            if tool_call['tool_call_id'] == part.tool_call_id:
-                                tool_call['result'] = part.content
+        deps.store.save_pydantic_history(result.all_messages())
         
         log_debug("Réponse générée", action="play_scenario", session_id=str(session_id), character_id=character_id, scenario_name=scenario_name, user_message=request.message)
         
         return {
-            "response": result.data,
-            "tool_calls": tool_calls
+            "response": result.all_messages()
         }
         
     except FileNotFoundError as e:
@@ -220,6 +200,7 @@ async def get_scenario_history(session_id: UUID):
     **Retour :**
     - `history` (list) : Liste ordonnée de tous les messages (user, assistant, tool, etc.) de la session.
     """
+    
     log_debug("Appel endpoint scenarios/get_scenario_history", session_id=str(session_id))
     try:
         # Récupérer les informations de session (vérifie l'existence)
@@ -228,22 +209,7 @@ async def get_scenario_history(session_id: UUID):
         
         # Construire l'agent et accéder au store
         agent, deps = build_gm_agent_pydantic(str(session_id), scenario_name)
-        messages = deps.store.get_messages()
-        
-        # Retourner tous les messages de la session
-        history = []
-        for msg in messages:
-            if isinstance(msg, dict):
-                history.append(msg)
-            elif hasattr(msg, 'model_dump'):
-                history.append(msg.model_dump())
-            else:
-                # Pour compatibilité avec différents formats de messages
-                history.append({
-                    "role": getattr(msg, 'role', 'unknown'),
-                    "content": getattr(msg, 'content', str(msg))
-                })
-        
+        history = deps.store.load_pydantic_history()
         return {"history": history}
         
     except FileNotFoundError as e:

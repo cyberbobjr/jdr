@@ -3,7 +3,6 @@ applyTo: '**'
 ---
 # Instructions for Code Documentation
 [README.md](../../README.md) contain the information about the Project
-[openai-instructions.md](../../instructions/openai-instructions.md) contain the detailed technical information about the Project
 
 For Haystack, the code documentation are:
 [PydanticAi documentation](../../pydanticai.md) (for PydanticAi documentation)

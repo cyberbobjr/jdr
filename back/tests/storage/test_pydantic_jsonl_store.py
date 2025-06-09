@@ -5,225 +5,123 @@ Validation de la compatibilité avec l'agent PydanticAI.
 
 import tempfile
 import os
+from pydantic_ai.messages import ModelRequest, TextPart, ModelMessagesTypeAdapter
 from back.storage.pydantic_jsonl_store import PydanticJsonlStore
 
 
 class TestPydanticJsonlStore:
     """
     ### TestPydanticJsonlStore
-    **Description :** Tests unitaires pour la classe PydanticJsonlStore.
+    **Description :** Tests unitaires pour la classe PydanticJsonlStore (API PydanticAI uniquement).
     """
 
-    def test_init_creates_file(self):
+    def test_load_realistic_json_history(self):
         """
-        ### test_init_creates_file
-        **Description :** Teste que l'initialisation crée le fichier et le répertoire.
+        ### test_load_realistic_json_history
+        **Description :** Teste le chargement d'un historique JSON réaliste (exemple fourni) via load_pydantic_history.
+        """
+        import json
+        example_json = [
+            {"parts": [
+                {"content": "Exemple de prompt système.", "part_kind": "system-prompt"}
+            ], "timestamp": "2025-06-09T09:30:34.839940Z", "kind": "request"},
+            {"parts": [
+                {"content": "Exemple de réponse MJ.", "part_kind": "text"}
+            ], "timestamp": "2025-06-09T09:30:35Z", "kind": "response"}
+        ]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            filepath = os.path.join(temp_dir, "test_realistic.jsonl")
+            with open(filepath, "w", encoding="utf-8") as f:
+                json.dump(example_json, f, ensure_ascii=False, indent=2)
+            store = PydanticJsonlStore(filepath)
+            loaded = store.load_pydantic_history()
+            assert len(loaded) == 2
+            assert loaded[0].parts[0].content == "Exemple de prompt système."
+            assert loaded[1].parts[0].content == "Exemple de réponse MJ."
+            # Vérifie que les objets sont bien des ModelRequest/ModelResponse
+            from pydantic_ai.messages import ModelRequest, ModelResponse
+            assert isinstance(loaded[0], ModelRequest) or isinstance(loaded[0], ModelResponse)
+            assert isinstance(loaded[1], ModelRequest) or isinstance(loaded[1], ModelResponse)
+
+    def test_save_and_load_pydantic_history(self):
+        """
+        ### test_save_and_load_pydantic_history
+        **Description :** Teste la sauvegarde et le rechargement d'un historique de messages PydanticAI à partir d'un exemple JSON fourni, en utilisant validate_python.
+        """
+        import json
+        from pydantic_ai.messages import ModelMessagesTypeAdapter
+        # Exemple JSON fourni (copié/collé)
+        example_json = [
+            {"parts": [
+                {"content": "[Contexte du personnage:\n\"{\\\"id\\\":\\\"79e55c14-7dd5-4189-b209-ea88f6d067eb\\\",\\\"name\\\":\\\"Galadhwen\\\",\\\"race\\\":\\\"Elfe Sylvain\\\",\\\"culture\\\":\\\"Rurale\\\",\\\"profession\\\":\\\"Aventurier\\\",\\\"caracteristiques\\\":{\\\"Force\\\":69,\\\"Constitution\\\":69,\\\"Agilit\u00e9\\\":69,\\\"Rapidité\\\":69,\\\"Volonté\\\":69,\\\"Raisonnement\\\":69,\\\"Intuition\\\":68,\\\"Présence\\\":68},\\\"competences\\\":{\\\"Comédie\\\":21},\\\"hp\\\":102,\\\"inventory\\\":[],\\\"equipment\\\":[\\\"Bandoulière\\\",\\\"Coutelas\\\",\\\"Bottes de cuir\\\",\\\"Gants de cuir\\\",\\\"Tenue de voyage\\\",\\\"Aiguille à coudre\\\"],\\\"spells\\\":[\\\"Voies du Verrouillage\\\",\\\"Teintes\\\",\\\"Accrochage\\\"],\\\"equipment_summary\\\":{\\\"total_cost\\\":4.8,\\\"total_weight\\\":5.2,\\\"remaining_money\\\":15.2,\\\"starting_money\\\":20.0},\\\"culture_bonuses\\\":{\\\"Artisanat\\\":3,\\\"Endurance\\\":1,\\\"Soins\\\":1,\\\"Herboristerie\\\":1,\\\"Connaissance Générale\\\":2,\\\"Équitation\\\":1,\\\"Natation\\\":2}}\"\n]\n\nje regarde la fontaine",
+                 "timestamp": "2025-06-09T10:04:39.378072Z",
+                 "part_kind": "user-prompt"}
+            ],
+            "instructions": None,
+            "kind": "request"
+            },
+            {"parts": [
+                {"content": "**Esgalbar, place centrale du village**  \n\n*Le soleil décline lentement à l'horizon, teintant le ciel de nuances orangées. Une brume légère flotte autour de la fontaine sèche, comme si elle retenait les souvenirs d'un temps où l'eau y coulait en abondance. Les pierres de la fontaine, autrefois ornées de motifs élégants, sont maintenant usées par les siècles et les intempéries. Quelques feuilles mortes s'accumulent dans son bassin vide, et un silence pesant règne sur la place, troublé seulement par le murmure du vent dans les branches des arbres environnants.*  \n\n**Points d'intérêt :**  \n- **La fontaine** : Son bassin est vide, mais des inscriptions à moitié effacées sont visibles sur son rebord. Elles semblent être en sindarin, la langue des Elfes.  \n- **Les alentours** : Quelques villageois pressent le pas, évitant de s'attarder près de la fontaine, comme si elle portait une malédiction.  \n\n**Actions possibles :**  \n1. **Examiner les inscriptions sur la fontaine** pour tenter de les déchiffrer. [Jet de dés : Raisonnement]  \n2. **Demander à un villageois** pourquoi la fontaine est abandonnée. [Jet de dés : Présence]  \n3. **Fouiller le bassin** pour voir s'il y a quelque chose de caché. [Jet de dés : Intuition]  \n4. **Utiliser un sort** pour tenter de réactiver la fontaine ou de comprendre son histoire. [Jet de dés : Volonté]  \n5. **Ignorer la fontaine et se diriger vers les ruines d'Arnor**, intrigué par les rumeurs de disparitions.  \n\n*Que choisissez-vous, Galadhwen ?*",
+                 "part_kind": "text"}
+            ],
+            "usage": {"requests": 1, "request_tokens": 3701, "response_tokens": 422, "total_tokens": 4123, "details": {"cached_tokens": 3328}},
+            "model_name": "deepseek-chat",
+            "timestamp": "2025-06-09T10:04:41Z",
+            "kind": "response",
+            "vendor_details": None,
+            "vendor_id": "1a42e012-8ad8-4403-867f-5a6ef1e79392"
+            }
+        ]
+        # Désérialisation via validate_python
+        historique = ModelMessagesTypeAdapter.validate_python(example_json)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            filepath = os.path.join(temp_dir, "test_session.jsonl")
+            store = PydanticJsonlStore(filepath)
+            store.save_pydantic_history(historique)
+            loaded = store.load_pydantic_history()
+            assert len(loaded) == 2
+            assert loaded[0].parts[0].content.startswith("[Contexte du personnage:")
+            assert loaded[1].parts[0].content.startswith("**Esgalbar, place centrale du village**")
+
+    def test_save_overwrites_file(self):
+        """
+        ### test_save_overwrites_file
+        **Description :** Teste que la sauvegarde écrase bien le fichier précédent.
         """
         with tempfile.TemporaryDirectory() as temp_dir:
             filepath = os.path.join(temp_dir, "test_session.jsonl")
             store = PydanticJsonlStore(filepath)
-            
-            assert os.path.exists(filepath)
-            assert store.filepath == filepath
+            historique1 = [ModelRequest(parts=[TextPart(content="msg1", part_kind="user-prompt")])]
+            store.save_pydantic_history(historique1)
+            historique2 = [ModelRequest(parts=[TextPart(content="msg2", part_kind="user-prompt")])]
+            store.save_pydantic_history(historique2)
+            loaded = store.load_pydantic_history()
+            assert len(loaded) == 1
+            assert loaded[0].parts[0].content == "msg2"
 
-    def test_save_and_load_user_message(self):
+    def test_load_empty_file(self):
         """
-        ### test_save_and_load_user_message
-        **Description :** Teste la sauvegarde et le chargement des messages utilisateur.
+        ### test_load_empty_file
+        **Description :** Teste le chargement d'un fichier vide (doit retourner une liste vide).
         """
         with tempfile.TemporaryDirectory() as temp_dir:
             filepath = os.path.join(temp_dir, "test_session.jsonl")
             store = PydanticJsonlStore(filepath)
-            
-            # Sauvegarder un message utilisateur
-            user_message = "Bonjour, je veux commencer l'aventure!"
-            store.save_user_message(user_message)
-            
-            # Charger les messages
-            messages = store.get_messages()
-            
-            assert len(messages) == 1
-            assert messages[0]["role"] == "user"
-            assert messages[0]["content"] == user_message
-            assert "timestamp" in messages[0]
+            # Fichier vide
+            loaded = store.load_pydantic_history()
+            assert loaded == []
 
-    def test_save_and_load_assistant_message(self):
+    def test_save_and_load_json_direct(self):
         """
-        ### test_save_and_load_assistant_message
-        **Description :** Teste la sauvegarde et le chargement des messages assistant.
+        ### test_save_and_load_json_direct
+        **Description :** Teste la sérialisation/désérialisation directe via to_jsonable_python/validate_python.
         """
-        with tempfile.TemporaryDirectory() as temp_dir:
-            filepath = os.path.join(temp_dir, "test_session.jsonl")
-            store = PydanticJsonlStore(filepath)
-            
-            # Sauvegarder un message assistant
-            assistant_message = "Bienvenue dans les Terres du Milieu! Votre aventure commence..."
-            store.save_assistant_message(assistant_message)
-            
-            # Charger les messages
-            messages = store.get_messages()
-            
-            assert len(messages) == 1
-            assert messages[0]["role"] == "assistant"
-            assert messages[0]["content"] == assistant_message
-            assert "timestamp" in messages[0]
-
-    def test_save_tool_message(self):
-        """
-        ### test_save_tool_message
-        **Description :** Teste la sauvegarde des appels d'outils.
-        """
-        with tempfile.TemporaryDirectory() as temp_dir:
-            filepath = os.path.join(temp_dir, "test_session.jsonl")
-            store = PydanticJsonlStore(filepath)
-            
-            # Sauvegarder un appel d'outil
-            tool_name = "apply_xp_to_character"
-            args = {"character_id": "test123", "xp_amount": 100}
-            result = {"success": True, "new_xp": 1100}
-            
-            store.save_tool_message(tool_name, args, result)
-            
-            # Charger les messages
-            messages = store.get_messages()
-            
-            assert len(messages) == 1
-            assert messages[0]["role"] == "tool"
-            assert messages[0]["tool_name"] == tool_name
-            assert messages[0]["args"] == args
-            assert messages[0]["result"] == result
-            assert "[TOOL_CALL]" in messages[0]["content"]
-            assert "timestamp" in messages[0]
-
-    def test_conversation_flow(self):
-        """
-        ### test_conversation_flow
-        **Description :** Teste un flux de conversation complet avec différents types de messages.
-        """
-        with tempfile.TemporaryDirectory() as temp_dir:
-            filepath = os.path.join(temp_dir, "test_session.jsonl")
-            store = PydanticJsonlStore(filepath)
-            
-            # Simuler une conversation
-            store.save_user_message("Je veux attaquer l'orc!")
-            store.save_tool_message("perform_attack", {"target": "orc", "weapon": "épée"}, {"hit": True, "damage": 8})
-            store.save_assistant_message("Votre attaque touche! L'orc prend 8 points de dégâts.")
-            store.save_user_message("Est-ce qu'il est mort?")
-            store.save_assistant_message("L'orc s'effondre, vaincu par votre coup mortel!")
-            
-            # Vérifier le flux complet
-            messages = store.get_messages()
-            
-            assert len(messages) == 5
-            assert messages[0]["role"] == "user"
-            assert messages[1]["role"] == "tool"
-            assert messages[2]["role"] == "assistant"
-            assert messages[3]["role"] == "user"
-            assert messages[4]["role"] == "assistant"
-
-    def test_persistence_across_instances(self):
-        """
-        ### test_persistence_across_instances
-        **Description :** Teste que les messages persistent entre différentes instances du store.
-        """
-        with tempfile.TemporaryDirectory() as temp_dir:
-            filepath = os.path.join(temp_dir, "test_session.jsonl")
-            
-            # Première instance - sauvegarder des messages
-            store1 = PydanticJsonlStore(filepath)
-            store1.save_user_message("Message 1")
-            store1.save_assistant_message("Réponse 1")
-            
-            # Deuxième instance - doit charger les messages existants
-            store2 = PydanticJsonlStore(filepath)
-            messages = store2.get_messages()
-            
-            assert len(messages) == 2
-            assert messages[0]["content"] == "Message 1"
-            assert messages[1]["content"] == "Réponse 1"
-            
-            # Ajouter un nouveau message avec la deuxième instance
-            store2.save_user_message("Message 2")
-            
-            # Troisième instance - doit avoir tous les messages
-            store3 = PydanticJsonlStore(filepath)
-            messages = store3.get_messages()
-            
-            assert len(messages) == 3
-            assert messages[2]["content"] == "Message 2"
-
-    def test_clear_store(self):
-        """
-        ### test_clear_store
-        **Description :** Teste la méthode de nettoyage du store.
-        """
-        with tempfile.TemporaryDirectory() as temp_dir:
-            filepath = os.path.join(temp_dir, "test_session.jsonl")
-            store = PydanticJsonlStore(filepath)
-            
-            # Ajouter des messages
-            store.save_user_message("Message à supprimer")
-            store.save_assistant_message("Réponse à supprimer")
-            
-            assert len(store.get_messages()) == 2
-            
-            # Nettoyer le store
-            store.clear()
-            
-            assert len(store.get_messages()) == 0
-            
-            # Vérifier que le fichier est vide
-            with open(filepath, "r") as f:
-                content = f.read().strip()
-                assert content == ""
-
-    def test_haystack_compatibility(self):
-        """
-        ### test_haystack_compatibility
-        **Description :** Teste la compatibilité avec l'interface Haystack (méthode save).
-        """
-        with tempfile.TemporaryDirectory() as temp_dir:
-            filepath = os.path.join(temp_dir, "test_session.jsonl")
-            store = PydanticJsonlStore(filepath)
-            
-            # Simuler des messages format dict (comme ceux retournés par Haystack)
-            messages = [
-                {"role": "user", "content": "Test message 1"},
-                {"role": "assistant", "content": "Test response 1"},
-                {"role": "user", "content": "Test message 2"}
-            ]
-            
-            # Utiliser la méthode save pour compatibilité
-            store.save(messages)
-            
-            # Vérifier que les messages sont correctement chargés
-            loaded_messages = store.get_messages()
-            
-            assert len(loaded_messages) == 3
-            assert loaded_messages[0]["content"] == "Test message 1"
-            assert loaded_messages[1]["content"] == "Test response 1"
-            assert loaded_messages[2]["content"] == "Test message 2"
-
-    def test_load_method_compatibility(self):
-        """
-        ### test_load_method_compatibility
-        **Description :** Teste la méthode load pour compatibilité avec l'interface Haystack.
-        """
-        with tempfile.TemporaryDirectory() as temp_dir:
-            filepath = os.path.join(temp_dir, "test_session.jsonl")
-            store = PydanticJsonlStore(filepath)
-            
-            # Ajouter des messages
-            store.save_user_message("Test load")
-            store.save_assistant_message("Test response")
-            
-            # Tester la méthode load (compatibilité Haystack)
-            loaded_messages = store.load()
-            
-            assert len(loaded_messages) == 2
-            assert loaded_messages[0]["content"] == "Test load"
-            assert loaded_messages[1]["content"] == "Test response"
-            
-            # Vérifier que load() et get_messages() retournent la même chose
-            get_messages_result = store.get_messages()
-            assert loaded_messages == get_messages_result
+        historique = [
+            ModelRequest(parts=[TextPart(content="test direct", part_kind="user-prompt")]),
+        ]
+        from pydantic_core import to_jsonable_python
+        historique_jsonable = to_jsonable_python(historique)
+        reloaded = ModelMessagesTypeAdapter.validate_python(historique_jsonable)
+        assert len(reloaded) == 1
+        assert isinstance(reloaded[0], ModelRequest)
+        assert reloaded[0].parts[0].content == "test direct"

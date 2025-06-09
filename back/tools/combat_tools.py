@@ -1,18 +1,21 @@
+from pydantic_ai import RunContext
 from back.utils.dice import roll_attack
 from back.utils.logger import log_debug
 from back.services.combat_service import CombatService
+from back.services.session_service import SessionService
 import uuid
 
 combat_service = CombatService()
 
-def roll_initiative_tool(characters: list[dict]) -> list:
+def roll_initiative_tool(ctx: RunContext[SessionService], characters: list[dict]) -> list:
     """
-    ### roll_initiative_tool
-    **Description :** Calcule l'ordre d'initiative des personnages.
-    **Paramètres :**
-    - `characters` (list[dict]) : Liste des personnages.
-    **Retour :**
-    - (list) : Liste triée selon l'initiative.
+    Calcule l'ordre d'initiative des personnages.
+
+    Args:
+        characters (list[dict]): Liste des personnages participant au combat.
+    
+    Returns:
+        list: Liste triée selon l'initiative.
     """
     log_debug("Tool roll_initiative_tool appelé", tool="roll_initiative_tool", characters=characters)
     # Ensure each character has an 'id' for CombatState
@@ -27,44 +30,47 @@ def roll_initiative_tool(characters: list[dict]) -> list:
 
 # Tool definition removed - now handled directly by PydanticAI agent
 
-def perform_attack_tool(dice: str) -> int:
+def perform_attack_tool(ctx: RunContext[SessionService], dice: str) -> int:
     """
-    ### perform_attack_tool
-    **Description :** Effectue un jet d'attaque.
-    **Paramètres :**
-    - `dice` (str) : Notation des dés à lancer (ex: "1d20").
-    **Retour :**
-    - (int) : Résultat du jet d'attaque.
+    Effectue un jet d'attaque.
+
+    Args:
+        dice (str): Notation des dés à lancer. Ex. : "1d20".
+    
+    Returns:
+        int: Résultat du jet d'attaque.
     """
     log_debug("Tool perform_attack_tool appelé", tool="perform_attack_tool", dice=dice)
     return roll_attack(dice)
 
 # Tool definition removed - now handled directly by PydanticAI agent
 
-def resolve_attack_tool(attack_roll: int, defense_roll: int) -> bool:
+def resolve_attack_tool(ctx: RunContext[SessionService], attack_roll: int, defense_roll: int) -> bool:
     """
-    ### resolve_attack_tool
-    **Description :** Résout une attaque en comparant les jets d'attaque et de défense.
-    **Paramètres :**
-    - `attack_roll` (int) : Jet d'attaque.
-    - `defense_roll` (int) : Jet de défense.
-    **Retour :**
-    - (bool) : True si l'attaque réussit, False sinon.
+    Résout une attaque en comparant les jets d'attaque et de défense.
+
+    Args:
+        attack_roll (int): Résultat du jet d'attaque.
+        defense_roll (int): Résultat du jet de défense.
+    
+    Returns:
+        bool: True si l'attaque réussit, False sinon.
     """
     log_debug("Tool resolve_attack_tool appelé", tool="resolve_attack_tool", attack_roll=attack_roll, defense_roll=defense_roll)
     return attack_roll > defense_roll
 
 # Tool definition removed - now handled directly by PydanticAI agent
 
-def calculate_damage_tool(base_damage: int, bonus: int = 0) -> int:
+def calculate_damage_tool(ctx: RunContext[SessionService], base_damage: int, bonus: int = 0) -> int:
     """
-    ### calculate_damage_tool
-    **Description :** Calcule les dégâts infligés en tenant compte des modificateurs.
-    **Paramètres :**
-    - `base_damage` (int) : Dégâts de base de l'attaque.
-    - `bonus` (int) : Bonus/malus de dégâts (optionnel).
-    **Retour :**
-    - (int) : Dégâts finaux infligés.
+    Calcule les dégâts infligés en tenant compte des modificateurs.
+
+    Args:
+        base_damage (int): Dégâts de base de l'attaque.
+        bonus (int): Bonus/malus de dégâts. Par défaut : 0.
+    
+    Returns:
+        int: Dégâts finaux infligés.
     """
     log_debug("Tool calculate_damage_tool appelé", tool="calculate_damage_tool", base_damage=base_damage, bonus=bonus)
     # Utilisation de CombatService pour le calcul des dégâts
@@ -72,14 +78,16 @@ def calculate_damage_tool(base_damage: int, bonus: int = 0) -> int:
 
 # Tool definition removed - now handled directly by PydanticAI agent
 
-def end_combat_tool(combat_id: str, reason: str) -> dict:
+def end_combat_tool(ctx: RunContext[SessionService], combat_id: str, reason: str) -> dict:
     """
-    ### end_combat_tool
-    **Description :** Termine explicitement un combat en précisant la raison (fuite, reddition, etc.).
-    **Paramètres :**
-    - `combat_id` (str) : Identifiant du combat.
-    - `reason` (str) : Raison de la fin du combat.
-    **Retour :** Dictionnaire contenant le statut final du combat.
+    Termine explicitement un combat en précisant la raison.
+
+    Args:
+        combat_id (str): Identifiant du combat.
+        reason (str): Raison de la fin du combat (fuite, reddition, victoire, etc.).
+    
+    Returns:
+        dict: Dictionnaire contenant le statut final du combat.
     """
     # Ici, il faudrait charger le CombatState depuis la persistance (non implémenté)
     # combat_state = charger_combat_state(combat_id)

@@ -63,8 +63,9 @@
       "resistance_esprit": 15,
       "resistance_magie": 20
     },
-    "hp": 102,
-    "xp": 0
+    "hp": 72,
+    "xp": 700,
+    "gold": 725
   },
   "created_at": "2025-05-29T21:21:50.892906",
   "last_update": "2025-05-31T01:28:05.686889"
