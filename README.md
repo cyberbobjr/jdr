@@ -44,6 +44,7 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
 │   │   ├── domain/             # Reprise des fichiers .py uploadés (1 concept = 1 fichier)
 │   │   └── schema.py           # DTO exposés par l'API
 │   ├── services/               # Logique métier unitaire (SRP)
+│   │   ├── character_persistence_service.py # Service centralisé pour la persistance des personnages (JSON)
 │   │   ├── inventory_service.py # Gestion de l'inventaire des personnages
 │   │   ├── character_service.py # Gestion des personnages (création, évolution, etc.)
 │   │   ├── combat_service.py    # Gestion des mécaniques de combat
@@ -70,36 +71,23 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
 │   │   └── logger.py           # Logger JSON (Grafana/Loki‑friendly)
 │   └── tests/                  # Tests unitaires et d'intégration (pytest)
 │       ├── agents/             # Tests pour les agents PydanticAI
-│       │   ├── test_agent_refactored.py
-│       │   ├── test_gm_agent_pydantic.py
-│       │   ├── test_gm_agent_refactored.py
-│       │   ├── test_gm_agent_tools_integration.py
-│       │   └── test_pydantic_agent.py
+│       │   └── test_gm_agent_consolidated.py # ⭐ Suite consolidée de 29 tests (100% réussite)
 │       ├── domain/             # Tests pour les modèles du domaine
 │       │   └── test_caracteristiques.py
 │       ├── routers/            # Tests pour les endpoints REST
 │       ├── services/           # Tests pour les services
 │       │   └── test_session_service.py
 │       ├── storage/            # Tests pour la persistance
-│       ├── tools/              # Tests pour les outils PydanticAI
-│       │   ├── test_all_tools.py
-│       │   ├── test_all_tools_integration.py
-│       │   ├── test_calculate_damage.py
-│       │   ├── test_character_tools.py
-│       │   ├── test_combat_tools.py
-│       │   ├── test_inventory_remove_item.py
-│       │   ├── test_inventory_tool.py
-│       │   ├── test_inventory_tools.py
-│       │   ├── test_refactoring_simple.py
-│       │   ├── test_simple_async.py
-│       │   ├── test_skill_direct.py
-│       │   ├── test_skill_functionality.py
-│       │   ├── test_skill_refactoring.py
-│       │   ├── test_skill_refactoring_final.py
-│       │   └── test_skill_tools.py
+│       ├── tools/              # Tests consolidés pour les outils PydanticAI
+│       │   ├── test_character_tools_consolidated.py    # Tests pour les outils de personnage
+│       │   ├── test_combat_tools_consolidated.py       # Tests pour les outils de combat
+│       │   ├── test_inventory_tools_consolidated.py    # Tests pour les outils d'inventaire
+│       │   ├── test_skill_tools_consolidated.py        # Tests pour les outils de compétences
+│       │   └── test_all_tools_integration_consolidated.py # Tests d'intégration généraux
 │       ├── utils/              # Tests pour les utilitaires
+│       ├── cleanup_test_sessions.py # 🧹 Script de nettoyage automatique des sessions de test
 │       ├── test_complete_migration.py # Test de migration générale
-│       ├── conftest.py         # Configuration pytest
+│       ├── conftest.py         # Configuration pytest + hooks de nettoyage automatique
 │       └── __init__.py
 ├── data/                        # Données persistantes du jeu
 │   ├── characters/             # Fiches des personnages joueurs et non-joueurs
@@ -111,6 +99,26 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
 ├── HaystackMemoryDoc.md         # Documentation détaillée sur la mémoire Haystack
 └── README.md                    # Ce fichier
 ```
+
+## Factorisation et Organisation (2025) - TERMINÉE ✅
+
+### Factorisation du Code Dupliqué
+- **CharacterPersistenceService** : Service centralisé pour la persistance des personnages dans les fichiers JSON
+  - Extraction de ~80 lignes de code dupliqué dans `CharacterService`
+  - API uniforme : `load_character_data()`, `save_character_data()`, `update_character_state()`, etc.
+  - Gestion d'erreurs robuste et logging centralisé
+  - Respect du principe SRP (Single Responsibility Principle)
+
+### Consolidation des Tests
+- **Regroupement par catégorie** : Les 17 fichiers de test éparpillés dans `/back/tests/tools/` ont été consolidés en 5 fichiers organisés :
+  - `test_character_tools_consolidated.py` : Tests des outils de personnage (XP, or, dégâts)
+  - `test_combat_tools_consolidated.py` : Tests des outils de combat (initiative, attaque, dégâts)
+  - `test_inventory_tools_consolidated.py` : Tests des outils d'inventaire (ajout/suppression d'objets)
+  - `test_skill_tools_consolidated.py` : Tests des outils de compétences (jets de dés, difficultés)
+  - `test_all_tools_integration_consolidated.py` : Tests d'intégration généraux
+
+- **Suppression des fichiers obsolètes** : 7 fichiers vides et plusieurs fichiers redondants supprimés
+- **Structure maintenant maintenable** : 38 tests organisés et fonctionnels (100% de succès)
 
 ## Organisation des Tests ✅
 
@@ -197,6 +205,45 @@ Le système empêche automatiquement la création de sessions dupliquées en dé
 | **200** | Succès | Session créée avec succès |
 | **404** | Scénario introuvable | Le fichier de scénario n'existe pas |
 | **409** | Session dupliquée | Une session existe déjà pour cette combinaison personnage/scénario |
+
+## 🧪 Tests et Qualité
+
+### Suite de Tests Consolidée
+
+Le projet dispose d'une **suite de tests complète et automatisée** avec un système de nettoyage intégré :
+
+#### 🎯 Tests de l'Agent GM (29 tests - 100% réussite)
+```bash
+# Exécution standard
+python -m pytest back/tests/agents/test_gm_agent_consolidated.py
+
+# Avec nettoyage automatique (PowerShell)
+.\run_tests_clean.ps1 -Verbose
+```
+
+#### 📊 Couverture Complète
+- ✅ **Initialisation de l'agent** (5 tests)
+- ✅ **Edge cases d'initialisation** (4 tests)  
+- ✅ **Prompt système et règles** (5 tests)
+- ✅ **Enrichissement de messages** (3 tests)
+- ✅ **Tests des outils** (5 tests)
+- ✅ **Edge cases des outils** (4 tests)
+- ✅ **Tests avancés** (3 tests)
+
+#### 🧹 Nettoyage Automatique
+Le système empêche la pollution de `/data/sessions` avec :
+- **Détection automatique** des fichiers de test
+- **Nettoyage sélectif** (préserve les sessions réelles)
+- **Hooks pytest** pour nettoyage automatique
+- **Script PowerShell** avec options avancées
+
+#### 📈 Métriques de Qualité
+- **Taux de réussite :** 100% (29/29 tests)
+- **Temps d'exécution :** ~5.5 minutes
+- **Nettoyage :** 0 fichier de pollution après tests
+- **Documentation :** Tests auto-documentés avec docstrings
+
+Pour plus de détails, voir [RAPPORT_TESTS_FINALISES.md](RAPPORT_TESTS_FINALISES.md).
 
 ---
 

@@ -1,10 +1,8 @@
 import pytest
 import shutil
 import os
-import tempfile
-import uuid
 from pathlib import Path
-from typing import List, Dict, Generator
+from typing import List, Generator
 from fastapi.testclient import TestClient
 
 
@@ -173,3 +171,72 @@ def mock_llm_response():
         "character_name": "Test Hero",
         "scenario_name": "Les_Pierres_du_Passe.md"
     }
+
+
+@pytest.fixture(scope="session", autouse=True)
+def cleanup_test_files():
+    """
+    ### cleanup_test_files
+    **Description :** Fixture de session qui nettoie automatiquement tous les fichiers ET répertoires de test créés pendant la session de test.
+    """
+    sessions_dir = Path("data/sessions")
+    
+    # Enregistrer l'état initial (fichiers et répertoires)
+    initial_files = set()
+    initial_dirs = set()
+    if sessions_dir.exists():
+        initial_files = {f.name for f in sessions_dir.glob("*.jsonl")}
+        initial_dirs = {d.name for d in sessions_dir.iterdir() if d.is_dir()}
+    
+    yield  # Tous les tests s'exécutent ici
+    
+    # Nettoyage final de tous les fichiers et répertoires de test créés pendant la session
+    if sessions_dir.exists():
+        current_files = {f.name for f in sessions_dir.glob("*.jsonl")}
+        current_dirs = {d.name for d in sessions_dir.iterdir() if d.is_dir()}
+        
+        test_files = current_files - initial_files
+        test_dirs = current_dirs - initial_dirs
+        
+        if test_files or test_dirs:
+            print(f"\n🧹 Nettoyage de session: {len(test_files)} fichiers et {len(test_dirs)} répertoires de test à supprimer")
+            
+            # Supprimer les fichiers de test
+            for file_name in test_files:
+                file_path = sessions_dir / file_name
+                if file_path.exists():
+                    try:
+                        file_path.unlink()
+                        print(f"   ✅ 📄 {file_name}")
+                    except Exception as e:
+                        print(f"   ❌ 📄 {file_name}: {e}")
+            
+            # Supprimer les répertoires de test
+            for dir_name in test_dirs:
+                dir_path = sessions_dir / dir_name
+                if dir_path.exists():
+                    try:
+                        shutil.rmtree(dir_path)
+                        print(f"   ✅ 📁 {dir_name}/")
+                    except Exception as e:
+                        print(f"   ❌ 📁 {dir_name}/: {e}")
+
+def pytest_sessionfinish(session, exitstatus):
+    """
+    ### pytest_sessionfinish
+    **Description :** Hook exécuté à la fin de la session de tests pour un nettoyage final.
+    """
+    try:
+        from back.tests.cleanup_test_sessions import cleanup_test_sessions
+        
+        if exitstatus == 0:  # Tests réussis
+            print("\n🎉 Tous les tests ont réussi !")
+        else:
+            print(f"\n⚠️ Tests terminés avec le code de sortie : {exitstatus}")
+        
+        print("🧹 Nettoyage final des fichiers de test...")
+        cleanup_test_sessions()
+    except ImportError:
+        print("⚠️ Script de nettoyage non trouvé")
+    except Exception as e:
+        print(f"⚠️ Erreur lors du nettoyage : {e}")
