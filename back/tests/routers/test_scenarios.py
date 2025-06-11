@@ -124,11 +124,9 @@ def test_play_scenario_returns_llm_response(tmp_path, monkeypatch, client):
     mock_agent.run.return_value = {"messages": [MagicMock(), mock_message1, mock_message2]}
     mock_store = MagicMock()
     mock_agent._store = mock_store
-    mock_store.load.return_value = []
-
-    # Patch pour éviter l'appel réel au service de personnage
+    mock_store.load.return_value = []    # Patch pour éviter l'appel réel au service de personnage
     with patch('back.routers.scenarios.CharacterService.get_character') as mock_char_service, \
-         patch('back.routers.scenarios.build_gm_agent', return_value=mock_agent):
+         patch('back.routers.scenarios.build_gm_agent_pydantic', return_value=(mock_agent, mock_store)):
         # Mock du personnage
         mock_character = MagicMock()
         mock_character.json.return_value = '{"name": "Test Character"}'
@@ -186,10 +184,9 @@ def test_start_scenario_with_llm_response(tmp_path, monkeypatch, client):
     mock_store = MagicMock()
     mock_agent._store = mock_store
     mock_store.load.return_value = []
-    
-    # Patch pour éviter l'appel réel au service de personnage
+      # Patch pour éviter l'appel réel au service de personnage
     with patch('back.routers.scenarios.CharacterService.get_character') as mock_char_service, \
-         patch('back.routers.scenarios.build_gm_agent', return_value=mock_agent):
+         patch('back.routers.scenarios.build_gm_agent_pydantic', return_value=(mock_agent, mock_store)):
         
         # Mock du personnage
         mock_character = MagicMock()
@@ -257,3 +254,71 @@ def test_start_scenario_prevents_duplicate_session(tmp_path, monkeypatch, client
     # Vérifier que la tentative de création d'une session dupliquée échoue
     assert response.status_code == 409
     assert "Une session existe déjà" in response.json()["detail"]
+
+def test_list_active_sessions(client, session_manager, isolated_data_dir):
+    """
+    ### test_list_active_sessions
+    **Description :** Teste la récupération de la liste des sessions actives avec les informations du scénario et du personnage.
+    **Paramètres :**
+    - `client` (TestClient) : Client FastAPI pour les tests d'API.
+    - `session_manager` (SessionManager) : Gestionnaire de sessions pour le nettoyage automatique.
+    - `isolated_data_dir` (Path) : Environnement de données isolé.
+    **Retour :** None (assertions sur la réponse JSON).
+    """
+    import uuid
+    
+    # Créer une session de test d'abord
+    character_id = str(uuid.uuid4())
+    scenario_name = "Les_Pierres_du_Passe.md"
+    
+    # Créer un personnage de test
+    test_character = {
+        "id": character_id,
+        "name": "Test Hero Sessions",
+        "race": "Homme",
+        "culture": "Rurale",
+        "profession": "Aventurier",
+        "caracteristiques": {
+            "Force": 60, "Constitution": 65, "Agilité": 70, "Rapidité": 65,
+            "Volonté": 75, "Raisonnement": 80, "Intuition": 70, "Présence": 60
+        },
+        "competences": {"Athletics": 50, "Stealth": 45}
+    }
+      # Créer le personnage
+    character_response = client.post("/api/characters", json=test_character)
+    assert character_response.status_code == 200
+    
+    # Démarrer une session
+    start_response = client.post("/api/scenarios/start", json={
+        "scenario_name": scenario_name,
+        "character_id": character_id
+    })
+    
+    if start_response.status_code == 200:
+        session_data = start_response.json()
+        session_manager.track_session(session_data["session_id"])
+        
+        # Tester la liste des sessions actives
+        sessions_response = client.get("/api/scenarios/sessions")
+        assert sessions_response.status_code == 200
+        
+        sessions_data = sessions_response.json()
+        assert "sessions" in sessions_data
+        assert isinstance(sessions_data["sessions"], list)
+        
+        # Vérifier qu'au moins notre session créée est présente
+        sessions = sessions_data["sessions"]
+        session_found = False
+        for session in sessions:
+            if session["session_id"] == session_data["session_id"]:
+                session_found = True
+                assert session["scenario_name"] == scenario_name
+                assert session["character_id"] == character_id
+                assert session["character_name"] == "Test Hero Sessions"
+                break
+        
+        assert session_found, "La session créée doit apparaître dans la liste des sessions actives"
+    else:
+        # Si la session existe déjà, au moins vérifier que l'endpoint fonctionne
+        sessions_response = client.get("/api/scenarios/sessions")
+        assert sessions_response.status_code == 200

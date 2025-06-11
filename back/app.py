@@ -1,14 +1,22 @@
 # back/app.py
 from fastapi import FastAPI
-from back.routers import characters, inventory, combat, scenarios
+from fastapi.middleware.cors import CORSMiddleware
+from back.routers import characters, scenarios
 from fastapi.openapi.utils import get_openapi
 
 app = FastAPI(title="JdR – Terres du Milieu")
 
+# Configuration CORS pour permettre les requêtes du frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://localhost:5173", "http://localhost:8080"],  # Ports communs pour dev frontend
+    allow_credentials=True,
+    allow_methods=["*"],  # Permet toutes les méthodes HTTP (GET, POST, PUT, DELETE, OPTIONS, etc.)
+    allow_headers=["*"],  # Permet tous les headers
+)
+
 # Routers REST
 app.include_router(characters.router, prefix="/api/characters")
-app.include_router(inventory.router,  prefix="/api/inventory")
-app.include_router(combat.router,     prefix="/api/combat")
 app.include_router(scenarios.router,  prefix="/api/scenarios")
 
 # Ajout de la documentation Swagger personnalisée

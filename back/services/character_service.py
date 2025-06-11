@@ -6,8 +6,41 @@ from typing import List
 from back.models.schema import Character
 from back.utils.logger import log_debug
 from back.services.character_persistence_service import CharacterPersistenceService
+from back.services.item_service import ItemService
 
 class CharacterService:
+    
+    @staticmethod
+    def _convert_equipment_to_inventory(state_data: dict) -> None:
+        """
+        ### _convert_equipment_to_inventory
+        **Description:** Convertit l'ancien format 'equipment' vers le nouveau format 'inventory'
+        **Paramètres:**
+        - `state_data` (dict): Données d'état du personnage à convertir
+        **Retour:** None (modifie state_data in-place)
+        """
+        item_service = ItemService()
+        
+        # Si on a un ancien format 'equipment' mais pas d'inventory
+        if 'equipment' in state_data and 'inventory' not in state_data:
+            equipment_names = state_data.get('equipment', [])
+            if equipment_names:
+                # Convertir les noms d'équipement en objets Item
+                inventory = item_service.convert_equipment_list_to_inventory(equipment_names)
+                state_data['inventory'] = [item.model_dump() for item in inventory]
+                log_debug("Équipement converti en inventaire", 
+                         action="convert_equipment_to_inventory", 
+                         character_equipment_count=len(equipment_names),
+                         character_inventory_count=len(inventory))
+            else:
+                state_data['inventory'] = []
+            
+            # Supprimer l'ancien champ equipment après conversion
+            del state_data['equipment']
+        
+        # Si on n'a ni equipment ni inventory, créer un inventaire vide
+        elif 'inventory' not in state_data and 'equipment' not in state_data:
+            state_data['inventory'] = []
     @staticmethod
     def get_all_characters() -> List[Character]:
         """
@@ -27,14 +60,16 @@ class CharacterService:
                 try:
                     character_data = CharacterPersistenceService.load_character_data(character_id)
                     state_data = character_data.get("state", {})
-                    
-                    # Skip characters that don't have all required fields
+                      # Skip characters that don't have all required fields
                     if not all(field in state_data for field in required_fields):
                         log_debug("Personnage ignoré (champs manquants)", 
                                  action="get_all_characters", 
                                  filename=filename, 
                                  missing_fields=[field for field in required_fields if field not in state_data])
                         continue
+                    
+                    # Convertir l'ancien format equipment vers inventory si nécessaire
+                    CharacterService._convert_equipment_to_inventory(state_data)
                     
                     # L'ID est le nom du fichier (sans .json)
                     state_data["id"] = character_id
@@ -46,10 +81,9 @@ class CharacterService:
                              filename=filename, 
                              error=str(e))
                     continue
-        
         log_debug("Chargement de tous les personnages", action="get_all_characters", count=len(characters))
         return characters
-
+    
     @staticmethod
     def get_character(character_id: str) -> Character:
         """
@@ -61,6 +95,10 @@ class CharacterService:
         """       
         character_data = CharacterPersistenceService.load_character_data(character_id)
         state_data = character_data.get("state", {})
+        
+        # Convertir l'ancien format equipment vers inventory si nécessaire
+        CharacterService._convert_equipment_to_inventory(state_data)
+        
         # L'ID est le nom du fichier (sans .json)
         state_data["id"] = character_id
         log_debug("Chargement du personnage", action="get_character", character_id=character_id)

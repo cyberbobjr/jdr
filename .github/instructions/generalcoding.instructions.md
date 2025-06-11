@@ -47,4 +47,4 @@ When a new file is generated, ensure that:
 - Always log errors with contextual information
 
 # If you want to execute command console
-The command console is powershell
+The command console is powershell under windows. So when you want to execute a command, use powershell commands.

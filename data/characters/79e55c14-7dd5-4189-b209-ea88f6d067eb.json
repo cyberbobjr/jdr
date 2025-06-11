@@ -64,11 +64,11 @@
       "resistance_magie": 20
     },
     "hp": 0,
-    "xp": -8997817,
-    "gold": 1505,
+    "xp": -8997717,
+    "gold": 1555,
     "test_attribute": "test_value",
-    "new_attribute": 126
+    "new_attribute": 168
   },
   "created_at": "2025-05-29T21:21:50.892906",
-  "last_update": "2025-06-10T16:24:10.358961"
+  "last_update": "2025-06-11T12:27:02.782632"
 }

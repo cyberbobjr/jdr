@@ -1,0 +1,1005 @@
+/* ========================================
+   STYLES GLOBAUX - JDR "TERRES DU MILIEU"
+   Thème médiéval-fantastique avec tons bruns/dorés
+   ======================================== */
+
+/* Variables CSS personnalisées pour le thème */
+:root {
+  /* Couleurs principales du thème JDR */
+  --jdr-primary: #8B4513;           /* Brun selle */
+  --jdr-primary-dark: #654321;      /* Brun foncé */
+  --jdr-primary-light: #A0522D;     /* Brun sienna */
+  
+  --jdr-secondary: #DAA520;         /* Or */
+  --jdr-secondary-dark: #B8860B;    /* Or foncé */
+  --jdr-secondary-light: #F4E99B;   /* Or clair */
+  
+  --jdr-accent: #CD853F;            /* Pérou */
+  --jdr-accent-dark: #A0522D;       /* Sienna */
+  --jdr-accent-light: #DEB887;      /* Beige burlywood */
+  
+  /* Couleurs de fond */
+  --jdr-bg-primary: #2C1810;        /* Brun très foncé */
+  --jdr-bg-secondary: #3C2414;      /* Brun foncé */
+  --jdr-bg-tertiary: #4A2C18;       /* Brun moyen */
+  --jdr-bg-light: #F5E6D3;          /* Parchemin clair */
+  
+  /* Couleurs de texte */
+  --jdr-text-primary: #F5E6D3;      /* Parchemin clair */
+  --jdr-text-secondary: #E6D7C3;    /* Parchemin moyen */
+  --jdr-text-muted: #C4B5A0;        /* Parchemin foncé */
+  --jdr-text-dark: #2C1810;         /* Texte foncé sur fond clair */
+  
+  /* Couleurs de statut */
+  --jdr-success: #228B22;           /* Vert forêt */
+  --jdr-warning: #FF8C00;           /* Orange foncé */
+  --jdr-danger: #B22222;            /* Rouge feu */
+  --jdr-info: #4682B4;             /* Bleu acier */
+  
+  /* Ombres et effets */
+  --jdr-shadow-small: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --jdr-shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --jdr-shadow-large: 0 8px 16px rgba(0, 0, 0, 0.5);
+  --jdr-glow-gold: 0 0 10px rgba(218, 165, 32, 0.5);
+  
+  /* Bordures et rayons */
+  --jdr-border-radius: 8px;
+  --jdr-border-radius-large: 12px;
+  --jdr-border-color: #8B4513;
+  
+  /* Polices */
+  --jdr-font-fantasy: 'Cinzel', 'Times New Roman', serif;
+  --jdr-font-body: 'Crimson Text', 'Georgia', serif;
+  --jdr-font-ui: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* ========================================
+   STYLES DE BASE ET TYPOGRAPHIE
+   ======================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--jdr-font-body);
+  background: linear-gradient(135deg, var(--jdr-bg-primary) 0%, var(--jdr-bg-secondary) 100%);
+  color: var(--jdr-text-primary);
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+/* Import des polices Google */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+/* ========================================
+   TITRES ET TYPOGRAPHIE
+   ======================================== */
+
+.jdr-title {
+  font-family: var(--jdr-font-fantasy);
+  color: var(--jdr-secondary);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  margin-bottom: 1rem;
+}
+
+.jdr-title-xl {
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.jdr-title-lg {
+  font-size: 2.5rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.jdr-title-md {
+  font-size: 2rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.jdr-title-sm {
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+.jdr-subtitle {
+  font-family: var(--jdr-font-body);
+  color: var(--jdr-text-secondary);
+  font-style: italic;
+  margin-bottom: 1.5rem;
+}
+
+.jdr-text-muted {
+  color: var(--jdr-text-muted);
+}
+
+.jdr-text-accent {
+  color: var(--jdr-accent);
+}
+
+/* ========================================
+   BOUTONS
+   ======================================== */
+
+.jdr-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: 2px solid var(--jdr-border-color);
+  border-radius: var(--jdr-border-radius);
+  background: linear-gradient(145deg, var(--jdr-primary), var(--jdr-primary-dark));
+  color: var(--jdr-text-primary);
+  font-family: var(--jdr-font-ui);
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--jdr-shadow-small);
+  position: relative;
+  overflow: hidden;
+}
+
+.jdr-btn:hover {
+  background: linear-gradient(145deg, var(--jdr-primary-light), var(--jdr-primary));
+  border-color: var(--jdr-secondary);
+  box-shadow: var(--jdr-shadow-medium);
+  transform: translateY(-2px);
+}
+
+.jdr-btn:active {
+  transform: translateY(0);
+  box-shadow: var(--jdr-shadow-small);
+}
+
+.jdr-btn:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.jdr-btn:hover:before {
+  left: 100%;
+}
+
+/* Variants de boutons */
+.jdr-btn-primary {
+  background: linear-gradient(145deg, var(--jdr-secondary), var(--jdr-secondary-dark));
+  border-color: var(--jdr-secondary-dark);
+  color: var(--jdr-text-dark);
+}
+
+.jdr-btn-primary:hover {
+  background: linear-gradient(145deg, var(--jdr-secondary-light), var(--jdr-secondary));
+  box-shadow: var(--jdr-glow-gold);
+}
+
+.jdr-btn-secondary {
+  background: linear-gradient(145deg, var(--jdr-accent), var(--jdr-accent-dark));
+  border-color: var(--jdr-accent-dark);
+}
+
+.jdr-btn-outline {
+  background: transparent;
+  border-color: var(--jdr-secondary);
+  color: var(--jdr-secondary);
+}
+
+.jdr-btn-outline:hover {
+  background: var(--jdr-secondary);
+  color: var(--jdr-text-dark);
+}
+
+.jdr-btn-danger {
+  background: linear-gradient(145deg, var(--jdr-danger), #8B0000);
+  border-color: #8B0000;
+}
+
+.jdr-btn-success {
+  background: linear-gradient(145deg, var(--jdr-success), #006400);
+  border-color: #006400;
+}
+
+/* Tailles de boutons */
+.jdr-btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+.jdr-btn-lg {
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
+}
+
+.jdr-btn-xl {
+  padding: 1.25rem 2.5rem;
+  font-size: 1.25rem;
+}
+
+.jdr-btn-icon {
+  padding: 0.75rem;
+  width: auto;
+  aspect-ratio: 1;
+}
+
+/* ========================================
+   CARDS ET PANELS
+   ======================================== */
+
+.jdr-card {
+  background: linear-gradient(145deg, var(--jdr-bg-secondary), var(--jdr-bg-tertiary));
+  border: 2px solid var(--jdr-border-color);
+  border-radius: var(--jdr-border-radius-large);
+  padding: 1.5rem;
+  box-shadow: var(--jdr-shadow-medium);
+  position: relative;
+  overflow: hidden;
+}
+
+.jdr-card:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--jdr-secondary), var(--jdr-accent));
+}
+
+.jdr-card-header {
+  border-bottom: 1px solid var(--jdr-border-color);
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+
+.jdr-card-title {
+  font-family: var(--jdr-font-fantasy);
+  color: var(--jdr-secondary);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.jdr-card-subtitle {
+  color: var(--jdr-text-muted);
+  font-style: italic;
+  margin: 0.5rem 0 0 0;
+}
+
+.jdr-card-body {
+  flex: 1;
+}
+
+.jdr-card-footer {
+  border-top: 1px solid var(--jdr-border-color);
+  padding-top: 1rem;
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+/* Card variants */
+.jdr-card-highlight {
+  border-color: var(--jdr-secondary);
+  box-shadow: var(--jdr-shadow-large), var(--jdr-glow-gold);
+}
+
+.jdr-card-character {
+  background: linear-gradient(145deg, #2A1F1A, #3A2F2A);
+  border-color: var(--jdr-accent);
+}
+
+.jdr-card-scenario {
+  background: linear-gradient(145deg, #1A2A1F, #2A3A2F);
+  border-color: var(--jdr-success);
+}
+
+/* ========================================
+   PANELS DÉROULANTS
+   ======================================== */
+
+.jdr-panel {
+  background: var(--jdr-bg-secondary);
+  border: 1px solid var(--jdr-border-color);
+  border-radius: var(--jdr-border-radius);
+  box-shadow: var(--jdr-shadow-small);
+  overflow: hidden;
+}
+
+.jdr-panel-header {
+  background: linear-gradient(145deg, var(--jdr-primary), var(--jdr-primary-dark));
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.3s ease;
+}
+
+.jdr-panel-header:hover {
+  background: linear-gradient(145deg, var(--jdr-primary-light), var(--jdr-primary));
+}
+
+.jdr-panel-title {
+  font-family: var(--jdr-font-fantasy);
+  color: var(--jdr-text-primary);
+  font-weight: 600;
+  margin: 0;
+}
+
+.jdr-panel-icon {
+  transition: transform 0.3s ease;
+}
+
+.jdr-panel-expanded .jdr-panel-icon {
+  transform: rotate(180deg);
+}
+
+.jdr-panel-body {
+  padding: 1.5rem;
+  border-top: 1px solid var(--jdr-border-color);
+}
+
+/* ========================================
+   FORMULAIRES
+   ======================================== */
+
+.jdr-form-group {
+  margin-bottom: 1.5rem;
+}
+
+.jdr-form-label {
+  display: block;
+  font-family: var(--jdr-font-ui);
+  font-weight: 500;
+  color: var(--jdr-text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.jdr-form-control {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: var(--jdr-bg-tertiary);
+  border: 2px solid var(--jdr-border-color);
+  border-radius: var(--jdr-border-radius);
+  color: var(--jdr-text-primary);
+  font-family: var(--jdr-font-body);
+  transition: all 0.3s ease;
+}
+
+.jdr-form-control:focus {
+  outline: none;
+  border-color: var(--jdr-secondary);
+  box-shadow: 0 0 0 3px rgba(218, 165, 32, 0.2);
+  background: var(--jdr-bg-secondary);
+}
+
+.jdr-form-control::placeholder {
+  color: var(--jdr-text-muted);
+  opacity: 0.7;
+}
+
+.jdr-form-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23DAA520' d='M8 12L3 7h10l-5 5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 16px;
+  padding-right: 2.5rem;
+}
+
+.jdr-form-textarea {
+  resize: vertical;
+  min-height: 100px;
+  font-family: var(--jdr-font-body);
+}
+
+.jdr-form-checkbox {
+  position: relative;
+  cursor: pointer;
+}
+
+.jdr-form-checkbox input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.jdr-form-checkbox .jdr-checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 20px;
+  width: 20px;
+  background: var(--jdr-bg-tertiary);
+  border: 2px solid var(--jdr-border-color);
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.jdr-form-checkbox input:checked ~ .jdr-checkmark {
+  background: var(--jdr-secondary);
+  border-color: var(--jdr-secondary-dark);
+}
+
+.jdr-form-checkbox .jdr-checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid var(--jdr-text-dark);
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
+}
+
+.jdr-form-checkbox input:checked ~ .jdr-checkmark:after {
+  display: block;
+}
+
+/* ========================================
+   MENUS ET NAVIGATION
+   ======================================== */
+
+.jdr-menu {
+  background: var(--jdr-bg-secondary);
+  border: 1px solid var(--jdr-border-color);
+  border-radius: var(--jdr-border-radius);
+  box-shadow: var(--jdr-shadow-medium);
+  padding: 0.5rem 0;
+  min-width: 200px;
+}
+
+.jdr-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: var(--jdr-text-primary);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.jdr-menu-item:hover {
+  background: var(--jdr-bg-tertiary);
+  color: var(--jdr-secondary);
+}
+
+.jdr-menu-divider {
+  height: 1px;
+  background: var(--jdr-border-color);
+  margin: 0.5rem 0;
+}
+
+.jdr-navbar {
+  background: linear-gradient(145deg, var(--jdr-bg-primary), var(--jdr-bg-secondary));
+  border-bottom: 2px solid var(--jdr-border-color);
+  padding: 1rem 0;
+  box-shadow: var(--jdr-shadow-medium);
+}
+
+.jdr-navbar-brand {
+  font-family: var(--jdr-font-fantasy);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--jdr-secondary);
+  text-decoration: none;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.jdr-navbar-nav {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.jdr-navbar-link {
+  color: var(--jdr-text-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+.jdr-navbar-link:hover,
+.jdr-navbar-link.active {
+  color: var(--jdr-secondary);
+}
+
+.jdr-navbar-link:after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--jdr-secondary);
+  transition: width 0.3s ease;
+}
+
+.jdr-navbar-link:hover:after,
+.jdr-navbar-link.active:after {
+  width: 100%;
+}
+
+/* ========================================
+   MODALES ET OVERLAYS
+   ======================================== */
+
+.jdr-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.jdr-modal-overlay.show {
+  opacity: 1;
+}
+
+.jdr-modal {
+  background: linear-gradient(145deg, var(--jdr-bg-secondary), var(--jdr-bg-tertiary));
+  border: 2px solid var(--jdr-border-color);
+  border-radius: var(--jdr-border-radius-large);
+  box-shadow: var(--jdr-shadow-large);
+  max-width: 600px;
+  max-height: 80vh;
+  width: 90%;
+  transform: scale(0.9);
+  transition: transform 0.3s ease;
+  overflow: hidden;
+}
+
+.jdr-modal-overlay.show .jdr-modal {
+  transform: scale(1);
+}
+
+.jdr-modal-header {
+  background: linear-gradient(145deg, var(--jdr-primary), var(--jdr-primary-dark));
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--jdr-border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.jdr-modal-title {
+  font-family: var(--jdr-font-fantasy);
+  color: var(--jdr-text-primary);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.jdr-modal-close {
+  background: none;
+  border: none;
+  color: var(--jdr-text-primary);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.jdr-modal-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.jdr-modal-body {
+  padding: 1.5rem;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.jdr-modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--jdr-border-color);
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+/* ========================================
+   BADGES ET STATUTS
+   ======================================== */
+
+.jdr-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.jdr-badge-success {
+  background: var(--jdr-success);
+  color: white;
+}
+
+.jdr-badge-warning {
+  background: var(--jdr-warning);
+  color: white;
+}
+
+.jdr-badge-danger {
+  background: var(--jdr-danger);
+  color: white;
+}
+
+.jdr-badge-info {
+  background: var(--jdr-info);
+  color: white;
+}
+
+.jdr-badge-primary {
+  background: var(--jdr-secondary);
+  color: var(--jdr-text-dark);
+}
+
+/* ========================================
+   LISTES ET TABLES
+   ======================================== */
+
+.jdr-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.jdr-list-item {
+  background: var(--jdr-bg-tertiary);
+  border: 1px solid var(--jdr-border-color);
+  border-radius: var(--jdr-border-radius);
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.jdr-list-item:hover {
+  background: var(--jdr-bg-secondary);
+  border-color: var(--jdr-secondary);
+  transform: translateX(4px);
+}
+
+.jdr-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--jdr-bg-secondary);
+  border-radius: var(--jdr-border-radius);
+  overflow: hidden;
+  box-shadow: var(--jdr-shadow-small);
+}
+
+.jdr-table th {
+  background: linear-gradient(145deg, var(--jdr-primary), var(--jdr-primary-dark));
+  color: var(--jdr-text-primary);
+  font-family: var(--jdr-font-fantasy);
+  font-weight: 600;
+  padding: 1rem;
+  text-align: left;
+}
+
+.jdr-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--jdr-border-color);
+  color: var(--jdr-text-secondary);
+}
+
+.jdr-table tr:hover td {
+  background: var(--jdr-bg-tertiary);
+}
+
+/* ========================================
+   UTILITAIRES ET HELPERS
+   ======================================== */
+
+.jdr-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.jdr-flex {
+  display: flex;
+}
+
+.jdr-flex-col {
+  flex-direction: column;
+}
+
+.jdr-justify-center {
+  justify-content: center;
+}
+
+.jdr-justify-between {
+  justify-content: space-between;
+}
+
+.jdr-items-center {
+  align-items: center;
+}
+
+.jdr-gap-2 {
+  gap: 0.5rem;
+}
+
+.jdr-gap-4 {
+  gap: 1rem;
+}
+
+.jdr-gap-6 {
+  gap: 1.5rem;
+}
+
+.jdr-mt-4 {
+  margin-top: 1rem;
+}
+
+.jdr-mb-4 {
+  margin-bottom: 1rem;
+}
+
+.jdr-p-4 {
+  padding: 1rem;
+}
+
+.jdr-text-center {
+  text-align: center;
+}
+
+.jdr-text-right {
+  text-align: right;
+}
+
+.jdr-w-full {
+  width: 100%;
+}
+
+.jdr-hidden {
+  display: none;
+}
+
+.jdr-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ========================================
+   ANIMATIONS ET TRANSITIONS
+   ======================================== */
+
+@keyframes jdr-fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes jdr-slideIn {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes jdr-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes jdr-glow {
+  0%, 100% { box-shadow: var(--jdr-shadow-medium); }
+  50% { box-shadow: var(--jdr-shadow-medium), var(--jdr-glow-gold); }
+}
+
+.jdr-animate-fadeIn {
+  animation: jdr-fadeIn 0.5s ease-out;
+}
+
+.jdr-animate-slideIn {
+  animation: jdr-slideIn 0.5s ease-out;
+}
+
+.jdr-animate-pulse {
+  animation: jdr-pulse 2s ease-in-out infinite;
+}
+
+.jdr-animate-glow {
+  animation: jdr-glow 2s ease-in-out infinite;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 768px) {
+  .jdr-title-xl { font-size: 2rem; }
+  .jdr-title-lg { font-size: 1.75rem; }
+  .jdr-title-md { font-size: 1.5rem; }
+  
+  .jdr-card {
+    padding: 1rem;
+  }
+  
+  .jdr-btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+  }
+  
+  .jdr-navbar-nav {
+    gap: 1rem;
+  }
+  
+  .jdr-modal {
+    width: 95%;
+    margin: 1rem;
+  }
+  
+  .jdr-container {
+    padding: 0 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .jdr-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .jdr-card-footer {
+    flex-direction: column;
+  }
+  
+  .jdr-modal-body {
+    padding: 1rem;
+  }
+  
+  .jdr-table {
+    font-size: 0.875rem;
+  }
+  
+  .jdr-table th,
+  .jdr-table td {
+    padding: 0.5rem;
+  }
+}
+
+/* ========================================
+   CLASSES SPÉCIFIQUES JDR
+   ======================================== */
+
+/* Dés et probabilités */
+.jdr-dice {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-family: monospace;
+  font-weight: bold;
+  color: var(--jdr-secondary);
+}
+
+/* Barres de vie/progression */
+.jdr-progress {
+  width: 100%;
+  height: 20px;
+  background: var(--jdr-bg-tertiary);
+  border: 1px solid var(--jdr-border-color);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.jdr-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--jdr-success), #32CD32);
+  transition: width 0.3s ease;
+  position: relative;
+}
+
+.jdr-progress-bar.danger {
+  background: linear-gradient(90deg, var(--jdr-danger), #FF4444);
+}
+
+.jdr-progress-bar.warning {
+  background: linear-gradient(90deg, var(--jdr-warning), #FFB444);
+}
+
+/* Cartes de caractéristiques */
+.jdr-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(139, 69, 19, 0.3);
+}
+
+.jdr-stat:last-child {
+  border-bottom: none;
+}
+
+.jdr-stat-name {
+  font-weight: 500;
+  color: var(--jdr-text-secondary);
+}
+
+.jdr-stat-value {
+  font-weight: bold;
+  color: var(--jdr-secondary);
+  font-family: monospace;
+}
+
+/* Messages de chat/historique */
+.jdr-message {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border-radius: var(--jdr-border-radius);
+  position: relative;
+}
+
+.jdr-message.user {
+  background: linear-gradient(145deg, var(--jdr-bg-tertiary), var(--jdr-bg-secondary));
+  border-left: 4px solid var(--jdr-secondary);
+  margin-left: 2rem;
+}
+
+.jdr-message.assistant {
+  background: linear-gradient(145deg, var(--jdr-bg-secondary), var(--jdr-bg-tertiary));
+  border-left: 4px solid var(--jdr-accent);
+  margin-right: 2rem;
+}
+
+.jdr-message-author {
+  font-weight: bold;
+  color: var(--jdr-secondary);
+  margin-bottom: 0.5rem;
+  font-family: var(--jdr-font-fantasy);
+}
+
+.jdr-message-content {
+  line-height: 1.6;
+  color: var(--jdr-text-primary);
+}
+
+.jdr-message-time {
+  font-size: 0.75rem;
+  color: var(--jdr-text-muted);
+  position: absolute;
+  bottom: 0.5rem;
+  right: 1rem;
+}

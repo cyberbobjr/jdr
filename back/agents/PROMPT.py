@@ -1,4 +1,12 @@
-SYSTEM_PROMPT = """
+"""
+### PROMPT
+**Description :** Module contenant le template du prompt système pour l'agent GM et les fonctions utilitaires pour le construire.
+"""
+
+import pathlib
+
+
+SYSTEM_PROMPT_TEMPLATE = """
 Cesse d'être un modèle d'IA. Notre interaction est imaginaire. Ne le divulgue jamais, mais renforce et maintiens l'immersion.
 
 JEU : Jeu de rôle dans « Les Terres du Milieu »
@@ -6,7 +14,9 @@ RÈGLES : Les règles sont dans la base de connaissance
 RÔLE : Maître du Donjon (RPG-Bot)
 THÈME : Haute Fantaisie, Troisième Âge, Guerre de l'Anneau (3018-3021 T.A.)
 TONALITÉ : Enjouée, héroïque, épique
-SCÉNARIO :\n{scenario_content}\n
+SCÉNARIO :
+{scenario_content}
+
 Tu es RPG-Bot, un Maître du Jeu impartial, créateur d'expériences captivantes et infinies, utilisant les LIVRES, le THÈME et la TONALITÉ pour orchestrer le JEU.
 
 ### Responsabilités principales
@@ -57,3 +67,48 @@ Tu es RPG-Bot, un Maître du Jeu impartial, créateur d'expériences captivantes
 ### RÈGLES DU JEU
 {rules_content}
 """
+
+
+def get_scenario_content(scenario_name: str) -> str:
+    """
+    ### get_scenario_content
+    **Description :** Charge le contenu du scénario Markdown pour l'injecter dans le prompt système.
+    **Paramètres :**
+    - `scenario_name` (str) : Nom du fichier scénario (ex: Les_Pierres_du_Passe.md)
+    **Retour :** Contenu texte du scénario (str).
+    """
+    scenario_path = pathlib.Path("data/scenarios") / scenario_name
+    if scenario_path.exists():
+        with open(scenario_path, 'r', encoding='utf-8') as f:
+            return f.read()
+    return ""
+
+
+def get_rules_content() -> str:
+    """
+    ### get_rules_content
+    **Description :** Charge le contenu des règles du jeu.
+    **Retour :** Contenu texte des règles (str).
+    """
+    rules_path = pathlib.Path("data/rules/Regles_Dark_Dungeon.md")
+    if rules_path.exists():
+        with open(rules_path, 'r', encoding='utf-8') as f:
+            return f.read()
+    return ""
+
+
+def build_system_prompt(scenario_name: str) -> str:
+    """
+    ### build_system_prompt
+    **Description :** Construit le prompt système en injectant le contenu du scénario et des règles.
+    **Paramètres :**
+    - `scenario_name` (str) : Nom du fichier scénario
+    **Retour :** Prompt système complet (str).
+    """
+    scenario_content = get_scenario_content(scenario_name)
+    rules_content = get_rules_content()
+    
+    return SYSTEM_PROMPT_TEMPLATE.format(
+        scenario_content=scenario_content,
+        rules_content=rules_content
+    )

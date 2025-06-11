@@ -5,11 +5,12 @@ Gère le chargement et la sauvegarde de l'historique, ainsi que les données de 
 
 import os
 import pathlib
-from typing import Dict, Any, Optional
-
+from typing import Dict, Any, Optional, List
+from uuid import UUID
 
 from back.services.character_service import CharacterService
 from back.storage.pydantic_jsonl_store import PydanticJsonlStore
+from back.utils.logger import log_debug
 
 
 class SessionService:
@@ -121,6 +122,43 @@ class SessionService:
         
         self.scenario_name = scenario_name
     
+    @staticmethod
+    def list_all_sessions() -> List[Dict[str, Any]]:
+        """
+        ### list_all_sessions
+        **Description :** Récupère la liste de toutes les sessions avec les informations du scénario et du personnage.
+        **Retour :** Liste de dictionnaires contenant les informations de chaque session
+        """
+        project_root = pathlib.Path(__file__).parent.parent.parent
+        sessions_dir = project_root / "data" / "sessions"
+        
+        all_sessions = []
+        
+        if sessions_dir.exists() and sessions_dir.is_dir():
+            for session_path in sessions_dir.iterdir():
+                if session_path.is_dir():
+                    # Charger l'ID du personnage
+                    character_file = session_path / "character.txt"
+                    if character_file.exists():
+                        character_id = character_file.read_text(encoding='utf-8').strip()
+                    else:
+                        character_id = "Inconnu"
+                    
+                    # Charger le nom du scénario
+                    scenario_file = session_path / "scenario.txt"
+                    if scenario_file.exists():
+                        scenario_name = scenario_file.read_text(encoding='utf-8').strip()
+                    else:
+                        scenario_name = "Inconnu"
+                    
+                    all_sessions.append({
+                        "session_id": session_path.name,
+                        "character_id": character_id,
+                        "scenario_name": scenario_name
+                    })
+        
+        return all_sessions
+
     # Les méthodes suivantes sont supprimées car elles ne sont utilisées que dans les tests :
     # - load_history
     # - save_history

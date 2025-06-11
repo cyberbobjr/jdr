@@ -9,7 +9,12 @@ from uuid import UUID
 import traceback
 
 from back.services.scenario_service import ScenarioService
-from back.models.schema import ScenarioList
+from back.services.session_service import SessionService
+from back.models.schema import (
+    ScenarioList, PlayScenarioRequest, PlayScenarioResponse,
+    ActiveSessionsResponse, StartScenarioRequest, StartScenarioResponse,
+    ScenarioHistoryResponse
+)
 from back.utils.logger import log_debug
 from back.agents.gm_agent_pydantic import build_gm_agent_pydantic, enrich_user_message_with_character
 from back.services.character_service import CharacterService
@@ -23,10 +28,86 @@ async def list_scenarios():
     **Description :** Endpoint pour lister les scénarios disponibles et en cours.
     **Paramètres :** Aucun.
     **Retour :** `ScenarioList` contenant une liste de scénarios avec leurs états.
+    
+    **Format de réponse :**
+    ```json
+    {
+        "scenarios": [
+            {
+                "name": "Les_Pierres_du_Passe.md",
+                "status": "available",
+                "session_id": null,
+                "scenario_name": null,
+                "character_name": null
+            },
+            {
+                "name": "Les_Pierres_du_Passe.md - Galadhwen",
+                "status": "in_progress",
+                "session_id": "12345678-1234-5678-9012-123456789abc",
+                "scenario_name": "Les_Pierres_du_Passe.md",
+                "character_name": "Galadhwen"
+            }
+        ]
+    }
+    ```
     """
     log_debug("Appel endpoint scenarios/list_scenarios")
     scenarios = ScenarioService.list_scenarios()
     return ScenarioList(scenarios=scenarios)
+
+@router.get("/sessions", response_model=ActiveSessionsResponse)
+async def list_active_sessions():
+    """
+    ### list_active_sessions
+    **Description :** Récupère la liste de toutes les sessions de jeu en cours avec le nom du scénario et le nom du personnage.
+    **Paramètres :** Aucun.
+    **Retour :**
+    - `sessions` (List[SessionInfo]) : Liste des sessions actives avec session_id, scenario_name, character_id et character_name.
+    
+    **Format de réponse :**
+    ```json
+    {
+        "sessions": [
+            {
+                "session_id": "12345678-1234-5678-9012-123456789abc",
+                "scenario_name": "Les_Pierres_du_Passe.md",
+                "character_id": "87654321-4321-8765-2109-987654321def",
+                "character_name": "Galadhwen"
+            }
+        ]
+    }
+    ```
+    """
+    
+    log_debug("Appel endpoint scenarios/list_active_sessions")
+    try:
+        # Récupérer toutes les sessions via SessionService
+        sessions = SessionService.list_all_sessions()
+        
+        # Enrichir chaque session avec le nom du personnage
+        enriched_sessions = []
+        for session in sessions:
+            try:
+                # Récupérer le nom du personnage via CharacterService
+                character = CharacterService.get_character(session["character_id"])
+                character_name = character.name
+            except Exception as e:
+                log_debug("Erreur lors du chargement du nom du personnage", error=str(e), character_id=session["character_id"])
+                character_name = "Inconnu"
+            
+            enriched_sessions.append({
+                "session_id": session["session_id"],
+                "scenario_name": session["scenario_name"],
+                "character_id": session["character_id"],
+                "character_name": character_name
+            })
+        
+        log_debug("Sessions actives récupérées", count=len(enriched_sessions))
+        return {"sessions": enriched_sessions}
+        
+    except Exception as e:
+        log_debug("Erreur lors de la récupération des sessions actives", error=str(e))
+        raise HTTPException(status_code=500, detail=f"Erreur interne: {str(e)}")
 
 @router.get("/{scenario_file}")
 async def get_scenario_details(scenario_file: str):
@@ -35,7 +116,21 @@ async def get_scenario_details(scenario_file: str):
     **Description :** Récupère le contenu d'un scénario (fichier Markdown) à partir de son nom de fichier.
     **Paramètres :**
     - `scenario_file` (str) : Le nom du fichier du scénario (ex: Les_Pierres_du_Passe.md).
-    **Retour :** Le contenu du fichier Markdown du scénario, ou une erreur 404 si le fichier n'existe pas.
+    **Retour :** Le contenu du fichier Markdown du scénario sous forme de chaîne de caractères.
+    **Exceptions :**
+    - HTTPException 404 : Si le fichier de scénario n'existe pas.
+    
+    **Format de réponse :**
+    ```
+    # Scénario : Les Pierres du Passé
+    
+    ## Contexte
+    L'histoire se déroule en l'année 2955 du Troisième Âge...
+    
+    ## 1. Lieux
+    ### Village d'Esgalbar
+    - **Description** : Petit hameau de maisons en bois...
+    ```
     """
     log_debug("Appel endpoint scenarios/get_scenario_details", scenario_file=scenario_file)
     try:
@@ -47,16 +142,35 @@ class StartScenarioRequest(BaseModel):
     scenario_name: str
     character_id: str
 
-@router.post("/start")
+@router.post("/start", response_model=StartScenarioResponse)
 async def start_scenario(request: StartScenarioRequest):
     """
     ### start_scenario
     **Description :** Démarre un scénario avec un personnage spécifique, retourne l'id de session et déclenche le début du scénario avec le LLM.
     **Paramètres :**
     - `request` (StartScenarioRequest) : Contient le nom du scénario et l'identifiant du personnage.
-    **Retour :** Un objet JSON avec session_id, scenario_name, character_id, message et la réponse initiale du LLM.
+        - `scenario_name` (str) : Nom du fichier de scénario (ex: "Les_Pierres_du_Passe.md")
+        - `character_id` (str) : UUID du personnage qui participe au scénario
+    **Retour :**
+    - `session_id` (str) : Identifiant unique de la session créée
+    - `scenario_name` (str) : Nom du scénario démarré
+    - `character_id` (str) : ID du personnage participant
+    - `message` (str) : Message de confirmation
+    - `llm_response` (str) : Réponse initiale du Maître du Jeu pour commencer l'aventure
     **Exceptions :**
     - HTTPException 409 : Si une session existe déjà avec le même scénario et personnage.
+    - HTTPException 404 : Si le scénario demandé n'existe pas.
+    
+    **Format de réponse :**
+    ```json
+    {
+        "session_id": "12345678-1234-5678-9012-123456789abc",
+        "scenario_name": "Les_Pierres_du_Passe.md",
+        "character_id": "87654321-4321-8765-2109-987654321def",
+        "message": "Scénario 'Les_Pierres_du_Passe.md' démarré avec succès pour le personnage 87654321-4321-8765-2109-987654321def.",
+        "llm_response": "**Esgalbar, place centrale du village**\n\n*Le soleil décline lentement à l'horizon, teintant le ciel de nuances orangées. Une brume légère flotte autour de la fontaine sèche...*"
+    }
+    ```
     """
     log_debug("Appel endpoint scenarios/start_scenario")
     
@@ -119,21 +233,50 @@ async def start_scenario(request: StartScenarioRequest):
             "llm_response": f"Erreur lors du démarrage du scénario: {str(e)}"
         }
 
-class PlayScenarioRequest(BaseModel):
-    message: str
-
-@router.post("/play")
+@router.post("/play", response_model=PlayScenarioResponse)
 async def play_scenario(session_id: UUID, request: PlayScenarioRequest):
     """
     ### play_scenario
-    **Description :** Envoie un message au MJ (LLM) pour jouer le scénario. Récupère automatiquement les informations de session (personnage et scénario).
+    **Description :** Envoie un message au MJ (LLM) pour jouer le scénario. Récupère automatiquement les informations de session (personnage et scénario) et retourne l'historique complet des messages générés.
     **Paramètres :**
     - `session_id` (UUID) : Identifiant de la session de jeu (query parameter).
-    - `request` (PlayScenarioRequest) : Contient le message du joueur.
+    - `request` (PlayScenarioRequest) : Objet contenant le message du joueur.
+        - `message` (str) : Le message du joueur à envoyer au Maître du Jeu.
     **Retour :**
-    - `response` (str) : Réponse du Maître du Jeu
-    - `tool_calls` (list) : Liste des appels d'outils effectués (si applicable)
+    - `response` (List[ConversationMessage]) : Liste complète des messages de conversation incluant :
+        - Les messages utilisateur et système
+        - Les réponses du LLM
+        - Les appels d'outils et leurs résultats
+        - Les métadonnées (tokens utilisés, timestamps, etc.)
+    **Exceptions :**
+    - HTTPException 404 : Si la session n'existe pas.
+    - HTTPException 500 : Erreur lors de la génération de la réponse.
     
+    **Format de réponse :**
+    ```json
+    {
+        "response": [
+            {
+                "parts": [
+                    {
+                        "content": "Contenu du message",
+                        "timestamp": "2025-06-09T09:30:34.839940Z",
+                        "part_kind": "user-prompt|system-prompt|text|tool-call|tool-return"
+                    }
+                ],
+                "kind": "request|response",
+                "usage": {
+                    "requests": 1,
+                    "request_tokens": 2951,
+                    "response_tokens": 423,
+                    "total_tokens": 3374
+                },
+                "model_name": "deepseek-chat",
+                "timestamp": "2025-06-09T09:30:35Z"
+            }
+        ]
+    }
+    ```
     """
     
     log_debug("Appel endpoint scenarios/play_scenario", session_id=str(session_id))
@@ -190,7 +333,7 @@ async def play_scenario(session_id: UUID, request: PlayScenarioRequest):
         )
         raise HTTPException(status_code=500, detail=f"Erreur interne: {str(e)}")
 
-@router.get("/history/{session_id}")
+@router.get("/history/{session_id}", response_model=ScenarioHistoryResponse)
 async def get_scenario_history(session_id: UUID):
     """
     ### get_scenario_history
@@ -198,7 +341,46 @@ async def get_scenario_history(session_id: UUID):
     **Paramètres :**
     - `session_id` (UUID) : Identifiant de la session de jeu.
     **Retour :**
-    - `history` (list) : Liste ordonnée de tous les messages (user, assistant, tool, etc.) de la session.
+    - `history` (List[ConversationMessage]) : Liste ordonnée de tous les messages (user, assistant, tool, etc.) de la session, avec le même format que `/scenarios/play`.
+    **Exceptions :**
+    - HTTPException 404 : Si la session n'existe pas.
+    - HTTPException 500 : Erreur lors de la récupération de l'historique.
+    
+    **Format de réponse :**
+    ```json
+    {
+        "history": [
+            {
+                "parts": [
+                    {
+                        "content": "Démarre le scénario et présente-moi la situation initiale.",
+                        "timestamp": "2025-06-09T09:30:34.839940Z",
+                        "part_kind": "user-prompt"
+                    }
+                ],
+                "kind": "request"
+            },
+            {
+                "parts": [
+                    {
+                        "content": "**Esgalbar, place centrale du village**...",
+                        "timestamp": "2025-06-09T09:30:35.123456Z",
+                        "part_kind": "text"
+                    }
+                ],
+                "kind": "response",
+                "usage": {
+                    "requests": 1,
+                    "request_tokens": 2951,
+                    "response_tokens": 423,
+                    "total_tokens": 3374
+                },
+                "model_name": "deepseek-chat",
+                "timestamp": "2025-06-09T09:30:35Z"
+            }
+        ]
+    }
+    ```
     """
     
     log_debug("Appel endpoint scenarios/get_scenario_history", session_id=str(session_id))
