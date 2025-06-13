@@ -1,6 +1,6 @@
 {
   "state": {
-    "concept": "Prêtre humain guérisseur itinérant",
+    "name": "Galadhwen",
     "race": "Elfe Sylvain",
     "culture": "Rurale",
     "profession": "Aventurier",
@@ -17,26 +17,117 @@
     "competences": {
       "Comédie": 21
     },
-    "talents": [],
-    "equipment": [
-      "Bandoulière",
-      "Coutelas",
-      "Bottes de cuir",
-      "Gants de cuir",
-      "Tenue de voyage",
-      "Aiguille à coudre"
+    "hp": 0,
+    "xp": -998625,
+    "gold": 645,
+    "inventory": [
+      {
+        "id": "703aeb5c-6b88-4ddf-9c2f-2a8da21d04b9",
+        "name": "Bandoulière",
+        "item_type": "Materiel",
+        "price_pc": 50,
+        "weight_kg": 1.0,
+        "description": "Sangle pour porter équipement",
+        "category": "Transport",
+        "damage": null,
+        "protection": null,
+        "armor_type": null,
+        "quantity": 1,
+        "is_equipped": true,
+        "crafting_time": "-",
+        "special_properties": null
+      },
+      {
+        "id": "b87baa50-f4b6-44f5-a9c7-ca3e3d4b388d",
+        "name": "Coutelas",
+        "item_type": "Arme",
+        "price_pc": 200,
+        "weight_kg": 0.5,
+        "description": "Lame courte large",
+        "category": "Couteau",
+        "damage": "1d4",
+        "protection": null,
+        "armor_type": null,
+        "quantity": 1,
+        "is_equipped": true,
+        "crafting_time": "2 jours",
+        "special_properties": null
+      },
+      {
+        "id": "2ded2037-3f06-49c7-858b-1216f558455a",
+        "name": "Bottes de cuir",
+        "item_type": "Materiel",
+        "price_pc": 50,
+        "weight_kg": 1.0,
+        "description": "Chaussures en cuir",
+        "category": "Vetement",
+        "damage": null,
+        "protection": null,
+        "armor_type": null,
+        "quantity": 1,
+        "is_equipped": true,
+        "crafting_time": "-",
+        "special_properties": null
+      },
+      {
+        "id": "955c3290-b72e-4cc9-9f4d-4fddec65a23b",
+        "name": "Gants de cuir",
+        "item_type": "Materiel",
+        "price_pc": 30,
+        "weight_kg": 0.2,
+        "description": "Protection mains",
+        "category": "Vetement",
+        "damage": null,
+        "protection": null,
+        "armor_type": null,
+        "quantity": 1,
+        "is_equipped": true,
+        "crafting_time": "-",
+        "special_properties": null
+      },
+      {
+        "id": "6aa36895-4e92-4b53-958a-5411ef06c1bc",
+        "name": "Tenue de voyage",
+        "item_type": "Materiel",
+        "price_pc": 100,
+        "weight_kg": 2.5,
+        "description": "Vêtements route",
+        "category": "Vetement",
+        "damage": null,
+        "protection": null,
+        "armor_type": null,
+        "quantity": 1,
+        "is_equipped": true,
+        "crafting_time": "-",
+        "special_properties": null
+      },
+      {
+        "id": "3068d24a-8e90-4b2f-9d5b-350f8b6c4643",
+        "name": "Aiguille à coudre",
+        "item_type": "Materiel",
+        "price_pc": 50,
+        "weight_kg": 0.0,
+        "description": "Outil de couture",
+        "category": "Artisanat",
+        "damage": null,
+        "protection": null,
+        "armor_type": null,
+        "quantity": 1,
+        "is_equipped": true,
+        "crafting_time": "-",
+        "special_properties": null
+      }
     ],
     "spells": [
       "Voies du Verrouillage",
       "Teintes",
       "Accrochage"
     ],
-    "current_step": "validation",
     "equipment_summary": {
       "total_cost": 4.8,
       "total_weight": 5.2,
       "remaining_money": 15.2,
-      "starting_money": 20
+      "starting_money": 20.0
     },
     "culture_bonuses": {
       "Artisanat": 3,
@@ -46,29 +137,6 @@
       "Connaissance Générale": 2,
       "Équitation": 1,
       "Natation": 2
-    },
-    "name": "Galadhwen",
-    "bonus_race": {
-      "Force": 1,
-      "Constitution": 1,
-      "Agilité": 4,
-      "Rapidité": 4,
-      "Volonté": 2,
-      "Raisonnement": 1,
-      "Intuition": 1,
-      "Présence": 1,
-      "bonus_endurance": 40,
-      "bonus_pp": 30,
-      "resistance_corps": 15,
-      "resistance_esprit": 15,
-      "resistance_magie": 20
-    },
-    "hp": 0,
-    "xp": -8997717,
-    "gold": 1555,
-    "test_attribute": "test_value",
-    "new_attribute": 168
-  },
-  "created_at": "2025-05-29T21:21:50.892906",
-  "last_update": "2025-06-11T12:27:02.782632"
+    }
+  }
 }

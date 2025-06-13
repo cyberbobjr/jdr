@@ -1,9 +1,6 @@
 from pydantic_ai import RunContext
-from ..services.inventory_service import InventoryService
 from back.services.session_service import SessionService
 from back.utils.logger import log_debug
-
-svc = InventoryService()
 
 def inventory_add_item(ctx: RunContext[SessionService], item_id: str, qty: int = 1) -> dict:
     """
@@ -17,8 +14,10 @@ def inventory_add_item(ctx: RunContext[SessionService], item_id: str, qty: int =
         dict: Résumé de l'inventaire mis à jour.
     """
     log_debug("Tool inventory_add_item appelé", tool="inventory_add_item", player_id=str(ctx.deps.character_id), item_id=item_id, qty=qty)
-    summary = svc.add_item(player_id=ctx.deps.character_id, item_id=item_id, qty=qty)
-    return summary
+    if ctx.deps.character_service:
+        return ctx.deps.character_service.add_item(item_id=item_id, qty=qty)
+    else:
+        return {"error": "Service de personnage non disponible"}
 
 # Tool definition removed - now handled directly by PydanticAI agent
 
@@ -34,7 +33,9 @@ def inventory_remove_item(ctx: RunContext[SessionService], item_id: str, qty: in
         dict: Résumé de l'inventaire mis à jour.
     """
     log_debug("Tool inventory_remove_item appelé", tool="inventory_remove_item", player_id=str(ctx.deps.character_id), item_id=item_id, qty=qty)
-    summary = svc.remove_item(player_id=ctx.deps.character_id, item_id=item_id, qty=qty)
-    return summary
+    if ctx.deps.character_service:
+        return ctx.deps.character_service.remove_item(item_id=item_id, qty=qty)
+    else:
+        return {"error": "Service de personnage non disponible"}
 
 # Tool definition removed - now handled directly by PydanticAI agent

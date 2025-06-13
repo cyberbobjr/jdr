@@ -45,6 +45,8 @@ class Character(BaseModel):
     caracteristiques: Dict[str, int]
     competences: Dict[str, int]
     hp: int = 100  # calculé à partir de Constitution
+    xp: int = 0  # Points d'expérience
+    gold: int = 0  # Or possédé
     inventory: List[Item] = []  # Inventaire détaillé avec objets complets
     spells: List[str] = []
     equipment_summary: Optional[Dict[str, float]] = None

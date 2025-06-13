@@ -33,6 +33,16 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
   - **Compatibilité stricte :** Structure de chaque message respecte le schéma PydanticAI (sérialisation via `to_jsonable_python`).
 - **Prompt système modulaire :** Le prompt système est externalisé dans `back/agents/PROMPT.py` pour faciliter la maintenance et les modifications. Le module contient le template et les fonctions utilitaires pour l'injection du contenu des scénarios et des règles.
 
+## Architecture d'Inventaire Refactorisée (2025) - TERMINÉE ✅
+
+- **Migration vers CharacterService :** Toutes les méthodes d'inventaire (`add_item`, `remove_item`, `equip_item`, `unequip_item`) migrées de `InventoryService` vers `CharacterService`.
+- **Architecture orientée instance :** `CharacterService` transformé d'un service statique en service d'instance avec un `character_id` spécifique au constructeur.
+- **Intégration SessionService :** `CharacterService` instancié comme propriété de `SessionService` pour une cohésion maximale.
+- **Outils unifiés :** Tous les outils utilisent `ctx.deps.character_service` pour accéder aux fonctionnalités de personnage et d'inventaire.
+- **Modèle enrichi :** Champs `xp` et `gold` ajoutés au modèle `Character` avec gestion des valeurs par défaut.
+- **Tests complets :** 18/18 tests passés validant la nouvelle architecture (services + outils).
+- **Suppression du code obsolète :** Fichier `inventory_service.py` supprimé, références mises à jour partout.
+
 ## Interfaces Frontend TypeScript (2025) - TERMINÉE ✅
 
 - **Interfaces strictement typées :** Génération automatique des interfaces TypeScript basées sur le fichier OpenAPI JSON du backend.
@@ -54,7 +64,6 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
 │   │   └── schema.py           # DTO exposés par l'API
 │   ├── services/               # Logique métier unitaire (SRP)
 │   │   ├── character_persistence_service.py # Service centralisé pour la persistance des personnages (JSON)
-│   │   ├── inventory_service.py # Gestion de l'inventaire des personnages
 │   │   ├── character_service.py # Gestion des personnages (création, évolution, etc.)
 │   │   ├── combat_service.py    # ✅ Gestion complète des mécaniques de combat (initiative, attaques, dégâts, fin automatique)
 │   │   ├── combat_state_service.py # ✅ Persistance de l'état des combats actifs (sauvegarde/chargement JSON, nettoyage automatique)

@@ -22,8 +22,7 @@
 │   │   ├── domain/             # Reprise des fichiers .py uploadés (1 concept = 1 fichier)
 │   │   └── schema.py           # DTO exposés par l’API
 │   ├── services/               # Logique métier unitaire (SRP)
-│   │   ├── inventory_service.py
-│   │   ├── character_service.py
+│   │   ├── character_service.py # Gestion des personnages et de leur inventaire
 │   │   ├── combat_service.py
 │   │   ├── skill_service.py
 │   │   └── scenario_service.py
@@ -107,7 +106,7 @@ class Character(BaseModel):
 
 | Service              | Méthode         | Signature (sync)                                                    | Rôle métier                                                    |
 | -------------------- | --------------- | ------------------------------------------------------------------- | -------------------------------------------------------------- |
-| **InventoryService** | `add_item`      | `(player_id: UUID, item_id: str, qty: int = 1) -> InventorySummary` | Ajoute un objet (contrôle poids, duplicata, coût)              |
+| **CharacterService** | `add_item`      | `(player_id: UUID, item_id: str, qty: int = 1) -> InventorySummary` | Ajoute un objet (contrôle poids, duplicata, coût)              |
 |                      | `remove_item`   | `(player_id: UUID, item_id: str, qty: int = 1) -> InventorySummary` | Retire l’objet ou diminue la quantité                          |
 |                      | `equip_item`    | `(player_id: UUID, item_id: str) -> None`                           | Marque l’objet comme équipé ↔ mod. stats                       |
 |                      | `sell_item`     | `(player_id: UUID, item_id: str, qty: int = 1) -> MoneySummary`     | Créditer le portefeuille après vente                           |
@@ -131,7 +130,7 @@ class Character(BaseModel):
 
 | Service              | Méthode HTTP | Chemin                                    | Payload minimal                                     | Réponse 200 (exemple)                                                         |
 | -------------------- | ------------ | ----------------------------------------- | --------------------------------------------------- | ----------------------------------------------------------------------------- |
-| **InventoryService** | `POST`       | `/api/inventory/add`                      | `{ "item_id": "epee_arnor", "qty": 1 }`             | `{ "inventory": [...], "wallet": { "gold": 2, "silver": 12, "copper": 40 } }` |
+| **CharacterService** | `POST`       | `/api/inventory/add`                      | `{ "item_id": "epee_arnor", "qty": 1 }`             | `{ "inventory": [...], "wallet": { "gold": 2, "silver": 12, "copper": 40 } }` |
 |                      | `POST`       | `/api/inventory/equip`                    | `{ "item_id": "epee_arnor" }`                       | `{ "equipped": true }`                                                        |
 | **CharacterService** | `POST`       | `/api/characters/{player_id}/skill-check` | `{ "skill": "esquive", "difficulty": 50 }`          | `{ "total": 67, "outcome": "success" }`                                       |
 |                      | `PATCH`      | `/api/characters/{player_id}/hp`          | `{ "delta": -13, "source": "sword" }`               | `{ "hp": 63 }`                                                                |
@@ -286,7 +285,7 @@ Le **`CombatService`** invoque systématiquement `take_damage` ou `heal` pour re
 
 1. Joueur : « J’achète l’épée ancienne chez Thadric pour 15 PO. »
 2. `gm_agent` appelle `inventory_tools.add_item(item_id="epee_arnor", qty=1)`. La requête inclut implicitement `price={gold:15, silver:0, copper:0}`.
-3. **InventoryService** :
+3. **CharacterService** :
 
    * Convertit le prix en *cuivres* (1 PO = 100 PI = 10 000 PC).
    * Vérifie que le porte‑monnaie du joueur dispose d’au moins 1 500 PC.

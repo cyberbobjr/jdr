@@ -45,6 +45,3 @@ When a new file is generated, ensure that:
 - Use try/catch blocks for async operations
 - Implement proper error boundaries in React components
 - Always log errors with contextual information
-
-# If you want to execute command console
-The command console is powershell under windows. So when you want to execute a command, use powershell commands.

@@ -71,12 +71,12 @@ class TestCharacterTools:
         
         # Appliquer l'XP
         result = character_apply_xp(mock_context, xp_to_add)
-        
-        # Vérifications
+          # Vérifications
         assert isinstance(result, dict)
-        assert "xp" in result
+        assert "character" in result
+        assert "xp" in result["character"]
         # Vérifier que l'XP a augmenté
-        assert result["xp"] >= initial_xp + xp_to_add
+        assert result["character"]["xp"] >= initial_xp + xp_to_add
     def test_character_add_gold(self, mock_context):
         """
         ### test_character_add_gold
@@ -92,12 +92,12 @@ class TestCharacterTools:
         
         # Ajouter l'or
         result = character_add_gold(mock_context, gold_to_add)
-        
-        # Vérifications
+          # Vérifications
         assert isinstance(result, dict)
-        assert "gold" in result
+        assert "character" in result
+        assert "gold" in result["character"]
         # Vérifier que l'or a augmenté
-        assert result["gold"] >= initial_gold + gold_to_add
+        assert result["character"]["gold"] >= initial_gold + gold_to_add
     
     def test_character_take_damage(self, mock_context):
         """
@@ -115,12 +115,12 @@ class TestCharacterTools:
         
         # Appliquer les dégâts
         result = character_take_damage(mock_context, damage_amount, damage_source)
-        
-        # Vérifications
+          # Vérifications
         assert isinstance(result, dict)
-        assert "hp" in result
+        assert "character" in result
+        assert "hp" in result["character"]
         expected_hp = max(0, initial_hp - damage_amount)
-        assert result["hp"] == expected_hp
+        assert result["character"]["hp"] == expected_hp
     
     def test_character_take_damage_minimum_zero(self, mock_context):
         """
@@ -133,11 +133,11 @@ class TestCharacterTools:
         damage_amount = 9999
         
         result = character_take_damage(mock_context, damage_amount, "massive_damage")
-        
-        # Vérifications
+          # Vérifications
         assert isinstance(result, dict)
-        assert "hp" in result
-        assert result["hp"] == 0  # Ne peut pas être négatif
+        assert "character" in result
+        assert "hp" in result["character"]
+        assert result["character"]["hp"] == 0  # Ne peut pas être négatif
     def test_character_apply_xp_multiple_times(self, mock_context):
         """
         ### test_character_apply_xp_multiple_times
@@ -148,14 +148,15 @@ class TestCharacterTools:
         # Ajouter de l'XP en plusieurs fois
         result1 = character_apply_xp(mock_context, 50)
         result2 = character_apply_xp(mock_context, 30)
-        
-        # Vérifications - juste s'assurer que les outils fonctionnent
+          # Vérifications - juste s'assurer que les outils fonctionnent
         assert isinstance(result1, dict)
         assert isinstance(result2, dict)
-        assert "xp" in result1
-        assert "xp" in result2
+        assert "character" in result1
+        assert "character" in result2
+        assert "xp" in result1["character"]
+        assert "xp" in result2["character"]
         # Le deuxième résultat devrait avoir plus d'XP que le premier
-        assert result2["xp"] >= result1["xp"]
+        assert result2["character"]["xp"] >= result1["character"]["xp"]
 
     def test_character_add_gold_multiple_times(self, mock_context):
         """
@@ -167,14 +168,15 @@ class TestCharacterTools:
         # Ajouter de l'or en plusieurs fois
         result1 = character_add_gold(mock_context, 25)
         result2 = character_add_gold(mock_context, 15)
-        
-        # Vérifications - juste s'assurer que les outils fonctionnent
+          # Vérifications - juste s'assurer que les outils fonctionnent
         assert isinstance(result1, dict)
         assert isinstance(result2, dict)
-        assert "gold" in result1
-        assert "gold" in result2
+        assert "character" in result1
+        assert "character" in result2
+        assert "gold" in result1["character"]
+        assert "gold" in result2["character"]
         # Le deuxième résultat devrait avoir plus d'or que le premier
-        assert result2["gold"] >= result1["gold"]
+        assert result2["character"]["gold"] >= result1["character"]["gold"]
 
     def test_character_damage_and_heal_simulation(self, mock_context):
         """
@@ -186,12 +188,12 @@ class TestCharacterTools:
         # Récupérer les HP initiaux
         initial_character = mock_context.deps.character_data
         initial_hp = initial_character.get("hp", 100)
-        
-        # Appliquer des dégâts
+          # Appliquer des dégâts
         damaged_result = character_take_damage(mock_context, 20, "combat")
-        damaged_hp = damaged_result["hp"]
+        damaged_hp = damaged_result["character"]["hp"]
         
         # Vérifier que les dégâts ont été appliqués (HP diminués ou à 0)
         assert isinstance(damaged_result, dict)
-        assert "hp" in damaged_result
+        assert "character" in damaged_result
+        assert "hp" in damaged_result["character"]
         assert damaged_hp <= initial_hp

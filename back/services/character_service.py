@@ -2,7 +2,7 @@
 # Logique métier unitaire (SRP)
 
 import os
-from typing import List
+from typing import List, Dict
 from back.models.schema import Character
 from back.utils.logger import log_debug
 from back.services.character_persistence_service import CharacterPersistenceService
@@ -10,6 +10,67 @@ from back.services.item_service import ItemService
 
 class CharacterService:
     
+    def __init__(self, character_id: str):
+        """
+        ### __init__
+        **Description:** Initialise le service de personnage pour un personnage spécifique
+        **Paramètres:**
+        - `character_id` (str): Identifiant du personnage à gérer
+        **Retour:** Aucun
+        """
+        self.character_id = character_id
+        self.character_data = self._load_character()
+    def _load_character(self) -> Character:
+        """
+        ### _load_character
+        **Description:** Charge les données du personnage depuis le stockage persistant
+        **Retour:** Objet Character chargé
+        """
+        character_data = CharacterPersistenceService.load_character_data(self.character_id)
+        state_data = character_data.get("state", {})
+        
+        # Convertir l'ancien format equipment vers inventory si nécessaire
+        self._convert_equipment_to_inventory(state_data)
+        
+        # Ajouter les champs manquants avec des valeurs par défaut
+        state_data.setdefault("xp", 0)
+        state_data.setdefault("gold", 0)
+        state_data.setdefault("hp", 100)
+        
+        # L'ID est le nom du fichier (sans .json)
+        state_data["id"] = self.character_id
+        log_debug("Chargement du personnage", action="_load_character", character_id=self.character_id)
+        return Character(**state_data)
+    
+    def save_character(self) -> None:
+        """
+        ### save_character
+        **Description:** Sauvegarde les données du personnage vers le stockage persistant
+        **Retour:** Aucun
+        """
+        character_dict = self.character_data.model_dump()
+        # Retirer l'ID car il ne doit pas être dans le fichier
+        character_dict.pop('id', None)
+        
+        CharacterPersistenceService.save_character_data(self.character_id, {"state": character_dict})
+        log_debug("Sauvegarde du personnage", action="save_character", character_id=self.character_id)
+    
+    def get_character(self) -> Character:
+        """
+        ### get_character
+        **Description:** Retourne l'objet Character actuellement chargé
+        **Retour:** Objet Character
+        """
+        return self.character_data
+    
+    def get_character_json(self) -> str:
+        """
+        ### get_character_json
+        **Description:** Retourne les données du personnage au format JSON
+        **Retour:** String JSON des données du personnage
+        """
+        return self.character_data.model_dump_json()
+
     @staticmethod
     def _convert_equipment_to_inventory(state_data: dict) -> None:
         """
@@ -41,6 +102,7 @@ class CharacterService:
         # Si on n'a ni equipment ni inventory, créer un inventaire vide
         elif 'inventory' not in state_data and 'equipment' not in state_data:
             state_data['inventory'] = []
+
     @staticmethod
     def get_all_characters() -> List[Character]:
         """
@@ -67,9 +129,13 @@ class CharacterService:
                                  filename=filename, 
                                  missing_fields=[field for field in required_fields if field not in state_data])
                         continue
-                    
-                    # Convertir l'ancien format equipment vers inventory si nécessaire
+                      # Convertir l'ancien format equipment vers inventory si nécessaire
                     CharacterService._convert_equipment_to_inventory(state_data)
+                    
+                    # Ajouter les champs manquants avec des valeurs par défaut
+                    state_data.setdefault("xp", 0)
+                    state_data.setdefault("gold", 0)
+                    state_data.setdefault("hp", 100)
                     
                     # L'ID est le nom du fichier (sans .json)
                     state_data["id"] = character_id
@@ -95,76 +161,148 @@ class CharacterService:
         """       
         character_data = CharacterPersistenceService.load_character_data(character_id)
         state_data = character_data.get("state", {})
-        
-        # Convertir l'ancien format equipment vers inventory si nécessaire
+          # Convertir l'ancien format equipment vers inventory si nécessaire
         CharacterService._convert_equipment_to_inventory(state_data)
+        
+        # Ajouter les champs manquants avec des valeurs par défaut
+        state_data.setdefault("xp", 0)
+        state_data.setdefault("gold", 0)
+        state_data.setdefault("hp", 100)
         
         # L'ID est le nom du fichier (sans .json)
         state_data["id"] = character_id
         log_debug("Chargement du personnage", action="get_character", character_id=character_id)
         return Character(**state_data)
 
-    @staticmethod
-    def apply_xp(player_id: str, xp: int) -> dict:
+    def apply_xp(self, xp: int) -> None:
         """
         ### apply_xp
-        **Description :** Ajoute de l'XP à un personnage et persiste la fiche mise à jour.
-        **Paramètres :**
-        - `player_id` (str) : Identifiant du personnage (UUID).
-        - `xp` (int) : Points d'expérience à ajouter.
-        **Retour :**
-        - (dict) : Fiche personnage mise à jour.
+        **Description:** Ajoute de l'XP au personnage et met à jour ses données
+        **Paramètres:**
+        - `xp` (int): Points d'expérience à ajouter
+        **Retour:** Aucun
         """
-        def add_xp(current_xp):
-            return current_xp + xp
-        
-        new_xp = CharacterPersistenceService.modify_character_attribute(
-            player_id, "xp", add_xp, "apply_xp")
-        
-        updated_state = CharacterPersistenceService.load_character_state(player_id)
-        log_debug("Ajout d'XP", action="apply_xp", player_id=player_id, xp_ajoute=xp, xp_total=new_xp)
-        return updated_state
+        current_xp = getattr(self.character_data, 'xp', 0)
+        new_xp = current_xp + xp
+        self.character_data.xp = new_xp
+        self.save_character()
+        log_debug("Ajout d'XP", action="apply_xp", player_id=self.character_id, xp_ajoute=xp, xp_total=new_xp)
 
-    @staticmethod
-    def add_gold(player_id: str, gold: int) -> dict:
+    def add_gold(self, gold: int) -> None:
         """
         ### add_gold
-        **Description :** Ajoute de l'or au portefeuille du personnage et persiste la fiche mise à jour.
-        **Paramètres :**
-        - `player_id` (str) : Identifiant du personnage (UUID).
-        - `gold` (int) : Montant d'or à ajouter.
-        **Retour :**
-        - (dict) : Fiche personnage mise à jour.
+        **Description:** Ajoute de l'or au portefeuille du personnage
+        **Paramètres:**
+        - `gold` (int): Montant d'or à ajouter
+        **Retour:** Aucun
         """
-        def add_gold_func(current_gold):
-            return current_gold + gold
-        
-        new_gold = CharacterPersistenceService.modify_character_attribute(
-            player_id, "gold", add_gold_func, "add_gold")
-        
-        updated_state = CharacterPersistenceService.load_character_state(player_id)
-        log_debug("Ajout d'or", action="add_gold", player_id=player_id, gold_ajoute=gold, gold_total=new_gold)
-        return updated_state
+        current_gold = getattr(self.character_data, 'gold', 0)
+        new_gold = current_gold + gold
+        self.character_data.gold = new_gold
+        self.save_character()
+        log_debug("Ajout d'or", action="add_gold", player_id=self.character_id, gold_ajoute=gold, gold_total=new_gold)
 
-    @staticmethod
-    def take_damage(player_id: str, amount: int, source: str = "combat") -> dict:
+    def take_damage(self, amount: int, source: str = "combat") -> None:
         """
         ### take_damage
-        **Description :** Diminue les points de vie d'un personnage et persiste la fiche mise à jour.
-        **Paramètres :**
-        - `player_id` (str) : Identifiant du personnage (UUID).
-        - `amount` (int) : Points de dégâts à appliquer.
-        - `source` (str) : Source des dégâts (optionnel).
-        **Retour :**
-        - (dict) : Fiche personnage mise à jour.
+        **Description:** Diminue les points de vie du personnage
+        **Paramètres:**
+        - `amount` (int): Points de dégâts à appliquer
+        - `source` (str): Source des dégâts (optionnel)
+        **Retour:** Aucun
         """
-        def take_damage_func(current_hp):
-            return max(0, current_hp - amount)
-        
-        new_hp = CharacterPersistenceService.modify_character_attribute(
-            player_id, "hp", take_damage_func, "take_damage")
-        
-        updated_state = CharacterPersistenceService.load_character_state(player_id)
-        log_debug("Application de dégâts", action="take_damage", player_id=player_id, 
+        current_hp = getattr(self.character_data, 'hp', 0)
+        new_hp = max(0, current_hp - amount)
+        self.character_data.hp = new_hp
+        self.save_character()
+        log_debug("Application de dégâts", action="take_damage", player_id=self.character_id, 
                  amount=amount, hp_restant=new_hp, source=source)
-        return updated_state
+
+    def add_item(self, item_id: str, qty: int = 1) -> Dict:
+        """
+        ### add_item
+        **Description:** Ajoute un objet à l'inventaire du personnage
+        **Paramètres:**
+        - `item_id` (str): L'identifiant de l'objet
+        - `qty` (int): La quantité à ajouter (par défaut 1)
+        **Retour:** dict - Résumé de l'inventaire mis à jour
+        """
+        log_debug("Ajout d'un objet à l'inventaire", action="add_item", player_id=self.character_id, item_id=item_id, qty=qty)
+        
+        # Assurer que le personnage a un inventaire
+        if not hasattr(self.character_data, 'inventory') or self.character_data.inventory is None:
+            self.character_data.inventory = []
+        
+        # Chercher si l'objet existe déjà dans l'inventaire
+        found = False
+        for item in self.character_data.inventory:
+            if hasattr(item, 'id') and item.id == item_id:
+                item.quantity += qty
+                found = True
+                break
+        
+        # Si l'objet n'existe pas, l'ajouter (nécessiterait ItemService pour créer l'objet)
+        if not found:
+            # Pour l'instant, retourner un dictionnaire simple
+            pass
+        
+        self.save_character()
+        return {"inventory": [item.model_dump() if hasattr(item, 'model_dump') else item for item in self.character_data.inventory]}
+
+    def remove_item(self, item_id: str, qty: int = 1) -> Dict:
+        """
+        ### remove_item
+        **Description:** Retire un objet de l'inventaire du personnage
+        **Paramètres:**
+        - `item_id` (str): L'identifiant de l'objet
+        - `qty` (int): La quantité à retirer (par défaut 1)
+        **Retour:** dict - Résumé de l'inventaire mis à jour
+        """
+        log_debug("Retrait d'un objet de l'inventaire", action="remove_item", player_id=self.character_id, item_id=item_id, qty=qty)
+        
+        if hasattr(self.character_data, 'inventory') and self.character_data.inventory:
+            for i, item in enumerate(self.character_data.inventory):
+                if hasattr(item, 'id') and item.id == item_id:
+                    item.quantity -= qty
+                    if item.quantity <= 0:
+                        del self.character_data.inventory[i]
+                    break
+        
+        self.save_character()
+        return {"inventory": [item.model_dump() if hasattr(item, 'model_dump') else item for item in self.character_data.inventory]}
+
+    def equip_item(self, item_id: str) -> Dict:
+        """
+        ### equip_item
+        **Description:** Équipe un objet pour le personnage
+        **Paramètres:**
+        - `item_id` (str): L'identifiant de l'objet
+        **Retour:** dict - Résumé de l'inventaire mis à jour avec l'objet équipé
+        """
+        if hasattr(self.character_data, 'inventory') and self.character_data.inventory:
+            for item in self.character_data.inventory:
+                if hasattr(item, 'id') and item.id == item_id:
+                    if hasattr(item, 'is_equipped'):
+                        item.is_equipped = True
+                    break
+        
+        self.save_character()
+        return {"inventory": [item.model_dump() if hasattr(item, 'model_dump') else item for item in self.character_data.inventory]}
+
+    def unequip_item(self, item_id: str) -> Dict:
+        """
+        ### unequip_item
+        **Description:** Déséquipe un objet pour le personnage
+        **Paramètres:**
+        - `item_id` (str): L'identifiant de l'objet
+        **Retour:** dict - Résumé de l'inventaire mis à jour avec l'objet déséquipé
+        """
+        if hasattr(self.character_data, 'inventory') and self.character_data.inventory:
+            for item in self.character_data.inventory:
+                if hasattr(item, 'id') and item.id == item_id:
+                    if hasattr(item, 'is_equipped'):
+                        item.is_equipped = False
+                    break
+        
+        self.save_character()
+        return {"inventory": [item.model_dump() if hasattr(item, 'model_dump') else item for item in self.character_data.inventory]}

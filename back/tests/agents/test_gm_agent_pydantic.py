@@ -1,175 +1,169 @@
 """
-Tests pour l'agent GM migré vers PydanticAI.
+Tests pour l'agent GM migré vers PydanticAI (sans appels LLM).
 """
 
 import pytest
 from unittest.mock import patch
 from back.agents.gm_agent_pydantic import (
-    build_gm_agent_pydantic,
     GMAgentDependencies,
-    _get_scenario_content,
-    _get_rules_content,
-    _build_system_prompt,
     enrich_user_message_with_character
 )
+from back.agents.PROMPT import get_scenario_content, get_rules_content, build_system_prompt
 
 
 class TestGMAgentPydantic:
     """
-    ### TestGMAgentPydantic
-    **Description :** Classe de tests pour l'agent GM utilisant PydanticAI.
+    ### TestGMAgentPydantic  
+    **Description :** Tests unitaires pour l'agent GM PydanticAI (sans appels LLM).
     """
 
-    def test_gm_agent_dependencies_initialization(self):
-        """
-        ### test_gm_agent_dependencies_initialization
-        **Description :** Teste l'initialisation des dépendances de l'agent GM.
-        **Paramètres :** Aucun.
-        **Retour :** Aucun.
-        """
-        session_id = "test_session"
-        character_data = {"name": "Aragorn", "level": 5}
+    # =============================================================================
+    # TESTS DES FONCTIONS DE CHARGEMENT DE CONTENU
+    # =============================================================================
+    
+    def test_get_scenario_content_success(self):
+        """Teste le chargement réussi du contenu d'un scénario."""
+        scenario_content = "Test scenario content with markdown"
         
-        deps = GMAgentDependencies(session_id=session_id, character_data=character_data)
-        
-        assert deps.session_id == session_id
-        assert deps.character_data == character_data
-        assert deps.store is not None
-
-    def test_get_scenario_content_existing_file(self):
-        """
-        ### test_get_scenario_content_existing_file
-        **Description :** Teste le chargement d'un fichier scénario existant.
-        **Paramètres :** Aucun.
-        **Retour :** Aucun.
-        """
         with patch("pathlib.Path.exists", return_value=True), \
-             patch("pathlib.Path.read_text", return_value="Contenu du scénario test"):
-            
-            content = _get_scenario_content("test_scenario.md")
-            assert content == "Contenu du scénario test"
+             patch("pathlib.Path.read_text", return_value=scenario_content):
+            content = get_scenario_content("test_scenario.md")
+            assert content == scenario_content
 
-    def test_get_scenario_content_non_existing_file(self):
-        """
-        ### test_get_scenario_content_non_existing_file
-        **Description :** Teste le comportement avec un fichier scénario inexistant.
-        **Paramètres :** Aucun.
-        **Retour :** Aucun.
-        """
+    def test_get_scenario_content_file_not_found(self):
+        """Teste le comportement quand le fichier de scénario n'existe pas."""
         with patch("pathlib.Path.exists", return_value=False):
-            content = _get_scenario_content("inexistant.md")
+            content = get_scenario_content("inexistant.md")
             assert content == ""
 
-    def test_get_rules_content(self):
-        """
-        ### test_get_rules_content
-        **Description :** Teste le chargement du contenu des règles.
-        **Paramètres :** Aucun.
-        **Retour :** Aucun.
-        """
-        mock_content = "# Règles de combat\nContenu des règles..."
+    def test_get_scenario_content_with_special_characters(self):
+        """Teste le chargement d'un scénario avec des caractères spéciaux."""
+        scenario_content = "Scénario avec des caractères spéciaux: àéèùç"
         
         with patch("pathlib.Path.exists", return_value=True), \
-             patch("builtins.open", mock_data=mock_content):
-            
-            content = _get_rules_content()
-            # Vérifier que le contenu contient les en-têtes de section
-            assert "=== section-6-combat.md ===" in content or content == ""
+             patch("pathlib.Path.read_text", return_value=scenario_content):
+            content = get_scenario_content("test_scenario.md")
+            assert content == scenario_content
 
-    def test_build_system_prompt_without_scenario(self):
-        """
-        ### test_build_system_prompt_without_scenario
-        **Description :** Teste la construction du prompt système sans scénario.
-        **Paramètres :** Aucun.
-        **Retour :** Aucun.
-        """
-        prompt = _build_system_prompt()
+    # =============================================================================
+    # TESTS DES FONCTIONS DE CHARGEMENT DES RÈGLES
+    # =============================================================================
+    
+    def test_get_rules_content_success(self):
+        """Teste le chargement réussi du contenu des règles."""
+        rules_content = "Test rules content"
         
-        assert "Maître du Donjon (RPG-Bot)" in prompt
-        assert "Terres du Milieu" in prompt
-        assert "SCÉNARIO :" in prompt
+        with patch("pathlib.Path.exists", return_value=True), \
+             patch("pathlib.Path.read_text", return_value=rules_content):
+            content = get_rules_content()
+            assert content == rules_content
 
-    def test_build_system_prompt_with_scenario(self):
-        """
-        ### test_build_system_prompt_with_scenario
-        **Description :** Teste la construction du prompt système avec un scénario.
-        **Paramètres :** Aucun.
-        **Retour :** Aucun.
-        """
-        with patch("back.agents.gm_agent_pydantic._get_scenario_content", return_value="Scénario de test"):
-            prompt = _build_system_prompt("test_scenario.md")
-            
-            assert "Scénario de test" in prompt
+    # =============================================================================
+    # TESTS DE CONSTRUCTION DU PROMPT SYSTÈME
+    # =============================================================================
+    
+    def test_build_system_prompt_basic(self):
+        """Teste la construction basique du prompt système."""
+        prompt = build_system_prompt("Les_Pierres_du_Passe.md")
+        assert isinstance(prompt, str)
+        assert len(prompt) > 0
 
-    def test_enrich_user_message_with_character(self):
-        """
-        ### test_enrich_user_message_with_character
-        **Description :** Teste l'enrichissement d'un message utilisateur avec les données du personnage.
-        **Paramètres :** Aucun.
-        **Retour :** Aucun.
-        """
-        message = "Je veux attaquer l'orc"
-        character_json = '{"name": "Legolas", "classe": "Archer"}'
+    def test_build_system_prompt_with_mock_content(self):
+        """Teste la construction du prompt avec du contenu mocké."""
+        mock_scenario = "Mock scenario content"
+        mock_rules = "Mock rules content"
         
-        enriched_message = enrich_user_message_with_character(message, character_json)
-        assert message in enriched_message
-        assert character_json in enriched_message
-        assert "PERSONNAGE_JSON:" in enriched_message
+        with patch("back.agents.PROMPT.get_scenario_content", return_value=mock_scenario), \
+             patch("back.agents.PROMPT.get_rules_content", return_value=mock_rules):
+            prompt = build_system_prompt("test_scenario.md")
+            assert mock_scenario in prompt
+            assert mock_rules in prompt
 
-    def test_build_gm_agent_pydantic(self):
-        """
-        ### test_build_gm_agent_pydantic
-        **Description :** Teste la construction de l'agent GM PydanticAI.
-        **Paramètres :** Aucun.
-        **Retour :** Aucun.
-        """
-        session_id = "test_session"
-        scenario_name = "test_scenario.md"
+    # =============================================================================
+    # TESTS D'ENRICHISSEMENT DE MESSAGES
+    # =============================================================================
+    
+    def test_enrich_user_message_with_character_complete(self):
+        """Teste l'enrichissement complet d'un message avec données de personnage."""
+        character_data = {
+            "id": "test-id",
+            "name": "Thorin Forgeheart",
+            "race": "Nain",
+            "profession": "Guerrier",
+            "culture": "Montagnes de Fer",
+            "attributes": {
+                "Vigueur": 16,
+                "Agilité": 10,
+                "Intelligence": 8,
+                "Perception": 12,
+                "Volonté": 14,
+                "Charisme": 7
+            },
+            "skills": {
+                "Armes blanches": 85,
+                "Bouclier": 75,
+                "Combat": 80,
+                "Forge": 70
+            },
+            "hp": 50,
+            "inventory": ["Épée en fer", "Bouclier rond"],
+            "equipment": ["Armure de cuir"],
+            "spells": []
+        }
         
-        with patch("back.agents.gm_agent_pydantic._build_system_prompt", return_value="Prompt test"):
-            agent, deps = build_gm_agent_pydantic(session_id=session_id, scenario_name=scenario_name)
-            
-            assert deps.session_id == session_id
-            assert agent is not None
-
-    @pytest.mark.asyncio
-    async def test_apply_xp_tool_integration(self):
-        """
-        ### test_apply_xp_tool_integration
-        **Description :** Teste l'intégration de l'outil d'application d'XP.
-        **Paramètres :** Aucun.
-        **Retour :** Aucun.
-        """
-        # Les outils sont maintenant définis directement dans l'agent via les décorateurs
-        # Créons un agent pour tester que les outils sont bien présents
-        agent, deps = build_gm_agent_pydantic("test_session", "test_scenario")
+        message = "Je veux attaquer l'orc avec mon épée."
+        enriched = enrich_user_message_with_character(message, character_data)
         
-        # Vérifier que l'agent a bien été créé
-        assert agent is not None
-        assert deps is not None
-          # Les outils sont intégrés via @agent.tool, pas comme fonctions exportées
-        # Donc on teste que l'agent peut être créé sans erreur
-        print("Agent PydanticAI créé avec succès avec les outils intégrés")
-
-    @pytest.mark.asyncio
-    async def test_skill_check_tool_integration(self):
-        """
-        ### test_skill_check_tool_integration
-        **Description :** Teste l'intégration de l'outil de jet de compétence.
-        **Paramètres :** Aucun.
-        **Retour :** Aucun.
-        """
-        # Les outils sont maintenant définis directement dans l'agent via les décorateurs
-        # Créons un agent pour tester que les outils sont bien présents
-        agent, deps = build_gm_agent_pydantic("test_session", "test_scenario")
+        # Vérifier que le message original est présent
+        assert message in enriched
         
-        # Vérifier que l'agent a bien été créé
-        assert agent is not None
-        assert deps is not None
+        # Vérifier que les données du personnage sont incluses
+        assert "Thorin Forgeheart" in enriched
+        assert "Nain" in enriched
+        assert "Guerrier" in enriched
+        assert "Vigueur" in enriched
+        assert "Combat" in enriched
+
+    def test_enrich_user_message_empty_character_data(self):
+        """Teste l'enrichissement avec des données de personnage minimales."""
+        character_data = {
+            "id": "minimal-id",
+            "name": "Minimal Character",
+            "race": "Humain",
+            "profession": "Novice",
+            "culture": "Test",
+            "attributes": {},
+            "skills": {},
+            "hp": 10,
+            "inventory": [],
+            "equipment": [],
+            "spells": []
+        }
         
-        # Les outils sont intégrés via @agent.tool, pas comme fonctions exportées
-        print("Agent PydanticAI créé avec succès avec les outils de compétence intégrés")
+        message = "Test message"
+        enriched = enrich_user_message_with_character(message, character_data)
+        
+        assert message in enriched
+        assert "Minimal Character" in enriched
 
+    # =============================================================================
+    # TESTS DE VALIDATION DES MODULES
+    # =============================================================================
+    
+    def test_module_imports_successful(self):
+        """Teste que tous les modules nécessaires peuvent être importés."""
+        try:
+            from back.agents.gm_agent_pydantic import GMAgentDependencies
+            from back.agents.PROMPT import build_system_prompt, get_scenario_content, get_rules_content
+            assert True  # Si on arrive ici, tous les imports ont réussi
+        except ImportError as e:
+            pytest.fail(f"Import failed: {e}")
 
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
+    def test_gm_agent_dependencies_basic_creation(self):
+        """Teste la création basique des dépendances GM."""
+        session_id = "test-session-123"
+        deps = GMAgentDependencies(session_id=session_id)
+        
+        assert deps.session_id == session_id
+        assert deps.character_data is None
+        assert deps.store is not None

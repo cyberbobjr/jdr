@@ -6,11 +6,9 @@ Gère le chargement et la sauvegarde de l'historique, ainsi que les données de 
 import os
 import pathlib
 from typing import Dict, Any, Optional, List
-from uuid import UUID
 
 from back.services.character_service import CharacterService
 from back.storage.pydantic_jsonl_store import PydanticJsonlStore
-from back.utils.logger import log_debug
 
 
 class SessionService:
@@ -24,7 +22,6 @@ class SessionService:
     - `scenario_name` (str) : Nom du scénario associé à la session
     - `store` (PydanticJsonlStore) : Store pour l'historique des messages
     """
-    
     def __init__(self, session_id: str, character_id: Optional[str] = None, scenario_name: Optional[str] = None):
         """
         ### __init__
@@ -38,6 +35,7 @@ class SessionService:
         self.character_id = character_id
         self.character_data: Dict[str, Any] = {}
         self.scenario_name: str = ""
+        self.character_service: Optional[CharacterService] = None
         
         # Initialiser le store pour l'historique
         project_root = pathlib.Path(__file__).parent.parent.parent
@@ -63,7 +61,6 @@ class SessionService:
         """
         project_root = pathlib.Path(__file__).parent.parent.parent
         session_dir = project_root / "data" / "sessions" / self.session_id
-        
         if session_dir.exists() and session_dir.is_dir():
             # Charger l'ID du personnage
             character_file = session_dir / "character.txt"
@@ -71,10 +68,10 @@ class SessionService:
                 character_id = character_file.read_text(encoding='utf-8').strip()
                 self.character_id = character_id  # Important: définir l'attribut character_id
                 
-                # Charger les données complètes du personnage via CharacterService
+                # Créer l'instance CharacterService pour ce personnage
                 try:
-                    character = CharacterService.get_character(character_id)
-                    self.character_data = character.dict()
+                    self.character_service = CharacterService(character_id)
+                    self.character_data = self.character_service.character_data.model_dump()
                 except FileNotFoundError:
                     raise ValueError(f"Personnage {character_id} introuvable")
             
@@ -109,14 +106,13 @@ class SessionService:
         # Sauvegarder le nom du scénario
         scenario_file = session_dir / "scenario.txt"
         scenario_file.write_text(scenario_name, encoding='utf-8')
-        
-        # Définir l'attribut character_id
+          # Définir l'attribut character_id
         self.character_id = character_id
         
-        # Charger les données du personnage via CharacterService
+        # Créer l'instance CharacterService pour ce personnage
         try:
-            character = CharacterService.get_character(character_id)
-            self.character_data = character.dict()
+            self.character_service = CharacterService(character_id)
+            self.character_data = self.character_service.character_data.model_dump()
         except FileNotFoundError:
             raise ValueError(f"Personnage {character_id} introuvable")
         

@@ -1,27 +1,41 @@
 import pytest
-from uuid import uuid4
-from back.services.inventory_service import InventoryService
+from back.services.character_service import CharacterService
 
 @pytest.fixture
-def inventory_service():
-    return InventoryService()
+def character_service():
+    # Utiliser un personnage existant pour les tests
+    return CharacterService("79e55c14-7dd5-4189-b209-ea88f6d067eb")
 
-def test_add_item(inventory_service):
-    player_id = uuid4()
-    result = inventory_service.add_item(player_id, "sword", 1)
+def test_add_item(character_service):
+    result = character_service.add_item("sword", 1)
     assert "inventory" in result
 
-def test_remove_item(inventory_service):
-    player_id = uuid4()
-    result = inventory_service.remove_item(player_id, "sword", 1)
+def test_remove_item(character_service):
+    result = character_service.remove_item("sword", 1)
     assert "inventory" in result
 
-def test_equip_item(inventory_service):
-    player_id = uuid4()
-    result = inventory_service.equip_item(player_id, "sword")
-    assert "equipped" in result
+def test_equip_item(character_service):
+    result = character_service.equip_item("sword")
+    assert "inventory" in result
 
-def test_unequip_item(inventory_service):
-    player_id = uuid4()
-    result = inventory_service.unequip_item(player_id, "sword")
-    assert "equipped" in result
+def test_unequip_item(character_service):
+    result = character_service.unequip_item("sword")
+    assert "inventory" in result
+
+def test_inventory_workflow(character_service):
+    """Test du workflow complet d'inventaire"""
+    # Ajouter un objet
+    result = character_service.add_item("test_item", 2)
+    assert "inventory" in result
+    
+    # Équiper l'objet
+    result = character_service.equip_item("test_item")
+    assert "inventory" in result
+    
+    # Déséquiper l'objet
+    result = character_service.unequip_item("test_item")
+    assert "inventory" in result
+    
+    # Retirer l'objet
+    result = character_service.remove_item("test_item", 2)
+    assert "inventory" in result

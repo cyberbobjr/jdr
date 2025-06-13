@@ -83,12 +83,11 @@ async def list_active_sessions():
     try:
         # Récupérer toutes les sessions via SessionService
         sessions = SessionService.list_all_sessions()
-        
-        # Enrichir chaque session avec le nom du personnage
+          # Enrichir chaque session avec le nom du personnage
         enriched_sessions = []
         for session in sessions:
             try:
-                # Récupérer le nom du personnage via CharacterService
+                # Récupérer le nom du personnage via CharacterService (méthode statique)
                 character = CharacterService.get_character(session["character_id"])
                 character_name = character.name
             except Exception as e:
@@ -184,24 +183,15 @@ async def start_scenario(request: StartScenarioRequest):
     except FileNotFoundError as e:
         # Scénario inexistant
         raise HTTPException(status_code=404, detail=str(e))
-    
     try:
-        # Récupérer la fiche personnage pour l'injection
-        character_json = ""
-        try:
-            character = CharacterService.get_character(request.character_id)
-            character_json = character.model_dump_json()
-        except Exception as e:
-            log_debug("Erreur lors du chargement du personnage pour start_scenario", error=str(e), character_id=request.character_id)
-            character_json = ""
-        
-        # Construire l'agent PydanticAI avec le scénario
+        # Construire l'agent PydanticAI avec le scénario (le personnage est accessible via deps.character_service)
         agent, deps = build_gm_agent_pydantic(session_id, request.scenario_name)
         
         # Message initial pour démarrer le scénario
         start_message = "Démarre le scénario et présente-moi la situation initiale."
         
-        # Enrichir le message avec la fiche personnage si disponible
+        # Enrichir le message avec la fiche personnage via le service de session
+        character_json = deps.character_service.get_character_json()
         if character_json:
             enriched_message = enrich_user_message_with_character(start_message, character_json)
         else:
@@ -285,20 +275,11 @@ async def play_scenario(session_id: UUID, request: PlayScenarioRequest):
         session_info = ScenarioService.get_session_info(str(session_id))
         character_id = session_info["character_id"]
         scenario_name = session_info["scenario_name"]
-        
-        # Récupérer la fiche personnage
-        character_json = ""
-        try:
-            character = CharacterService.get_character(character_id)
-            character_json = character.model_dump_json()
-        except Exception as e:
-            log_debug("Erreur lors du chargement du personnage", error=str(e), character_id=character_id)
-            character_json = ""
-        
-        # Construire l'agent PydanticAI avec le scénario
+          # Construire l'agent PydanticAI avec le scénario (le personnage est accessible via deps.character_service)
         agent, deps = build_gm_agent_pydantic(str(session_id), scenario_name)
         
-        # Enrichir le message utilisateur avec la fiche personnage
+        # Enrichir le message utilisateur avec la fiche personnage via le service de session
+        character_json = deps.character_service.get_character_json()
         if character_json:
             enriched_message = enrich_user_message_with_character(request.message, character_json)
         else:
