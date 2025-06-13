@@ -1,171 +1,133 @@
 """
-Tests unitaires pour SessionService.
+Tests pour le service de session (sans dépendances complexes).
 """
 
 import pytest
 import tempfile
-import shutil
-from pathlib import Path
-import json
 import os
+from pathlib import Path
+from unittest.mock import patch, MagicMock
 
 from back.services.session_service import SessionService
 
 
 class TestSessionService:
-    """Tests pour SessionService"""
-    
+    """
+    ### TestSessionService
+    **Description :** Tests unitaires pour le service de session (simplifiés).
+    """
+
     @pytest.fixture
     def temp_dir(self):
-        """Crée un répertoire temporaire pour les tests"""
-        temp_dir = tempfile.mkdtemp()
-        # Créer la structure de données attendue
-        data_dir = Path(temp_dir) / "data"
-        data_dir.mkdir()
-        (data_dir / "sessions").mkdir()
-        (data_dir / "characters").mkdir()
-        yield temp_dir
-        shutil.rmtree(temp_dir)
-    
-    @pytest.fixture
-    def test_character(self, temp_dir):
-        """Crée un personnage de test"""
-        character_data = {
-            "state": {
-                "name": "Aragorn",
-                "race": "Homme",
-                "culture": "Gondor",
-                "profession": "Rôdeur",
-                "caracteristiques": {
-                    "Force": 85,
-                    "Constitution": 80,
-                    "Agilité": 75,
-                    "Rapidité": 70,
-                    "Volonté": 80,
-                    "Raisonnement": 75,
-                    "Intuition": 80,
-                    "Présence": 70
-                },
-                "competences": {
-                    "Combat": 75,
-                    "Survie": 80,
-                    "Perception": 70
-                },
-                "hp": 100,
-                "xp": 0,
-                "gold": 100,
-                "inventory": [],
-                "spells": [],
-                "equipment_summary": {},
-                "culture_bonuses": {}
-            }
-        }
-        # Sauvegarder le personnage
-        char_path = Path(temp_dir) / "data" / "characters" / "test_char_123.json"
-        with open(char_path, 'w', encoding='utf-8') as f:
-            json.dump(character_data, f)
-        return character_data
-    
-    def test_create_new_session(self, temp_dir, test_character, monkeypatch):
-        """Test la création d'une nouvelle session"""
-        # Patch pour que CharacterPersistenceService et SessionService utilisent temp_dir
-        from back.services import character_persistence_service
+        """Crée un répertoire temporaire pour les tests."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            yield temp_dir
+
+    def test_session_service_initialization_with_mocks(self):
+        """Test l'initialisation du service de session avec des mocks complets."""
+        session_id = "test-session-123"
         
-        def mock_get_character_file_path(character_id: str) -> str:
-            return str(Path(temp_dir) / "data" / "characters" / f"{character_id}.json")
-        
-        monkeypatch.setattr(character_persistence_service.CharacterPersistenceService, 
-                          "_get_character_file_path", staticmethod(mock_get_character_file_path))
-        
-        # Patch le project_root dans SessionService
-        def mock_init(self, session_id: str, character_id=None, scenario_name=None):
-            self.session_id = session_id
-            self.character_id = character_id
-            self.character_data = {}
-            self.scenario_name = ""
-            self.character_service = None
+        # Mock pathlib pour éviter les accès au système de fichiers
+        with patch("back.services.session_service.pathlib.Path") as mock_path:
+            # Mock pour le project_root
+            mock_project_root = MagicMock()
+            mock_path.return_value = mock_project_root
+            mock_project_root.parent.parent.parent = mock_project_root
             
-            # Utiliser temp_dir comme project_root
-            project_root = Path(temp_dir)
-            if not os.path.isabs(session_id):
-                history_path = str(project_root / "data" / "sessions" / f"{session_id}.jsonl")
-            else:
-                history_path = session_id + ".jsonl"
+            # Mock pour le chemin du store
+            mock_history_path = mock_project_root / "data" / "sessions" / f"{session_id}.jsonl"
+            mock_history_path.__str__ = MagicMock(return_value=f"/tmp/sessions/{session_id}.jsonl")
             
-            from back.storage.pydantic_jsonl_store import PydanticJsonlStore
-            self.store = PydanticJsonlStore(history_path)
-            
-            # Charger les données de session ou créer une nouvelle session
-            if not self._load_session_data_with_temp_dir(temp_dir):
-                if character_id and scenario_name:
-                    self._create_session_with_temp_dir(character_id, scenario_name, temp_dir)
-                else:
-                    raise ValueError(f"Session {session_id} n'existe pas et les paramètres de création ne sont pas fournis")
-        
-        def mock_load_session_data(self, temp_dir):
-            session_dir = Path(temp_dir) / "data" / "sessions" / self.session_id
-            if session_dir.exists() and session_dir.is_dir():
-                character_file = session_dir / "character.txt"
-                if character_file.exists():
-                    character_id = character_file.read_text(encoding='utf-8').strip()
-                    self.character_id = character_id
-                    
-                    from back.services.character_service import CharacterService
-                    try:
-                        self.character_service = CharacterService(character_id)
-                        self.character_data = self.character_service.character_data.model_dump()
-                    except FileNotFoundError:
-                        raise ValueError(f"Personnage {character_id} introuvable")
+            # Mock PydanticJsonlStore
+            with patch("back.services.session_service.PydanticJsonlStore") as mock_store:
+                mock_store_instance = MagicMock()
+                mock_store.return_value = mock_store_instance
                 
-                scenario_file = session_dir / "scenario.txt"
-                if scenario_file.exists():
-                    self.scenario_name = scenario_file.read_text(encoding='utf-8').strip()
-                else:
-                    self.scenario_name = 'Les_Pierres_du_Passe.md'
-                
-                return True
-            return False
+                # Mock _load_session_data pour retourner False (pas de session existante)
+                with patch.object(SessionService, "_load_session_data", return_value=False):
+                    # Test avec parameters manquants (devrait lever une exception)
+                    with pytest.raises(ValueError, match="n'existe pas"):
+                        SessionService(session_id)
+
+    def test_session_service_with_character_id_mock(self):
+        """Test l'initialisation avec character_id en mockant les dépendances."""
+        session_id = "test-session-456"
+        character_id = "test-character"
+        scenario_name = "test-scenario.md"
         
-        def mock_create_session(self, character_id: str, scenario_name: str, temp_dir):
-            session_dir = Path(temp_dir) / "data" / "sessions" / self.session_id
-            session_dir.mkdir(parents=True, exist_ok=True)
+        with patch("back.services.session_service.pathlib.Path") as mock_path, \
+             patch("back.services.session_service.PydanticJsonlStore") as mock_store, \
+             patch.object(SessionService, "_load_session_data", return_value=False), \
+             patch.object(SessionService, "_create_session") as mock_create:
             
-            character_file = session_dir / "character.txt"
-            character_file.write_text(character_id, encoding='utf-8')
+            # Configuration des mocks
+            mock_project_root = MagicMock()
+            mock_path.return_value = mock_project_root
+            mock_path.__file__ = "/test/session_service.py"
+            mock_project_root.parent.parent.parent = mock_project_root
             
-            scenario_file = session_dir / "scenario.txt"
-            scenario_file.write_text(scenario_name, encoding='utf-8')
+            mock_store_instance = MagicMock()
+            mock_store.return_value = mock_store_instance
             
-            self.character_id = character_id
+            # Créer la session
+            session = SessionService(session_id, character_id, scenario_name)
             
-            from back.services.character_service import CharacterService
-            try:
-                self.character_service = CharacterService(character_id)
-                self.character_data = self.character_service.character_data.model_dump()
-            except FileNotFoundError:
-                raise ValueError(f"Personnage {character_id} introuvable")
+            # Vérifications
+            assert session.session_id == session_id
+            assert session.character_id == character_id
+            mock_create.assert_called_once_with(character_id, scenario_name)
+
+    def test_session_service_store_initialization(self):
+        """Test que le store est correctement initialisé."""
+        session_id = "test-store-init"
+        
+        with patch("back.services.session_service.pathlib.Path") as mock_path, \
+             patch("back.services.session_service.PydanticJsonlStore") as mock_store, \
+             patch.object(SessionService, "_load_session_data", return_value=True):
             
-            self.scenario_name = scenario_name
+            mock_project_root = MagicMock()
+            mock_path.return_value = mock_project_root
+            mock_path.__file__ = "/test/session_service.py"
+            
+            mock_store_instance = MagicMock()
+            mock_store.return_value = mock_store_instance
+            
+            session = SessionService(session_id)
+            
+            assert session.store == mock_store_instance
+            mock_store.assert_called_once()
+
+    def test_session_service_absolute_path_handling(self):
+        """Test le traitement des chemins absolus pour session_id."""
+        absolute_session_id = "/tmp/absolute/session"
         
-        monkeypatch.setattr(SessionService, "__init__", mock_init)
-        monkeypatch.setattr(SessionService, "_load_session_data_with_temp_dir", mock_load_session_data)
-        monkeypatch.setattr(SessionService, "_create_session_with_temp_dir", mock_create_session)
+        with patch("back.services.session_service.os.path.isabs", return_value=True), \
+             patch("back.services.session_service.PydanticJsonlStore") as mock_store, \
+             patch.object(SessionService, "_load_session_data", return_value=True):
+            
+            mock_store_instance = MagicMock()
+            mock_store.return_value = mock_store_instance
+            
+            session = SessionService(absolute_session_id)
+            
+            # Vérifier que le store est appelé avec le bon chemin
+            expected_path = absolute_session_id + ".jsonl"
+            mock_store.assert_called_once_with(expected_path)
+
+    def test_session_attributes_initialization(self):
+        """Test que tous les attributs sont correctement initialisés."""
+        session_id = "test-attributes"
         
-        session_id = "test_session_001"
-        character_id = "test_char_123"
-        scenario_name = "Test_Scenario.md"
-        
-        # Créer une nouvelle session
-        session = SessionService(session_id, character_id=character_id, scenario_name=scenario_name)
-        
-        # Vérifier que les données sont correctement chargées
-        assert session.session_id == session_id
-        assert session.character_service is not None
-        assert session.character_service.character_data.name == "Aragorn"
-        assert session.scenario_name == scenario_name
-        
-        # Vérifier que les fichiers ont été créés
-        session_dir = Path(temp_dir) / "data" / "sessions" / session_id
-        assert session_dir.exists()
-        assert (session_dir / "character.txt").read_text() == character_id
-        assert (session_dir / "scenario.txt").read_text() == scenario_name
+        with patch("back.services.session_service.pathlib.Path"), \
+             patch("back.services.session_service.PydanticJsonlStore"), \
+             patch.object(SessionService, "_load_session_data", return_value=True):
+            
+            session = SessionService(session_id)
+            
+            # Vérifier que tous les attributs sont initialisés
+            assert session.session_id == session_id
+            assert session.character_id is None  # Initial value
+            assert isinstance(session.character_data, dict)
+            assert session.scenario_name == ""  # Initial value
+            assert session.character_service is None  # Initial value
+            assert session.store is not None
