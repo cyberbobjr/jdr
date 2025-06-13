@@ -1,6 +1,6 @@
 import { config } from '@vue/test-utils'
 
-// Mock FontAwesome globalement pour les tests
+// Mock FontAwesome et RouterLink globalement pour les tests
 config.global.stubs = {
   'font-awesome-icon': {
     template: '<i class="fa-mock" />'

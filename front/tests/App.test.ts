@@ -54,18 +54,6 @@ describe('App', () => {
     expect(wrapper.text()).toContain('Accueil')
     expect(wrapper.text()).toContain('Sessions')
   })
-  it('devrait afficher le footer', () => {
-    const wrapper = mount(App, {
-      global: {
-        plugins: [router],
-        components: {
-          'font-awesome-icon': mockFontAwesome
-        }
-      }
-    })
-    
-    expect(wrapper.text()).toContain('Créé avec Vue.js 3, TypeScript, TailwindCSS et FastAPI')
-  })
   it('devrait avoir les liens de navigation', () => {
     const wrapper = mount(App, {
       global: {

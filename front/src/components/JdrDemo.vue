@@ -45,7 +45,7 @@ const character = ref({
 </script>
 
 <template>
-  <div class="max-w-4xl mx-auto p-6">
+  <div class="w-full mx-auto p-6">
     <!-- Titre de la démonstration -->
     <div class="text-center mb-8">
       <h2 class="text-3xl font-bold text-white mb-4 flex items-center justify-center space-x-3">

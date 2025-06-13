@@ -1,84 +1,44 @@
 // Service API pour l'application JDR "Terres du Milieu"
 // Gestion complète des appels backend FastAPI + PydanticAI
+//
+// Ce fichier utilise les interfaces définies dans interfaces.ts basées sur le fichier OpenAPI JSON
+// Les seules interfaces définies ici sont spécifiques au frontend (GameSession, etc.)
 
-import type { CharacterContext } from './interfaces';
+import type {
+  CharacterContext,
+  Character,
+  CharacterList,
+  ScenarioStatus,
+  ScenarioList,
+  StartScenarioRequest,
+  StartScenarioResponse,
+  PlayScenarioRequest,
+  PlayScenarioResponse,
+  AttackEndpointResponse,
+  GetScenarioDetailsResponse,
+  GetScenarioHistoryResponse,
+  ApiErrorResponse,
+  HistoryResponse,
+  ConversationMessage
+}
+  from "./interfaces";
 
 // ========================================
 // Configuration et types API
 // ========================================
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-// Types pour les requêtes et réponses API
-export interface Character {
-  id: string;
-  name: string;
-  race: string;
-  culture: string;
-  profession: string;
-  caracteristiques: Record<string, number>;
-  competences: Record<string, number>;
-  hp: number;
-  inventory: Item[];
-  equipment: string[];
-  spells: string[];
-  equipment_summary?: Record<string, number> | null;
-  culture_bonuses?: Record<string, number> | null;
-}
-
-export interface Item {
-  id: string;
-  name: string;
-  weight: number;
-  base_value: number;
-}
-
-export interface CharacterList {
-  characters: Character[];
-}
-
-export interface ScenarioStatus {
-  name: string;
-  status: string;
-  session_id?: string | null;
-  scenario_name?: string | null;
-  character_name?: string | null;
-}
-
-export interface ScenarioList {
-  scenarios: ScenarioStatus[];
-}
-
-export interface StartScenarioRequest {
-  scenario_name: string;
-  character_id: string;
-}
-
-export interface StartScenarioResponse {
-  session_id: string;
-  scenario_name: string;
-  character_id: string;
-  message: string;
-  initial_response: string;
-}
-
-export interface PlayScenarioRequest {
-  message: string;
-}
-
-export interface PlayScenarioResponse {
-  response: string;
-  tool_calls?: any[];
-}
-
+// Types spécifiques au frontend (non présents dans l'OpenAPI)
 export interface GameSession {
   session_id: string;
   scenario_name: string;
   character_name: string;
-  status: 'active' | 'paused' | 'completed';
+  status: "active" | "paused" | "completed";
   last_activity: string;
 }
 
+// Interface combinée pour les requêtes d'attaque de combat
 export interface CombatAttackRequest {
   attacker_id: string;
   target_id: string;
@@ -97,7 +57,7 @@ export class ApiError extends Error {
     public details?: any
   ) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
   }
 }
 
@@ -110,10 +70,10 @@ async function makeRequest<T>(
   options: RequestInit = {}
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
-  
+
   const defaultHeaders = {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    "Content-Type": "application/json",
+    Accept: "application/json",
   };
 
   const config: RequestInit = {
@@ -123,19 +83,18 @@ async function makeRequest<T>(
       ...options.headers,
     },
   };
-
   try {
     const response = await fetch(url, config);
-    
+
     if (!response.ok) {
       let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-      let errorDetails;
+      let errorDetails: ApiErrorResponse | undefined;
 
       try {
-        errorDetails = await response.json();
+        errorDetails = (await response.json()) as ApiErrorResponse;
         if (errorDetails.detail) {
-          errorMessage = Array.isArray(errorDetails.detail) 
-            ? errorDetails.detail.map((d: any) => d.msg).join(', ')
+          errorMessage = Array.isArray(errorDetails.detail)
+            ? errorDetails.detail.map((d) => d.msg).join(", ")
             : errorDetails.detail;
         }
       } catch {
@@ -145,19 +104,24 @@ async function makeRequest<T>(
       throw new ApiError(response.status, errorMessage, errorDetails);
     }
 
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
       return await response.json();
     } else {
-      return await response.text() as unknown as T;
+      return (await response.text()) as unknown as T;
     }
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;
     }
-    
+
     // Erreur de réseau ou autre
-    throw new ApiError(0, `Erreur de connexion: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+    throw new ApiError(
+      0,
+      `Erreur de connexion: ${
+        error instanceof Error ? error.message : "Erreur inconnue"
+      }`
+    );
   }
 }
 
@@ -166,7 +130,6 @@ async function makeRequest<T>(
 // ========================================
 
 export class JdrApiService {
-  
   // ========================================
   // Gestion des personnages
   // ========================================
@@ -175,7 +138,7 @@ export class JdrApiService {
    * Récupère la liste de tous les personnages disponibles
    */
   static async getCharacters(): Promise<Character[]> {
-    const result = await makeRequest<CharacterList>('/api/characters/');
+    const result = await makeRequest<CharacterList>("/api/characters/");
     return result.characters;
   }
 
@@ -184,7 +147,7 @@ export class JdrApiService {
    */
   static async getCharacter(id: string): Promise<Character | null> {
     const characters = await this.getCharacters();
-    return characters.find(char => char.id === id) || null;
+    return characters.find((char) => char.id === id) || null;
   }
 
   // ========================================
@@ -195,43 +158,55 @@ export class JdrApiService {
    * Récupère la liste de tous les scénarios avec leur statut
    */
   static async getScenarios(): Promise<ScenarioStatus[]> {
-    const result = await makeRequest<ScenarioList>('/api/scenarios/');
+    const result = await makeRequest<ScenarioList>("/api/scenarios/");
     return result.scenarios;
   }
-
   /**
    * Récupère le contenu détaillé d'un scénario
    */
   static async getScenarioDetails(scenarioFile: string): Promise<string> {
-    return await makeRequest<string>(`/api/scenarios/${encodeURIComponent(scenarioFile)}`);
+    const result = await makeRequest<GetScenarioDetailsResponse>(
+      `/api/scenarios/${encodeURIComponent(scenarioFile)}`
+    );
+    return result.content || (result as unknown as string); // Compatibilité avec l'ancien format
   }
 
   /**
    * Démarre un nouveau scénario avec un personnage
    */
-  static async startScenario(request: StartScenarioRequest): Promise<StartScenarioResponse> {
-    return await makeRequest<StartScenarioResponse>('/api/scenarios/start', {
-      method: 'POST',
+  static async startScenario(
+    request: StartScenarioRequest
+  ): Promise<StartScenarioResponse> {
+    return await makeRequest<StartScenarioResponse>("/api/scenarios/start", {
+      method: "POST",
       body: JSON.stringify(request),
     });
   }
-
   /**
    * Envoie un message pour jouer le scénario
    */
-  static async playScenario(sessionId: string, request: PlayScenarioRequest): Promise<PlayScenarioResponse> {
+  static async playScenario(
+    sessionId: string,
+    request: PlayScenarioRequest
+  ): Promise<PlayScenarioResponse> {
+    this.validateSessionParams(sessionId);
     const params = new URLSearchParams({ session_id: sessionId });
-    return await makeRequest<PlayScenarioResponse>(`/api/scenarios/play?${params}`, {
-      method: 'POST',
-      body: JSON.stringify(request),
-    });
+    return await makeRequest<PlayScenarioResponse>(
+      `/api/scenarios/play?${params}`,
+      {
+        method: "POST",
+        body: JSON.stringify(request),
+      }
+    );
   }
-
   /**
    * Récupère l'historique complet d'une session de jeu
    */
-  static async getScenarioHistory(sessionId: string): Promise<any[]> {
-    const result = await makeRequest<{ history: any[] }>(`/api/scenarios/history/${sessionId}`);
+  static async getScenarioHistory(sessionId: string): Promise<ConversationMessage[]> {
+    this.validateSessionParams(sessionId);
+    const result = await makeRequest<GetScenarioHistoryResponse>(
+      `/api/scenarios/history/${sessionId}`
+    );
     return result.history || [];
   }
 
@@ -240,54 +215,32 @@ export class JdrApiService {
   // ========================================
 
   /**
-   * Récupère la liste des sessions de jeu en cours
+   * Récupère la liste des sessions de jeu en cours (API REST)
+   * Utilise l'endpoint /api/scenarios/sessions (voir openapi.json)
+   * @returns {Promise<GameSession[]>} Liste des sessions actives
    */
   static async getActiveSessions(): Promise<GameSession[]> {
-    const scenarios = await this.getScenarios();
-    const activeSessions: GameSession[] = [];
-
-    for (const scenario of scenarios) {
-      if (scenario.status === 'active' && scenario.session_id) {
-        activeSessions.push({
-          session_id: scenario.session_id,
-          scenario_name: scenario.scenario_name || scenario.name,
-          character_name: scenario.character_name || 'Personnage inconnu',
-          status: 'active',
-          last_activity: new Date().toISOString(), // On pourrait récupérer cela du backend
-        });
-      }
-    }
-
-    return activeSessions;
+    const result = await makeRequest<{ sessions: any[] }>("/api/scenarios/sessions");
+    // Adaptation du format backend -> frontend
+    return result.sessions.map((s) => ({
+      session_id: s.session_id,
+      scenario_name: s.scenario_name,
+      character_name: s.character_name,
+      status: "active", // Le backend ne fournit pas de statut, on suppose "active"
+      last_activity: new Date().toISOString(), // Optionnel, à améliorer si le backend fournit l'info
+    }));
   }
-
   /**
    * Récupère une session spécifique par son ID
    */
   static async getSession(sessionId: string): Promise<GameSession | null> {
+    if (!this.isValidUUID(sessionId)) {
+      return null;
+    }
     const sessions = await this.getActiveSessions();
-    return sessions.find(session => session.session_id === sessionId) || null;
+    return sessions.find((session) => session.session_id === sessionId) || null;
   }
 
-  // ========================================
-  // Gestion du combat
-  // ========================================
-
-  /**
-   * Effectue une attaque dans le système de combat
-   */
-  static async performAttack(request: CombatAttackRequest): Promise<Record<string, any>> {
-    const params = new URLSearchParams({
-      attacker_id: request.attacker_id,
-      target_id: request.target_id,
-      attack_value: request.attack_value.toString(),
-    });
-
-    return await makeRequest<Record<string, any>>(`/api/combat/attack?${params}`, {
-      method: 'POST',
-      body: JSON.stringify(request.combat_state),
-    });
-  }
 
   // ========================================
   // Utilitaires et helpers
@@ -310,11 +263,10 @@ export class JdrApiService {
    */
   static formatScenarioName(name: string): string {
     return name
-      .replace(/\.md$/, '') // Retire l'extension .md
-      .replace(/_/g, ' ') // Remplace les underscores par des espaces
-      .replace(/\b\w/g, l => l.toUpperCase()); // Met en forme title case
+      .replace(/\.md$/, "") // Retire l'extension .md
+      .replace(/_/g, " ") // Remplace les underscores par des espaces
+      .replace(/\b\w/g, (l) => l.toUpperCase()); // Met en forme title case
   }
-
   /**
    * Convertit un Character en CharacterContext pour les interfaces existantes
    */
@@ -328,7 +280,7 @@ export class JdrApiService {
       caracteristiques: character.caracteristiques,
       competences: character.competences,
       hp: character.hp,
-      inventory: character.inventory?.map(item => item.name) || [],
+      inventory: character.inventory?.map((item) => item.name) || [],
       equipment: character.equipment || [],
       spells: character.spells || [],
       equipment_summary: {
@@ -340,19 +292,54 @@ export class JdrApiService {
       culture_bonuses: character.culture_bonuses || {},
     };
   }
-
   /**
    * Génère un ID de session temporaire (pour les tests ou fallback)
    */
   static generateSessionId(): string {
     return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
+
+  /**
+   * Valide qu'une chaîne est un UUID valide
+   */
+  static isValidUUID(uuid: string): boolean {
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(uuid);
+  }
+
+  /**
+   * Valide les paramètres d'une session avant l'appel API
+   */
+  static validateSessionParams(sessionId: string): void {
+    if (!sessionId) {
+      throw new ApiError(400, "Session ID is required");
+    }
+    if (!this.isValidUUID(sessionId)) {
+      throw new ApiError(400, "Invalid session ID format");
+    }
+  }
+
+  /**
+   * Gère les erreurs API de manière cohérente
+   */
+  static handleApiError(error: unknown): never {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+
+    if (error instanceof Error) {
+      throw new ApiError(0, `Erreur inattendue: ${error.message}`);
+    }
+
+    throw new ApiError(0, "Erreur inconnue");
+  }
 }
 
 // Export par défaut du service
 export default JdrApiService;
 
-// Export des types pour utilisation dans les composants
+// Re-export des types principaux de interfaces.ts pour une utilisation simplifiée
 export type {
   Character,
   CharacterList,
@@ -362,6 +349,6 @@ export type {
   StartScenarioResponse,
   PlayScenarioRequest,
   PlayScenarioResponse,
-  GameSession,
-  CombatAttackRequest,
-};
+} from './interfaces';
+
+// Note: GameSession et CombatAttackRequest sont déjà exportés via leurs définitions d'interface ci-dessus

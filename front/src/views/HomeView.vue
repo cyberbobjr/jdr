@@ -288,10 +288,6 @@ onMounted(async () => {
               <font-awesome-icon :icon="['fas', 'play']" />
               Commencer Maintenant
             </router-link>
-            <router-link to="/about" class="jdr-btn jdr-btn-outline jdr-btn-lg">
-              <font-awesome-icon :icon="['fas', 'info-circle']" />
-              En savoir plus
-            </router-link>
           </div>
         </div>
       </div>
@@ -307,15 +303,11 @@ onMounted(async () => {
 /* Section Hero */
 .hero-section {
   padding: 4rem 0 6rem 0;
-  background: linear-gradient(135deg, 
-    rgba(44, 24, 16, 0.9) 0%, 
-    rgba(60, 36, 20, 0.8) 50%, 
-    rgba(74, 44, 24, 0.9) 100%),
-    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23DAA520" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+  background: var(--jdr-bg-primary);
 }
 
 .hero-content {
-  max-width: 800px;
+  width: 100%;
   margin: 0 auto;
 }
 
@@ -376,20 +368,20 @@ onMounted(async () => {
 /* Section Statistiques */
 .stats-section {
   padding: 3rem 0;
-  background: linear-gradient(145deg, var(--jdr-bg-secondary), var(--jdr-bg-tertiary));
+  background: var(--jdr-bg-secondary);
 }
 
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 2rem;
-  max-width: 800px;
+  width: 100%;
   margin: 0 auto;
 }
 
 .stat-card {
   padding: 2rem 1rem;
-  background: linear-gradient(145deg, var(--jdr-bg-primary), var(--jdr-bg-secondary));
+  background: var(--jdr-bg-primary);
   border: 2px solid var(--jdr-border-color);
   transition: all 0.3s ease;
 }
@@ -469,7 +461,7 @@ onMounted(async () => {
 /* Section Démonstration */
 .demo-section {
   padding: 4rem 0;
-  background: linear-gradient(145deg, var(--jdr-bg-tertiary), var(--jdr-bg-secondary));
+  background: var(--jdr-bg-tertiary);
 }
 
 .demo-header {
@@ -477,7 +469,7 @@ onMounted(async () => {
 }
 
 .demo-container {
-  max-width: 1000px;
+  width: 100%;
   margin: 0 auto;
   padding: 2rem;
 }
@@ -488,12 +480,10 @@ onMounted(async () => {
 }
 
 .cta-content {
-  max-width: 600px;
+  width: 100%;
   margin: 0 auto;
   padding: 3rem 2rem;
-  background: linear-gradient(145deg, 
-    rgba(218, 165, 32, 0.1), 
-    rgba(139, 69, 19, 0.1));
+  background: var(--jdr-bg-secondary);
   border: 2px solid var(--jdr-secondary);
 }
 

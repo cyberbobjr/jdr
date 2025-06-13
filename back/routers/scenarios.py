@@ -333,6 +333,46 @@ async def play_scenario(session_id: UUID, request: PlayScenarioRequest):
         )
         raise HTTPException(status_code=500, detail=f"Erreur interne: {str(e)}")
 
+def get_message_dict(obj):
+    """
+    Convertit un objet message (ModelRequest, ModelResponse, etc.) en dict.
+    Essaie .model_dump(), puis .dict(), puis vars(obj).
+    """
+    if hasattr(obj, 'model_dump'):
+        return obj.model_dump()
+    if hasattr(obj, 'dict'):
+        return obj.dict()
+    try:
+        return vars(obj)
+    except Exception:
+        return None
+
+def normalize_json_history(history):
+    """
+    Normalise l'historique JSON natif pour garantir la présence des champs obligatoires dans chaque part.
+    - Ajoute un timestamp ISO si manquant ("1970-01-01T00:00:00Z").
+    - Ajoute content vide si manquant.
+    - Ajoute part_kind 'text' si manquant.
+    """
+    import datetime
+    DEFAULT_TIMESTAMP = "1970-01-01T00:00:00Z"
+    if not isinstance(history, list):
+        return []
+    normalized = []
+    for msg in history:
+        msg = dict(msg)  # Copie défensive
+        parts = msg.get('parts', [])
+        norm_parts = []
+        for part in parts:
+            part = dict(part)
+            part.setdefault('content', '')
+            part.setdefault('timestamp', DEFAULT_TIMESTAMP)
+            part.setdefault('part_kind', 'text')
+            norm_parts.append(part)
+        msg['parts'] = norm_parts
+        normalized.append(msg)
+    return normalized
+
 @router.get("/history/{session_id}", response_model=ScenarioHistoryResponse)
 async def get_scenario_history(session_id: UUID):
     """
@@ -345,55 +385,17 @@ async def get_scenario_history(session_id: UUID):
     **Exceptions :**
     - HTTPException 404 : Si la session n'existe pas.
     - HTTPException 500 : Erreur lors de la récupération de l'historique.
-    
-    **Format de réponse :**
-    ```json
-    {
-        "history": [
-            {
-                "parts": [
-                    {
-                        "content": "Démarre le scénario et présente-moi la situation initiale.",
-                        "timestamp": "2025-06-09T09:30:34.839940Z",
-                        "part_kind": "user-prompt"
-                    }
-                ],
-                "kind": "request"
-            },
-            {
-                "parts": [
-                    {
-                        "content": "**Esgalbar, place centrale du village**...",
-                        "timestamp": "2025-06-09T09:30:35.123456Z",
-                        "part_kind": "text"
-                    }
-                ],
-                "kind": "response",
-                "usage": {
-                    "requests": 1,
-                    "request_tokens": 2951,
-                    "response_tokens": 423,
-                    "total_tokens": 3374
-                },
-                "model_name": "deepseek-chat",
-                "timestamp": "2025-06-09T09:30:35Z"
-            }
-        ]
-    }
-    ```
     """
-    
     log_debug("Appel endpoint scenarios/get_scenario_history", session_id=str(session_id))
     try:
         # Récupérer les informations de session (vérifie l'existence)
         session_info = ScenarioService.get_session_info(str(session_id))
         scenario_name = session_info["scenario_name"]
-        
         # Construire l'agent et accéder au store
         agent, deps = build_gm_agent_pydantic(str(session_id), scenario_name)
-        history = deps.store.load_pydantic_history()
-        return {"history": history}
-        
+        history = deps.store.read_json_history()
+        normalized_history = normalize_json_history(history)
+        return {"history": normalized_history}
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:

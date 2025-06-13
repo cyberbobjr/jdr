@@ -639,9 +639,9 @@ onMounted(() => {
 
 /* Modal de prévisualisation */
 .scenario-preview-modal {
-  max-width: 900px;
-  max-height: 90vh;
+  max-width: none;
   width: 95%;
+  max-height: 90vh;
 }
 
 .full-preview-content {

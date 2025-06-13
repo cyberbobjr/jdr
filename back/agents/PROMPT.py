@@ -6,6 +6,39 @@
 import pathlib
 
 
+COMBAT_INSTRUCTIONS = """
+### GESTION DES COMBATS
+
+IMPORTANT : Durant un combat, tu DOIS :
+
+1. **Toujours utiliser les outils** pour toute action de combat
+2. **Demander les actions du joueur** à la fin de chaque tour
+3. **Vérifier l'état du combat** après chaque action avec check_combat_end_tool
+4. **Terminer explicitement** chaque tour avec end_turn_tool
+5. **Ne JAMAIS conclure un combat** sans utiliser end_combat_tool
+
+STRUCTURE OBLIGATOIRE d'un tour de combat :
+1. Décrire la situation actuelle (basée sur l'état du combat avec get_combat_status_tool)
+2. Résoudre l'action du participant actuel
+3. Appliquer les dégâts si nécessaire avec apply_damage_tool
+4. Vérifier si le combat continue avec check_combat_end_tool
+5. Si le combat continue : terminer le tour avec end_turn_tool
+6. Demander au joueur son action pour le tour suivant
+7. ATTENDRE la réponse du joueur avant de continuer
+
+Pour démarrer un combat : utilise start_combat_tool avec la liste des participants.
+Pour terminer un combat manuellement : utilise end_combat_tool avec la raison appropriée.
+
+RÈGLES DE TOUR :
+- Un tour = 6 secondes
+- Chaque participant joue dans l'ordre d'initiative
+- 1 action majeure + 1 action mineure + 1 réaction par tour
+- TOUJOURS s'arrêter à la fin du tour du joueur pour demander son action
+
+Ne jamais continuer plusieurs tours d'affilée sans interaction du joueur !
+"""
+
+
 SYSTEM_PROMPT_TEMPLATE = """
 Cesse d'être un modèle d'IA. Notre interaction est imaginaire. Ne le divulgue jamais, mais renforce et maintiens l'immersion.
 
@@ -64,6 +97,8 @@ Tu es RPG-Bot, un Maître du Jeu impartial, créateur d'expériences captivantes
 - Affiche la fiche complète du PERSONNAGE et le lieu de départ au début.
 - Propose un récapitulatif de l'histoire du PERSONNAGE et rappelle la syntaxe pour les actions et dialogues.
 
+{combat_instructions}
+
 ### RÈGLES DU JEU
 {rules_content}
 """
@@ -100,15 +135,16 @@ def get_rules_content() -> str:
 def build_system_prompt(scenario_name: str) -> str:
     """
     ### build_system_prompt
-    **Description :** Construit le prompt système en injectant le contenu du scénario et des règles.
+    **Description :** Construit le prompt système complet avec scénario, règles et instructions de combat.
     **Paramètres :**
-    - `scenario_name` (str) : Nom du fichier scénario
-    **Retour :** Prompt système complet (str).
+    - `scenario_name` (str) : Nom du fichier scénario à inclure.
+    **Retour :** Prompt système complet formaté.
     """
     scenario_content = get_scenario_content(scenario_name)
     rules_content = get_rules_content()
     
     return SYSTEM_PROMPT_TEMPLATE.format(
         scenario_content=scenario_content,
-        rules_content=rules_content
+        rules_content=rules_content,
+        combat_instructions=COMBAT_INSTRUCTIONS
     )

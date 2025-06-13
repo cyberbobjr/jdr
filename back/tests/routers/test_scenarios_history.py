@@ -45,11 +45,19 @@ def test_get_scenario_history_returns_full_history(tmp_path, monkeypatch, client
     mock_message3 = MagicMock()
     mock_message3.model_dump.return_value = {"role": "tool", "text": "Résultat d'outil"}
     mock_store = MagicMock()
-    mock_store.load.return_value = [mock_message1, mock_message2, mock_message3]
-    mock_agent._store = mock_store
-
-    with patch('back.routers.scenarios.build_gm_agent', return_value=mock_agent), \
-         patch('back.routers.scenarios.ScenarioService.get_session_info', return_value={"scenario_name": scenario_name}):
+    # Prépare un historique JSON natif simulé (format attendu par l'API)
+    fake_history = [
+        {"parts": [{"content": "Bonjour", "timestamp": "2025-01-01T00:00:00Z", "part_kind": "user-prompt"}], "role": "user"},
+        {"parts": [{"content": "Bienvenue !", "timestamp": "2025-01-01T00:00:01Z", "part_kind": "text"}], "role": "assistant"},
+        {"parts": [{"content": "Résultat d'outil", "timestamp": "2025-01-01T00:00:02Z", "part_kind": "tool-return"}], "role": "tool"}
+    ]
+    mock_store.read_json_history.return_value = fake_history
+    # Patch aussi la classe PydanticJsonlStore pour forcer l'utilisation du mock partout
+    # Patch get_session_info pour retourner aussi character_id (attendu par la route)
+    fake_session_info = {"scenario_name": scenario_name, "character_id": character_id}
+    with patch('back.routers.scenarios.build_gm_agent_pydantic', return_value=(mock_agent, mock_store)), \
+         patch('back.routers.scenarios.ScenarioService.get_session_info', return_value=fake_session_info), \
+         patch('back.agents.gm_agent_pydantic.PydanticJsonlStore', return_value=mock_store):
         response = client.get(f"/api/scenarios/history/{session_id}")
         assert response.status_code == 200
         data = response.json()

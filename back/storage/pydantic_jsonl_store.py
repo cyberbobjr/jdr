@@ -73,5 +73,22 @@ class PydanticJsonlStore:
             log_debug("Erreur lors du rechargement de l'historique PydanticAI", error=str(e), filepath=os.path.abspath(self.filepath))
             return []
 
+    def read_json_history(self) -> list:
+        """
+        ### read_json_history
+        **Description :** Lit et retourne directement le contenu JSON du fichier d'historique, sans désérialisation PydanticAI.
+        **Returns :** Liste de messages (dictionnaires) au format PydanticAI natif (jsonable).
+        """
+        import json
+        if not os.path.exists(self.filepath):
+            return []
+        try:
+            with open(self.filepath, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            return data
+        except Exception as e:
+            log_debug("Erreur lors de la lecture du json historique brut", error=str(e), filepath=os.path.abspath(self.filepath))
+            return []
+
     # Suppression des méthodes de compatibilité Haystack (save, load) qui ne sont plus utilisées ni nécessaires.
     # Seules les méthodes PydanticAI modernes sont conservées.

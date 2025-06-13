@@ -65,6 +65,8 @@ npm run test -- --run # Tests en mode run unique
 - ✅ **Lanceur de dés** : Simulation de lancement de D20 avec animation
 - ✅ **Fiche de personnage** : Affichage des statistiques avec barres de progression
 - ✅ **Interface JDR** : Boutons d'action pour les différentes fonctionnalités
+- ✅ **En-tête JDR (JdrHeader)** : Composant d'en-tête principal avec navigation responsive, extrait depuis `App.vue`. Permet la navigation sur desktop et mobile avec menu déroulant.
+- ✅ **Spinner de chargement (JdrSpinner)** : Indicateur de chargement animé et personnalisable, avec option de label.
 
 ### Icônes FontAwesome
 - ✅ Icônes thématiques pour le JDR (dés, épées, magie, etc.)
@@ -76,6 +78,8 @@ npm run test -- --run # Tests en mode run unique
 - ✅ Configuration Vitest avec jsdom
 - ✅ Mocks pour FontAwesome et Vue Router
 - ✅ Tests de montage, affichage et interactions
+- ✅ Tests unitaires du composant d'en-tête (navigation, affichage, responsive)
+- ✅ Tests unitaires du composant spinner (affichage, props, accessibilité)
 
 ## Scripts disponibles
 

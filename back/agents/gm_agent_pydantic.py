@@ -83,9 +83,12 @@ def build_gm_agent_pydantic(session_id: str, scenario_name: str = "Les_Pierres_d
         model_name=api_model,
         provider=provider
     )
-    
     from back.tools.character_tools import character_apply_xp, character_add_gold, character_take_damage
-    from back.tools.combat_tools import roll_initiative_tool, perform_attack_tool, resolve_attack_tool, calculate_damage_tool, end_combat_tool
+    from back.tools.combat_tools import (
+        roll_initiative_tool, perform_attack_tool, resolve_attack_tool, calculate_damage_tool, 
+        end_combat_tool, end_turn_tool, check_combat_end_tool, apply_damage_tool, 
+        get_combat_status_tool, start_combat_tool
+    )
     from back.tools.inventory_tools import inventory_add_item, inventory_remove_item
     from back.tools.skill_tools import skill_check_with_character
     
@@ -100,10 +103,16 @@ def build_gm_agent_pydantic(session_id: str, scenario_name: str = "Les_Pierres_d
             inventory_add_item,
             inventory_remove_item,
             skill_check_with_character,
+            # Outils de combat complets
+            start_combat_tool,
             roll_initiative_tool,
             perform_attack_tool,
             resolve_attack_tool,
             calculate_damage_tool,
+            apply_damage_tool,
+            get_combat_status_tool,
+            check_combat_end_tool,
+            end_turn_tool,
             end_combat_tool
         ])
     
@@ -122,12 +131,82 @@ def enrich_user_message_with_character(user_message: str, character_data: Dict[s
     if not character_data:
         return user_message
     
-    character_context = f"""[Contexte du personnage:
+    character_context = f"""<PERSONNAGE JOUEUR>
 {json.dumps(character_data, indent=2, ensure_ascii=False)}
+<PERSONNAGE JOUEUR>
+"""
+    return character_context + user_message
+
+
+def enrich_user_message_with_combat_state(user_message: str, combat_state: Optional[Dict]) -> str:
+    """
+    ### enrich_user_message_with_combat_state
+    **Description :** Enrichit le message avec l'état du combat actuel.
+    **Paramètres :**
+    - `user_message` (str) : Message original de l'utilisateur
+    - `combat_state` (Optional[Dict]) : État du combat actuel
+    **Retour :** Message enrichi avec contexte du combat.
+    """
+    if not combat_state or combat_state.get('status') != 'en_cours':
+        return user_message
+    
+    current_participant = combat_state.get('current_participant', {})
+    alive_participants = combat_state.get('alive_participants', [])
+    
+    combat_context = f"""[État du Combat Actuel:
+Combat ID: {combat_state.get('combat_id', 'Inconnu')}
+Round: {combat_state.get('round', 1)}
+Tour de: {current_participant.get('nom', 'Inconnu')} (HP: {current_participant.get('hp', '?')})
+Statut: {combat_state.get('status', 'en_cours')}
+Participants vivants: {len(alive_participants)}
 ]
 
 """
-    return character_context + user_message
+    return combat_context + user_message
+
+
+def auto_enrich_message_with_combat_context(session_id: str, user_message: str) -> str:
+    """
+    ### auto_enrich_message_with_combat_context
+    **Description :** Enrichit automatiquement le message avec l'état du combat s'il y en a un actif.
+    **Paramètres :**
+    - `session_id` (str) : Identifiant de la session
+    - `user_message` (str) : Message original de l'utilisateur
+    **Retour :** Message enrichi avec contexte du combat si applicable.
+    """
+    try:
+        from back.services.combat_state_service import CombatStateService
+        from back.services.combat_service import CombatService
+        
+        combat_state_service = CombatStateService()
+        combat_service = CombatService()
+        
+        # Vérifier s'il y a un combat actif
+        if not combat_state_service.has_active_combat(session_id):
+            return user_message
+        
+        # Charger l'état du combat
+        combat_state = combat_state_service.load_combat_state(session_id)
+        if not combat_state:
+            return user_message
+        
+        # Obtenir le résumé enrichi
+        combat_summary = combat_service.get_combat_summary(combat_state)
+        
+        # Ajouter des informations enrichies
+        current_participant = None
+        if combat_state.current_turn < len(combat_state.initiative_order):
+            current_id = combat_state.initiative_order[combat_state.current_turn]
+            current_participant = next((p for p in combat_state.participants if p['id'] == current_id), None)
+        
+        combat_summary["current_participant"] = current_participant
+        combat_summary["alive_participants"] = [p for p in combat_state.participants if p.get('hp', 1) > 0]
+        
+        return enrich_user_message_with_combat_state(user_message, combat_summary)
+        
+    except Exception as e:
+        # En cas d'erreur, retourner le message original sans crash
+        return user_message
 
     # La gestion de l'historique (messages) doit être assurée directement par le store ou l'agent, et non par SessionService.
     # Les méthodes load_history, save_history et update_character_data ne sont plus utilisées ni exposées.

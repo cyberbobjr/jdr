@@ -525,7 +525,7 @@ onMounted(() => {
 
 <style scoped>
 .creation-form {
-  max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
 }
 
@@ -704,7 +704,7 @@ onMounted(() => {
 
 /* Styles pour le résumé */
 .creation-summary {
-  background: linear-gradient(145deg, var(--jdr-bg-secondary), var(--jdr-bg-primary));
+  background: var(--jdr-bg-secondary);
 }
 
 .summary-content {

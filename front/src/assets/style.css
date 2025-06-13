@@ -1,7 +1,13 @@
+/* Import des polices Google */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
 /* ========================================
    STYLES GLOBAUX - JDR "TERRES DU MILIEU"
    Thème médiéval-fantastique avec tons bruns/dorés
    ======================================== */
+@import './base.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Variables CSS personnalisées pour le thème */
 :root {
@@ -48,8 +54,8 @@
   --jdr-border-color: #8B4513;
   
   /* Polices */
-  --jdr-font-fantasy: 'Cinzel', 'Times New Roman', serif;
-  --jdr-font-body: 'Crimson Text', 'Georgia', serif;
+  --jdr-font-fantasy: 'Cinzel', 'Inter', Arial, sans-serif;
+  --jdr-font-body: 'Inter', 'Helvetica Neue', Arial, sans-serif;
   --jdr-font-ui: 'Inter', 'Helvetica Neue', Arial, sans-serif;
 }
 
@@ -63,7 +69,7 @@
 
 body {
   font-family: var(--jdr-font-body);
-  background: linear-gradient(135deg, var(--jdr-bg-primary) 0%, var(--jdr-bg-secondary) 100%);
+  background: var(--jdr-bg-primary);
   color: var(--jdr-text-primary);
   line-height: 1.6;
   margin: 0;
@@ -71,8 +77,6 @@ body {
   min-height: 100vh;
 }
 
-/* Import des polices Google */
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
 
 /* ========================================
    TITRES ET TYPOGRAPHIE
@@ -135,7 +139,7 @@ body {
   padding: 0.75rem 1.5rem;
   border: 2px solid var(--jdr-border-color);
   border-radius: var(--jdr-border-radius);
-  background: linear-gradient(145deg, var(--jdr-primary), var(--jdr-primary-dark));
+  background: var(--jdr-primary);
   color: var(--jdr-text-primary);
   font-family: var(--jdr-font-ui);
   font-weight: 500;
@@ -148,7 +152,7 @@ body {
 }
 
 .jdr-btn:hover {
-  background: linear-gradient(145deg, var(--jdr-primary-light), var(--jdr-primary));
+  background: var(--jdr-primary-light);
   border-color: var(--jdr-secondary);
   box-shadow: var(--jdr-shadow-medium);
   transform: translateY(-2px);
@@ -166,7 +170,7 @@ body {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: rgba(255, 255, 255, 0.1);
   transition: left 0.5s;
 }
 
@@ -176,18 +180,23 @@ body {
 
 /* Variants de boutons */
 .jdr-btn-primary {
-  background: linear-gradient(145deg, var(--jdr-secondary), var(--jdr-secondary-dark));
+  background: var(--jdr-secondary);
   border-color: var(--jdr-secondary-dark);
   color: var(--jdr-text-dark);
 }
 
 .jdr-btn-primary:hover {
-  background: linear-gradient(145deg, var(--jdr-secondary-light), var(--jdr-secondary));
+  background: var(--jdr-secondary-light);
   box-shadow: var(--jdr-glow-gold);
 }
 
 .jdr-btn-secondary {
-  background: linear-gradient(145deg, var(--jdr-accent), var(--jdr-accent-dark));
+  background: var(--jdr-accent);
+  border-color: var(--jdr-accent-dark);
+}
+
+.jdr-btn-secondary:hover {
+  background: var(--jdr-accent);
   border-color: var(--jdr-accent-dark);
 }
 
@@ -203,12 +212,12 @@ body {
 }
 
 .jdr-btn-danger {
-  background: linear-gradient(145deg, var(--jdr-danger), #8B0000);
+  background: var(--jdr-danger);
   border-color: #8B0000;
 }
 
 .jdr-btn-success {
-  background: linear-gradient(145deg, var(--jdr-success), #006400);
+  background: var(--jdr-success);
   border-color: #006400;
 }
 
@@ -238,59 +247,6 @@ body {
    CARDS ET PANELS
    ======================================== */
 
-.jdr-card {
-  background: linear-gradient(145deg, var(--jdr-bg-secondary), var(--jdr-bg-tertiary));
-  border: 2px solid var(--jdr-border-color);
-  border-radius: var(--jdr-border-radius-large);
-  padding: 1.5rem;
-  box-shadow: var(--jdr-shadow-medium);
-  position: relative;
-  overflow: hidden;
-}
-
-.jdr-card:before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--jdr-secondary), var(--jdr-accent));
-}
-
-.jdr-card-header {
-  border-bottom: 1px solid var(--jdr-border-color);
-  padding-bottom: 1rem;
-  margin-bottom: 1rem;
-}
-
-.jdr-card-title {
-  font-family: var(--jdr-font-fantasy);
-  color: var(--jdr-secondary);
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin: 0;
-}
-
-.jdr-card-subtitle {
-  color: var(--jdr-text-muted);
-  font-style: italic;
-  margin: 0.5rem 0 0 0;
-}
-
-.jdr-card-body {
-  flex: 1;
-}
-
-.jdr-card-footer {
-  border-top: 1px solid var(--jdr-border-color);
-  padding-top: 1rem;
-  margin-top: 1rem;
-  display: flex;
-  gap: 1rem;
-  justify-content: flex-end;
-}
-
 /* Card variants */
 .jdr-card-highlight {
   border-color: var(--jdr-secondary);
@@ -298,12 +254,12 @@ body {
 }
 
 .jdr-card-character {
-  background: linear-gradient(145deg, #2A1F1A, #3A2F2A);
+  background: #2A1F1A;
   border-color: var(--jdr-accent);
 }
 
 .jdr-card-scenario {
-  background: linear-gradient(145deg, #1A2A1F, #2A3A2F);
+  background: #1A2A1F;
   border-color: var(--jdr-success);
 }
 
@@ -320,7 +276,7 @@ body {
 }
 
 .jdr-panel-header {
-  background: linear-gradient(145deg, var(--jdr-primary), var(--jdr-primary-dark));
+  background: var(--jdr-primary);
   padding: 1rem 1.5rem;
   cursor: pointer;
   user-select: none;
@@ -331,7 +287,7 @@ body {
 }
 
 .jdr-panel-header:hover {
-  background: linear-gradient(145deg, var(--jdr-primary-light), var(--jdr-primary));
+  background: var(--jdr-primary-light);
 }
 
 .jdr-panel-title {
@@ -489,7 +445,7 @@ body {
 }
 
 .jdr-navbar {
-  background: linear-gradient(145deg, var(--jdr-bg-primary), var(--jdr-bg-secondary));
+  background: var(--jdr-bg-primary);
   border-bottom: 2px solid var(--jdr-border-color);
   padding: 1rem 0;
   box-shadow: var(--jdr-shadow-medium);
@@ -566,11 +522,11 @@ body {
 }
 
 .jdr-modal {
-  background: linear-gradient(145deg, var(--jdr-bg-secondary), var(--jdr-bg-tertiary));
+  background: var(--jdr-bg-secondary);
   border: 2px solid var(--jdr-border-color);
   border-radius: var(--jdr-border-radius-large);
   box-shadow: var(--jdr-shadow-large);
-  max-width: 600px;
+  max-width: 1000px;
   max-height: 80vh;
   width: 90%;
   transform: scale(0.9);
@@ -583,7 +539,7 @@ body {
 }
 
 .jdr-modal-header {
-  background: linear-gradient(145deg, var(--jdr-primary), var(--jdr-primary-dark));
+  background: var(--jdr-primary);
   padding: 1.5rem;
   border-bottom: 1px solid var(--jdr-border-color);
   display: flex;
@@ -704,7 +660,7 @@ body {
 }
 
 .jdr-table th {
-  background: linear-gradient(145deg, var(--jdr-primary), var(--jdr-primary-dark));
+  background: var(--jdr-primary);
   color: var(--jdr-text-primary);
   font-family: var(--jdr-font-fantasy);
   font-weight: 600;
@@ -727,7 +683,7 @@ body {
    ======================================== */
 
 .jdr-container {
-  max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
   padding: 0 1rem;
 }
@@ -865,14 +821,9 @@ body {
   .jdr-navbar-nav {
     gap: 1rem;
   }
-  
-  .jdr-modal {
+    .jdr-modal {
     width: 95%;
     margin: 1rem;
-  }
-  
-  .jdr-container {
-    padding: 0 0.5rem;
   }
 }
 
@@ -927,17 +878,17 @@ body {
 
 .jdr-progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, var(--jdr-success), #32CD32);
+  background: var(--jdr-success);
   transition: width 0.3s ease;
   position: relative;
 }
 
 .jdr-progress-bar.danger {
-  background: linear-gradient(90deg, var(--jdr-danger), #FF4444);
+  background: var(--jdr-danger);
 }
 
 .jdr-progress-bar.warning {
-  background: linear-gradient(90deg, var(--jdr-warning), #FFB444);
+  background: var(--jdr-warning);
 }
 
 /* Cartes de caractéristiques */
@@ -973,13 +924,13 @@ body {
 }
 
 .jdr-message.user {
-  background: linear-gradient(145deg, var(--jdr-bg-tertiary), var(--jdr-bg-secondary));
+  background: var(--jdr-bg-tertiary);
   border-left: 4px solid var(--jdr-secondary);
   margin-left: 2rem;
 }
 
 .jdr-message.assistant {
-  background: linear-gradient(145deg, var(--jdr-bg-secondary), var(--jdr-bg-tertiary));
+  background: var(--jdr-bg-secondary);
   border-left: 4px solid var(--jdr-accent);
   margin-right: 2rem;
 }
@@ -1002,4 +953,25 @@ body {
   position: absolute;
   bottom: 0.5rem;
   right: 1rem;
+}
+
+#app {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  font-weight: normal;
+}
+
+a,
+.green {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+  padding: 3px;
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
 }

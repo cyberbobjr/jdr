@@ -624,9 +624,9 @@ onMounted(() => {
 
 /* Modal de détails */
 .character-details-modal {
-  max-width: 800px;
-  max-height: 90vh;
+  max-width: none;
   width: 95%;
+  max-height: 90vh;
 }
 
 .character-full-details {

@@ -33,6 +33,14 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
   - **Compatibilité stricte :** Structure de chaque message respecte le schéma PydanticAI (sérialisation via `to_jsonable_python`).
 - **Prompt système modulaire :** Le prompt système est externalisé dans `back/agents/PROMPT.py` pour faciliter la maintenance et les modifications. Le module contient le template et les fonctions utilitaires pour l'injection du contenu des scénarios et des règles.
 
+## Interfaces Frontend TypeScript (2025) - TERMINÉE ✅
+
+- **Interfaces strictement typées :** Génération automatique des interfaces TypeScript basées sur le fichier OpenAPI JSON du backend.
+- **Service API refactorisé :** Suppression de la duplication de code, utilisation des interfaces centralisées dans `front/src/core/interfaces.ts`.
+- **Validation robuste :** Validation des UUIDs, gestion d'erreurs typée avec `ApiErrorResponse`, méthodes utilitaires pour la robustesse.
+- **Tests complets :** Suite de tests unitaires (10/10) validant les interfaces, la validation, et la conversion de types.
+- **Documentation :** Interfaces documentées en français selon les standards du projet, noms de méthodes en anglais.
+
 ## Structure du Projet
 
 ```
@@ -48,13 +56,14 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
 │   │   ├── character_persistence_service.py # Service centralisé pour la persistance des personnages (JSON)
 │   │   ├── inventory_service.py # Gestion de l'inventaire des personnages
 │   │   ├── character_service.py # Gestion des personnages (création, évolution, etc.)
-│   │   ├── combat_service.py    # Gestion des mécaniques de combat
+│   │   ├── combat_service.py    # ✅ Gestion complète des mécaniques de combat (initiative, attaques, dégâts, fin automatique)
+│   │   ├── combat_state_service.py # ✅ Persistance de l'état des combats actifs (sauvegarde/chargement JSON, nettoyage automatique)
 │   │   ├── skill_service.py     # Gestion des compétences et de leurs jets
 │   │   ├── scenario_service.py  # Gestion du déroulement des scénarios
 │   │   └── session_service.py   # Gestion des sessions de jeu (historique, personnage, scénario)
 │   ├── tools/                  # Outils PydanticAI (signature RunContext[SessionService])
 │   │   ├── inventory_tools.py  # Outils pour l'inventaire (ajout, retrait, gestion d'objets)
-│   │   ├── combat_tools.py     # Outils pour le combat
+│   │   ├── combat_tools.py     # ✅ 6 outils de combat complets (start, end_turn, check_end, apply_damage, get_status, end_combat)
 │   │   ├── skill_tools.py      # Outils pour les compétences (refactorisé)
 │   │   └── character_tools.py  # Outils pour la gestion des personnages
 │   ├── agents/                 # Assemblage Agent PydanticAI + mémoire
@@ -92,11 +101,18 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
 │       └── __init__.py
 ├── front/                       # Front‑end Vue.js + TypeScript + TailwindCSS ✅
 │   ├── src/                    # Code source de l'interface utilisateur
+│   ├── src/                    # Code source de l'interface utilisateur
 │   │   ├── components/         # Composants Vue réutilisables
-│   │   │   └── JdrDemo.vue     # Composant de démonstration avec lanceur de dés
+│   │   │   ├── JdrDemo.vue     # Composant de démonstration avec lanceur de dés
+│   │   │   ├── ChatMessage.vue # ✅ Composant générique d'affichage des messages LLM
+│   │   │   └── README-ChatMessage.md # Documentation du composant ChatMessage
 │   │   ├── views/              # Pages/vues de l'application
 │   │   │   ├── HomeView.vue    # Page d'accueil avec présentation des fonctionnalités
 │   │   │   └── AboutView.vue   # Page à propos
+│   │   ├── core/               # Services et interfaces TypeScript ✅
+│   │   │   ├── interfaces.ts   # ✅ Interfaces TypeScript basées sur OpenAPI JSON (strictement typées)
+│   │   │   ├── api.ts          # ✅ Service API refactorisé avec nouvelles interfaces (validation UUID, gestion d'erreurs)
+│   │   │   └── api.test.ts     # ✅ Tests unitaires pour les interfaces et service API (10/10 tests)
 │   │   ├── router/             # Configuration du routage Vue Router
 │   │   ├── assets/             # Ressources CSS avec TailwindCSS configuré
 │   │   ├── App.vue             # Composant racine avec navigation et thème JDR
@@ -474,12 +490,98 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
 ### Utilitaires
 - **`logging_tool`** : Outil de logging pour l'agent
 
+## 💬 Interface de Chat LLM Généralisée (2025) ✅
+
+### Composant ChatMessage
+Un composant Vue.js générique pour afficher les messages de conversation basé sur l'interface `ConversationMessage` :
+
+#### Fonctionnalités
+- **Messages typés** : Support complet de l'interface TypeScript `ConversationMessage[]`
+- **Affichage hiérarchique** : Chaque message contient des parties (`MessagePart[]`) avec types distincts
+- **Types de messages** : Différenciation visuelle pour `request`, `response`, `system`, `error`
+- **Types de parties** : Support des `system-prompt`, `user-prompt`, `text`, `tool-call`, `tool-return`
+- **Formatage intelligent** : Contenu code pour les outils, markdown basique pour le texte
+- **Informations de debug** : Affichage optionnel des détails d'usage des tokens
+- **Timestamps** : Formatage automatique en français pour messages et parties
+
+#### Structure supportée
+- **Interface stricte** : `ConversationMessage` avec `MessagePart[]` typés
+- **Usage des tokens** : `MessageUsage` avec détails de consommation LLM
+- **Métadonnées** : `model_name`, `vendor_details`, `vendor_id` optionnels
+- **Références dynamiques** : Support des `dynamic_ref` dans les parties
+
+#### Props du composant
+```typescript
+interface Props {
+  messages: ConversationMessage[]  // Tableau de messages à afficher
+  showDebugInfo?: boolean         // Affichage des détails techniques
+}
+```
+
+#### Intégration
+- Composant réutilisable pour tous les historiques de conversation
+- Compatible avec les réponses d'API `PlayScenarioResponse` et `GetScenarioHistoryResponse`
+- Styling CSS moderne avec différenciation visuelle par type
+- Gestion des références temporelles et métadonnées LLM
+
 ## Tests
 
 - Les tests unitaires et d'intégration sont dans `back/tests/`.
 - Tous les tests ont été migrés et validés pour PydanticAI.
 - Organisation par responsabilité : `agents/`, `tools/`, `services/`, `domain/`, etc.
 - Exemple : `back/tests/tools/test_all_tools_integration.py` vérifie le bon fonctionnement de tous les outils PydanticAI.
+- **Frontend** : Tests Vitest pour les composants Vue.js, dont ChatMessage
+
+## ⚔️ Système de Combat Complet (2025) ✅
+
+### Architecture Combat
+Le système de combat a été entièrement implémenté et résout le problème des boucles infinies de l'agent LLM. Il respecte l'architecture **CombatManagement.md** avec une séparation stricte entre logique métier (Python) et narration (LLM).
+
+#### Services de Combat
+- **`CombatService`** : Logique métier complète (initiative, attaques, dégâts, fin automatique)
+- **`CombatStateService`** : Persistance JSON des états de combat (sauvegarde/chargement/nettoyage)
+
+#### Outils de Combat PydanticAI (6 outils)
+```python
+# Démarrage et gestion des tours
+start_combat_tool(participants: list[dict]) -> dict
+end_turn_tool(combat_id: str) -> dict
+check_combat_end_tool(combat_id: str) -> dict
+
+# Application des effets
+apply_damage_tool(combat_id: str, target_id: str, amount: int) -> dict
+get_combat_status_tool(combat_id: str) -> dict
+end_combat_tool(combat_id: str, reason: str) -> dict
+```
+
+#### Fonctionnalités Clés
+- **Persistance automatique** : État sauvegardé à chaque action
+- **Détection automatique de fin** : Combat terminé quand un camp n'a plus de participants vivants  
+- **Injection de contexte** : État du combat injecté automatiquement dans le prompt LLM
+- **Instructions structurées** : Le prompt système guide l'agent avec la structure obligatoire des tours
+- **Normalisation des participants** : Support des formats `name`/`nom` et `health`/`hp`
+
+#### Structure Obligatoire d'un Tour (Prompt)
+```
+1. Décrire la situation (get_combat_status_tool)
+2. Résoudre l'action du participant actuel  
+3. Appliquer les dégâts (apply_damage_tool)
+4. Vérifier la fin (check_combat_end_tool)
+5. Si continue : terminer le tour (end_turn_tool)
+6. Demander l'action du joueur
+7. ATTENDRE la réponse avant de continuer
+```
+
+#### Tests Complets
+- **19 tests unitaires** : `CombatStateService` (10) + `combat_tools` (9)
+- **Test d'intégration** : Validation du flux complet de combat
+- **100% de réussite** : Tous les tests passent avec nettoyage automatique
+
+### Résolution du Problème de Boucle Infinie ✅
+Avant : L'agent LLM tournait en boucle sans s'arrêter lors des combats
+Après : L'agent utilise les outils appropriés, s'arrête automatiquement en fin de tour, et attend l'action du joueur
+
+**Test validé** : L'agent démarre un combat, gère les tours correctement, applique les dégâts, détecte la fin automatiquement et nettoie l'état.
 
 ## Système de Prévention des Sessions Dupliquées (2025)
 
