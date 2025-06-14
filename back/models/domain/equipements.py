@@ -2,6 +2,7 @@ from typing import Dict, Any, List, Optional
 import csv
 import os
 from .base import Equipment
+from back.config import get_data_dir
 
 class Equipements:
     """Gestion de l'équipement, des armes et armures"""
@@ -16,11 +17,10 @@ class Equipements:
     def _load_equipment(self) -> Dict[str, Equipment]:
         """Charge l'équipement général depuis le fichier CSV"""
         equipment = {}
-        # Ajustement du chemin pour pointer vers /data/game/equipements.csv depuis la racine du projet
-        csv_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'data', 'game', 'equipements.csv')
+        equipements_path = os.path.join(get_data_dir(), "game", "equipements.csv")
         
         try:
-            with open(csv_path, 'r', encoding='utf-8') as csvfile:
+            with open(equipements_path, 'r', encoding='utf-8') as csvfile:
                 reader = csv.DictReader(csvfile)
                 for row in reader:
                     # Ignorer les lignes de commentaire
@@ -40,7 +40,7 @@ class Equipements:
                     equipment[row['Nom']] = item
                     
         except FileNotFoundError:
-            print(f"Erreur : Fichier CSV non trouvé à {csv_path}")
+            print(f"Erreur : Fichier CSV non trouvé à {equipements_path}")
         except Exception as e:
             print(f"Erreur lors du chargement du fichier CSV : {e}")
             
@@ -49,11 +49,10 @@ class Equipements:
     def _load_weapons(self) -> Dict[str, Any]:
         """Charge les armes depuis le fichier CSV"""
         weapons = {}
-        # Ajustement du chemin pour pointer vers /data/game/equipements.csv depuis la racine du projet
-        csv_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'data', 'game', 'equipements.csv')
+        equipements_path = os.path.join(get_data_dir(), "game", "equipements.csv")
         
         try:
-            with open(csv_path, 'r', encoding='utf-8') as csvfile:
+            with open(equipements_path, 'r', encoding='utf-8') as csvfile:
                 reader = csv.DictReader(csvfile)
                 for row in reader:
                     if row['Type'] == 'Arme':
@@ -75,11 +74,10 @@ class Equipements:
     def _load_armors(self) -> Dict[str, Any]:
         """Charge les armures depuis le fichier CSV"""
         armors = {}
-        # Ajustement du chemin pour pointer vers /data/game/equipements.csv depuis la racine du projet
-        csv_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'data', 'game', 'equipements.csv')
+        equipements_path = os.path.join(get_data_dir(), "game", "equipements.csv")
         
         try:
-            with open(csv_path, 'r', encoding='utf-8') as csvfile:
+            with open(equipements_path, 'r', encoding='utf-8') as csvfile:
                 reader = csv.DictReader(csvfile)
                 for row in reader:
                     if row['Type'] == 'Armure':
@@ -101,11 +99,10 @@ class Equipements:
     def _load_shields(self) -> Dict[str, Any]:
         """Charge les boucliers depuis le fichier CSV"""
         shields = {}
-        # Ajustement du chemin pour pointer vers /data/game/equipements.csv depuis la racine du projet
-        csv_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'data', 'game', 'equipements.csv')
+        equipements_path = os.path.join(get_data_dir(), "game", "equipements.csv")
         
         try:
-            with open(csv_path, 'r', encoding='utf-8') as csvfile:
+            with open(equipements_path, 'r', encoding='utf-8') as csvfile:
                 reader = csv.DictReader(csvfile)
                 for row in reader:
                     if row['Type'] == 'Bouclier':

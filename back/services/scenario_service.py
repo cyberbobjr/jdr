@@ -7,6 +7,7 @@ from typing import List
 from back.models.schema import ScenarioStatus
 from back.utils.logger import log_debug
 from back.services.character_service import CharacterService
+from back.config import get_data_dir
 
 
 class ScenarioService:
@@ -20,7 +21,7 @@ class ScenarioService:
     def list_scenarios() -> List[ScenarioStatus]:
         # Définir les chemins vers les dossiers scenarios et sessions
         base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../data"))
-        scenarios_dir = os.path.join(base_dir, "scenarios")
+        scenarios_dir = os.path.join(get_data_dir(), "scenarios")
         sessions_dir = os.path.join(base_dir, "sessions")
 
         # Scénarios disponibles (*.md dans data/scenarios)
@@ -89,7 +90,7 @@ class ScenarioService:
         - FileNotFoundError: Si le fichier n'existe pas.
         """
         base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../data/scenarios"))
-        scenario_path = os.path.join(base_dir, scenario_file)
+        scenario_path = os.path.join(get_data_dir(), "scenarios", scenario_file)
         if not os.path.isfile(scenario_path):
             raise FileNotFoundError(f"Le scénario '{scenario_file}' n'existe pas.")
         with open(scenario_path, "r", encoding="utf-8") as f:
@@ -123,7 +124,7 @@ class ScenarioService:
             raise ValueError(f"Une session existe déjà pour le scénario '{scenario_name}' avec le personnage {character_id}.")
         
         base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../data"))
-        scenarios_dir = os.path.join(base_dir, "scenarios")
+        scenarios_dir = os.path.join(get_data_dir(), "scenarios")
         sessions_dir = os.path.join(base_dir, "sessions")
 
         # Vérifie si le scénario existe

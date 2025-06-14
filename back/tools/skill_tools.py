@@ -49,7 +49,7 @@ def skill_check_with_character(ctx: RunContext[SessionService], skill_name: str,
     """
     try:
         # Récupérer la fiche du personnage via CharacterService
-        character_service = CharacterService()
+        character_service = CharacterService(ctx.deps.character_id)
         character = character_service.get_character(ctx.deps.character_id)
         character_data = character.dict()  # Convertir en dict Python
         

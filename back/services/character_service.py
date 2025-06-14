@@ -7,6 +7,7 @@ from back.models.schema import Character
 from back.utils.logger import log_debug
 from back.services.character_persistence_service import CharacterPersistenceService
 from back.services.item_service import ItemService
+from back.config import get_data_dir
 
 class CharacterService:
     
@@ -112,7 +113,7 @@ class CharacterService:
             List[Character]: Une liste d'objets Character représentant les personnages disponibles.
         """
         characters = []
-        characters_dir = os.path.join(os.path.dirname(__file__), "../../data/characters")
+        characters_dir = os.path.join(get_data_dir(), "characters")
         required_fields = ["name", "race", "culture", "profession", "caracteristiques", "competences"]
         
         for filename in os.listdir(characters_dir):
@@ -151,7 +152,7 @@ class CharacterService:
         return characters
     
     @staticmethod
-    def get_character(character_id: str) -> Character:
+    def get_character(character_id: str) -> dict:
         """
         ### get_character
         **Description :** Récupère un personnage à partir de son identifiant (UUID) depuis le dossier data/characters.

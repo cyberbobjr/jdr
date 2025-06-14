@@ -9,6 +9,7 @@ from back.agents.PROMPT import (
     get_rules_content,
     SYSTEM_PROMPT_TEMPLATE
 )
+from back.config import get_data_dir
 
 
 class TestPromptModule:
@@ -35,7 +36,7 @@ class TestPromptModule:
         content = get_scenario_content("Les_Pierres_du_Passe.md")
         assert isinstance(content, str)
         # Le fichier existe, donc le contenu ne devrait pas être vide
-        if pathlib.Path("data/scenarios/Les_Pierres_du_Passe.md").exists():
+        if (pathlib.Path(get_data_dir()) / "scenarios" / "Les_Pierres_du_Passe.md").exists():
             assert len(content) > 0
 
     def test_get_scenario_content_with_nonexistent_file(self):
@@ -54,7 +55,7 @@ class TestPromptModule:
         content = get_rules_content()
         assert isinstance(content, str)
         # Le fichier de règles devrait exister
-        if pathlib.Path("data/rules/Regles_Dark_Dungeon.md").exists():
+        if (pathlib.Path(get_data_dir()) / "rules" / "Regles_Dark_Dungeon.md").exists():
             assert len(content) > 0
 
     def test_build_system_prompt_replaces_placeholders(self):

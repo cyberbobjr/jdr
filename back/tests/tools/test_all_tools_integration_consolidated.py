@@ -50,17 +50,20 @@ class TestAllToolsIntegrationConsolidated:
         # Test character_apply_xp
         result = character_apply_xp(mock_context, 50)
         assert isinstance(result, dict)
-        assert "xp" in result or "experience" in result or "message" in result
+        assert "character" in result
+        assert "xp" in result["character"] or "experience" in result["character"] or "message" in result["character"]
         
         # Test character_add_gold
         result = character_add_gold(mock_context, 100)
         assert isinstance(result, dict)
-        assert "or" in result or "gold" in result or "message" in result
+        assert "character" in result
+        assert "gold" in result["character"] or "or" in result["character"] or "message" in result["character"]
         
         # Test character_take_damage
         result = character_take_damage(mock_context, 5, "test damage")
         assert isinstance(result, dict)
-        assert "pv" in result or "hp" in result or "message" in result
+        assert "character" in result
+        assert "hp" in result["character"] or "message" in result["character"]
 
     def test_character_tools_edge_cases(self, mock_context):
         """Teste les cas limites des outils de personnage."""

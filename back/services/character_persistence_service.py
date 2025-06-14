@@ -7,6 +7,7 @@ import os
 import json
 from typing import Dict, Any
 from back.utils.logger import log_debug
+from back.config import get_data_dir
 
 
 class CharacterPersistenceService:
@@ -25,7 +26,7 @@ class CharacterPersistenceService:
         - `character_id` (str) : Identifiant du personnage (UUID).
         **Retour :** Chemin complet vers le fichier JSON (str).
         """
-        characters_dir = os.path.join(os.path.dirname(__file__), "../../data/characters")
+        characters_dir = os.path.join(get_data_dir(), "characters")
         return os.path.join(characters_dir, f"{character_id}.json")
     
     @staticmethod

@@ -5,6 +5,7 @@
 Supprime automatiquement les fichiers de session temporaires générés pendant les tests.
 """
 
+from back.config import get_data_dir
 from pathlib import Path
 import re
 from datetime import datetime
@@ -15,7 +16,7 @@ def cleanup_test_sessions():
     **Description :** Nettoie les fichiers ET répertoires de session de test dans le répertoire data/sessions.
     Supprime les fichiers et dossiers qui correspondent aux patterns de test.
     """
-    sessions_dir = Path("data/sessions")
+    sessions_dir = Path(get_data_dir()) / "sessions"
     if not sessions_dir.exists():
         print("📁 Répertoire data/sessions non trouvé")
         return
@@ -93,7 +94,7 @@ def cleanup_old_sessions(days=7):
     **Paramètres :**
     - `days` (int) : Nombre de jours après lesquels supprimer les sessions.
     """
-    sessions_dir = Path("data/sessions")
+    sessions_dir = Path(get_data_dir()) / "sessions"
     if not sessions_dir.exists():
         return
     

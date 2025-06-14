@@ -1,9 +1,9 @@
 import pytest
 import shutil
-import os
 from pathlib import Path
 from typing import List, Generator
 from fastapi.testclient import TestClient
+from back.config import get_data_dir
 
 
 @pytest.fixture
@@ -26,7 +26,7 @@ class SessionManager:
     
     def __init__(self):
         self.created_sessions: List[str] = []
-        self.sessions_base_path = Path("c:/Users/benjamin/IdeaProjects/jdr/data/sessions")
+        self.sessions_base_path = Path(get_data_dir()) / "sessions"
     
     def track_session(self, session_id: str):
         """
@@ -77,10 +77,6 @@ def isolated_data_dir(tmp_path, monkeypatch) -> Path:
     """
     ### isolated_data_dir
     **Description :** Fixture pour créer un environnement de données isolé pour les tests.
-    **Paramètres :**
-    - `tmp_path` (Path) : Dossier temporaire pytest.
-    - `monkeypatch` (pytest fixture) : Pour patcher les chemins d'accès aux dossiers de données.
-    **Retour :** Path vers le dossier de données temporaire.
     """
     # Créer la structure de dossiers nécessaire
     scenarios_dir = tmp_path / "scenarios"
@@ -89,71 +85,26 @@ def isolated_data_dir(tmp_path, monkeypatch) -> Path:
     sessions_dir.mkdir()
     characters_dir = tmp_path / "characters"
     characters_dir.mkdir()
-      # Créer un scénario de test par défaut
+    # Créer un scénario de test par défaut
     (scenarios_dir / "Les_Pierres_du_Passe.md").write_text(
         "# Les Pierres du Passé\n\nScénario de test pour les tests d'intégration.",
         encoding="utf-8"
     )
-    
     # Créer un autre scénario de test
     (scenarios_dir / "TestScenario.md").write_text(
-        "# Test\nContenu du scénario de test.",
+        "# Test Scénario\nCeci est un scénario de test pour la validation des tests unitaires.\n",
         encoding="utf-8"
     )
-      # Créer un personnage de test par défaut
-    test_character = {
-        "state": {
-            "id": "79e55c14-7dd5-4189-b209-ea88f6d067eb",
-            "name": "Test Hero",
-            "race": "Homme",
-            "culture": "Rurale",
-            "profession": "Aventurier",
-            "caracteristiques": {
-                "Force": 60,
-                "Constitution": 65,
-                "Agilité": 70,
-                "Rapidité": 65,
-                "Volonté": 75,
-                "Raisonnement": 80,
-                "Intuition": 70,
-                "Présence": 60
-            },
-            "competences": {
-                "Combat": 10,
-                "Nature": 15,
-                "Subterfuge": 5
-            },
-            "hp": 100,
-            "equipment": [],
-            "spells": [],
-            "equipment_summary": {},
-            "culture_bonuses": {}
-        },
-        "created_at": "2025-06-03T10:00:00",
-        "last_update": "2025-06-03T10:00:00"
-    }
-    
-    import json
-    (characters_dir / "79e55c14-7dd5-4189-b209-ea88f6d067eb.json").write_text(
-        json.dumps(test_character, indent=2, ensure_ascii=False),
-        encoding="utf-8"    )
-    
-    # Patcher les services pour utiliser le dossier temporaire
-    import back.services.scenario_service as scenario_service
-    import back.services.character_service as character_service
-    
-    # Stocker la fonction originale pour éviter la récursion
-    original_abspath = os.path.abspath
-    
-    # Patcher les chemins de base pour pointer vers les dossiers temporaires
-    def mock_abspath(path):
-        if "data" in path:
-            return str(tmp_path)
-        return original_abspath(path)
-    
-    monkeypatch.setattr(scenario_service.os.path, "abspath", mock_abspath)
-    monkeypatch.setattr(character_service.os.path, "abspath", mock_abspath)
-    
+    # Patch global de get_data_dir dans tous les modules de service et de test connus
+    monkeypatch.setattr("back.config.get_data_dir", lambda: str(tmp_path))
+    monkeypatch.setattr("back.services.scenario_service.get_data_dir", lambda: str(tmp_path))
+    monkeypatch.setattr("back.services.character_persistence_service.get_data_dir", lambda: str(tmp_path))
+    monkeypatch.setattr("back.models.domain.equipements.get_data_dir", lambda: str(tmp_path))
+    # Patch aussi dans les tests qui importent directement get_data_dir
+    monkeypatch.setattr("back.tests.agents.test_prompt.get_data_dir", lambda: str(tmp_path))
+    monkeypatch.setattr("back.tests.cleanup_test_sessions.get_data_dir", lambda: str(tmp_path))
+    monkeypatch.setattr("back.tests.conftest.get_data_dir", lambda: str(tmp_path))
+    monkeypatch.setattr("back.services.character_service.get_data_dir", lambda: str(tmp_path))
     return tmp_path
 
 
@@ -179,7 +130,7 @@ def cleanup_test_files():
     ### cleanup_test_files
     **Description :** Fixture de session qui nettoie automatiquement tous les fichiers ET répertoires de test créés pendant la session de test.
     """
-    sessions_dir = Path("data/sessions")
+    sessions_dir = Path(get_data_dir()) / "sessions"
     
     # Enregistrer l'état initial (fichiers et répertoires)
     initial_files = set()

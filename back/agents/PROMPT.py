@@ -4,6 +4,7 @@
 """
 
 import pathlib
+from back.config import get_data_dir
 
 
 COMBAT_INSTRUCTIONS = """
@@ -112,7 +113,7 @@ def get_scenario_content(scenario_name: str) -> str:
     - `scenario_name` (str) : Nom du fichier scénario (ex: Les_Pierres_du_Passe.md)
     **Retour :** Contenu texte du scénario (str).
     """
-    scenario_path = pathlib.Path("data/scenarios") / scenario_name
+    scenario_path = pathlib.Path(get_data_dir()) / "scenarios" / scenario_name
     if scenario_path.exists():
         with open(scenario_path, 'r', encoding='utf-8') as f:
             return f.read()
@@ -125,7 +126,7 @@ def get_rules_content() -> str:
     **Description :** Charge le contenu des règles du jeu.
     **Retour :** Contenu texte des règles (str).
     """
-    rules_path = pathlib.Path("data/rules/Regles_Dark_Dungeon.md")
+    rules_path = pathlib.Path(get_data_dir()) / "rules" / "Regles_Dark_Dungeon.md"
     if rules_path.exists():
         with open(rules_path, 'r', encoding='utf-8') as f:
             return f.read()
