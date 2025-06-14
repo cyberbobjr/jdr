@@ -54,8 +54,9 @@
   --jdr-border-color: #8B4513;
   
   /* Polices */
-  --jdr-font-fantasy: 'Cinzel', 'Inter', Arial, sans-serif;
-  --jdr-font-body: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --jdr-font-fantasy:  'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --jdr-font-body:  'Inter', 'Helvetica Neue', Arial, sans-serif;
+/*  --jdr-font-body: 'Inter', 'Helvetica Neue', Arial, sans-serif;*/
   --jdr-font-ui: 'Inter', 'Helvetica Neue', Arial, sans-serif;
 }
 
@@ -71,19 +72,20 @@ body {
   font-family: var(--jdr-font-body);
   background: var(--jdr-bg-primary);
   color: var(--jdr-text-primary);
-  line-height: 1.6;
   margin: 0;
   padding: 0;
   min-height: 100vh;
 }
 
-
+h4 {
+    font-family: var(--jdr-font-body);
+}
 /* ========================================
    TITRES ET TYPOGRAPHIE
    ======================================== */
 
 .jdr-title {
-  font-family: var(--jdr-font-fantasy);
+  font-family: var(--jdr-font-body);
   color: var(--jdr-secondary);
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
   margin-bottom: 1rem;
@@ -974,4 +976,20 @@ a,
   a:hover {
     background-color: hsla(160, 100%, 37%, 0.2);
   }
+}
+
+.jdr-mr-1 {
+  margin-right: 0.25rem;
+}
+.jdr-mr-2 {
+  margin-right: 0.5rem;
+}
+.jdr-mr-3 {
+  margin-right: 0.75rem;
+}
+.jdr-mr-4 {
+  margin-right: 1rem;
+}
+.jdr-mr-5 {
+  margin-right: 1.5rem;
 }

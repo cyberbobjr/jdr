@@ -3,7 +3,7 @@
 
 import os
 from typing import List, Dict
-from back.models.schema import Character
+from back.models.schema import Character, Item
 from back.utils.logger import log_debug
 from back.services.character_persistence_service import CharacterPersistenceService
 from back.services.item_service import ItemService
@@ -219,34 +219,78 @@ class CharacterService:
         log_debug("Application de dégâts", action="take_damage", player_id=self.character_id, 
                  amount=amount, hp_restant=new_hp, source=source)
 
+    def instantiate_item_by_id(self, item_id: str, qty: int = 1) -> 'Item':
+        """
+        ### instantiate_item_by_id
+        **Description:** Instancie un objet à partir de son identifiant en utilisant le service ItemService.
+        **Paramètres:**
+        - `item_id` (str): L'identifiant de l'objet à instancier.
+        - `qty` (int): Quantité de l'objet (défaut: 1)
+        **Retour:** Objet Item instancié.
+        """
+        item_service = ItemService()
+        # On suppose que l'item_id correspond au nom de l'objet dans ItemService
+        item = item_service.create_item_from_name(item_id, quantity=qty)
+        return item
+
+    def add_item_object(self, item: 'Item') -> Dict:
+        """
+        ### add_item_object
+        **Description:** Ajoute un objet complet à l'inventaire du personnage.
+        **Paramètres:**
+        - `item` (Item): L'objet à ajouter à l'inventaire.
+        **Retour:** dict - Résumé de l'inventaire mis à jour
+        """
+        if not hasattr(self.character_data, 'inventory') or self.character_data.inventory is None:
+            self.character_data.inventory = []
+        # Vérifie si l'objet existe déjà
+        for inv_item in self.character_data.inventory:
+            if hasattr(inv_item, 'id') and inv_item.id == item.id:
+                inv_item.quantity += item.quantity
+                self.save_character()
+                return {"inventory": [i.model_dump() if hasattr(i, 'model_dump') else i for i in self.character_data.inventory]}
+        # Sinon, ajoute l'objet
+        self.character_data.inventory.append(item)
+        self.save_character()
+        return {"inventory": [i.model_dump() if hasattr(i, 'model_dump') else i for i in self.character_data.inventory]}
+
+    def item_exists(self, item_id: str) -> bool:
+        """
+        ### item_exists
+        **Description:** Vérifie si un objet avec l'identifiant donné existe dans l'inventaire du personnage.
+        **Paramètres:**
+        - `item_id` (str): L'identifiant de l'objet à vérifier.
+        **Retour:** booléen indiquant la présence de l'objet dans l'inventaire.
+        """
+        if not hasattr(self.character_data, 'inventory') or self.character_data.inventory is None:
+            return False
+        for item in self.character_data.inventory:
+            if hasattr(item, 'id') and item.id == item_id:
+                return True
+        return False
+
     def add_item(self, item_id: str, qty: int = 1) -> Dict:
         """
         ### add_item
-        **Description:** Ajoute un objet à l'inventaire du personnage
+        **Description:** Ajoute un objet à l'inventaire du personnage. Instancie l'objet si il n'existe pas.
         **Paramètres:**
         - `item_id` (str): L'identifiant de l'objet
         - `qty` (int): La quantité à ajouter (par défaut 1)
         **Retour:** dict - Résumé de l'inventaire mis à jour
         """
         log_debug("Ajout d'un objet à l'inventaire", action="add_item", player_id=self.character_id, item_id=item_id, qty=qty)
-        
-        # Assurer que le personnage a un inventaire
         if not hasattr(self.character_data, 'inventory') or self.character_data.inventory is None:
             self.character_data.inventory = []
-        
-        # Chercher si l'objet existe déjà dans l'inventaire
         found = False
         for item in self.character_data.inventory:
             if hasattr(item, 'id') and item.id == item_id:
                 item.quantity += qty
                 found = True
                 break
-        
-        # Si l'objet n'existe pas, l'ajouter (nécessiterait ItemService pour créer l'objet)
         if not found:
-            # Pour l'instant, retourner un dictionnaire simple
-            pass
-        
+            # Instancie l'objet et l'ajoute à l'inventaire
+            item = self.instantiate_item_by_id(item_id, qty)
+            self.character_data.inventory.append(item)
         self.save_character()
         return {"inventory": [item.model_dump() if hasattr(item, 'model_dump') else item for item in self.character_data.inventory]}
 

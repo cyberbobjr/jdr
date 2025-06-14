@@ -69,7 +69,8 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
 │   │   ├── combat_state_service.py # ✅ Persistance de l'état des combats actifs (sauvegarde/chargement JSON, nettoyage automatique)
 │   │   ├── skill_service.py     # Gestion des compétences et de leurs jets
 │   │   ├── scenario_service.py  # Gestion du déroulement des scénarios
-│   │   └── session_service.py   # Gestion des sessions de jeu (historique, personnage, scénario)
+│   │   ├── session_service.py   # Gestion des sessions de jeu (historique, personnage, scénario)
+│   │   ├── character_creation_service.py # Service dédié à la création de personnage (allocation, validation, listes)
 │   ├── tools/                  # Outils PydanticAI (signature RunContext[SessionService])
 │   │   ├── inventory_tools.py  # Outils pour l'inventaire (ajout, retrait, gestion d'objets)
 │   │   ├── combat_tools.py     # ✅ 6 outils de combat complets (start, end_turn, check_end, apply_damage, get_status, end_combat)
@@ -81,6 +82,7 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
 │   │   ├── characters.py       # Endpoints pour la gestion des personnages
 │   │   ├── inventory.py        # Endpoints pour la gestion de l'inventaire
 │   │   ├── scenarios.py        # Endpoints pour la gestion des scénarios
+│   │   ├── creation.py         # Endpoints spécialisés pour la création de personnage (étapes, validation, statut)
 │   │   └── combat.py           # Endpoints pour la gestion du combat
 │   ├── storage/                # Persistance JSON & ressources
 │   │   ├── file_storage.py     # CRUD thread‑safe (aiofiles + asyncio.Lock) pour la persistance des données
@@ -208,6 +210,7 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
 | POST    | /api/scenarios/play                       | session_id (UUID, query), message (str, body JSON)                      | responses (list de messages générés par l'agent)                    |
 | GET     | /api/scenarios/history/{session_id}       | session_id (UUID, path)                                                 | history (list de tous les messages de la session)                   |
 | GET     | /api/characters/                          | Aucun                                                                   | Liste complète des personnages avec leurs fiches détaillées         |
+| GET     | /api/characters/{character_id}            | character_id (UUID, path)                                              | Détail du personnage (`Character`)                                  |
 | POST    | /api/combat/attack                        | attacker_id (str), target_id (str), attack_value (int), combat_state (dict, body) | combat_state (état du combat mis à jour)                            |
 
 > Toutes les routes sont documentées dans le code source et la [documentation technique](instructions/openai-instructions.md).
@@ -467,6 +470,46 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
 - L'`equipment_summary` fournit un résumé des totaux (poids, valeur, or restant)
 - **Conversion automatique** : Les anciens formats `equipment: List[str]` sont automatiquement convertis vers `inventory: List[Item]`
 
+### 2. `GET /api/characters/{character_id}` - Détail d'un Personnage
+
+**Description :** Récupère le détail d'un personnage à partir de son identifiant unique (UUID).
+
+**Paramètres :**
+- `character_id` (UUID) : Identifiant unique du personnage
+
+**Format de réponse :**
+```json
+{
+  "id": "d7763165-4c03-4c8d-9bc6-6a2568b79eb3",
+  "name": "Aragorn",
+  "race": "Humain",
+  "culture": "Gondor",
+  "profession": "Rôdeur",
+  "caracteristiques": { ... },
+  "competences": { ... },
+  "hp": 85,
+  "xp": 0,
+  "gold": 0,
+  "inventory": [ ... ],
+  "spells": [],
+  "equipment_summary": { ... },
+  "culture_bonuses": { ... }
+}
+```
+
+**Codes d'erreur :**
+- `404` : Personnage introuvable
+
+> Voir aussi : tests associés dans `back/tests/routers/test_characters.py`
+
+## Service de création de personnage (2025)
+
+- **character_creation_service.py** : Service dédié à la création de personnage, gérant l'allocation automatique des caractéristiques selon la profession et la race, la validation des points, et la fourniture des listes (professions, races, compétences, cultures, équipements, sorts).
+- **creation.py** : Routeur FastAPI spécialisé pour la création de personnage, exposant les routes pour chaque étape, l'enregistrement et le suivi du statut de création.
+- **Tests** : Les tests unitaires sont disponibles dans `/back/tests/services/test_character_creation_service.py`.
+
+Ce module permet de découper la création de personnage en étapes validées côté backend, pour un front progressif et interactif.
+
 ## Gestion de l'historique et mémoire (PydanticAI)
 
 - L'historique des messages (sessions de jeu) est stocké en JSONL via `back/storage/pydantic_jsonl_store.py`.
@@ -688,5 +731,3 @@ Le frontend est prêt pour l'intégration avec l'API FastAPI + PydanticAI :
 - Structure modulaire pour l'ajout de nouvelles fonctionnalités
 - Configuration TypeScript stricte pour une intégration API robuste
 - Tests unitaires pour assurer la stabilité lors des développements futurs
-
----

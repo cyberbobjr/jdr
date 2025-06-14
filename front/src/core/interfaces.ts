@@ -266,6 +266,50 @@ export interface ConversationMessage {
   vendor_id?: string | null;
 }
 
+// === Création de personnage (API /api/creation) ===
+
+export interface AllocateAttributesRequest {
+  profession: string;
+  race: string;
+}
+
+export interface AllocateAttributesResponse {
+  attributes: Record<string, number>;
+}
+
+export interface CheckAttributesRequest {
+  attributes: Record<string, number>;
+}
+
+export interface CheckAttributesResponse {
+  valid: boolean;
+}
+
+export interface SaveCharacterRequest {
+  character_id: string;
+  character: Record<string, any>;
+}
+
+export interface SaveCharacterResponse {
+  status: string;
+}
+
+export interface CheckSkillsRequest {
+  skills: Record<string, number>;
+  profession: string;
+}
+
+export interface CheckSkillsResponse {
+  valid: boolean;
+  cost: number;
+}
+
+export interface CreationStatusResponse {
+  character_id: string;
+  status: string;
+  created_at?: string;
+}
+
 // === Types utilitaires ===
 
 /**

@@ -135,3 +135,36 @@ class StartScenarioResponse(BaseModel):
 class ScenarioHistoryResponse(BaseModel):
     """Modèle de réponse pour l'endpoint /scenarios/history/{session_id}"""
     history: List[ConversationMessage]
+
+class AllocateAttributesRequest(BaseModel):
+    profession: str
+    race: str
+
+class AllocateAttributesResponse(BaseModel):
+    attributes: Dict[str, int]
+
+class CheckAttributesRequest(BaseModel):
+    attributes: Dict[str, int]
+
+class CheckAttributesResponse(BaseModel):
+    valid: bool
+
+class SaveCharacterRequest(BaseModel):
+    character_id: str
+    character: dict
+
+class SaveCharacterResponse(BaseModel):
+    status: str
+
+class CheckSkillsRequest(BaseModel):
+    skills: Dict[str, int]
+    profession: str
+
+class CheckSkillsResponse(BaseModel):
+    valid: bool
+    cost: int
+
+class CreationStatusResponse(BaseModel):
+    character_id: str
+    status: str
+    created_at: Optional[str] = None

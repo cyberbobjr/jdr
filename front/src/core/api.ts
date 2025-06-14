@@ -14,12 +14,19 @@ import type {
   StartScenarioResponse,
   PlayScenarioRequest,
   PlayScenarioResponse,
-  AttackEndpointResponse,
   GetScenarioDetailsResponse,
   GetScenarioHistoryResponse,
   ApiErrorResponse,
-  HistoryResponse,
-  ConversationMessage
+  ConversationMessage,
+  AllocateAttributesRequest,
+  AllocateAttributesResponse,
+  CheckAttributesRequest,
+  CheckAttributesResponse,
+  SaveCharacterRequest,
+  SaveCharacterResponse,
+  CheckSkillsRequest,
+  CheckSkillsResponse,
+  CreationStatusResponse
 }
   from "./interfaces";
 
@@ -241,6 +248,91 @@ export class JdrApiService {
     return sessions.find((session) => session.session_id === sessionId) || null;
   }
 
+
+  // ========================================
+  // Création de personnage (API REST)
+  // ========================================
+
+  /**
+   * Alloue automatiquement les caractéristiques selon la profession et la race
+   */
+  static async allocateAttributes(
+    request: AllocateAttributesRequest
+  ): Promise<AllocateAttributesResponse> {
+    return await makeRequest<AllocateAttributesResponse>(
+      "/api/creation/allocate-attributes",
+      {
+        method: "POST",
+        body: JSON.stringify(request),
+      }
+    );
+  }
+
+  /**
+   * Vérifie la validité d'une répartition de caractéristiques
+   */
+  static async checkAttributes(
+    request: CheckAttributesRequest
+  ): Promise<CheckAttributesResponse> {
+    return await makeRequest<CheckAttributesResponse>(
+      "/api/creation/check-attributes",
+      {
+        method: "POST",
+        body: JSON.stringify(request),
+      }
+    );
+  }
+
+  /**
+   * Crée un nouveau personnage (état initial, id, date)
+   */
+  static async createNewCharacter(): Promise<CreationStatusResponse> {
+    return await makeRequest<CreationStatusResponse>(
+      "/api/creation/new",
+      { method: "POST" }
+    );
+  }
+
+  /**
+   * Sauvegarde ou met à jour les données du personnage
+   */
+  static async saveCharacter(
+    request: SaveCharacterRequest
+  ): Promise<SaveCharacterResponse> {
+    return await makeRequest<SaveCharacterResponse>(
+      "/api/creation/save",
+      {
+        method: "POST",
+        body: JSON.stringify(request),
+      }
+    );
+  }
+
+  /**
+   * Vérifie la validité de la répartition des compétences
+   */
+  static async checkSkills(
+    request: CheckSkillsRequest
+  ): Promise<CheckSkillsResponse> {
+    return await makeRequest<CheckSkillsResponse>(
+      "/api/creation/check-skills",
+      {
+        method: "POST",
+        body: JSON.stringify(request),
+      }
+    );
+  }
+
+  /**
+   * Récupère le statut de création d'un personnage
+   */
+  static async getCreationStatus(
+    characterId: string
+  ): Promise<CreationStatusResponse> {
+    return await makeRequest<CreationStatusResponse>(
+      `/api/creation/status/${characterId}`
+    );
+  }
 
   // ========================================
   // Utilitaires et helpers
