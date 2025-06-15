@@ -79,6 +79,7 @@ export interface Item {
  */
 export interface Character {
   id: string;
+  status: string;
   name: string;
   race: string;
   culture: string;
@@ -152,22 +153,6 @@ export interface HTTPValidationError {
 // === Paramètres des endpoints ===
 
 /**
- * Paramètres pour l'endpoint d'attaque de combat
- */
-export interface AttackEndpointParams {
-  attacker_id: string;
-  target_id: string;
-  attack_value: number;
-}
-
-/**
- * Corps de la requête pour l'endpoint d'attaque de combat
- */
-export interface AttackEndpointBody {
-  combat_state: Record<string, any>;
-}
-
-/**
  * Paramètres pour récupérer les détails d'un scénario
  */
 export interface GetScenarioDetailsParams {
@@ -189,13 +174,6 @@ export interface GetScenarioHistoryParams {
 }
 
 // === Réponses des endpoints ===
-
-/**
- * Réponse de l'endpoint d'attaque de combat
- */
-export interface AttackEndpointResponse {
-  [key: string]: any; // État du combat mis à jour
-}
 
 /**
  * Réponse de l'endpoint pour démarrer un scénario
@@ -305,10 +283,19 @@ export interface CheckSkillsResponse {
 }
 
 export interface CreationStatusResponse {
-  character_id: string;
+  id: string;
   status: string;
   created_at?: string;
 }
+
+// === Création de personnage (LLM) ===
+
+// Les routes de génération LLM utilisent Partial<Character> comme type d'entrée.
+// Utiliser ce type pour définir les entrées attendues par les routes de création de personnage.
+// Exemple :
+// export interface GenerateCharacterRequest {
+//   character: Partial<Character>;
+// }
 
 // === Types utilitaires ===
 
@@ -322,4 +309,49 @@ export type UUID = string;
  */
 export interface ApiErrorResponse {
   detail: string | ValidationError[];
+}
+
+export interface GeneratePhysicalDescriptionResponse {
+  physical_description:string;
+}
+
+export interface GenerateBackgroundResponse {
+  background:string;
+}
+
+export interface GenerateNameResponse {
+  name:string;
+}
+
+// === Groupes de compétences (structure du JSON) ===
+export interface SkillGroup {
+  name: string;
+  description: string;
+}
+
+export type SkillGroupsDict = Record<string, SkillGroup[]>;
+
+// === Races (structure du JSON détaillé) ===
+export interface RaceJson {
+  name: string;
+  characteristic_bonuses: Record<string, number>;
+  destiny_points: number;
+  special_abilities: string[];
+  base_languages: string[];
+  optional_languages: string[];
+  cultures: {
+    name: string;
+    bonus: string;
+    traits: string;
+  }[];
+}
+
+// === Professions (structure du JSON détaillé) ===
+export interface ProfessionJson {
+  name: string;
+  description: string;
+  favored_skill_groups: Record<string, number>;
+  main_characteristics: string[];
+  abilities: string[];
+  spheres: string[];
 }

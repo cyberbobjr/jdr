@@ -2,7 +2,7 @@ import pytest
 from back.services.character_service import CharacterService
 
 @pytest.fixture
-def character_service():
+def character_service(character_79e55c14):
     # Utiliser un personnage existant pour les tests
     return CharacterService("79e55c14-7dd5-4189-b209-ea88f6d067eb")
 

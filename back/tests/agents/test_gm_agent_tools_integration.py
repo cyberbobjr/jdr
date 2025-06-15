@@ -14,7 +14,7 @@ class TestGMAgentPydanticTools:
     """
 
     @pytest.fixture
-    def agent_and_deps(self):
+    def agent_and_deps(self, character_79e55c14):
         """Fixture pour créer un agent et ses dépendances de test avec un character_id valide."""
         return build_gm_agent_pydantic(session_id="test_tools_session", character_id="79e55c14-7dd5-4189-b209-ea88f6d067eb")
 

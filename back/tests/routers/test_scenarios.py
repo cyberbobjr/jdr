@@ -1,4 +1,4 @@
-def test_start_scenario(client, session_manager, isolated_data_dir):
+def test_start_scenario(client, session_manager, isolated_data_dir, character_79e55c14):
     """
     ### test_start_scenario
     **Description :** Teste le démarrage d'un scénario avec nettoyage automatique de session.
@@ -17,10 +17,6 @@ def test_start_scenario(client, session_manager, isolated_data_dir):
     scenarios_dir = isolated_data_dir / "scenarios"
     scenarios_dir.mkdir(exist_ok=True)
     (scenarios_dir / scenario_name).write_text("# Test\nContenu du scénario de test.", encoding="utf-8")
-    # Création du fichier personnage dans le dossier temporaire
-    characters_dir = isolated_data_dir / "characters"
-    characters_dir.mkdir(exist_ok=True)
-    (characters_dir / f"{character_id}.json").write_text(json.dumps({"state": {"name": "Test Hero", "hp": 42, "caracteristiques": {}}}), encoding="utf-8")
     with patch("back.services.scenario_service.get_data_dir", return_value=str(isolated_data_dir)):
         response = client.post("/api/scenarios/start", json={
             "scenario_name": scenario_name,
@@ -34,7 +30,7 @@ def test_start_scenario(client, session_manager, isolated_data_dir):
         else:
             assert response.status_code in [200, 409]
 
-def test_start_scenario_returns_session_id(client, session_manager, isolated_data_dir):
+def test_start_scenario_returns_session_id(client, session_manager, isolated_data_dir, character_79e55c14):
     """
     ### test_start_scenario_returns_session_id
     **Description:** Vérifie que l'endpoint /api/scenarios/start retourne bien un id de session, le nom du scénario et l'id du personnage.
@@ -54,23 +50,6 @@ def test_start_scenario_returns_session_id(client, session_manager, isolated_dat
     scenarios_dir = isolated_data_dir / "scenarios"
     scenarios_dir.mkdir(exist_ok=True)
     (scenarios_dir / scenario_name).write_text("# Test\nContenu du scénario de test.", encoding="utf-8")
-    # Création du fichier personnage dans le dossier temporaire
-    characters_dir = isolated_data_dir / "characters"
-    characters_dir.mkdir(exist_ok=True)
-    test_character = {
-        "id": character_id,
-        "name": "Test Hero Unique",
-        "race": "Homme",
-        "culture": "Rurale",
-        "profession": "Aventurier",
-        "caracteristiques": {
-            "Force": 60, "Constitution": 65, "Agilité": 70, "Rapidité": 65,
-            "Volonté": 75, "Raisonnement": 80, "Intuition": 70, "Présence": 60
-        },
-        "competences": {"Combat": 10, "Nature": 15, "Subterfuge": 5},
-        "state": {"id": character_id, "hp": 100, "xp": 0, "gold": 50}
-    }
-    (characters_dir / f"{character_id}.json").write_text(json.dumps(test_character, indent=2, ensure_ascii=False), encoding="utf-8")
     with patch("back.services.scenario_service.get_data_dir", return_value=str(isolated_data_dir)):
         response = client.post("/api/scenarios/start", json={
             "scenario_name": scenario_name,
@@ -258,7 +237,7 @@ def test_start_scenario_prevents_duplicate_session(tmp_path, monkeypatch, client
     assert response.status_code == 409
     assert "Une session existe déjà" in response.json()["detail"]
 
-def test_list_active_sessions(client, session_manager, isolated_data_dir, monkeypatch):
+def test_list_active_sessions(client, session_manager, isolated_data_dir, monkeypatch, character_79e55c14):
     """
     ### test_list_active_sessions
     **Description :** Teste la récupération de la liste des sessions actives avec les informations du scénario et du personnage.

@@ -1,6 +1,10 @@
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Optional, Tuple
 from enum import Enum
+from typing import Dict, List, Optional
+from dataclasses import dataclass
+from back.config import get_data_dir
+import json
 
 class Difficulty(Enum):
     ROUTINE = 60
@@ -19,18 +23,6 @@ class CharacteristicBonus:
     bonus: int
 
 @dataclass
-class Race:
-    name: str
-    sub_cultures: List[str]
-    characteristic_bonuses: Dict[str, int]
-    endurance_bonus: int
-    pp_bonus: int
-    body_resistance: int
-    mind_resistance: int
-    magic_resistance: int
-    special_abilities: List[str]
-
-@dataclass
 class Profession:
     name: str
     description: str
@@ -38,6 +30,21 @@ class Profession:
     main_characteristics: List[str]
     abilities: List[str]
     spheres: List[str]
+
+    @classmethod
+    def load_all_from_json(cls) -> List["Profession"]:
+        """
+        ### load_all_from_json
+        **Description:** Charge la liste des professions depuis le fichier JSON centralisé et retourne des instances de Profession.
+        **Parameters:**
+        - Aucun
+        **Returns:** Liste d'instances Profession.
+        """
+        import os
+        data_path = os.path.join(get_data_dir(), 'professions.json')
+        with open(data_path, encoding='utf-8') as f:
+            data = json.load(f)
+        return [cls(**p) for p in data]
 
 @dataclass
 class Culture:
@@ -75,3 +82,19 @@ class Spell:
     bonus: Optional[str] = None
     malus: Optional[str] = None
     dice_rolls: Optional[str] = None
+
+@dataclass
+class CultureData:
+    name: str
+    bonus: str
+    traits: str
+
+@dataclass
+class RaceData:
+    name: str
+    characteristic_bonuses: Dict[str, int]
+    destiny_points: int
+    special_abilities: List[str]
+    base_languages: List[str]
+    optional_languages: List[str]
+    cultures: List[CultureData]

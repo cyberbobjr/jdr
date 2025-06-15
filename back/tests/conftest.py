@@ -1,5 +1,6 @@
 import pytest
 import shutil
+import os
 from pathlib import Path
 from typing import List, Generator
 from fastapi.testclient import TestClient
@@ -105,6 +106,8 @@ def isolated_data_dir(tmp_path, monkeypatch) -> Path:
     monkeypatch.setattr("back.tests.cleanup_test_sessions.get_data_dir", lambda: str(tmp_path))
     monkeypatch.setattr("back.tests.conftest.get_data_dir", lambda: str(tmp_path))
     monkeypatch.setattr("back.services.character_service.get_data_dir", lambda: str(tmp_path))
+    # Patch d'environnement pour garantir l'isolation même en cas d'import précoce
+    os.environ['JDR_DATA_DIR'] = str(tmp_path)
     return tmp_path
 
 
@@ -191,3 +194,49 @@ def pytest_sessionfinish(session, exitstatus):
         print("⚠️ Script de nettoyage non trouvé")
     except Exception as e:
         print(f"⚠️ Erreur lors du nettoyage : {e}")
+
+@pytest.fixture
+def character_79e55c14(isolated_data_dir):
+    """
+    Fixture qui crée le fichier du personnage 79e55c14-7dd5-4189-b209-ea88f6d067eb dans le dossier characters du répertoire isolé.
+    Le JSON contient les champs à la racine ET dans 'state' pour compatibilité maximale.
+    """
+    import json
+    from uuid import UUID
+    character_data = {
+        "id": "79e55c14-7dd5-4189-b209-ea88f6d067eb",
+        "name": "Galadhwen",
+        "race": "Elfe Sylvain",
+        "culture": "Rurale",
+        "profession": "Aventurier",
+        "caracteristiques": {
+            "Force": 69,
+            "Constitution": 69,
+            "Agilité": 69,
+            "Rapidité": 69,
+            "Volonté": 69,
+            "Raisonnement": 69,
+            "Intuition": 68,
+            "Présence": 68
+        },
+        "competences": {"Comédie": 21, "Perception": 42, "Survie": 33},
+        "hp": 102,
+        "xp": 0,
+        "gold": 0,
+        "inventory": [],
+        "equipment": ["Bandoulière", "Coutelas", "Bottes de cuir", "Gants de cuir"],
+        "talents": [],
+        "notes": "",
+        "background": "",
+        "spells": [],
+        "equipment_summary": None,
+        "culture_bonuses": {},
+        "physical_description": "",
+    }
+    characters_dir = isolated_data_dir / "characters"
+    characters_dir.mkdir(exist_ok=True)
+    file_path = characters_dir / "79e55c14-7dd5-4189-b209-ea88f6d067eb.json"
+    # Format hybride : racine + state
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump({**character_data, "state": character_data}, f, ensure_ascii=False, indent=2)
+    return file_path

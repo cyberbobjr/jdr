@@ -24,7 +24,7 @@ class TestInventoryTools:
     """Test suite for all inventory-related tools"""
 
     @pytest.fixture
-    def mock_context(self):
+    def mock_context(self, character_79e55c14):
         """Create a mock context for testing"""
         class MockContext:
             def __init__(self):

@@ -51,6 +51,8 @@ class Character(BaseModel):
     spells: List[str] = []
     equipment_summary: Optional[Dict[str, float]] = None
     culture_bonuses: Optional[Dict[str, int]] = None
+    background: Optional[str] = None  # Histoire du personnage
+    physical_description: Optional[str] = None  # Description physique
 
 class ScenarioStatus(BaseModel):
     name: str
@@ -165,6 +167,52 @@ class CheckSkillsResponse(BaseModel):
     cost: int
 
 class CreationStatusResponse(BaseModel):
-    character_id: str
+    id: str
     status: str
     created_at: Optional[str] = None
+
+class CharacterAny(BaseModel):
+    """
+    Schéma permissif pour retourner un personnage complet ou incomplet (tous champs optionnels).
+    """
+    id: Optional[str] = None
+    name: Optional[str] = None
+    race: Optional[str] = None
+    culture: Optional[str] = None
+    profession: Optional[str] = None
+    caracteristiques: Optional[Dict[str, int]] = None
+    competences: Optional[Dict[str, int]] = None
+    hp: Optional[int] = None
+    xp: Optional[int] = None
+    gold: Optional[int] = None
+    inventory: Optional[List[Item]] = None
+    spells: Optional[List[str]] = None
+    equipment_summary: Optional[Dict[str, float]] = None
+    culture_bonuses: Optional[Dict[str, int]] = None
+    background: Optional[str] = None
+    physical_description: Optional[str] = None
+    created_at: Optional[str] = None
+    last_update: Optional[str] = None
+    current_step: Optional[str] = None
+    status: Optional[str] = None
+
+class CharacterListAny(BaseModel):
+    characters: List[CharacterAny]
+
+class ProfessionSchema(BaseModel):
+    """Modèle détaillé pour une profession (pour documentation Swagger et frontend)"""
+    name: str
+    description: str
+    favored_skill_groups: Dict[str, int]
+    main_characteristics: List[str]
+    abilities: List[str]
+    spheres: List[str]
+
+class RaceSchema(BaseModel):
+    name: str
+    characteristic_bonuses: Dict[str, int]
+    destiny_points: int
+    special_abilities: List[str]
+    base_languages: List[str]
+    optional_languages: List[str]
+    cultures: List[Dict[str, str]]

@@ -26,8 +26,15 @@ import type {
   SaveCharacterResponse,
   CheckSkillsRequest,
   CheckSkillsResponse,
-  CreationStatusResponse
+  CreationStatusResponse,
+  GeneratePhysicalDescriptionResponse,
+  GenerateBackgroundResponse,
+  GenerateNameResponse,
+  SkillGroupsDict,
+  RaceJson,
+  ProfessionJson
 }
+
   from "./interfaces";
 
 // ========================================
@@ -332,6 +339,87 @@ export class JdrApiService {
     return await makeRequest<CreationStatusResponse>(
       `/api/creation/status/${characterId}`
     );
+  }
+
+  /**
+   * Récupère la liste détaillée des professions disponibles
+   */
+  static async getProfessions(): Promise<ProfessionJson[]> {
+    return await makeRequest<ProfessionJson[]>("/api/creation/professions");
+  }
+
+  /**
+   * Récupère la liste brute des races (structure du JSON)
+   */
+  static async getRaces(): Promise<RaceJson[]> {
+    return await makeRequest<RaceJson[]>("/api/creation/races");
+  }
+
+  /**
+   * Récupère la structure complète des groupes de compétences (JSON brut)
+   */
+  static async getSkills(): Promise<SkillGroupsDict> {
+    return await makeRequest<SkillGroupsDict>("/api/creation/skills");
+  }
+
+  /**
+   * Récupère la liste des équipements disponibles
+   */
+  static async getEquipments(): Promise<string[]> {
+    return await makeRequest<string[]>("/api/creation/equipments");
+  }
+
+  /**
+   * Récupère la liste des sorts disponibles
+   */
+  static async getSpells(): Promise<string[]> {
+    return await makeRequest<string[]>("/api/creation/spells");
+  }
+
+  // ========================================
+  // Appels aux routes LLM (génération nom, background, description physique)
+  // ========================================
+
+  /**
+   * Génère un nom de personnage via LLM à partir d'une fiche partielle
+   */
+  static async generateCharacterName(character: Partial<Character>): Promise<string> {
+    const result = await makeRequest<GenerateNameResponse>(
+      "/creation/generate-name",
+      {
+        method: "POST",
+        body: JSON.stringify(character),
+      }
+    );
+    return result.name;
+  }
+
+  /**
+   * Génère un background d'histoire via LLM (character partiel accepté)
+   */
+  static async generateCharacterBackground(character: Partial<Character>): Promise<string> {
+    const result = await makeRequest<GenerateBackgroundResponse>(
+      "/creation/generate-background",
+      {
+        method: "POST",
+        body: JSON.stringify(character),
+      }
+    );
+    return result.background;
+  }
+
+  /**
+   * Génère une description physique via LLM (character partiel accepté)
+   */
+  static async generateCharacterPhysicalDescription(character: Partial<Character>): Promise<string> {
+    const result = await makeRequest<GeneratePhysicalDescriptionResponse>(
+      "/creation/generate-physical-description",
+      {
+        method: "POST",
+        body: JSON.stringify(character),
+      }
+    );
+    return result.physical_description;
   }
 
   // ========================================

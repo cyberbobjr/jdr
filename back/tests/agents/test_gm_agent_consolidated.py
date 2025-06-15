@@ -71,6 +71,8 @@ class TestGMAgentConsolidated:
             "bonus_race": {"Force": 1},
             "hp": 45,
             "xp": 100,
+            "background": "Né dans le Royaume de Fer, il a combattu toute sa vie.",
+            "physical_description": "Grand, robuste, cheveux bruns.",
             "created_at": "2025-06-13T00:00:00Z",
             "last_update": "2025-06-13T00:00:00Z"
         }

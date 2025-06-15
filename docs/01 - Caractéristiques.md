@@ -111,37 +111,6 @@ sorts et par les effets magiques (autres que ceux qui affectent le corps ou l’
 Les résistances sont abordées dans le Chapitre [07 · Les Compétences](07.0 · Les Compétences.markdown) et leur
 utilisation est précisée dans le Chapitre [11 · À l’Aventure](11 · A l'Aventure.markdown).
 
-<a name="table-bonus-raciaux"></a>
-
-##### Table – Bonus raciaux
-
-| Races | Force | Constitution | Agilité | Rapidité | Volonté | Raisonnement | Intuition | Présence | Bonus End. | Bonus PP | Résistance Corps | Résistance Esprit | Résistance Magie |
-|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **Homme** | * | * | * | * | * | * | * | * | 30 | 30 | 10 | 10 | 10 |
-| **Númenóréen** | 2 | 2 | 0 | 0 | 3 | 3 | 0 | 3 | 40 | 35 | 15 | 15 | 15 |
-| **Elfe Noldo** | 2 | 3 | 3 | 3 | 2 | 2 | 2 | 5 | 30 | 40 | 15 | 15 | 20 |
-| **Elfe Sinda** | 1 | 3 | 2 | 3 | 3 | 1 | 5 | 2 | 30 | 40 | 15 | 15 | 20 |
-| **Elfe Sylvain** | 1 | 1 | 4 | 4 | 2 | 1 | 1 | 1 | 40 | 30 | 15 | 15 | 20 |
-| **Hobbit** | -2 | 3 | 4 | 3 | 2 | 0 | 1 | -1 | 35 | 0 | 15 | 15 | 15 |
-| **Nain** | 4 | 4 | 1 | 0 | 3 | 0 | 0 | -1 | 50 | 10 | 15 | 10 | 15 |
-
-\* Les humains n'ont pas de bonus raciaux fixes. A la place, le joueur doit répartir 8 points de bonus de la façon dont
-il le souhaite entre les 8 caractéristiques. Aucune caractéristique ne peut avoir un bonus supérieur à +3.
-
-
-## Races et Sous-Cultures
-
-|Race|Sous-Cultures Possibles|Bonus Raciaux|
-|:---|:---|:---|
-|Humains|Sylvestre, Nomade, Rurale, Citadine, Sous-Collines, Grottes|8 points de bonus à répartir entre les caractéristiques (maximum +3 par caractéristique). Bonus End. +30, Bonus PP +30, Résistance Corps +10, Résistance Esprit +10, Résistance Magie +10|
-|Númenóréens|Sylvestre, Rurale, Citadine|Force +2, Constitution +2, Volonté +3, Raisonnement +3, Présence +3. Bonus End. +40, Bonus PP +35, Résistance Corps +15, Résistance Esprit +15, Résistance Magie +15|
-|Elfes Noldor|Noldo, Sylvestre, Citadine|Force +2, Constitution +3, Agilité +3, Rapidité +3, Volonté +2, Raisonnement +2, Intuition +2, Présence +5. Bonus End. +30, Bonus PP +40, Résistance Corps +15, Résistance Esprit +15, Résistance Magie +20|
-|Elfes Sindar|Sinda, Sylvestre, Rurale, Citadine|Force +1, Constitution +3, Agilité +2, Rapidité +3, Volonté +3, Intuition +5. Bonus End. +30, Bonus PP +40, Résistance Corps +15, Résistance Esprit +15, Résistance Magie +20|
-|Elfes Sylvains|Sylvain, Sylvestre, Rurale|Agilité +4, Rapidité +4, Volonté +2. Bonus End. +40, Bonus PP +30, Résistance Corps +15, Résistance Esprit +15, Résistance Magie +20|
-|Hobbits|Hobbit, Sous-Collines, Rurale, Citadine|Constitution +3, Agilité +4, Rapidité +3, Volonté +2. Bonus End. +35, Bonus PP +0, Résistance Corps +15, Résistance Esprit +15, Résistance Magie +15|
-|Nains|Nain, Cavernes Profondes, Grottes, Citadine|Force +4, Constitution +4, Volonté +3. Bonus End. +50, Bonus PP +10, Résistance Corps +15, Résistance Esprit +10, Résistance Magie +15|
-
-
 ## Professions
 
 |Profession|Description|Groupes Favoris de Compétences|Caractéristiques Principales|Capacités de la Profession|

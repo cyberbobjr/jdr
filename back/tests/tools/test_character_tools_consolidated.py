@@ -22,7 +22,7 @@ class TestCharacterTools:
     """
     
     @pytest.fixture
-    def character_id(self):
+    def character_id(self, character_79e55c14):
         """
         ### character_id
         **Description :** Fixture qui retourne l'ID d'un personnage existant pour les tests.

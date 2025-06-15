@@ -28,6 +28,11 @@
 .jdr-flex {
   display: flex;
 }
+
+.jdr-justify-end {
+  justify-content: flex-end;
+}
+
 .jdr-flex-wrap {
   flex-wrap: wrap;
 }
@@ -48,9 +53,77 @@
 .jdr-p-2 { padding: 0.5rem; }
 .jdr-p-4 { padding: 1rem; }
 
+.jdr-mr-1 {
+  margin-right: 0.25rem;
+}
+.jdr-mr-2 {
+  margin-right: 0.5rem;
+}
+.jdr-mr-3 {
+  margin-right: 0.75rem;
+}
+.jdr-mr-4 {
+  margin-right: 1rem;
+}
+.jdr-mr-5 {
+  margin-right: 1.5rem;
+}
 /* Responsive (breakpoints simples) */
 @media (min-width: 768px) {
   .md\:jdr-grid-cols-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+
+.jdr-flex-col {
+  flex-direction: column;
+}
+
+.jdr-justify-center {
+  justify-content: center;
+}
+
+.jdr-justify-between {
+  justify-content: space-between;
+}
+
+.jdr-items-center {
+  align-items: center;
+}
+
+.jdr-gap-2 {
+  gap: 0.5rem;
+}
+
+.jdr-gap-4 {
+  gap: 1rem;
+}
+
+.jdr-gap-6 {
+  gap: 1.5rem;
+}
+
+.jdr-mt-4 {
+  margin-top: 1rem;
+}
+
+.jdr-mb-4 {
+  margin-bottom: 1rem;
+}
+
+.jdr-p-4 {
+  padding: 1rem;
+}
+
+.jdr-text-center {
+  text-align: center;
+}
+
+.jdr-text-right {
+  text-align: right;
+}
+
+.jdr-w-full {
+  width: 100%;
+}
+

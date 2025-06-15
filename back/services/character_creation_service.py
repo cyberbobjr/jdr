@@ -4,12 +4,12 @@ Ce service gère l'allocation automatique des caractéristiques, la vérificatio
 et fournit les listes de professions, races, compétences, cultures, équipements et sorts.
 """
 
-from back.models.domain.races import Races
-from back.models.domain.professions import Professions
 from back.models.domain.competences import Competences
-from back.models.domain.cultures import Cultures
 from back.models.domain.equipements import Equipements
 from back.models.domain.magie import Magie
+from back.config import get_data_dir
+import json
+import os
 
 class CharacterCreationService:
     """
@@ -86,49 +86,52 @@ class CharacterCreationService:
     def get_professions() -> list:
         """
         ### get_professions
-        **Description:** Retourne la liste des professions disponibles.
+        **Description:** Retourne la liste des professions disponibles (noms uniquement).
         **Parameters:**
         - Aucun
         **Returns:** Une liste de professions (str).
         """
-        return list(Professions().PROFESSIONS_DATA.keys())
+        data_path = os.path.join(get_data_dir(), 'professions.json')
+        with open(data_path, encoding='utf-8') as f:
+            professions = json.load(f)
+        return [p['name'] for p in professions]
+
+    @staticmethod
+    def get_professions_full() -> list:
+        """
+        ### get_professions_full
+        **Description:** Retourne la liste complète des objets professions (toutes les infos).
+        **Parameters:**
+        - Aucun
+        **Returns:** Une liste de dictionnaires représentant chaque profession.
+        """
+        data_path = os.path.join(get_data_dir(), 'professions.json')
+        with open(data_path, encoding='utf-8') as f:
+            professions = json.load(f)
+        return professions
 
     @staticmethod
     def get_races() -> list:
         """
         ### get_races
-        **Description:** Retourne la liste des races disponibles.
+        **Description:** Retourne la liste complète des races disponibles avec toutes leurs informations (cultures, bonus, etc).
         **Parameters:**
         - Aucun
-        **Returns:** Une liste de races (str).
+        **Returns:** Une liste d'objets RaceData (structure complète issue du JSON).
         """
-        return list(Races().RACES_DATA.keys())
+        from back.models.domain.races import Races
+        return Races().RACES_DATA
 
     @staticmethod
-    def get_skills() -> list:
+    def get_skills() -> dict:
         """
         ### get_skills
-        **Description:** Retourne la liste des compétences disponibles.
+        **Description:** Retourne le dictionnaire brut des groupes de compétences (structure du JSON centralisé).
         **Parameters:**
         - Aucun
-        **Returns:** Une liste de compétences (str).
+        **Returns:** Un dictionnaire {groupe: [compétences]}.
         """
-        skills = []
-        for group in Competences.SKILL_GROUPS.values():
-            for skill in group:
-                skills.append(skill['name'])
-        return skills
-
-    @staticmethod
-    def get_cultures() -> list:
-        """
-        ### get_cultures
-        **Description:** Retourne la liste des cultures disponibles.
-        **Parameters:**
-        - Aucun
-        **Returns:** Une liste de cultures (str).
-        """
-        return list(Cultures().get_all_cultures().keys())
+        return Competences().SKILL_GROUPS
 
     @staticmethod
     def get_equipments() -> list:

@@ -22,6 +22,8 @@ class Character(BaseModel):
     - `bonus_race` (Dict[str, int]) : Bonus liés à la race
     - `hp` (int) : Points de vie
     - `xp` (int) : Expérience accumulée
+    - `background` (str) : Histoire du personnage (background narratif)
+    - `physical_description` (str) : Description physique du personnage
     - `created_at` (Optional[str]) : Date de création (ISO)
     - `last_update` (Optional[str]) : Date de dernière mise à jour (ISO)
     """
@@ -41,5 +43,7 @@ class Character(BaseModel):
     bonus_race: Dict[str, int]
     hp: int
     xp: int
+    background: str
+    physical_description: str
     created_at: Optional[str] = None
     last_update: Optional[str] = None

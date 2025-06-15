@@ -1,0 +1,55 @@
+{
+  "Artistique": [
+    {"name": "Comédie", "description": "Capacité à jouer un rôle et imiter les actions d'autres personnes. Ne modifie pas l'apparence physique."},
+    {"name": "Danse", "description": "Art de maîtriser les mouvements rythmiques et de reproduire ou créer des danses."},
+    {"name": "Imitation", "description": "Talent pour reproduire voix et sons de manière convaincante."},
+    {"name": "Musique - Chant", "description": "Maîtrise de la voix pour le chant et l'interprétation musicale."},
+    {"name": "Musique - Instrument", "description": "Capacité à jouer d'un instrument de musique spécifique."},
+    {"name": "Narration", "description": "Art de conter des histoires de manière captivante et mémorable."}
+  ],
+  "Arts de la Magie": [
+    {"name": "Accord", "description": "Permet de s'accorder aux objets magiques et d'utiliser leurs pouvoirs."},
+    {"name": "Alchimie", "description": "Art de créer des potions et substances magiques à partir d'ingrédients spéciaux."},
+    {"name": "Artisanat des Charmes", "description": "Création d'objets magiques mineurs et temporaires."},
+    {"name": "Connaissance Ésotérique", "description": "Savoir approfondi sur des sujets mystiques et magiques spécifiques."},
+    {"name": "Cristaux Runiques", "description": "Utilisation et création de runes magiques sur des pierres précieuses."},
+    {"name": "Développement PP", "description": "Mesure la capacité à accumuler et gérer l'énergie magique."},
+    {"name": "Divination", "description": "Art de prédire l'avenir par diverses méthodes mystiques."},
+    {"name": "Incantation de Sort", "description": "Capacité à lancer des sorts spécifiques."},
+    {"name": "Projection de Pouvoir", "description": "Permet de transférer l'énergie magique dans des objets."},
+    {"name": "Runes", "description": "Lecture et création d'inscriptions magiques."},
+    {"name": "Tours de Magie", "description": "Maîtrise de la magie mineure et des sorts basiques."}
+  ],
+  "Athlétique": [
+    {"name": "Acrobatie", "description": "Capacité à effectuer des mouvements complexes et acrobatiques, incluant la gestion des chutes."},
+    {"name": "Contorsion", "description": "Art de se contorsionner pour passer dans des espaces étroits ou se libérer de liens."},
+    {"name": "Escalade", "description": "Aptitude à grimper sur diverses surfaces verticales."}
+  ],
+  "Combat": [
+    {"name": "Arts Martiaux - Balayages", "description": "Techniques de combat basées sur les projections et les déséquilibres."},
+    {"name": "Arts Martiaux - Coups", "description": "Combat à mains nues focalisé sur les coups directs et percutants."},
+    {"name": "Arts Martiaux - Style", "description": "Maîtrise de formes spécifiques et avancées d'arts martiaux."},
+    {"name": "Bagarre", "description": "Combat de rue sans règles utilisant tout ce qui est disponible."},
+    {"name": "Maniement d'Arme", "description": "Capacité à utiliser efficacement un type d'arme spécifique."},
+    {"name": "Style de Combat", "description": "Techniques avancées de combat avec des armes."}
+  ],
+  "Concentration": [
+    {"name": "Concentration Ki", "description": "Canalisation de l'énergie interne pour améliorer les capacités physiques."},
+    {"name": "Concentration Mentale", "description": "Focalisation mentale pour améliorer une action spécifique."},
+    {"name": "Défense Ki", "description": "Utilisation de l'énergie interne pour améliorer ses défenses sans armure."},
+    {"name": "Force Ki", "description": "Augmentation temporaire de la force physique par l'énergie interne."},
+    {"name": "Vitesse Ki", "description": "Accélération des mouvements permettant des actions supplémentaires."}
+  ],
+  "Général": [
+    {"name": "Artisanat", "description": "Capacité à créer et réparer des objets dans un domaine spécifique."},
+    {"name": "Connaissance Générale", "description": "Savoir théorique et pratique dans un domaine spécifique."},
+    {"name": "Communication par Signaux", "description": "Capacité à transmettre des messages via des moyens non-verbaux."},
+    {"name": "Estimation", "description": "Évaluation de la valeur marchande d'objets et de biens."},
+    {"name": "Herboristerie", "description": "Connaissance des plantes et de leurs utilisations."},
+    {"name": "Langage", "description": "Maîtrise d'une langue spécifique, parlée et/ou écrite."},
+    {"name": "Maîtrise des Cordes", "description": "Expertise dans la manipulation des cordes et la création de nœuds."},
+    {"name": "Perception", "description": "Capacité à remarquer des détails et détecter des choses cachées."},
+    {"name": "Résistance du Corps", "description": "Capacité à résister aux effets physiques et aux poisons."},
+    {"name": "Résistance de l'Esprit", "description": "Protection contre les effets mentaux et psychiques."}
+  ]
+}

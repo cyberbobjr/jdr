@@ -22,7 +22,7 @@ class TestSkillToolsConsolidated:
     """Test suite for all skill-related tools"""
     
     @pytest.fixture
-    def character_id(self):
+    def character_id(self, character_79e55c14):
         """Fixture qui retourne l'ID d'un personnage existant pour les tests."""
         return "79e55c14-7dd5-4189-b209-ea88f6d067eb"
     

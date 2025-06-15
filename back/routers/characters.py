@@ -1,24 +1,25 @@
 from fastapi import APIRouter, HTTPException
 from back.services.character_service import CharacterService
-from back.models.schema import Character, CharacterList
+from back.models.schema import Character, CharacterListAny
 from back.utils.logger import log_debug
 from uuid import UUID
 
 router = APIRouter()
 
-@router.get("/", response_model=CharacterList)
+@router.get("/", response_model=CharacterListAny)
 def list_characters():
     """
     Récupère la liste de tous les personnages disponibles dans le système.
 
-    Cet endpoint permet d'obtenir tous les personnages créés et leurs informations
-    détaillées (caractéristiques, compétences, équipement, etc.).
+    Cet endpoint permet d'obtenir tous les personnages créés, qu'ils soient complets ou en cours de création.
+    Les personnages incomplets (status="en_cours") sont retournés avec uniquement les champs présents.
 
     Returns:
-        CharacterList: Une liste contenant tous les personnages disponibles
+        CharacterListAny: Une liste contenant tous les personnages disponibles (complets ou partiels)
         
     Example Response:
-        ```json
+    
+    ```json
         {
             "characters": [
                 {
@@ -73,7 +74,19 @@ def list_characters():
     """
     log_debug("Appel endpoint characters/list_characters")
     characters = CharacterService.get_all_characters()
-    return {"characters": characters}
+    result = []
+    for c in characters:
+        if isinstance(c, dict):
+            c = c.copy()
+            if "id" in c and not isinstance(c["id"], str):
+                c["id"] = str(c["id"])
+            result.append(c)
+        else:
+            d = c.model_dump()
+            if "id" in d and not isinstance(d["id"], str):
+                d["id"] = str(d["id"])
+            result.append(d)
+    return {"characters": result}
 
 @router.get("/{character_id}", response_model=Character)
 def get_character_detail(character_id: UUID):

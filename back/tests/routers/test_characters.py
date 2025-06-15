@@ -2,11 +2,11 @@ import json
 import uuid
 
 def test_list_characters(client, isolated_data_dir):
-    # Création d'un personnage strictement conforme au modèle métier, tout dans 'state'
+    # Création d'un personnage strictement conforme au modèle métier, tout à la racine
     character_id = str(uuid.uuid4())
     characters_dir = isolated_data_dir / "characters"
     characters_dir.mkdir(exist_ok=True)
-    state = {
+    character_data = {
         "id": character_id,
         "name": "Test Hero",
         "race": "Humain",
@@ -31,7 +31,6 @@ def test_list_characters(client, isolated_data_dir):
         "equipment_summary": {"total_weight": 0.0, "total_value": 0.0, "remaining_gold": 0.0},
         "culture_bonuses": {"Endurance": 1}
     }
-    character_data = {"state": state}
     (characters_dir / f"{character_id}.json").write_text(json.dumps(character_data), encoding="utf-8")
     response = client.get("/api/characters")
     assert response.status_code == 200
@@ -48,7 +47,7 @@ def test_get_character_detail(client, isolated_data_dir):
     character_id = str(uuid.uuid4())
     characters_dir = isolated_data_dir / "characters"
     characters_dir.mkdir(exist_ok=True)
-    state = {
+    character_data = {
         "id": character_id,
         "name": "Test Hero",
         "race": "Humain",
@@ -73,7 +72,6 @@ def test_get_character_detail(client, isolated_data_dir):
         "equipment_summary": {"total_weight": 0.0, "total_value": 0.0, "remaining_gold": 0.0},
         "culture_bonuses": {"Endurance": 1}
     }
-    character_data = {"state": state}
     (characters_dir / f"{character_id}.json").write_text(json.dumps(character_data), encoding="utf-8")
     response = client.get(f"/api/characters/{character_id}")
     assert response.status_code == 200

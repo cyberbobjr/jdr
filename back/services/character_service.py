@@ -28,16 +28,14 @@ class CharacterService:
         **Retour:** Objet Character chargé
         """
         character_data = CharacterPersistenceService.load_character_data(self.character_id)
-        state_data = character_data.get("state", {})
-        
+        # On prend directement la racine du JSON
+        state_data = character_data
         # Convertir l'ancien format equipment vers inventory si nécessaire
         self._convert_equipment_to_inventory(state_data)
-        
         # Ajouter les champs manquants avec des valeurs par défaut
         state_data.setdefault("xp", 0)
         state_data.setdefault("gold", 0)
         state_data.setdefault("hp", 100)
-        
         # L'ID est le nom du fichier (sans .json)
         state_data["id"] = self.character_id
         log_debug("Chargement du personnage", action="_load_character", character_id=self.character_id)
@@ -52,8 +50,7 @@ class CharacterService:
         character_dict = self.character_data.model_dump()
         # Retirer l'ID car il ne doit pas être dans le fichier
         character_dict.pop('id', None)
-        
-        CharacterPersistenceService.save_character_data(self.character_id, {"state": character_dict})
+        CharacterPersistenceService.save_character_data(self.character_id, character_dict)
         log_debug("Sauvegarde du personnage", action="save_character", character_id=self.character_id)
     
     def get_character(self) -> Character:
@@ -105,12 +102,12 @@ class CharacterService:
             state_data['inventory'] = []
 
     @staticmethod
-    def get_all_characters() -> List[Character]:
+    def get_all_characters() -> List[object]:
         """
         Récupère la liste de tous les personnages disponibles à partir des fichiers JSON.
 
         Returns:
-            List[Character]: Une liste d'objets Character représentant les personnages disponibles.
+            List[object]: Une liste d'objets Character ou de dicts bruts pour les personnages incomplets.
         """
         characters = []
         characters_dir = os.path.join(get_data_dir(), "characters")
@@ -119,29 +116,29 @@ class CharacterService:
         for filename in os.listdir(characters_dir):
             if filename.endswith(".json"):
                 character_id = filename[:-5]  # Retire l'extension .json
-                
                 try:
                     character_data = CharacterPersistenceService.load_character_data(character_id)
-                    state_data = character_data.get("state", {})
-                      # Skip characters that don't have all required fields
-                    if not all(field in state_data for field in required_fields):
+                    status = character_data.get("status", None)
+                    if status == "en_cours":
+                        # On ajoute le dict brut pour les personnages en cours de création
+                        character_data["id"] = character_id
+                        characters.append(character_data)
+                        continue
+                    if not all(field in character_data for field in required_fields):
                         log_debug("Personnage ignoré (champs manquants)", 
                                  action="get_all_characters", 
                                  filename=filename, 
-                                 missing_fields=[field for field in required_fields if field not in state_data])
+                                 missing_fields=[field for field in required_fields if field not in character_data])
                         continue
-                      # Convertir l'ancien format equipment vers inventory si nécessaire
-                    CharacterService._convert_equipment_to_inventory(state_data)
-                    
+                    # Convertir l'ancien format equipment vers inventory si nécessaire
+                    CharacterService._convert_equipment_to_inventory(character_data)
                     # Ajouter les champs manquants avec des valeurs par défaut
-                    state_data.setdefault("xp", 0)
-                    state_data.setdefault("gold", 0)
-                    state_data.setdefault("hp", 100)
-                    
+                    character_data.setdefault("xp", 0)
+                    character_data.setdefault("gold", 0)
+                    character_data.setdefault("hp", 100)
                     # L'ID est le nom du fichier (sans .json)
-                    state_data["id"] = character_id
-                    characters.append(Character(**state_data))
-                    
+                    character_data["id"] = character_id
+                    characters.append(Character(**character_data))
                 except (FileNotFoundError, ValueError) as e:
                     log_debug("Erreur lors du chargement du personnage", 
                              action="get_all_characters_error", 
@@ -161,7 +158,7 @@ class CharacterService:
         **Retour :** Objet Character (Pydantic).
         """       
         character_data = CharacterPersistenceService.load_character_data(character_id)
-        state_data = character_data.get("state", {})
+        state_data = character_data
           # Convertir l'ancien format equipment vers inventory si nécessaire
         CharacterService._convert_equipment_to_inventory(state_data)
         

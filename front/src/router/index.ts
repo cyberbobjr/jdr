@@ -54,6 +54,15 @@ const router = createRouter({
         title: 'Scénarios',
         description: 'Bibliothèque de scénarios'
       }
+    },
+    {
+      path: '/create/:characterId/:step',
+      name: 'create',
+      component: () => import('../views/Create.vue'),
+      meta: {
+        title: 'Créer un personnage',
+        description: 'Page de création de personnage'
+      }
     }
   ],
 })

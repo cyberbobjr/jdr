@@ -2,6 +2,14 @@
 
 Ce projet vise à créer un jeu de rôle (JdR) se déroulant dans les Terres du Milieu, où la narration et les mécaniques de jeu sont orchestrées par un Large Language Model (LLM) agissant comme Maître du Jeu (MJ).
 
+## Nouveautés (2025)
+
+- **Modèle Character enrichi** :
+  - Ajout des champs `background` (histoire du personnage) et `physical_description` (description physique) dans le modèle métier et le schéma principal.
+  - Ces champs sont générés automatiquement via l'agent LLM lors de la création du personnage.
+- **Routes de génération LLM** :
+  - Nouvelles routes API pour générer un nom, un background et une description physique de personnage via l'agent LLM, en envoyant la fiche de personnage partielle pour contextualisation.
+
 ## Architecture Générale
 
 L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (remplaçant complètement Haystack 3.x et LangChain), et d'une infrastructure DevOps. Les détails de la spécification technique se trouvent dans [instructions/openai-instructions.md](instructions/openai-instructions.md).
@@ -212,6 +220,9 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
 | GET     | /api/characters/                          | Aucun                                                                   | Liste complète des personnages avec leurs fiches détaillées         |
 | GET     | /api/characters/{character_id}            | character_id (UUID, path)                                              | Détail du personnage (`Character`)                                  |
 | POST    | /api/combat/attack                        | attacker_id (str), target_id (str), attack_value (int), combat_state (dict, body) | combat_state (état du combat mis à jour)                            |
+| POST    | /creation/generate-name                      | character (Partial<Character>, body JSON)                              | name (str) : nom généré par LLM                                      |
+| POST    | /creation/generate-background                | character (Partial<Character>, body JSON)                              | background (str) : background généré par LLM                         |
+| POST    | /creation/generate-physical-description      | character (Partial<Character>, body JSON)                              | physical_description (str) : description physique générée par LLM    |
 
 > Toutes les routes sont documentées dans le code source et la [documentation technique](instructions/openai-instructions.md).
 
@@ -648,6 +659,45 @@ Le système empêche automatiquement la création de sessions dupliquées en dé
 | **404** | Scénario introuvable | Le fichier de scénario n'existe pas |
 | **409** | Session dupliquée | Une session existe déjà pour cette combinaison personnage/scénario |
 
+## Migration 2025 : Suppression de la clé `state` dans les fiches de personnage
+
+- **Structure simplifiée** : Les fiches de personnage JSON n'utilisent plus de clé intermédiaire `state`. Tous les champs du personnage (nom, race, caractéristiques, inventaire, etc.) sont désormais à la racine du fichier JSON.
+- **Compatibilité** : Toute la logique de lecture/écriture, les services et les tests ont été adaptés pour fonctionner sans la clé `state`.
+- **Conséquences** :
+  - Les anciennes méthodes manipulant la section `state` (ex : `load_character_state`, `update_character_state`, etc.) ont été supprimées.
+  - Les tests unitaires et d'intégration ont été corrigés pour écrire/lire les personnages directement à la racine.
+  - Toute fiche de personnage doit désormais respecter ce format :
+
+```json
+{
+  "id": "d1a4064a-c956-4d46-b6ea-5e688cf2f78b",
+  "name": "Test Hero",
+  "race": "Humain",
+  "culture": "Rurale",
+  "profession": "Aventurier",
+  "caracteristiques": {"Force": 10, ...},
+  "competences": {"Athletisme": 5},
+  "hp": 42,
+  "xp": 0,
+  "gold": 0,
+  "inventory": [],
+  "spells": [],
+  "equipment_summary": {},
+  "culture_bonuses": {},
+  "created_at": "2025-06-14T19:08:31.148010",
+  "last_update": "2025-06-14T19:08:31.148010",
+  "current_step": "creation",
+  "status": "en_cours"
+}
+```
+
+- **Avantages** :
+  - Lecture/écriture plus simple et plus rapide
+  - Moins d'ambiguïté sur la structure des données
+  - Maintenance facilitée pour les évolutions futures
+
+> ⚠️ Toute référence à la clé `state` dans le code ou les tests doit être supprimée pour garantir la compatibilité.
+
 ## 🧪 Tests et Qualité
 
 ### Suite de Tests Consolidée
@@ -731,3 +781,29 @@ Le frontend est prêt pour l'intégration avec l'API FastAPI + PydanticAI :
 - Structure modulaire pour l'ajout de nouvelles fonctionnalités
 - Configuration TypeScript stricte pour une intégration API robuste
 - Tests unitaires pour assurer la stabilité lors des développements futurs
+
+## Gestion centralisée des races et cultures (2025)
+
+Depuis juin 2025, la gestion des races et cultures est entièrement centralisée via le fichier `data/races_and_cultures.json`.
+
+- **Source de vérité unique** : Toutes les informations sur les races, bonus, cultures, langues, etc. sont définies dans ce fichier JSON.
+- **Chargement backend** : Le backend charge ce fichier via la méthode `_load_races_data` de la classe `Races` (`back/models/domain/races.py`).
+- **Dataclasses typées** : Les structures Python `RaceData` et `CultureData` (dans `back/models/domain/base.py`) garantissent la cohérence des données et facilitent la validation.
+- **Suppression de l'ancien code** : Toute la logique de gestion des cultures (CSV, module `cultures.py`, anciens dataclass) a été supprimée pour éviter toute redondance ou incohérence.
+- **Tests** : Des tests unitaires valident la structure et le contenu du chargement JSON (`back/tests/domain/test_races_data.py`).
+
+> ⚠️ Pour ajouter ou modifier une race/culture, il suffit désormais de modifier le fichier `races_and_cultures.json`.
+
+## Gestion centralisée des professions (2025)
+
+Depuis juin 2025, la gestion des professions est entièrement centralisée via le fichier `data/professions.json`.
+
+- **Source de vérité unique** : Toutes les informations sur les professions (nom, description, groupes de compétences favoris, caractéristiques principales, capacités, sphères) sont définies dans ce fichier JSON.
+- **Chargement backend** : Le backend charge ce fichier via les méthodes `get_professions` et `get_professions_full` du service `CharacterCreationService` (`back/services/character_creation_service.py`).
+- **Routes API** :
+  - `/api/creation/professions` : Retourne la liste des noms de professions (pour la sélection rapide côté frontend).
+  - `/api/creation/professions/full` : Retourne la liste complète des objets professions (pour affichage détaillé ou documentation avancée).
+- **Suppression de l'ancien code** : Toute la logique de gestion des professions en Python (hors dataclass métier) a été supprimée pour éviter toute redondance ou incohérence.
+- **Tests** : Des tests unitaires valident la structure et le contenu du chargement JSON (voir `/back/tests/services/test_character_creation_service.py`).
+
+> ⚠️ Pour ajouter ou modifier une profession, il suffit désormais de modifier le fichier `professions.json`.

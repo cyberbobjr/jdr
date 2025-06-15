@@ -24,7 +24,7 @@ def test_get_all_characters(isolated_data_dir):
         "crafting_time": None,
         "special_properties": None
     }
-    state = {
+    character_data = {
         "id": str(character_id),
         "name": "Test Hero",
         "race": "Humain",
@@ -49,7 +49,6 @@ def test_get_all_characters(isolated_data_dir):
         "equipment_summary": {"total_weight": 2.5, "total_value": 100.0, "remaining_gold": 0.0},
         "culture_bonuses": {"Endurance": 1}
     }
-    character_data = {"state": state}
     (characters_dir / f"{character_id}.json").write_text(json.dumps(character_data), encoding="utf-8")
     characters = CharacterService.get_all_characters()
     assert isinstance(characters, list)

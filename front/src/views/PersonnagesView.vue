@@ -8,7 +8,7 @@
 
     <!-- Indicateur de chargement -->
     <div v-if="loading" class="jdr-text-center jdr-p-4">
-      <JdrSpinner class="jdr-mx-auto jdr-mb-2" size="lg" />
+      <JdrSpinner class="jdr-mx-auto jdr-mb-2" :size="48" />
       <p class="jdr-mt-4">Chargement des personnages...</p>
     </div>
 
@@ -38,6 +38,10 @@
             <font-awesome-icon :icon="['fas', 'sync-alt']" />
             Actualiser
           </button>
+          <button @click="onCreateCharacterClick" class="jdr-btn jdr-btn-primary">
+            <font-awesome-icon :icon="['fas', 'plus']" />
+            Créer un personnage
+          </button>
         </div>
       </div>
 
@@ -62,14 +66,25 @@
               <font-awesome-icon :icon="['fas', 'eye']" />
               Détails
             </button>
-            <router-link 
-              :to="{ name: 'nouveau-scenario', query: { characterId: character.id } }"
-              class="jdr-btn jdr-btn-primary jdr-btn-sm"
-              @click.stop
-            >
-              <font-awesome-icon :icon="['fas', 'play']" />
-              Jouer
-            </router-link>
+            <template v-if="character.status === 'en_cours'">
+              <button
+                class="jdr-btn jdr-btn-warning jdr-btn-sm"
+                @click.stop="finalizeCharacter(character)"
+              >
+                <font-awesome-icon :icon="['fas', 'edit']" />
+                Finaliser le personnage
+              </button>
+            </template>
+            <template v-else>
+              <router-link 
+                :to="{ name: 'nouveau-scenario', query: { characterId: character.id } }"
+                class="jdr-btn jdr-btn-primary jdr-btn-sm"
+                @click.stop
+              >
+                <font-awesome-icon :icon="['fas', 'play']" />
+                Jouer
+              </router-link>
+            </template>
           </template>
         </CardComponent>
       </div>
@@ -178,6 +193,7 @@ import CardComponent from '@/components/CardComponent.vue';
 import JdrSpinner from '@/components/JdrSpinner.vue';
 import JdrModale from '@/components/JdrModale.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { useRouter } from 'vue-router';
 
 // État réactif
 const loading = ref(true);
@@ -187,6 +203,9 @@ const characters = ref<Character[]>([]);
 // Modal de détails
 const showDetailsModal = ref(false);
 const selectedCharacter = ref<Character | null>(null);
+
+// Router
+const router = useRouter();
 
 // Chargement des personnages
 const loadCharacters = async () => {
@@ -220,9 +239,36 @@ const closeDetailsModal = () => {
   selectedCharacter.value = null;
 };
 
+// Création d'un personnage
+const onCreateCharacterClick = async () => {
+  try {
+    loading.value = true;
+    error.value = null;
+
+    // Appel à l'API pour créer un personnage (étape 1)
+    const newCharacter = await JdrApiService.createNewCharacter();
+
+    // Redirection vers la route de création avec l'ID du personnage et l'étape 1
+    if (newCharacter && newCharacter.id) {
+      router.push({ name: 'create', params: { characterId: newCharacter.id, step: 'step1' } });
+    }
+  } catch (err) {
+    console.error('Erreur lors de la création du personnage:', err);
+    error.value = err instanceof Error ? err.message : 'Erreur de connexion au serveur';
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Finalisation du personnage
+const finalizeCharacter = (character: Character) => {
+  router.push({ name: 'create', params: { characterId: character.id, step: 'step1' } });
+};
+
 // Utilitaires de formatage
-const formatSkillName = (skill: string) => {
-  return skill
+const formatSkillName = (skill: string | number) => {
+  const skillStr = String(skill);
+  return skillStr
     .split('_')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
@@ -232,33 +278,6 @@ const getHpBarClass = (hp: number) => {
   if (hp > 70) return '';
   if (hp > 30) return 'warning';
   return 'danger';
-};
-
-const getMainStats = (stats: Record<string, number>) => {
-  // Utilise les clés du format API (majuscules, accents)
-  const mainStatKeys = ['Force', 'Constitution', 'Agilité', 'Rapidité', 'Volonté', 'Raisonnement', 'Intuition', 'Présence'];
-  const result: Record<string, number> = {};
-  mainStatKeys.forEach(key => {
-    if (stats[key] !== undefined) {
-      result[key] = stats[key];
-    }
-  });
-  return result;
-};
-
-const getTopSkills = (skills: Record<string, number>) => {
-  // Retourne les 3 meilleures compétences
-  const sortedSkills = Object.entries(skills)
-    .filter(([_, value]) => value > 0)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 3);
-  
-  const result: Record<string, number> = {};
-  sortedSkills.forEach(([skill, value]) => {
-    result[skill] = value;
-  });
-  
-  return result;
 };
 
 // Montage du composant

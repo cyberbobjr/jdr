@@ -8,7 +8,7 @@ def create_test_character(character_id, data_dir):
     """
     Crée un personnage minimal pour les tests dans le dossier isolé.
     """
-    state = {
+    character_data = {
         "id": character_id,
         "name": "Test Hero",
         "race": "Humain",
@@ -24,7 +24,6 @@ def create_test_character(character_id, data_dir):
         "equipment_summary": {},
         "culture_bonuses": {}
     }
-    character_data = {"state": state}
     characters_dir = data_dir / "characters"
     characters_dir.mkdir(exist_ok=True)
     (characters_dir / f"{character_id}.json").write_text(json.dumps(character_data), encoding="utf-8")

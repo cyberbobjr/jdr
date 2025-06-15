@@ -21,7 +21,13 @@ class TestCharacterCreationService:
 
     def test_get_races(self):
         races = CharacterCreationService.get_races()
+        # On attend une liste d'objets RaceData (structure dict issue du JSON)
         assert isinstance(races, list)
+        assert len(races) > 0
+        for race in races:
+            assert isinstance(race, dict) or hasattr(race, 'name')
+            assert hasattr(race, 'cultures') or 'cultures' in race
+            assert hasattr(race, 'characteristic_bonuses') or 'characteristic_bonuses' in race
 
     def test_get_skills(self):
         skills = CharacterCreationService.get_skills()

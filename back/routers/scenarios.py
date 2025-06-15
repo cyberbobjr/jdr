@@ -18,6 +18,7 @@ from back.models.schema import (
 from back.utils.logger import log_debug
 from back.agents.gm_agent_pydantic import build_gm_agent_pydantic, enrich_user_message_with_character
 from back.services.character_service import CharacterService
+from back.services.character_persistence_service import CharacterPersistenceService
 
 router = APIRouter()
 
@@ -174,6 +175,11 @@ async def start_scenario(request: StartScenarioRequest):
     log_debug("Appel endpoint scenarios/start_scenario")
     
     try:
+        # Vérification du statut du personnage
+        character_data = CharacterPersistenceService.load_character_data(request.character_id)
+        if character_data.get("status") == "en_cours":
+            raise HTTPException(status_code=400, detail="Impossible de démarrer un scénario avec un personnage en cours de création.")
+        
         # Créer la session (vérifie automatiquement l'existence d'une session duplicatée)
         session_info = ScenarioService.start_scenario(request.scenario_name, request.character_id)
         session_id = session_info["session_id"]
@@ -274,6 +280,11 @@ async def play_scenario(session_id: UUID, request: PlayScenarioRequest):
         # Récupérer les informations de session
         session_info = ScenarioService.get_session_info(str(session_id))
         character_id = session_info["character_id"]
+        # Vérification du statut du personnage
+        character_data = CharacterPersistenceService.load_character_data(character_id)
+        if character_data.get("status") == "en_cours":
+            raise HTTPException(status_code=400, detail="Impossible de jouer avec un personnage en cours de création.")
+        
         scenario_name = session_info["scenario_name"]
           # Construire l'agent PydanticAI avec le scénario (le personnage est accessible via deps.character_service)
         agent, deps = build_gm_agent_pydantic(str(session_id), scenario_name)
