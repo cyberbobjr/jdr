@@ -1,0 +1,92 @@
+{
+  "weapons": {
+    "Épée longue": {
+      "type": "arme",
+      "category": "mêlée",
+      "damage": "1d8+4",
+      "weight": 1.5,
+      "cost": 50,
+      "description": "Épée à une main équilibrée et polyvalente"
+    },
+    "Arc long": {
+      "type": "arme",
+      "category": "distance",
+      "damage": "1d8+2",
+      "range": 150,
+      "weight": 1.0,
+      "cost": 30,
+      "description": "Arc puissant pour le combat à distance"
+    },
+    "Dague": {
+      "type": "arme",
+      "category": "mêlée",
+      "damage": "1d4+2",
+      "weight": 0.5,
+      "cost": 10,
+      "description": "Petite lame discrète et rapide"
+    },
+    "Bâton": {
+      "type": "arme",
+      "category": "mêlée",
+      "damage": "1d6+3",
+      "weight": 2.0,
+      "cost": 5,
+      "description": "Bâton de combat, souvent utilisé par les mages"
+    }
+  },
+  "armor": {
+    "Armure de cuir": {
+      "type": "armure",
+      "protection": 3,
+      "weight": 5.0,
+      "cost": 25,
+      "description": "Armure légère en cuir durci"
+    },
+    "Cotte de mailles": {
+      "type": "armure",
+      "protection": 6,
+      "weight": 15.0,
+      "cost": 100,
+      "description": "Armure de mailles entrelacées"
+    },
+    "Armure de plaques": {
+      "type": "armure",
+      "protection": 10,
+      "weight": 25.0,
+      "cost": 300,
+      "description": "Armure lourde en plaques de métal"
+    }
+  },
+  "items": {
+    "Corde (10m)": {
+      "type": "équipement",
+      "weight": 2.0,
+      "cost": 5,
+      "description": "Corde solide de 10 mètres"
+    },
+    "Rations (1 jour)": {
+      "type": "consommable",
+      "weight": 0.5,
+      "cost": 2,
+      "description": "Nourriture pour une journée"
+    },
+    "Torche": {
+      "type": "équipement",
+      "weight": 0.5,
+      "cost": 1,
+      "description": "Source de lumière portable"
+    },
+    "Sac d'herbes": {
+      "type": "équipement",
+      "weight": 1.0,
+      "cost": 10,
+      "description": "Assortiment d'herbes médicinales et magiques"
+    },
+    "Trousse de soins": {
+      "type": "équipement",
+      "weight": 1.0,
+      "cost": 15,
+      "description": "Kit de premiers secours"
+    }
+  }
+}

@@ -4,12 +4,12 @@ Ce service gère l'allocation automatique des caractéristiques, la vérificatio
 et fournit les listes de professions, races, compétences, cultures, équipements et sorts.
 """
 
-from back.models.domain.competences import Competences
-from back.models.domain.equipements import Equipements
-from back.models.domain.magie import Magie
-from back.config import get_data_dir
-import json
-import os
+from back.models.domain.characteristics_manager import CharacteristicsManager
+from back.models.domain.skills_manager import SkillsManager
+from back.models.domain.races_manager import RacesManager
+from back.models.domain.spells_manager import SpellsManager
+from back.models.domain.professions_manager import ProfessionsManager
+from back.models.domain.equipment_manager import EquipmentManager
 
 class CharacterCreationService:
     """
@@ -26,43 +26,54 @@ class CharacterCreationService:
         - `race` (str): La race du personnage.
         **Returns:** Un dictionnaire des caractéristiques allouées.
         """
-        from back.models.domain.caracteristiques import Caracteristiques
-        from back.models.domain.races import Races
-        caracs = Caracteristiques()
-        base_names = caracs.NAMES
-        budget = 550
+        characteristics_manager = CharacteristicsManager()
+        races_manager = RacesManager()
+          # Obtenir les noms des caractéristiques et le budget
+        char_names = list(characteristics_manager.get_all_characteristics().keys())
+        starting_points = characteristics_manager.starting_points
+        
         # Bonus raciaux à intégrer dans la répartition
-        races = Races().RACES_DATA
-        race_obj = races.get(race)
-        racial_bonuses = race_obj.characteristic_bonuses if race_obj else {}
+        race_data = races_manager.get_race_by_name(race)
+        racial_bonuses = race_data.get("characteristic_bonuses", {}) if race_data else {}
+        
         # 1. On part d'une base minimale (50 partout)
-        values = {name: 50 for name in base_names}
-        # 2. On prépare la liste d'ordre de priorité
-        recos = caracs.get_profession_recommendations().get(profession, {})
-        main_stats = recos.get("principales", [])
-        ordered_stats = main_stats + [n for n in base_names if n not in main_stats]
-        # 3. On incrémente chaque stat dans l'ordre, en tenant compte du bonus racial, jusqu'à épuisement du budget
-        while True:
+        values = {name: 50 for name in char_names}
+          # 2. Pour simplifier, on distribue équitablement le budget restant
+        remaining_budget = starting_points - sum(values.values())
+        
+        # 3. Distribution équitable avec priorité aux caractéristiques principales de la profession
+        professions_manager = ProfessionsManager()
+        profession_data = professions_manager.get_profession_by_name(profession)
+        primary_chars = profession_data.get("primary_characteristics", []) if profession_data else []
+        
+        # Distribution prioritaire aux caractéristiques principales
+        chars_to_improve = primary_chars + [name for name in char_names if name not in primary_chars]
+        
+        # Amélioration progressive jusqu'à épuisement du budget
+        while remaining_budget > 0 and any(values[name] < 90 for name in char_names):
             improved = False
-            for stat in ordered_stats:
-                bonus = racial_bonuses.get(stat, 0)
-                # On ne dépasse jamais 90 au total (valeur brute + bonus racial)
-                if values[stat] + bonus < 90:
-                    # On simule l'incrément
-                    test_values = {k: values[k] + racial_bonuses.get(k, 0) for k in base_names}
-                    test_values[stat] += 1
-                    if caracs.calculate_cost(test_values) <= budget:
-                        values[stat] += 1
-                        improved = True
+            for char_name in chars_to_improve:
+                if remaining_budget > 0 and values[char_name] < 90:
+                    values[char_name] += 1
+                    remaining_budget -= 1
+                    improved = True
             if not improved:
                 break
+        
         # 4. On applique les bonus raciaux pour le résultat final
-        for stat in base_names:
-            if stat in racial_bonuses:
-                values[stat] += racial_bonuses[stat]
-        return values
-
-    @staticmethod
+        for char_name in char_names:
+            if char_name in racial_bonuses:
+                values[char_name] += racial_bonuses[char_name]
+        
+        return values    @staticmethod
+    def check_attributes_points(attributes: dict) -> bool:
+        """
+        ### check_attributes_points
+        **Description:** Vérifie que les points de caractéristiques respectent les règles de création (budget, limites, etc.).
+        **Parameters:**
+        - `attributes` (dict): Dictionnaire des caractéristiques du personnage.
+        **Returns:** Un booléen indiquant si les points sont valides.
+        """    @staticmethod
     def check_attributes_points(attributes: dict) -> bool:
         """
         ### check_attributes_points
@@ -71,14 +82,16 @@ class CharacterCreationService:
         - `attributes` (dict): Dictionnaire des caractéristiques du personnage.
         **Returns:** Un booléen indiquant si les points sont valides.
         """
-        from back.models.domain.caracteristiques import Caracteristiques
-        caracs = Caracteristiques()
+        characteristics_manager = CharacteristicsManager()
+        
         # Vérifie le budget total
-        if not caracs.validate_distribution(attributes):
+        total_cost = characteristics_manager.calculate_cost(attributes)
+        if total_cost > characteristics_manager.starting_points:
             return False
-        # Vérifie les bornes (1-105)
+        
+        # Vérifie les bornes (1-100)
         for v in attributes.values():
-            if v < 1 or v > 105:
+            if v < 1 or v > 100:
                 return False
         return True
 
@@ -86,15 +99,12 @@ class CharacterCreationService:
     def get_professions() -> list:
         """
         ### get_professions
-        **Description:** Retourne la liste des professions disponibles (noms uniquement).
-        **Parameters:**
+        **Description:** Retourne la liste des professions disponibles (noms uniquement).        **Parameters:**
         - Aucun
         **Returns:** Une liste de professions (str).
         """
-        data_path = os.path.join(get_data_dir(), 'professions.json')
-        with open(data_path, encoding='utf-8') as f:
-            professions = json.load(f)
-        return [p['name'] for p in professions]
+        professions_manager = ProfessionsManager()
+        return professions_manager.get_profession_names()
 
     @staticmethod
     def get_professions_full() -> list:
@@ -105,12 +115,8 @@ class CharacterCreationService:
         - Aucun
         **Returns:** Une liste de dictionnaires représentant chaque profession.
         """
-        data_path = os.path.join(get_data_dir(), 'professions.json')
-        with open(data_path, encoding='utf-8') as f:
-            professions = json.load(f)
-        return professions
-
-    @staticmethod
+        professions_manager = ProfessionsManager()
+        return professions_manager.get_all_professions()    @staticmethod
     def get_races() -> list:
         """
         ### get_races
@@ -119,8 +125,8 @@ class CharacterCreationService:
         - Aucun
         **Returns:** Une liste d'objets RaceData (structure complète issue du JSON).
         """
-        from back.models.domain.races import Races
-        return Races().RACES_DATA
+        races_manager = RacesManager()
+        return races_manager.get_all_races_data()
 
     @staticmethod
     def get_skills() -> dict:
@@ -131,9 +137,8 @@ class CharacterCreationService:
         - Aucun
         **Returns:** Un dictionnaire {groupe: [compétences]}.
         """
-        return Competences().SKILL_GROUPS
-
-    @staticmethod
+        skills_manager = SkillsManager()
+        return skills_manager.get_all_skill_groups()    @staticmethod
     def get_equipments() -> list:
         """
         ### get_equipments
@@ -142,7 +147,8 @@ class CharacterCreationService:
         - Aucun
         **Returns:** Une liste d'équipements (str).
         """
-        return list(Equipements().equipment.keys())
+        equipment_manager = EquipmentManager()
+        return equipment_manager.get_equipment_names()
 
     @staticmethod
     def get_spells() -> list:
@@ -153,60 +159,90 @@ class CharacterCreationService:
         - Aucun
         **Returns:** Une liste de sorts (str).
         """
-        return list(Magie().spells.keys())
-
-    @staticmethod
+        spells_manager = SpellsManager()
+        all_spells = []
+        for sphere_data in spells_manager.get_all_spells().values():
+            all_spells.extend([spell["name"] for spell in sphere_data])
+        return all_spells    @staticmethod
     def check_skills_points(skills: dict, profession: str) -> bool:
         """
         ### check_skills_points
-        **Description:** Vérifie que la répartition des points de compétences respecte les règles (budget, maximum par compétence, groupes favoris, etc.), en s'appuyant sur le modèle Competences.
+        **Description:** Vérifie que la répartition des points de compétences respecte les règles (budget, maximum par compétence, groupes favoris, etc.), en s'appuyant sur les nouveaux managers.
         **Parameters:**
         - `skills` (dict): Dictionnaire {nom_compétence: rangs}
         - `profession` (str): Profession du personnage (pour les groupes favoris)
         **Returns:** True si la répartition est valide, False sinon.
         """
-        from back.models.domain.professions import Professions
-        from back.models.domain.competences import Competences
+        professions_manager = ProfessionsManager()
+        skills_manager = SkillsManager()
+        
         MAX_RANK = 6
         BUDGET = 40
-        prof = Professions().PROFESSIONS_DATA.get(profession)
-        if not prof:
+        
+        profession_data = professions_manager.get_profession_by_name(profession)
+        if not profession_data:
             return False
-        favored_groups = prof.favored_skill_groups.keys()
-        comp = Competences()
+        
+        skill_groups = profession_data.get("skill_groups", {})
         total_cost = 0
-        for skill, ranks in skills.items():
-            skill_obj = comp.get_skill(skill)
-            if not skill_obj:
-                return False
+        
+        for skill_name, ranks in skills.items():
             if not (0 <= ranks <= MAX_RANK):
                 return False
-            is_favored = skill_obj.group in favored_groups
-            total_cost += comp.calculate_development_cost(skill, ranks, is_favored)
-        return total_cost <= BUDGET
-
-    @staticmethod
+            
+            skill_data = skills_manager.get_skill_by_name(skill_name)
+            if not skill_data:
+                return False
+            
+            skill_group = skill_data.get("group", "")
+            is_favored = skill_group in skill_groups
+            
+            # Calcul du coût: si favori, coût réduit de moitié pour les premiers rangs
+            if is_favored and skill_group in skill_groups:
+                favored_info = skill_groups[skill_group]
+                favored_ranks = min(ranks, favored_info.get("ranks", 0))
+                cost_per_rank = favored_info.get("cost_per_rank", 3)
+                regular_ranks = max(0, ranks - favored_ranks)
+                total_cost += favored_ranks * cost_per_rank + regular_ranks * 3
+            else:
+                total_cost += ranks * 3  # Coût standard
+        
+        return total_cost <= BUDGET    @staticmethod
     def calculate_skills_cost(skills: dict, profession: str) -> int:
         """
         ### calculate_skills_cost
-        **Description:** Calcule le coût total en PdP de la répartition des compétences, en s'appuyant sur le modèle Competences.
+        **Description:** Calcule le coût total en PdP de la répartition des compétences, en s'appuyant sur les nouveaux managers.
         **Parameters:**
         - `skills` (dict): Dictionnaire {nom_compétence: rangs}
         - `profession` (str): Profession du personnage
         **Returns:** Le coût total (int).
         """
-        from back.models.domain.professions import Professions
-        from back.models.domain.competences import Competences
-        prof = Professions().PROFESSIONS_DATA.get(profession)
-        if not prof:
+        professions_manager = ProfessionsManager()
+        skills_manager = SkillsManager()
+        
+        profession_data = professions_manager.get_profession_by_name(profession)
+        if not profession_data:
             return 0
-        favored_groups = prof.favored_skill_groups.keys()
-        comp = Competences()
+        
+        skill_groups = profession_data.get("skill_groups", {})
         total_cost = 0
-        for skill, ranks in skills.items():
-            skill_obj = comp.get_skill(skill)
-            if not skill_obj:
+        
+        for skill_name, ranks in skills.items():
+            skill_data = skills_manager.get_skill_by_name(skill_name)
+            if not skill_data:
                 continue
-            is_favored = skill_obj.group in favored_groups
-            total_cost += comp.calculate_development_cost(skill, ranks, is_favored)
+            
+            skill_group = skill_data.get("group", "")
+            is_favored = skill_group in skill_groups
+            
+            # Calcul du coût: si favori, coût réduit de moitié pour les premiers rangs
+            if is_favored and skill_group in skill_groups:
+                favored_info = skill_groups[skill_group]
+                favored_ranks = min(ranks, favored_info.get("ranks", 0))
+                cost_per_rank = favored_info.get("cost_per_rank", 3)
+                regular_ranks = max(0, ranks - favored_ranks)
+                total_cost += favored_ranks * cost_per_rank + regular_ranks * 3
+            else:
+                total_cost += ranks * 3  # Coût standard
+                
         return total_cost

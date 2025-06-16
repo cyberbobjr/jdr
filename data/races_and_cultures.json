@@ -5,9 +5,6 @@
             "Volonté": 1
         },
         "destiny_points": 3,
-        "special_abilities": [
-            "+1 compétence libre"
-        ],
         "base_languages": [
             "Ouistrain (langue commune)"
         ],
@@ -20,23 +17,36 @@
         "cultures": [
             {
                 "name": "Gondoriens",
-                "bonus": "+1 Savoir",
+                "skill_bonuses": {
+                    "Connaissance Générale": 1
+                },
                 "traits": "Tradition et fierté"
             },
             {
                 "name": "Rohirrim",
-                "bonus": "+1 Équitation",
+                "skill_bonuses": {
+                    "Équitation": 1
+                },
                 "traits": "Culture équestre"
             },
             {
                 "name": "Hommes du Nord",
-                "bonus": "+1 Survie",
+                "skill_bonuses": {
+                    "Survie": 1
+                },
                 "traits": "Endurance au climat"
             },
             {
                 "name": "Dúnedain",
-                "bonus": "+1 Vol, +1 Comp. libre",
-                "traits": "Longévité ×3, +1 Point de destin"
+                "characteristic_bonuses": {
+                    "Volonté": 1
+                },
+                "free_skill_points": 1,
+                "traits": "Longévité ×3, +1 Point de destin",
+                "special_traits": {
+                    "longevity_multiplier": 3,
+                    "bonus_destiny_points": 1
+                }
             }
         ]
     },
@@ -46,10 +56,6 @@
             "Agilité": 2
         },
         "destiny_points": 2,
-        "special_abilities": [
-            "Vision nocturne",
-            "Immunité aux maladies"
-        ],
         "base_languages": [
             "Sindarin",
             "Ouistrain"
@@ -63,17 +69,26 @@
         "cultures": [
             {
                 "name": "Noldor",
-                "bonus": "+1 Art, +1 Savoir",
+                "skill_bonuses": {
+                    "Artisanat": 1,
+                    "Connaissance Générale": 1
+                },
                 "traits": "Maîtres artisans"
             },
             {
                 "name": "Sindar",
-                "bonus": "+1 Nature, +1 Per",
+                "skill_bonuses": {
+                    "Herboristerie": 1,
+                    "Perception": 1
+                },
                 "traits": "Harmonie avec la nature"
             },
             {
                 "name": "Sylvains",
-                "bonus": "+1 Disc, +1 Tir",
+                "skill_bonuses": {
+                    "Discrétion": 1,
+                    "Maniement d'Arme": 1
+                },
                 "traits": "Experts des forêts"
             }
         ]
@@ -81,13 +96,9 @@
     {
         "name": "Nains",
         "characteristic_bonuses": {
-            "Vigueur": 2
+            "Constitution": 2
         },
         "destiny_points": 2,
-        "special_abilities": [
-            "Vision dans le noir",
-            "Résistance magie (+2)"
-        ],
         "base_languages": [
             "Khuzdul (secret)",
             "Ouistrain"
@@ -100,12 +111,16 @@
         "cultures": [
             {
                 "name": "Longues-Barbes",
-                "bonus": "+1 Forge",
+                "skill_bonuses": {
+                    "Artisanat": 1
+                },
                 "traits": "Traditions anciennes"
             },
             {
                 "name": "Barbes-de-Feu",
-                "bonus": "+1 Combat",
+                "skill_bonuses": {
+                    "Maniement d'Arme": 1
+                },
                 "traits": "Guerriers nés"
             }
         ]
@@ -113,13 +128,9 @@
     {
         "name": "Hobbits",
         "characteristic_bonuses": {
-            "Discrétion": 2
+            "Agilité": 2
         },
         "destiny_points": 4,
-        "special_abilities": [
-            "Résistance mentale (+2)",
-            "Chance (1 relance/jour)"
-        ],
         "base_languages": [
             "Ouistrain"
         ],
@@ -131,17 +142,23 @@
         "cultures": [
             {
                 "name": "Pied-Poilus",
-                "bonus": "+1 Discrétion",
+                "skill_bonuses": {
+                    "Discrétion": 1
+                },
                 "traits": "Discrets et prudents"
             },
             {
                 "name": "Forts",
-                "bonus": "+1 Vigueur",
+                "characteristic_bonuses": {
+                    "Constitution": 1
+                },
                 "traits": "Robustes et résistants"
             },
             {
                 "name": "Brandeboucs",
-                "bonus": "+1 Navigation",
+                "skill_bonuses": {
+                    "Survie": 1
+                },
                 "traits": "Aventureux"
             }
         ]

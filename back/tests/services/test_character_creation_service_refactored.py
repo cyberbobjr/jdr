@@ -111,7 +111,8 @@ class TestCharacterCreationService:
         
         if professions:
             profession = professions[0]
-            skills = {"Perception": 2}            
+            skills = {"Perception": 2}
+            
             cost = CharacterCreationService.calculate_skills_cost(skills, profession)
             assert isinstance(cost, int)
             assert cost >= 0

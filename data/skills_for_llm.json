@@ -1,0 +1,206 @@
+{
+  "skills_for_llm": {
+    "skill_groups": {
+      "Artistique": [
+        {
+          "name": "Comédie",
+          "description": "Capacité à jouer un rôle et imiter les actions d'autres personnes. Ne modifie pas l'apparence physique.",
+          "characteristics": ["Présence", "Intuition"],
+          "examples": ["Se faire passer pour un garde", "Imiter un accent régional", "Jouer un rôle social"]
+        },
+        {
+          "name": "Danse",
+          "description": "Art de maîtriser les mouvements rythmiques et de reproduire ou créer des danses.",
+          "characteristics": ["Agilité", "Présence"],
+          "examples": ["Danser lors d'une fête", "Distraire par la danse", "Performance artistique"]
+        },
+        {
+          "name": "Imitation",
+          "description": "Talent pour reproduire voix et sons de manière convaincante.",
+          "characteristics": ["Présence", "Volonté"],
+          "examples": ["Imiter une voix", "Reproduire un cri d'animal", "Ventriloquie"]
+        },
+        {
+          "name": "Musique - Chant",
+          "description": "Maîtrise de la voix pour le chant et l'interprétation musicale.",
+          "characteristics": ["Présence", "Intuition"],
+          "examples": ["Chanter pour distraire", "Performance publique", "Chant magique"]
+        },
+        {
+          "name": "Musique - Instrument",
+          "description": "Capacité à jouer d'un instrument de musique spécifique.",
+          "characteristics": ["Présence", "Agilité"],
+          "examples": ["Jouer de la harpe", "Performance musicale", "Accompagnement magique"]
+        },
+        {
+          "name": "Narration",
+          "description": "Art de conter des histoires de manière captivante et mémorable.",
+          "characteristics": ["Présence", "Intuition"],
+          "examples": ["Raconter une légende", "Captiver un auditoire", "Transmettre des informations"]
+        }
+      ],
+      "Combat": [
+        {
+          "name": "Arts Martiaux - Balayages",
+          "description": "Techniques de combat basées sur les projections et les déséquilibres.",
+          "characteristics": ["Force", "Agilité"],
+          "examples": ["Faire tomber un adversaire", "Projeter un ennemi", "Combat sans arme"]
+        },
+        {
+          "name": "Arts Martiaux - Coups",
+          "description": "Combat à mains nues focalisé sur les coups directs et percutants.",
+          "characteristics": ["Force", "Agilité"],
+          "examples": ["Coup de poing", "Coup de pied", "Attaque à mains nues"]
+        },
+        {
+          "name": "Bagarre",
+          "description": "Combat de rue sans règles utilisant tout ce qui est disponible.",
+          "characteristics": ["Force", "Agilité"],
+          "examples": ["Combat improvisé", "Utiliser l'environnement", "Combat brutal"]
+        },
+        {
+          "name": "Maniement d'Arme",
+          "description": "Capacité à utiliser efficacement un type d'arme spécifique.",
+          "characteristics": ["Force", "Agilité"],
+          "examples": ["Attaque à l'épée", "Tir à l'arc", "Combat avec lance"]
+        }
+      ],
+      "Général": [
+        {
+          "name": "Artisanat",
+          "description": "Capacité à créer et réparer des objets dans un domaine spécifique.",
+          "characteristics": ["Raisonnement", "Agilité"],
+          "examples": ["Forger une épée", "Réparer une armure", "Créer des bijoux"]
+        },
+        {
+          "name": "Connaissance Générale",
+          "description": "Savoir théorique et pratique dans un domaine spécifique.",
+          "characteristics": ["Raisonnement", "Raisonnement"],
+          "examples": ["Histoire ancienne", "Géographie", "Lois et coutumes"]
+        },
+        {
+          "name": "Estimation",
+          "description": "Évaluation de la valeur marchande d'objets et de biens.",
+          "characteristics": ["Raisonnement", "Intuition"],
+          "examples": ["Évaluer un trésor", "Négocier un prix", "Identifier la qualité"]
+        },
+        {
+          "name": "Herboristerie",
+          "description": "Connaissance des plantes et de leurs utilisations.",
+          "characteristics": ["Raisonnement", "Intuition"],
+          "examples": ["Identifier une plante", "Préparer un remède", "Trouver des ingrédients"]
+        },
+        {
+          "name": "Perception",
+          "description": "Capacité à remarquer des détails et détecter des choses cachées.",
+          "characteristics": ["Intuition", "Volonté"],
+          "examples": ["Repérer un piège", "Entendre des pas furtifs", "Remarquer un détail"]
+        },
+        {
+          "name": "Survie",
+          "description": "Capacité à survivre en milieu naturel hostile.",
+          "characteristics": ["Constitution", "Intuition"],
+          "examples": ["Trouver de l'eau", "S'orienter en forêt", "Survivre au froid"]
+        }
+      ],
+      "Athlétique": [
+        {
+          "name": "Acrobatie",
+          "description": "Capacité à effectuer des mouvements complexes et acrobatiques, incluant la gestion des chutes.",
+          "characteristics": ["Agilité", "Volonté"],
+          "examples": ["Saut périlleux", "Amortir une chute", "Équilibre sur poutre"]
+        },
+        {
+          "name": "Escalade",
+          "description": "Aptitude à grimper sur diverses surfaces verticales.",
+          "characteristics": ["Agilité", "Force"],
+          "examples": ["Escalader une falaise", "Grimper un mur", "Descendre en rappel"]
+        },
+        {
+          "name": "Natation",
+          "description": "Capacité à se déplacer efficacement dans l'eau.",
+          "characteristics": ["Force", "Constitution"],
+          "examples": ["Traverser une rivière", "Plonger en profondeur", "Sauvetage aquatique"]
+        }
+      ],
+      "Influence": [
+        {
+          "name": "Diplomatie",
+          "description": "Art de négocier et de convaincre par la parole.",
+          "characteristics": ["Présence", "Raisonnement"],
+          "examples": ["Négocier un traité", "Convaincre un garde", "Éviter un conflit"]
+        },
+        {
+          "name": "Intimidation",
+          "description": "Capacité à impressionner et effrayer par la menace.",
+          "characteristics": ["Présence", "Force"],
+          "examples": ["Menacer un bandit", "Impressionner par la force", "Obtenir des informations"]
+        },
+        {
+          "name": "Leadership",
+          "description": "Capacité à diriger et motiver un groupe.",
+          "characteristics": ["Présence", "Volonté"],
+          "examples": ["Commander des soldats", "Motiver des alliés", "Organiser une mission"]
+        }
+      ],
+      "Subterfuge": [
+        {
+          "name": "Crochetage",
+          "description": "Art d'ouvrir les serrures sans clé.",
+          "characteristics": ["Agilité", "Raisonnement"],
+          "examples": ["Ouvrir une porte", "Forcer un coffre", "Désactiver un mécanisme"]
+        },
+        {
+          "name": "Discrétion",
+          "description": "Capacité à se déplacer et agir sans être détecté.",
+          "characteristics": ["Agilité", "Intuition"],
+          "examples": ["Se faufiler silencieusement", "Se cacher dans l'ombre", "Éviter les patrouilles"]
+        },
+        {
+          "name": "Vol à la Tire",
+          "description": "Dextérité pour subtiliser des objets sans être vu.",
+          "characteristics": ["Agilité", "Intuition"],
+          "examples": ["Voler une bourse", "Subtiliser une clé", "Faire disparaître un objet"]
+        }
+      ]
+    },
+    "difficulty_levels": {
+      "Routine": {
+        "modifier": 60,
+        "description": "Action très simple, pratiquement automatique"
+      },
+      "Très Facile": {
+        "modifier": 40,
+        "description": "Action simple avec conditions favorables"
+      },
+      "Facile": {
+        "modifier": 20,
+        "description": "Action accessible avec un minimum d'expérience"
+      },
+      "Moyenne": {
+        "modifier": 0,
+        "description": "Action standard, difficulté normale"
+      },
+      "Difficile": {
+        "modifier": -20,
+        "description": "Action complexe nécessitant de l'expertise"
+      },
+      "Très Difficile": {
+        "modifier": -40,
+        "description": "Action très complexe, pour experts confirmés"
+      },
+      "Extrêmement Difficile": {
+        "modifier": -60,
+        "description": "Action héroïque, limite du possible"
+      },
+      "Pure Folie": {
+        "modifier": -80,
+        "description": "Action quasi-impossible"
+      },
+      "Absurde": {
+        "modifier": -100,
+        "description": "Action miraculeuse"
+      }
+    }
+  }
+}

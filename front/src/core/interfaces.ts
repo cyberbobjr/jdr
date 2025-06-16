@@ -355,3 +355,154 @@ export interface ProfessionJson {
   abilities: string[];
   spheres: string[];
 }
+
+// === Nouvelles interfaces pour les données JSON refactorisées ===
+
+/**
+ * Interface pour les données de caractéristique depuis characteristics.json
+ */
+export interface CharacteristicData {
+  id: string;
+  name: string;
+  abbreviation: string;
+  description: string;
+  category: 'physical' | 'mental' | 'social';
+}
+
+/**
+ * Interface pour les données complètes des caractéristiques
+ */
+export interface CharacteristicsData {
+  characteristics: Record<string, CharacteristicData>;
+  bonus_table: Record<string, number>;
+  cost_table: Record<string, number>;
+  starting_points: number;
+  maximum_starting_value: number;
+}
+
+/**
+ * Interface pour les données de compétence depuis skills_for_llm.json
+ */
+export interface SkillDataLLM {
+  name: string;
+  group: string;
+  description: string;
+  primary_characteristic: string;
+  difficulty_levels: {
+    facile: string;
+    moyenne: string;
+    difficile: string;
+    tres_difficile: string;
+  };
+}
+
+/**
+ * Interface pour les groupes de compétences organisés pour l'LLM
+ */
+export interface SkillGroupsLLM {
+  [groupName: string]: SkillDataLLM[];
+}
+
+/**
+ * Interface pour les données de culture depuis races_and_cultures.json
+ */
+export interface CultureData {
+  name: string;
+  skill_bonuses?: Record<string, number>;
+  characteristic_bonuses?: Record<string, number>;
+  free_skill_points?: number;
+  traits: string;
+  special_traits?: Record<string, any>;
+}
+
+/**
+ * Interface pour les données de race depuis races_and_cultures.json
+ */
+export interface RaceData {
+  name: string;
+  characteristic_bonuses: Record<string, number>;
+  destiny_points: number;
+  base_languages: string[];
+  optional_languages: string[];
+  cultures: CultureData[];
+}
+
+/**
+ * Interface pour les données de profession depuis professions.json
+ */
+export interface ProfessionData {
+  name: string;
+  description: string;
+  primary_characteristics: string[];
+  skill_groups: Record<string, {
+    ranks: number;
+    cost_per_rank: number;
+  }>;
+  magic_spheres: string[];
+  starting_equipment: string[];
+}
+
+/**
+ * Interface pour les données de sort depuis spells.json
+ */
+export interface SpellData {
+  name: string;
+  power_cost: number;
+  description: string;
+}
+
+/**
+ * Interface pour les sphères de magie avec leurs sorts
+ */
+export interface MagicSpheres {
+  [sphereName: string]: SpellData[];
+}
+
+/**
+ * Interface pour les données d'équipement depuis equipment.json
+ */
+export interface EquipmentData {
+  type: string;
+  weight: number;
+  cost: number;
+  description: string;
+  // Propriétés spécifiques selon le type
+  damage?: string;
+  category?: string;
+  range?: number;
+  protection?: number;
+}
+
+/**
+ * Interface pour les catégories d'équipement
+ */
+export interface EquipmentCategories {
+  weapons: Record<string, EquipmentData>;
+  armor: Record<string, EquipmentData>;
+  items: Record<string, EquipmentData>;
+}
+
+/**
+ * Interface pour les données de système de combat depuis combat_system.json
+ */
+export interface CombatSystemData {
+  initiative: {
+    base_formula: string;
+    tie_breaker: string;
+    description: string;
+  };
+  turn_structure: {
+    action_points: number;
+    phases: string[];
+  };
+  actions: Record<string, {
+    name: string;
+    cost: number;
+    description: string;
+  }>;
+  difficulty_modifiers: Record<string, number>;
+  damage_types?: Record<string, any>;
+  armor_types?: Record<string, any>;
+}
+
+// === Mise à jour des interfaces existantes pour compatibilité ===

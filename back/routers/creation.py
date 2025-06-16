@@ -36,15 +36,9 @@ def get_races():
     Retourne la liste complète des races disponibles (structure typée RaceSchema pour documentation Swagger).
     **Sortie** : Liste d'objets RaceSchema (structure complète issue du JSON).
     """
-    from back.models.domain.races import Races
-    races = Races()._load_races_data()
-    # Conversion RaceData -> dict pour Pydantic, cultures aussi
-    result = []
-    for r in races:
-        race_dict = r.__dict__.copy()
-        race_dict['cultures'] = [c.__dict__ for c in r.cultures]
-        result.append(race_dict)
-    return result
+    from back.models.domain.races_manager import RacesManager
+    races_manager = RacesManager()
+    return races_manager.get_all_races()
 
 @router.get("/skills", summary="Groupes de compétences", response_model=Dict[str, List[Dict]])
 def get_skills():
