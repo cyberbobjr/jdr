@@ -36,11 +36,28 @@ class Item(BaseModel):
     crafting_time: Optional[str] = None  # Temps de fabrication
     special_properties: Optional[List[str]] = None  # Propriétés spéciales
 
+class RaceData(BaseModel):
+    name: str
+    characteristic_bonuses: Dict[str, int]
+    destiny_points: int
+    special_abilities: List[str]
+    base_languages: List[str]
+    optional_languages: List[str]
+    cultures: Optional[List['CultureData']] = None  # Optionnel pour éviter de l'envoyer lors de la sauvegarde
+
+class CultureData(BaseModel):
+    name: str
+    description: Optional[str] = None
+    skill_bonuses: Optional[Dict[str, int]] = None
+    characteristic_bonuses: Optional[Dict[str, int]] = None
+    free_skill_points: Optional[int] = None
+    traits: Optional[str] = None  # Pour la compatibilité avec le JSON actuel
+
 class Character(BaseModel):
     id: UUID
     name: str
-    race: str
-    culture: str
+    race: RaceData
+    culture: CultureData
     profession: str
     caracteristiques: Dict[str, int]
     competences: Dict[str, int]
@@ -177,8 +194,8 @@ class CharacterAny(BaseModel):
     """
     id: Optional[str] = None
     name: Optional[str] = None
-    race: Optional[str] = None
-    culture: Optional[str] = None
+    race: Optional[RaceData] = None
+    culture: Optional[CultureData] = None
     profession: Optional[str] = None
     caracteristiques: Optional[Dict[str, int]] = None
     competences: Optional[Dict[str, int]] = None
@@ -208,11 +225,4 @@ class ProfessionSchema(BaseModel):
     abilities: List[str]
     spheres: List[str]
 
-class RaceSchema(BaseModel):
-    name: str
-    characteristic_bonuses: Dict[str, int]
-    destiny_points: int
-    special_abilities: List[str]
-    base_languages: List[str]
-    optional_languages: List[str]
-    cultures: List[Dict[str, str]]
+# Les modèles RaceData et CultureData sont maintenant définis plus haut et remplacent RaceSchema et CultureSchema

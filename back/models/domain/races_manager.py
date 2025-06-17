@@ -27,9 +27,17 @@ class RacesManager:
                 }
             ]
 
-    def get_all_races(self) -> List[str]:
-        """Retourne la liste de toutes les races disponibles"""
-        return [race["name"] for race in self.races_data]
+    def get_all_races(self) -> List[dict]:
+        """Retourne la liste complète des races (dictionnaires) pour correspondre à RaceSchema"""
+        # S'assurer que chaque race a bien tous les champs attendus par RaceSchema
+        races = []
+        for race in self.races_data:
+            race_obj = dict(race)
+            # Ajout du champ special_abilities si absent
+            if 'special_abilities' not in race_obj:
+                race_obj['special_abilities'] = []
+            races.append(race_obj)
+        return races
 
     def get_race_by_name(self, race_name: str) -> Optional[Dict]:
         """Retourne les données d'une race par son nom"""

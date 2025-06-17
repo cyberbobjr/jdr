@@ -51,14 +51,14 @@
           v-for="character in characters"
           :key="character.id"
           :title="character.name"
-          :subtitle="character.race"
+          :subtitle="character.race?.name || 'Race non définie'"
           @click="selectCharacter(character)"
           class="jdr-w-full md:jdr-w-1/3 lg:jdr-w-1/4"
         >
           <template #default>
             <div class="jdr-mb-2">
               <span class="jdr-text-muted">Culture :</span>
-              <span>{{ character.culture }}</span>
+              <span>{{ character.culture?.name || 'Culture non définie' }}</span>
             </div>
           </template>
           <template #footer>
@@ -98,13 +98,10 @@
         <p class="jdr-text-muted jdr-mb-4">
           Il n'y a actuellement aucun personnage créé. Créez un personnage pour commencer !
         </p>
-        <button class="jdr-btn jdr-btn-primary jdr-btn-lg" disabled>
+        <button @click="onCreateCharacterClick" class="jdr-btn jdr-btn-primary jdr-btn-lg">
           <font-awesome-icon :icon="['fas', 'plus']" />
           Créer un personnage
         </button>
-        <p class="jdr-text-muted jdr-mt-4">
-          <small>Fonctionnalité à venir</small>
-        </p>
       </div>
     </div>
 
@@ -112,7 +109,7 @@
     <JdrModale
       v-if="showDetailsModal && selectedCharacter"
       :title="selectedCharacter.name"
-      :subtitle="selectedCharacter.profession + ' - ' + selectedCharacter.race"
+      :subtitle="selectedCharacter.profession + ' - ' + selectedCharacter.race.name"
       :showOk="false"
       :showCancel="true"
       cancelLabel="Fermer"
@@ -124,11 +121,11 @@
           <div class="jdr-flex jdr-justify-center jdr-gap-4 jdr-mb-2">
             <div>
               <h4 class="jdr-title jdr-title-sm jdr-mb-1">Race</h4>
-              <div class="jdr-text-primary jdr-text-center">{{ selectedCharacter.race }}</div>
+              <div class="jdr-text-primary jdr-text-center">{{ selectedCharacter.race?.name || 'Race non définie' }}</div>
             </div>
             <div>
               <h4 class="jdr-title jdr-title-sm jdr-mb-1">Culture</h4>
-              <div class="jdr-text-primary jdr-text-center">{{ selectedCharacter.culture }}</div>
+              <div class="jdr-text-primary jdr-text-center">{{ selectedCharacter.culture?.name || 'Culture non définie' }}</div>
             </div>
             <div>
               <h4 class="jdr-title jdr-title-sm jdr-mb-1">Profession</h4>

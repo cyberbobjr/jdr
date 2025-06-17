@@ -698,112 +698,15 @@ Le système empêche automatiquement la création de sessions dupliquées en dé
 
 > ⚠️ Toute référence à la clé `state` dans le code ou les tests doit être supprimée pour garantir la compatibilité.
 
-## 🧪 Tests et Qualité
+## Ajout des skills de culture (2025)
 
-### Suite de Tests Consolidée
+- Un nouveau groupe de compétences "Culture" a été ajouté dans `data/skills_for_llm.json`.
+- Chaque trait de culture issu de `data/races_and_cultures.json` est désormais représenté comme un skill de culture, avec une propriété `culture` précisant la ou les cultures associées.
+- Ces skills de culture ne peuvent être acquis naturellement que par les personnages issus de la culture correspondante.
+- La structure d'un skill de culture est identique à celle des autres skills : `name`, `description`, `characteristics`, `examples`, et `culture`.
 
-Le projet dispose d'une **suite de tests complète et automatisée** avec un système de nettoyage intégré :
-
-#### 🎯 Tests de l'Agent GM (29 tests - 100% réussite)
-```bash
-# Exécution standard
-python -m pytest back/tests/agents/test_gm_agent_consolidated.py
-
-# Avec nettoyage automatique (PowerShell)
-.\run_tests_clean.ps1 -Verbose
-```
-
-#### 📊 Couverture Complète
-- ✅ **Initialisation de l'agent** (5 tests)
-- ✅ **Edge cases d'initialisation** (4 tests)  
-- ✅ **Prompt système et règles** (5 tests)
-- ✅ **Enrichissement de messages** (3 tests)
-- ✅ **Tests des outils** (5 tests)
-- ✅ **Edge cases des outils** (4 tests)
-- ✅ **Tests avancés** (3 tests)
-
-#### 🧹 Nettoyage Automatique
-Le système empêche la pollution de `/data/sessions` avec :
-- **Détection automatique** des fichiers de test
-- **Nettoyage sélectif** (préserve les sessions réelles)
-- **Hooks pytest** pour nettoyage automatique
-- **Script PowerShell** avec options avancées
-
-#### 📈 Métriques de Qualité
-- **Taux de réussite :** 100% (29/29 tests)
-- **Temps d'exécution :** ~5.5 minutes
-- **Nettoyage :** 0 fichier de pollution après tests
-- **Documentation :** Tests auto-documentés avec docstrings
-
-Pour plus de détails, voir [RAPPORT_TESTS_FINALISES.md](RAPPORT_TESTS_FINALISES.md).
-
----
-
-*Ce README reflète l'état actuel du projet après la migration complète vers PydanticAI et l'organisation des tests.*
-
-## Frontend Vue.js (2025) - TERMINÉ ✅
-
-### Architecture et technologies
-- **Vue.js 3.5.13** avec Composition API et TypeScript
-- **TailwindCSS 4.1.8** avec configuration PostCSS optimisée
-- **FontAwesome 6.7.2** pour les icônes thématiques JDR
-- **Vue Router** pour la navigation SPA
-- **Vite 6.3.5** pour le développement et build rapide
-- **Vitest 3.2.3** avec jsdom pour les tests unitaires
-
-### Fonctionnalités implémentées
-- ✅ **Interface moderne** avec thème sombre et design JDR
-- ✅ **Composants interactifs** : lanceur de dés D20, fiches de personnage
-- ✅ **Navigation responsive** avec header/footer
-- ✅ **Animations CSS** et transitions fluides
-- ✅ **Tests complets** : 19 tests unitaires (100% réussite)
-
-### Structure frontend
-```
-front/
-├── src/
-│   ├── components/JdrDemo.vue      # Composant de démonstration avec lanceur de dés
-│   ├── views/HomeView.vue          # Page d'accueil avec présentation
-│   ├── router/index.ts             # Configuration des routes
-│   ├── assets/main.css             # Styles TailwindCSS
-│   ├── App.vue                     # Composant racine
-│   └── main.ts                     # Point d'entrée avec FontAwesome
-├── tests/ (19 tests)               # Tests unitaires complets
-├── package.json                    # Configuration npm
-├── vite.config.ts                  # Configuration Vite
-├── vitest.config.ts               # Configuration des tests
-├── tailwind.config.js             # Configuration TailwindCSS
-└── postcss.config.js              # Configuration PostCSS (corrigée)
-```
-
-### Intégration backend
-Le frontend est prêt pour l'intégration avec l'API FastAPI + PydanticAI :
-- Structure modulaire pour l'ajout de nouvelles fonctionnalités
-- Configuration TypeScript stricte pour une intégration API robuste
-- Tests unitaires pour assurer la stabilité lors des développements futurs
-
-## Gestion centralisée des races et cultures (2025)
-
-Depuis juin 2025, la gestion des races et cultures est entièrement centralisée via le fichier `data/races_and_cultures.json`.
-
-- **Source de vérité unique** : Toutes les informations sur les races, bonus, cultures, langues, etc. sont définies dans ce fichier JSON.
-- **Chargement backend** : Le backend charge ce fichier via la méthode `_load_races_data` de la classe `Races` (`back/models/domain/races.py`).
-- **Dataclasses typées** : Les structures Python `RaceData` et `CultureData` (dans `back/models/domain/base.py`) garantissent la cohérence des données et facilitent la validation.
-- **Suppression de l'ancien code** : Toute la logique de gestion des cultures (CSV, module `cultures.py`, anciens dataclass) a été supprimée pour éviter toute redondance ou incohérence.
-- **Tests** : Des tests unitaires valident la structure et le contenu du chargement JSON (`back/tests/domain/test_races_data.py`).
-
-> ⚠️ Pour ajouter ou modifier une race/culture, il suffit désormais de modifier le fichier `races_and_cultures.json`.
-
-## Gestion centralisée des professions (2025)
-
-Depuis juin 2025, la gestion des professions est entièrement centralisée via le fichier `data/professions.json`.
-
-- **Source de vérité unique** : Toutes les informations sur les professions (nom, description, groupes de compétences favoris, caractéristiques principales, capacités, sphères) sont définies dans ce fichier JSON.
-- **Chargement backend** : Le backend charge ce fichier via les méthodes `get_professions` et `get_professions_full` du service `CharacterCreationService` (`back/services/character_creation_service.py`).
-- **Routes API** :
-  - `/api/creation/professions` : Retourne la liste des noms de professions (pour la sélection rapide côté frontend).
-  - `/api/creation/professions/full` : Retourne la liste complète des objets professions (pour affichage détaillé ou documentation avancée).
-- **Suppression de l'ancien code** : Toute la logique de gestion des professions en Python (hors dataclass métier) a été supprimée pour éviter toute redondance ou incohérence.
-- **Tests** : Des tests unitaires valident la structure et le contenu du chargement JSON (voir `/back/tests/services/test_character_creation_service.py`).
-
-> ⚠️ Pour ajouter ou modifier une profession, il suffit désormais de modifier le fichier `professions.json`.
+- **Affinités culturelles pour les compétences** :
+  - Les affinités entre cultures et compétences sont centralisées dans `data/skills_affinities.json`.
+  - Un script (`tools/generate_skills_with_affinities.py`) injecte automatiquement la propriété `cultures` dans chaque compétence de `skills_for_llm.json`.
+  - Pour ajouter une nouvelle culture ou compétence, il suffit de mettre à jour le mapping dans `skills_affinities.json` puis de relancer le script.
+  - Ce système garantit la cohérence et la facilité de maintenance du fichier des compétences.

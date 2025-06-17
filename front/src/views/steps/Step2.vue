@@ -77,9 +77,10 @@ watch(caracs, validateCaracs, { deep: true });
 
 async function proposeDistribution() {
   if (!props.initialData) return;
-  const { profession, race } = props.initialData;
-  if (!profession || !race) return;
-  const result = await JdrApiService.allocateAttributes({ profession, race });
+  const { race } = props.initialData;
+  if (!race) return;
+  // Correction de l'appel à JdrApiService.allocateAttributes pour ne passer que la race.
+  const result = await JdrApiService.allocateAttributes({ race });
   caracs.value = { ...result.attributes };
 }
 

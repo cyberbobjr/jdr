@@ -155,19 +155,27 @@ class CharacterService:
         **Description :** Récupère un personnage à partir de son identifiant (UUID) depuis le dossier data/characters.
         **Paramètres :**
         - `character_id` (str) : Identifiant du personnage (UUID).
-        **Retour :** Objet Character (Pydantic).
+        **Retour :** Dictionnaire des données du personnage.
         """       
-        character_data = CharacterPersistenceService.load_character_data(character_id)
-        state_data = character_data
-          # Convertir l'ancien format equipment vers inventory si nécessaire
-        CharacterService._convert_equipment_to_inventory(state_data)
-        
-        # Ajouter les champs manquants avec des valeurs par défaut
-        state_data.setdefault("xp", 0)
-        state_data.setdefault("gold", 0)
-        state_data.setdefault("hp", 100)
-        
-        # L'ID est le nom du fichier (sans .json)
+        try:
+            character_data = CharacterPersistenceService.load_character_data(character_id)
+            
+            state_data = character_data
+            # Convertir l'ancien format equipment vers inventory si nécessaire
+            CharacterService._convert_equipment_to_inventory(state_data)
+            
+            # Ajouter les champs manquants avec des valeurs par défaut
+            state_data.setdefault("xp", 0)
+            state_data.setdefault("gold", 0)
+            state_data.setdefault("hp", 100)
+            
+            # L'ID est le nom du fichier (sans .json)
+            state_data["id"] = character_id
+            
+            log_debug("Chargement du personnage", action="get_character", character_id=character_id)
+            return state_data
+        except Exception as e:
+            raise e
         state_data["id"] = character_id
         log_debug("Chargement du personnage", action="get_character", character_id=character_id)
         return Character(**state_data)

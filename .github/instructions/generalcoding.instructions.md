@@ -45,3 +45,6 @@ When a new file is generated, ensure that:
 - Use try/catch blocks for async operations
 - Implement proper error boundaries in React components
 - Always log errors with contextual information
+
+# FUNCTIONAL Description
+All games rules are described in the [synthese_rules.md](../../synthese_rules.md) file.

@@ -1,8 +1,8 @@
 # Guide Complet des Compétences HARP Terre du Milieu
-
 ## 1. Règles Générales des Compétences
 
 ### Principes de Base
+- Le joueur dispose de 84 Points de Développement (PdD) pour acquérir des compétences et des talents
 - Les compétences gèrent les actions complexes nécessitant apprentissage et pratique
 - Utilisées pour les manœuvres ayant une chance d'échec
 - Chaque compétence est liée à deux caractéristiques

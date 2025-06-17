@@ -1,8 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from back.services.character_service import CharacterService
-from back.models.schema import Character, CharacterListAny
+from back.models.schema import CharacterListAny, CharacterAny
 from back.utils.logger import log_debug
-from uuid import UUID
 
 router = APIRouter()
 
@@ -88,22 +87,26 @@ def list_characters():
             result.append(d)
     return {"characters": result}
 
-@router.get("/{character_id}", response_model=Character)
-def get_character_detail(character_id: UUID):
+@router.get("/{character_id}", response_model=CharacterAny)
+def get_character_detail(character_id: str):
     """
     Récupère le détail d'un personnage à partir de son identifiant unique.
 
     Cet endpoint permet d'obtenir toutes les informations détaillées d'un personnage spécifique.
 
     Paramètres:
-        character_id (UUID): L'identifiant unique du personnage à récupérer
+        character_id (str): L'identifiant unique du personnage à récupérer
     Retourne:
-        Character: Les informations détaillées du personnage
+        CharacterAny: Les informations détaillées du personnage (permissif pour les personnages en cours)
     """
     log_debug("Appel endpoint characters/get_character_detail", character_id=str(character_id))
+    
     try:
-        character = CharacterService.get_character(str(character_id))
+        character = CharacterService.get_character(character_id)
         return character
+    except FileNotFoundError as e:
+        log_debug(f"Personnage non trouvé: {e}", character_id=str(character_id))
+        raise HTTPException(status_code=404, detail="Personnage non trouvé")
     except Exception as e:
         log_debug(f"Erreur lors de la récupération du personnage: {e}", character_id=str(character_id))
-        raise HTTPException(status_code=404, detail="Personnage non trouvé")
+        raise HTTPException(status_code=500, detail=f"Erreur interne du serveur: {str(e)}")

@@ -5,162 +5,589 @@
         {
           "name": "Comédie",
           "description": "Capacité à jouer un rôle et imiter les actions d'autres personnes. Ne modifie pas l'apparence physique.",
-          "characteristics": ["Présence", "Intuition"],
-          "examples": ["Se faire passer pour un garde", "Imiter un accent régional", "Jouer un rôle social"]
+          "characteristics": [
+            "Présence",
+            "Intuition"
+          ],
+          "examples": [
+            "Se faire passer pour un garde",
+            "Imiter un accent régional",
+            "Jouer un rôle social"
+          ],
+          "cultures": []
         },
         {
           "name": "Danse",
           "description": "Art de maîtriser les mouvements rythmiques et de reproduire ou créer des danses.",
-          "characteristics": ["Agilité", "Présence"],
-          "examples": ["Danser lors d'une fête", "Distraire par la danse", "Performance artistique"]
+          "characteristics": [
+            "Agilité",
+            "Présence"
+          ],
+          "examples": [
+            "Danser lors d'une fête",
+            "Distraire par la danse",
+            "Performance artistique"
+          ],
+          "cultures": []
         },
         {
           "name": "Imitation",
           "description": "Talent pour reproduire voix et sons de manière convaincante.",
-          "characteristics": ["Présence", "Volonté"],
-          "examples": ["Imiter une voix", "Reproduire un cri d'animal", "Ventriloquie"]
+          "characteristics": [
+            "Présence",
+            "Volonté"
+          ],
+          "examples": [
+            "Imiter une voix",
+            "Reproduire un cri d'animal",
+            "Ventriloquie"
+          ],
+          "cultures": []
         },
         {
           "name": "Musique - Chant",
           "description": "Maîtrise de la voix pour le chant et l'interprétation musicale.",
-          "characteristics": ["Présence", "Intuition"],
-          "examples": ["Chanter pour distraire", "Performance publique", "Chant magique"]
+          "characteristics": [
+            "Présence",
+            "Intuition"
+          ],
+          "examples": [
+            "Chanter pour distraire",
+            "Performance publique",
+            "Chant magique"
+          ],
+          "cultures": []
         },
         {
           "name": "Musique - Instrument",
           "description": "Capacité à jouer d'un instrument de musique spécifique.",
-          "characteristics": ["Présence", "Agilité"],
-          "examples": ["Jouer de la harpe", "Performance musicale", "Accompagnement magique"]
+          "characteristics": [
+            "Présence",
+            "Agilité"
+          ],
+          "examples": [
+            "Jouer de la harpe",
+            "Performance musicale",
+            "Accompagnement magique"
+          ],
+          "cultures": []
         },
         {
           "name": "Narration",
           "description": "Art de conter des histoires de manière captivante et mémorable.",
-          "characteristics": ["Présence", "Intuition"],
-          "examples": ["Raconter une légende", "Captiver un auditoire", "Transmettre des informations"]
+          "characteristics": [
+            "Présence",
+            "Intuition"
+          ],
+          "examples": [
+            "Raconter une légende",
+            "Captiver un auditoire",
+            "Transmettre des informations"
+          ],
+          "cultures": []
         }
       ],
       "Combat": [
         {
           "name": "Arts Martiaux - Balayages",
           "description": "Techniques de combat basées sur les projections et les déséquilibres.",
-          "characteristics": ["Force", "Agilité"],
-          "examples": ["Faire tomber un adversaire", "Projeter un ennemi", "Combat sans arme"]
+          "characteristics": [
+            "Force",
+            "Agilité"
+          ],
+          "examples": [
+            "Faire tomber un adversaire",
+            "Projeter un ennemi",
+            "Combat sans arme"
+          ],
+          "cultures": []
         },
         {
           "name": "Arts Martiaux - Coups",
           "description": "Combat à mains nues focalisé sur les coups directs et percutants.",
-          "characteristics": ["Force", "Agilité"],
-          "examples": ["Coup de poing", "Coup de pied", "Attaque à mains nues"]
+          "characteristics": [
+            "Force",
+            "Agilité"
+          ],
+          "examples": [
+            "Coup de poing",
+            "Coup de pied",
+            "Attaque à mains nues"
+          ],
+          "cultures": []
         },
         {
           "name": "Bagarre",
           "description": "Combat de rue sans règles utilisant tout ce qui est disponible.",
-          "characteristics": ["Force", "Agilité"],
-          "examples": ["Combat improvisé", "Utiliser l'environnement", "Combat brutal"]
+          "characteristics": [
+            "Force",
+            "Agilité"
+          ],
+          "examples": [
+            "Combat improvisé",
+            "Utiliser l'environnement",
+            "Combat brutal"
+          ],
+          "cultures": []
         },
         {
           "name": "Maniement d'Arme",
           "description": "Capacité à utiliser efficacement un type d'arme spécifique.",
-          "characteristics": ["Force", "Agilité"],
-          "examples": ["Attaque à l'épée", "Tir à l'arc", "Combat avec lance"]
+          "characteristics": [
+            "Force",
+            "Agilité"
+          ],
+          "examples": [
+            "Attaque à l'épée",
+            "Tir à l'arc",
+            "Combat avec lance"
+          ],
+          "cultures": [
+            "Barbes-de-Feu",
+            "Sylvains"
+          ]
         }
       ],
       "Général": [
         {
           "name": "Artisanat",
           "description": "Capacité à créer et réparer des objets dans un domaine spécifique.",
-          "characteristics": ["Raisonnement", "Agilité"],
-          "examples": ["Forger une épée", "Réparer une armure", "Créer des bijoux"]
+          "characteristics": [
+            "Raisonnement",
+            "Agilité"
+          ],
+          "examples": [
+            "Forger une épée",
+            "Réparer une armure",
+            "Créer des bijoux"
+          ],
+          "cultures": [
+            "Noldor",
+            "Longues-Barbes"
+          ]
         },
         {
           "name": "Connaissance Générale",
           "description": "Savoir théorique et pratique dans un domaine spécifique.",
-          "characteristics": ["Raisonnement", "Raisonnement"],
-          "examples": ["Histoire ancienne", "Géographie", "Lois et coutumes"]
+          "characteristics": [
+            "Raisonnement",
+            "Raisonnement"
+          ],
+          "examples": [
+            "Histoire ancienne",
+            "Géographie",
+            "Lois et coutumes"
+          ],
+          "cultures": [
+            "Gondoriens",
+            "Noldor"
+          ]
         },
         {
           "name": "Estimation",
           "description": "Évaluation de la valeur marchande d'objets et de biens.",
-          "characteristics": ["Raisonnement", "Intuition"],
-          "examples": ["Évaluer un trésor", "Négocier un prix", "Identifier la qualité"]
+          "characteristics": [
+            "Raisonnement",
+            "Intuition"
+          ],
+          "examples": [
+            "Évaluer un trésor",
+            "Négocier un prix",
+            "Identifier la qualité"
+          ],
+          "cultures": []
         },
         {
           "name": "Herboristerie",
           "description": "Connaissance des plantes et de leurs utilisations.",
-          "characteristics": ["Raisonnement", "Intuition"],
-          "examples": ["Identifier une plante", "Préparer un remède", "Trouver des ingrédients"]
+          "characteristics": [
+            "Raisonnement",
+            "Intuition"
+          ],
+          "examples": [
+            "Identifier une plante",
+            "Préparer un remède",
+            "Trouver des ingrédients"
+          ],
+          "cultures": [
+            "Sindar"
+          ]
         },
         {
           "name": "Perception",
           "description": "Capacité à remarquer des détails et détecter des choses cachées.",
-          "characteristics": ["Intuition", "Volonté"],
-          "examples": ["Repérer un piège", "Entendre des pas furtifs", "Remarquer un détail"]
+          "characteristics": [
+            "Intuition",
+            "Volonté"
+          ],
+          "examples": [
+            "Repérer un piège",
+            "Entendre des pas furtifs",
+            "Remarquer un détail"
+          ],
+          "cultures": [
+            "Sindar"
+          ]
         },
         {
           "name": "Survie",
           "description": "Capacité à survivre en milieu naturel hostile.",
-          "characteristics": ["Constitution", "Intuition"],
-          "examples": ["Trouver de l'eau", "S'orienter en forêt", "Survivre au froid"]
+          "characteristics": [
+            "Constitution",
+            "Intuition"
+          ],
+          "examples": [
+            "Trouver de l'eau",
+            "S'orienter en forêt",
+            "Survivre au froid"
+          ],
+          "cultures": [
+            "Hommes du Nord",
+            "Brandeboucs"
+          ]
         }
       ],
       "Athlétique": [
         {
           "name": "Acrobatie",
           "description": "Capacité à effectuer des mouvements complexes et acrobatiques, incluant la gestion des chutes.",
-          "characteristics": ["Agilité", "Volonté"],
-          "examples": ["Saut périlleux", "Amortir une chute", "Équilibre sur poutre"]
+          "characteristics": [
+            "Agilité",
+            "Volonté"
+          ],
+          "examples": [
+            "Saut périlleux",
+            "Amortir une chute",
+            "Équilibre sur poutre"
+          ],
+          "cultures": []
         },
         {
           "name": "Escalade",
           "description": "Aptitude à grimper sur diverses surfaces verticales.",
-          "characteristics": ["Agilité", "Force"],
-          "examples": ["Escalader une falaise", "Grimper un mur", "Descendre en rappel"]
+          "characteristics": [
+            "Agilité",
+            "Force"
+          ],
+          "examples": [
+            "Escalader une falaise",
+            "Grimper un mur",
+            "Descendre en rappel"
+          ],
+          "cultures": []
         },
         {
           "name": "Natation",
           "description": "Capacité à se déplacer efficacement dans l'eau.",
-          "characteristics": ["Force", "Constitution"],
-          "examples": ["Traverser une rivière", "Plonger en profondeur", "Sauvetage aquatique"]
+          "characteristics": [
+            "Force",
+            "Constitution"
+          ],
+          "examples": [
+            "Traverser une rivière",
+            "Plonger en profondeur",
+            "Sauvetage aquatique"
+          ],
+          "cultures": []
         }
       ],
       "Influence": [
         {
           "name": "Diplomatie",
           "description": "Art de négocier et de convaincre par la parole.",
-          "characteristics": ["Présence", "Raisonnement"],
-          "examples": ["Négocier un traité", "Convaincre un garde", "Éviter un conflit"]
+          "characteristics": [
+            "Présence",
+            "Raisonnement"
+          ],
+          "examples": [
+            "Négocier un traité",
+            "Convaincre un garde",
+            "Éviter un conflit"
+          ],
+          "cultures": []
         },
         {
           "name": "Intimidation",
           "description": "Capacité à impressionner et effrayer par la menace.",
-          "characteristics": ["Présence", "Force"],
-          "examples": ["Menacer un bandit", "Impressionner par la force", "Obtenir des informations"]
+          "characteristics": [
+            "Présence",
+            "Force"
+          ],
+          "examples": [
+            "Menacer un bandit",
+            "Impressionner par la force",
+            "Obtenir des informations"
+          ],
+          "cultures": []
         },
         {
           "name": "Leadership",
           "description": "Capacité à diriger et motiver un groupe.",
-          "characteristics": ["Présence", "Volonté"],
-          "examples": ["Commander des soldats", "Motiver des alliés", "Organiser une mission"]
+          "characteristics": [
+            "Présence",
+            "Volonté"
+          ],
+          "examples": [
+            "Commander des soldats",
+            "Motiver des alliés",
+            "Organiser une mission"
+          ],
+          "cultures": []
         }
       ],
       "Subterfuge": [
         {
           "name": "Crochetage",
           "description": "Art d'ouvrir les serrures sans clé.",
-          "characteristics": ["Agilité", "Raisonnement"],
-          "examples": ["Ouvrir une porte", "Forcer un coffre", "Désactiver un mécanisme"]
+          "characteristics": [
+            "Agilité",
+            "Raisonnement"
+          ],
+          "examples": [
+            "Ouvrir une porte",
+            "Forcer un coffre",
+            "Désactiver un mécanisme"
+          ],
+          "cultures": []
         },
         {
           "name": "Discrétion",
           "description": "Capacité à se déplacer et agir sans être détecté.",
-          "characteristics": ["Agilité", "Intuition"],
-          "examples": ["Se faufiler silencieusement", "Se cacher dans l'ombre", "Éviter les patrouilles"]
+          "characteristics": [
+            "Agilité",
+            "Intuition"
+          ],
+          "examples": [
+            "Se faufiler silencieusement",
+            "Se cacher dans l'ombre",
+            "Éviter les patrouilles"
+          ],
+          "cultures": [
+            "Pied-Poilus",
+            "Sylvains"
+          ]
         },
         {
           "name": "Vol à la Tire",
           "description": "Dextérité pour subtiliser des objets sans être vu.",
-          "characteristics": ["Agilité", "Intuition"],
-          "examples": ["Voler une bourse", "Subtiliser une clé", "Faire disparaître un objet"]
+          "characteristics": [
+            "Agilité",
+            "Intuition"
+          ],
+          "examples": [
+            "Voler une bourse",
+            "Subtiliser une clé",
+            "Faire disparaître un objet"
+          ],
+          "cultures": []
+        }
+      ],
+      "Culture": [
+        {
+          "name": "Tradition et fierté",
+          "description": "Représente l'attachement aux coutumes et à la fierté des Gondoriens.",
+          "characteristics": [
+            "Intuition",
+            "Présence"
+          ],
+          "examples": [
+            "Respecter les traditions lors d'une cérémonie officielle."
+          ],
+          "culture": [
+            "Gondoriens"
+          ],
+          "cultures": [
+            "Gondoriens"
+          ]
+        },
+        {
+          "name": "Culture équestre",
+          "description": "Maîtrise des coutumes et de la vie centrée sur les chevaux chez les Rohirrim.",
+          "characteristics": [
+            "Intuition",
+            "Présence"
+          ],
+          "examples": [
+            "Participer à une fête hippique traditionnelle."
+          ],
+          "culture": [
+            "Rohirrim"
+          ],
+          "cultures": [
+            "Rohirrim"
+          ]
+        },
+        {
+          "name": "Endurance au climat",
+          "description": "Capacité à s'adapter et survivre dans les conditions difficiles du Nord.",
+          "characteristics": [
+            "Constitution",
+            "Intuition"
+          ],
+          "examples": [
+            "Voyager sans faiblir dans le froid du Nord."
+          ],
+          "culture": [
+            "Hommes du Nord"
+          ],
+          "cultures": [
+            "Hommes du Nord"
+          ]
+        },
+        {
+          "name": "Longévité ×3, +1 Point de destin",
+          "description": "Longévité exceptionnelle et chance accrue propres aux Dúnedain.",
+          "characteristics": [
+            "Volonté",
+            "Intuition"
+          ],
+          "examples": [
+            "Résister à l'épreuve du temps, bénéficier d'un destin hors du commun."
+          ],
+          "culture": [
+            "Dúnedain"
+          ],
+          "cultures": [
+            "Dúnedain"
+          ]
+        },
+        {
+          "name": "Maîtres artisans",
+          "description": "Savoir-faire artisanal d'exception transmis chez les Noldor.",
+          "characteristics": [
+            "Raisonnement",
+            "Agilité"
+          ],
+          "examples": [
+            "Forger une œuvre d'art elfique.",
+            "Créer des objets magiques.",
+            "Restaurer des artefacts anciens."
+          ],
+          "culture": [
+            "Noldor"
+          ],
+          "cultures": [
+            "Noldor"
+          ]
+        },
+        {
+          "name": "Harmonie avec la nature",
+          "description": "Connexion profonde avec la nature et les êtres vivants chez les Sindar.",
+          "characteristics": [
+            "Intuition",
+            "Présence"
+          ],
+          "examples": [
+            "Communier avec les animaux de la forêt."
+          ],
+          "culture": [
+            "Sindar"
+          ],
+          "cultures": [
+            "Sindar"
+          ]
+        },
+        {
+          "name": "Experts des forêts",
+          "description": "Aptitude à survivre et se déplacer dans les forêts sylvestres.",
+          "characteristics": [
+            "Intuition",
+            "Agilité"
+          ],
+          "examples": [
+            "Se déplacer silencieusement dans la forêt."
+          ],
+          "culture": [
+            "Sylvains"
+          ],
+          "cultures": [
+            "Sylvains"
+          ]
+        },
+        {
+          "name": "Traditions anciennes",
+          "description": "Respect et transmission des traditions ancestrales chez les Longues-Barbes.",
+          "characteristics": [
+            "Raisonnement",
+            "Volonté"
+          ],
+          "examples": [
+            "Raconter une légende naine autour du feu."
+          ],
+          "culture": [
+            "Longues-Barbes"
+          ],
+          "cultures": [
+            "Longues-Barbes"
+          ]
+        },
+        {
+          "name": "Guerriers nés",
+          "description": "Prédisposition au combat et à la bravoure chez les Barbes-de-Feu.",
+          "characteristics": [
+            "Force",
+            "Volonté"
+          ],
+          "examples": [
+            "Mener une charge héroïque en première ligne."
+          ],
+          "culture": [
+            "Barbes-de-Feu"
+          ],
+          "cultures": [
+            "Barbes-de-Feu"
+          ]
+        },
+        {
+          "name": "Discrets et prudents",
+          "description": "Talent pour la discrétion et la prudence chez les Pied-Poilus.",
+          "characteristics": [
+            "Intuition",
+            "Agilité"
+          ],
+          "examples": [
+            "Éviter d'être repéré lors d'un déplacement."
+          ],
+          "culture": [
+            "Pied-Poilus"
+          ],
+          "cultures": [
+            "Pied-Poilus"
+          ]
+        },
+        {
+          "name": "Robustes et résistants",
+          "description": "Grande robustesse et résistance physique chez les Forts.",
+          "characteristics": [
+            "Constitution",
+            "Volonté"
+          ],
+          "examples": [
+            "Porter de lourdes charges sans faiblir."
+          ],
+          "culture": [
+            "Forts"
+          ],
+          "cultures": [
+            "Forts"
+          ]
+        },
+        {
+          "name": "Aventureux",
+          "description": "Goût pour l'aventure et la découverte chez les Brandeboucs.",
+          "characteristics": [
+            "Intuition",
+            "Présence"
+          ],
+          "examples": [
+            "Explorer des territoires inconnus."
+          ],
+          "culture": [
+            "Brandeboucs"
+          ],
+          "cultures": [
+            "Brandeboucs"
+          ]
         }
       ]
     },

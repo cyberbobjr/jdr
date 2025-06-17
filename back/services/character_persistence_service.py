@@ -6,6 +6,7 @@ Factorisation du code de lecture/écriture utilisé par CharacterService et autr
 import os
 import json
 from typing import Dict, Any
+from dataclasses import asdict, is_dataclass
 from back.utils.logger import log_debug
 from back.config import get_data_dir
 
@@ -110,3 +111,37 @@ class CharacterPersistenceService:
                      character_id=character_id, 
                      error=str(e))
             raise
+    
+    @staticmethod
+    def delete_character_data(character_id: str) -> None:
+        """
+        ### delete_character_data
+        **Description :** Supprime le fichier JSON d'un personnage à partir de son identifiant.
+        **Paramètres :**
+        - `character_id` (str) : Identifiant du personnage (UUID).
+        **Retour :** Aucun
+        """
+        filepath = CharacterPersistenceService._get_character_file_path(character_id)
+        if os.path.exists(filepath):
+            os.remove(filepath)
+            log_debug("Personnage supprimé", action="delete_character_data", character_id=character_id, filepath=filepath)
+        else:
+            log_debug("Suppression ignorée : personnage introuvable", action="delete_character_data", character_id=character_id, filepath=filepath)
+    
+    @staticmethod
+    def _serialize_for_json(obj):
+        """
+        ### _serialize_for_json
+        **Description :** Convertit récursivement les objets dataclass en dictionnaires pour la sérialisation JSON.
+        **Paramètres :**
+        - `obj` : L'objet à sérialiser
+        **Retour :** L'objet sérialisable en JSON
+        """
+        if is_dataclass(obj):
+            return asdict(obj)
+        elif isinstance(obj, dict):
+            return {k: CharacterPersistenceService._serialize_for_json(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [CharacterPersistenceService._serialize_for_json(item) for item in obj]
+        else:
+            return obj

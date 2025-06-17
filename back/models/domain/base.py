@@ -86,8 +86,11 @@ class Spell:
 @dataclass
 class CultureData:
     name: str
-    bonus: str
-    traits: str
+    description: Optional[str] = None
+    skill_bonuses: Optional[Dict[str, int]] = None
+    characteristic_bonuses: Optional[Dict[str, int]] = None
+    free_skill_points: Optional[int] = None
+    traits: Optional[str] = None  # Pour la compatibilité avec le JSON actuel
 
 @dataclass
 class RaceData:
@@ -97,4 +100,4 @@ class RaceData:
     special_abilities: List[str]
     base_languages: List[str]
     optional_languages: List[str]
-    cultures: List[CultureData]
+    cultures: Optional[List[CultureData]] = None  # Optionnel pour éviter de l'envoyer lors de la sauvegarde

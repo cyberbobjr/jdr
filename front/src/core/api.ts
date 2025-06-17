@@ -31,8 +31,7 @@ import type {
   GenerateBackgroundResponse,
   GenerateNameResponse,
   SkillGroupsDict,
-  RaceJson,
-  ProfessionJson
+  RaceData
 }
 
   from "./interfaces";
@@ -152,16 +151,36 @@ export class JdrApiService {
    * Récupère la liste de tous les personnages disponibles
    */
   static async getCharacters(): Promise<Character[]> {
-    const result = await makeRequest<CharacterList>("/api/characters/");
-    return result.characters;
+    try {
+      const result = await makeRequest<CharacterList>("/api/characters/");
+      console.log('getCharacters result:', result);
+      return result.characters;
+    } catch (error) {
+      console.error('Erreur dans getCharacters:', error);
+      return [];
+    }
   }
 
   /**
-   * Récupère un personnage par son ID
+   * Récupère un personnage par son ID en appelant l'endpoint spécifique
    */
   static async getCharacter(id: string): Promise<Character | null> {
-    const characters = await this.getCharacters();
-    return characters.find((char) => char.id === id) || null;
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/characters/${id}`);
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          return null;
+        }
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      
+      const character = await response.json();
+      return character;
+    } catch (error) {
+      console.error('Erreur dans getCharacter:', error);
+      return null;
+    }
   }
 
   // ========================================
@@ -261,7 +280,7 @@ export class JdrApiService {
   // ========================================
 
   /**
-   * Alloue automatiquement les caractéristiques selon la profession et la race
+   * Alloue automatiquement les caractéristiques selon la race
    */
   static async allocateAttributes(
     request: AllocateAttributesRequest
@@ -342,17 +361,10 @@ export class JdrApiService {
   }
 
   /**
-   * Récupère la liste détaillée des professions disponibles
-   */
-  static async getProfessions(): Promise<ProfessionJson[]> {
-    return await makeRequest<ProfessionJson[]>("/api/creation/professions");
-  }
-
-  /**
    * Récupère la liste brute des races (structure du JSON)
    */
-  static async getRaces(): Promise<RaceJson[]> {
-    return await makeRequest<RaceJson[]>("/api/creation/races");
+  static async getRaces(): Promise<RaceData[]> {
+    return await makeRequest<RaceData[]>("/api/creation/races");
   }
 
   /**
@@ -454,8 +466,8 @@ export class JdrApiService {
     return {
       id: character.id,
       name: character.name,
-      race: character.race,
-      culture: character.culture,
+      race: character.race.name,
+      culture: character.culture.name,
       profession: character.profession,
       caracteristiques: character.caracteristiques,
       competences: character.competences,

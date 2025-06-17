@@ -1,0 +1,31 @@
+{
+  "race": {
+    "name": "Elfes",
+    "characteristic_bonuses": {
+      "Agilité": 2
+    },
+    "destiny_points": 2,
+    "special_abilities": [],
+    "base_languages": [
+      "Sindarin",
+      "Ouistrain"
+    ],
+    "optional_languages": [
+      "Quenya",
+      "Sylvain",
+      "Entique",
+      "Langues anciennes"
+    ]
+  },
+  "culture": {
+    "name": "Sindar",
+    "description": null,
+    "skill_bonuses": {
+      "Herboristerie": 1,
+      "Perception": 1
+    },
+    "characteristic_bonuses": null,
+    "free_skill_points": null,
+    "special_traits": null
+  }
+}

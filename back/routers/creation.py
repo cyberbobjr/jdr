@@ -2,49 +2,45 @@
 Routeur FastAPI pour la création de personnage.
 Expose les routes nécessaires à chaque étape de la création et au suivi du statut.
 """
-from fastapi import APIRouter, HTTPException, Body
+from fastapi import APIRouter, HTTPException, Body, status
 from uuid import uuid4
 from datetime import datetime
-from typing import List, Dict
+from typing import List
 from ..services.character_creation_service import CharacterCreationService
 from back.services.character_persistence_service import CharacterPersistenceService
+from back.models.domain.races_manager import RacesManager
 from back.models.schema import (
     AllocateAttributesRequest, AllocateAttributesResponse,
     CheckAttributesRequest, CheckAttributesResponse,
     SaveCharacterRequest, SaveCharacterResponse,
     CheckSkillsRequest, CheckSkillsResponse,
     CreationStatusResponse,
-    ProfessionSchema,
-    RaceSchema  # Ajouté
+    RaceData  # Remplace RaceSchema
 )
 from back.agents.gm_agent_pydantic import build_gm_agent_pydantic, enrich_user_message_with_character
 
 router = APIRouter(tags=["creation"])
 
-@router.get("/professions", summary="Professions détaillées", response_model=List[ProfessionSchema])
-def get_professions():
-    """
-    Retourne la liste complète des professions disponibles (structure détaillée pour Swagger et frontend).
-    **Sortie** : Liste d'objets ProfessionSchema (structure complète issue du JSON).
-    """
-    from back.services.character_creation_service import CharacterCreationService
-    return CharacterCreationService.get_professions_full()
-
-@router.get("/races", summary="Liste des races", response_model=List[RaceSchema])
+@router.get("/races", summary="Liste des races", response_model=List[RaceData])
 def get_races():
     """
-    Retourne la liste complète des races disponibles (structure typée RaceSchema pour documentation Swagger).
-    **Sortie** : Liste d'objets RaceSchema (structure complète issue du JSON).
+    Retourne la liste complète des races disponibles (structure typée RaceData pour documentation Swagger).
+    **Sortie** : Liste d'objets RaceData (structure complète issue du JSON).
     """
     from back.models.domain.races_manager import RacesManager
     races_manager = RacesManager()
     return races_manager.get_all_races()
 
-@router.get("/skills", summary="Groupes de compétences", response_model=Dict[str, List[Dict]])
+@router.get(
+    "/skills",
+    summary="Compétences détaillées (LLM)",
+    response_model=dict,  # Pour Swagger, on expose le schéma JSON complet
+    response_description="Structure complète du fichier skills_for_llm.json (groupes, compétences, niveaux de difficulté, etc.)"
+)
 def get_skills():
     """
-    Retourne le dictionnaire brut des groupes de compétences (structure du JSON centralisé).
-    **Sortie** : Dictionnaire {groupe: [compétences]}.
+    Retourne la structure complète du fichier skills_for_llm.json (groupes, compétences, niveaux de difficulté, etc.).
+    **Sortie** : Dictionnaire conforme à skills_for_llm.json
     """
     return CharacterCreationService.get_skills()
 
@@ -69,15 +65,21 @@ def get_spells():
     "/allocate-attributes",
     response_model=AllocateAttributesResponse,
     summary="Allocation automatique des caractéristiques",
-    description="Alloue automatiquement les caractéristiques selon la profession et la race fournies."
+    description="Alloue automatiquement les caractéristiques selon la race fournie."
 )
 def allocate_attributes(request: AllocateAttributesRequest):
     """
-    Alloue automatiquement les caractéristiques selon la profession et la race.
-    - **Entrée** : profession (str), race (str)
+    Alloue automatiquement les caractéristiques selon la race.
+    - **Entrée** : race (str)
     - **Sortie** : Dictionnaire des caractéristiques allouées
     """
-    attributes = CharacterCreationService.allocate_attributes_auto(request.profession, request.race)
+    # Récupérer l'objet RaceData complet à partir du nom
+    races_manager = RacesManager()
+    race_data = races_manager.get_race_by_name(request.race)
+    if not race_data:
+        raise HTTPException(status_code=404, detail=f"Race '{request.race}' not found")
+    
+    attributes = CharacterCreationService.allocate_attributes_auto(race_data)
     return AllocateAttributesResponse(attributes=attributes)
 
 @router.post(
@@ -160,11 +162,11 @@ def get_creation_status(character_id: str):
 def check_skills(request: CheckSkillsRequest):
     """
     Vérifie que la répartition des points de compétences respecte les règles (budget, groupes favoris, max par compétence).
-    - **Entrée** : skills (dict), profession (str)
+    - **Entrée** : skills (dict)
     - **Sortie** : valid (bool), cost (int)
     """
-    valid = CharacterCreationService.check_skills_points(request.skills, request.profession)
-    cost = CharacterCreationService.calculate_skills_cost(request.skills, request.profession)
+    valid = CharacterCreationService.check_skills_points(request.skills)
+    cost = CharacterCreationService.calculate_skills_cost(request.skills)
     return CheckSkillsResponse(valid=valid, cost=cost)
 
 @router.post("/generate-name", summary="Générer un nom de personnage via LLM")
@@ -223,3 +225,24 @@ async def generate_character_physical_description(character: dict = Body(...)):
         return {"physical_description": result.strip()}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/characteristics", summary="Liste des caractéristiques", response_model=dict)
+def get_characteristics():
+    """
+    Retourne la liste et la description des caractéristiques (ex : Force, Agilité, etc.).
+    **Sortie** : Dictionnaire {nom: description}
+    """
+    from back.models.domain.characteristics_manager import CharacteristicsManager
+    manager = CharacteristicsManager()
+    return manager.get_all_characteristics()
+
+@router.delete("/delete/{character_id}", summary="Supprimer un personnage", status_code=status.HTTP_204_NO_CONTENT)
+def delete_character(character_id: str):
+    """
+    Supprime un personnage à partir de son identifiant.
+    **Entrée** : character_id (str)
+    **Sortie** : 204 No Content si succès
+    """
+    from back.services.character_persistence_service import CharacterPersistenceService
+    CharacterPersistenceService.delete_character_data(character_id)
+    return None

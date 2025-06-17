@@ -11,8 +11,8 @@ class TestCharacterCreationService:
         
         if professions and races:
             profession = professions[0]
-            race = races[0]["name"]
-            result = CharacterCreationService.allocate_attributes_auto(profession, race)
+            race_data = races[0]  # races[0] est déjà un objet RaceData
+            result = CharacterCreationService.allocate_attributes_auto(race_data)
             
             assert isinstance(result, dict)
             assert len(result) > 0

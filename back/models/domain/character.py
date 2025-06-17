@@ -1,5 +1,6 @@
 from typing import Dict, List, Optional
 from pydantic import BaseModel
+from .base import RaceData, CultureData
 
 class Character(BaseModel):
     """
@@ -7,8 +8,8 @@ class Character(BaseModel):
     **Description :** Modèle de données représentant un personnage joueur ou non-joueur du JdR. Utilisé pour typer `character_data` lors de l'initialisation de `GMAgentDependencies`.
     **Attributs :**
     - `concept` (str) : Concept ou archétype du personnage
-    - `race` (str) : Race du personnage
-    - `culture` (str) : Culture d'origine
+    - `race` (RaceData) : Objet race complet avec tous les bonus et détails
+    - `culture` (CultureData) : Objet culture complet avec tous les bonus et détails
     - `profession` (str) : Profession principale
     - `caracteristiques` (Dict[str, int]) : Caractéristiques principales (Force, Constitution, etc.)
     - `competences` (Dict[str, int]) : Compétences et leur niveau
@@ -28,8 +29,8 @@ class Character(BaseModel):
     - `last_update` (Optional[str]) : Date de dernière mise à jour (ISO)
     """
     concept: str
-    race: str
-    culture: str
+    race: RaceData
+    culture: CultureData
     profession: str
     caracteristiques: Dict[str, int]
     competences: Dict[str, int]

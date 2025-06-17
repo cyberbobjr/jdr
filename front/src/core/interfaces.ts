@@ -81,8 +81,8 @@ export interface Character {
   id: string;
   status: string;
   name: string;
-  race: string;
-  culture: string;
+  race: RaceData;
+  culture: CultureData;
   profession: string;
   caracteristiques: Record<string, number>;
   competences: Record<string, number>;
@@ -247,7 +247,6 @@ export interface ConversationMessage {
 // === Création de personnage (API /api/creation) ===
 
 export interface AllocateAttributesRequest {
-  profession: string;
   race: string;
 }
 
@@ -274,7 +273,6 @@ export interface SaveCharacterResponse {
 
 export interface CheckSkillsRequest {
   skills: Record<string, number>;
-  profession: string;
 }
 
 export interface CheckSkillsResponse {
@@ -331,31 +329,6 @@ export interface SkillGroup {
 
 export type SkillGroupsDict = Record<string, SkillGroup[]>;
 
-// === Races (structure du JSON détaillé) ===
-export interface RaceJson {
-  name: string;
-  characteristic_bonuses: Record<string, number>;
-  destiny_points: number;
-  special_abilities: string[];
-  base_languages: string[];
-  optional_languages: string[];
-  cultures: {
-    name: string;
-    bonus: string;
-    traits: string;
-  }[];
-}
-
-// === Professions (structure du JSON détaillé) ===
-export interface ProfessionJson {
-  name: string;
-  description: string;
-  favored_skill_groups: Record<string, number>;
-  main_characteristics: string[];
-  abilities: string[];
-  spheres: string[];
-}
-
 // === Nouvelles interfaces pour les données JSON refactorisées ===
 
 /**
@@ -408,10 +381,10 @@ export interface SkillGroupsLLM {
  */
 export interface CultureData {
   name: string;
+  description?: string;
   skill_bonuses?: Record<string, number>;
   characteristic_bonuses?: Record<string, number>;
   free_skill_points?: number;
-  traits: string;
   special_traits?: Record<string, any>;
 }
 
@@ -422,24 +395,10 @@ export interface RaceData {
   name: string;
   characteristic_bonuses: Record<string, number>;
   destiny_points: number;
+  special_abilities: string[];
   base_languages: string[];
   optional_languages: string[];
-  cultures: CultureData[];
-}
-
-/**
- * Interface pour les données de profession depuis professions.json
- */
-export interface ProfessionData {
-  name: string;
-  description: string;
-  primary_characteristics: string[];
-  skill_groups: Record<string, {
-    ranks: number;
-    cost_per_rank: number;
-  }>;
-  magic_spheres: string[];
-  starting_equipment: string[];
+  cultures?: CultureData[]; // Optionnel pour éviter de l'envoyer lors de la sauvegarde
 }
 
 /**

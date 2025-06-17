@@ -1,0 +1,22 @@
+{
+  "Artisanat": ["Noldor", "Longues-Barbes"],
+  "Équitation": ["Rohirrim"],
+  "Survie": ["Hommes du Nord", "Brandeboucs"],
+  "Connaissance Générale": ["Gondoriens", "Noldor"],
+  "Discrétion": ["Pied-Poilus", "Sylvains"],
+  "Maniement d'Arme": ["Barbes-de-Feu", "Sylvains"],
+  "Herboristerie": ["Sindar"],
+  "Perception": ["Sindar"],
+  "Robustes et résistants": ["Forts"],
+  "Aventureux": ["Brandeboucs"],
+  "Tradition et fierté": ["Gondoriens"],
+  "Culture équestre": ["Rohirrim"],
+  "Endurance au climat": ["Hommes du Nord"],
+  "Longévité ×3, +1 Point de destin": ["Dúnedain"],
+  "Maîtres artisans": ["Noldor"],
+  "Harmonie avec la nature": ["Sindar"],
+  "Experts des forêts": ["Sylvains"],
+  "Traditions anciennes": ["Longues-Barbes"],
+  "Guerriers nés": ["Barbes-de-Feu"],
+  "Discrets et prudents": ["Pied-Poilus"]
+}
