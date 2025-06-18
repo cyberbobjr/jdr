@@ -156,7 +156,6 @@ class ScenarioHistoryResponse(BaseModel):
     history: List[ConversationMessage]
 
 class AllocateAttributesRequest(BaseModel):
-    profession: str
     race: str
 
 class AllocateAttributesResponse(BaseModel):
@@ -177,7 +176,6 @@ class SaveCharacterResponse(BaseModel):
 
 class CheckSkillsRequest(BaseModel):
     skills: Dict[str, int]
-    profession: str
 
 class CheckSkillsResponse(BaseModel):
     valid: bool
@@ -225,4 +223,25 @@ class ProfessionSchema(BaseModel):
     abilities: List[str]
     spheres: List[str]
 
+class CharacteristicSchema(BaseModel):
+    """Schéma pour une caractéristique individuelle"""
+    short_name: str
+    category: str  # 'physical', 'mental', ou 'social'
+    description: str
+    examples: List[str]
+
+class CharacteristicsResponse(BaseModel):
+    """Schéma de réponse pour le endpoint /api/creation/characteristics"""
+    characteristics: Dict[str, CharacteristicSchema]
+    bonus_table: Dict[str, int]
+    cost_table: Dict[str, int]
+    starting_points: int
+
 # Les modèles RaceData et CultureData sont maintenant définis plus haut et remplacent RaceSchema et CultureSchema
+
+class UpdateSkillsRequest(BaseModel):
+    character_id: str
+    skills: Dict[str, int]
+
+class UpdateSkillsResponse(BaseModel):
+    status: str

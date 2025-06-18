@@ -15,7 +15,8 @@ from back.models.schema import (
     SaveCharacterRequest, SaveCharacterResponse,
     CheckSkillsRequest, CheckSkillsResponse,
     CreationStatusResponse,
-    RaceData  # Remplace RaceSchema
+    RaceData,  # Remplace RaceSchema
+    CharacteristicsResponse, UpdateSkillsRequest, UpdateSkillsResponse  # Nouveau schéma pour les caractéristiques
 )
 from back.agents.gm_agent_pydantic import build_gm_agent_pydantic, enrich_user_message_with_character
 
@@ -226,11 +227,15 @@ async def generate_character_physical_description(character: dict = Body(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/characteristics", summary="Liste des caractéristiques", response_model=dict)
+@router.get("/characteristics", summary="Données complètes des caractéristiques", response_model=CharacteristicsResponse)
 def get_characteristics():
     """
-    Retourne la liste et la description des caractéristiques (ex : Force, Agilité, etc.).
-    **Sortie** : Dictionnaire {nom: description}
+    Retourne le fichier characteristics.json complet avec toutes les données :
+    - Définitions des caractéristiques (Force, Agilité, etc.)
+    - Table des bonus par valeur
+    - Table des coûts en points
+    - Points de départ
+    **Sortie** : Contenu complet du fichier characteristics.json
     """
     from back.models.domain.characteristics_manager import CharacteristicsManager
     manager = CharacteristicsManager()
@@ -246,3 +251,21 @@ def delete_character(character_id: str):
     from back.services.character_persistence_service import CharacterPersistenceService
     CharacterPersistenceService.delete_character_data(character_id)
     return None
+
+@router.post(
+    "/update-skills",
+    response_model=UpdateSkillsResponse,
+    summary="Mise à jour des compétences",
+    description="Met à jour uniquement les compétences du personnage en cours de création."
+)
+def update_skills(request: UpdateSkillsRequest):
+    """
+    Met à jour uniquement les compétences du personnage en cours de création.
+    Effectue un merge avec les données existantes.
+    - **Entrée** : character_id (str), skills (dict)
+    - **Sortie** : status (str)
+    """
+    # Créer un dictionnaire avec seulement les compétences
+    character_data = {"competences": request.skills}
+    CharacterPersistenceService.save_character_data(request.character_id, character_data)
+    return UpdateSkillsResponse(status="en_cours")

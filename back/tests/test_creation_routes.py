@@ -13,8 +13,29 @@ def test_get_races():
 def test_get_characteristics():
     response = client.get("/api/creation/characteristics")
     assert response.status_code == 200
-    assert isinstance(response.json(), dict)
-    assert "Force" in response.json() or len(response.json()) > 0
+    data = response.json()
+    assert isinstance(data, dict)
+    
+    # Vérifier la structure complète du JSON
+    assert "characteristics" in data
+    assert "bonus_table" in data
+    assert "cost_table" in data
+    assert "starting_points" in data
+    
+    # Vérifier qu'on a bien les caractéristiques principales
+    characteristics = data["characteristics"]
+    assert "Force" in characteristics
+    assert "Constitution" in characteristics
+    assert "Agilité" in characteristics
+    
+    # Vérifier la structure d'une caractéristique
+    force = characteristics["Force"]
+    assert "short_name" in force
+    assert "category" in force
+    assert "description" in force
+    assert "examples" in force
+    assert force["short_name"] == "FOR"
+    assert force["category"] == "physical"
 
 # Teste la récupération des compétences
 def test_get_skills():

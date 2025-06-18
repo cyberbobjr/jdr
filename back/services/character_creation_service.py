@@ -72,9 +72,9 @@ class CharacterCreationService:
         if total_cost > characteristics_manager.starting_points:
             return False
         
-        # Vérifie les bornes (1-100)
+        # Vérifie les bornes (1-105)
         for v in attributes.values():
-            if v < 1 or v > 100:
+            if v < 1 or v > 105:
                 return False
         return True
 

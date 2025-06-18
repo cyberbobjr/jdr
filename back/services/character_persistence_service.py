@@ -89,6 +89,7 @@ class CharacterPersistenceService:
         """
         ### save_character_data
         **Description :** Sauvegarde les données complètes d'un personnage dans son fichier JSON.
+        Effectue un merge avec les données existantes pour éviter l'écrasement.
         **Paramètres :**
         - `character_id` (str) : Identifiant du personnage (UUID).
         - `character_data` (dict) : Données à sauvegarder.
@@ -97,13 +98,33 @@ class CharacterPersistenceService:
         filepath = CharacterPersistenceService._get_character_file_path(character_id)
         
         try:
-            with open(filepath, "w", encoding="utf-8") as file:
-                json.dump(character_data, file, ensure_ascii=False, indent=2)
+            # Charger les données existantes si le fichier existe
+            existing_data = {}
+            if os.path.exists(filepath):
+                try:
+                    with open(filepath, "r", encoding="utf-8") as file:
+                        existing_data = json.load(file)
+                except (json.JSONDecodeError, Exception) as e:
+                    log_debug("Erreur lors de la lecture du fichier existant, recréation", 
+                             action="save_character_data_warning", 
+                             character_id=character_id, 
+                             error=str(e))
+                    existing_data = {}
             
-            log_debug("Données personnage sauvegardées", 
+            # Merger les données (les nouvelles données ont priorité)
+            merged_data = {**existing_data, **character_data}
+            
+            # Créer le répertoire si nécessaire
+            os.makedirs(os.path.dirname(filepath), exist_ok=True)
+            
+            with open(filepath, "w", encoding="utf-8") as file:
+                json.dump(merged_data, file, ensure_ascii=False, indent=2)
+            
+            log_debug("Données personnage sauvegardées (merge)", 
                      action="save_character_data", 
                      character_id=character_id, 
-                     filepath=os.path.abspath(filepath))
+                     filepath=os.path.abspath(filepath),
+                     keys_updated=list(character_data.keys()))
         
         except Exception as e:
             log_debug("Erreur lors de la sauvegarde", 

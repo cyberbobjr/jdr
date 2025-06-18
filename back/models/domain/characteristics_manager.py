@@ -72,8 +72,7 @@ class CharacteristicsManager:
         # Cas spéciaux pour les valeurs exactes
         if str(value) in self.bonus_table:
             return self.bonus_table[str(value)]
-        
-        # Recherche dans les plages
+          # Recherche dans les plages
         for range_key, bonus in self.bonus_table.items():
             if "-" in range_key:
                 start, end = map(int, range_key.split("-"))
@@ -89,13 +88,37 @@ class CharacteristicsManager:
         return total_cost
 
     def _get_cost_for_value(self, value: int) -> int:
-        """Calcule le coût pour une valeur donnée"""
-        for range_key, cost in self.cost_table.items():
+        """Calcule le coût progressif pour une valeur donnée"""
+        total_cost = 0
+        current_value = 1  # On commence à 1
+        
+        # Trier les plages de coût par ordre croissant
+        sorted_ranges = sorted(self.cost_table.items(), 
+                             key=lambda x: int(x[0].split('-')[0]) if '-' in x[0] else int(x[0]))
+        
+        # Calculer le coût progressif pour chaque plage
+        for range_key, cost_per_point in sorted_ranges:
+            if current_value > value:
+                break  # On a déjà atteint la valeur cible
+            
             if "-" in range_key:
                 start, end = map(int, range_key.split("-"))
-                if start <= value <= end:
-                    return cost * value
-        return value  # Fallback
+                
+                start_in_range = max(current_value, start)
+                end_in_range = min(value, end)
+                
+                if start_in_range <= end_in_range:
+                    points_in_this_range = end_in_range - start_in_range + 1
+                    total_cost += points_in_this_range * cost_per_point
+                    current_value = end_in_range + 1
+            else:
+                # Valeur exacte
+                exact_value = int(range_key)
+                if current_value <= exact_value <= value:
+                    total_cost += cost_per_point
+                    current_value = exact_value + 1
+        
+        return total_cost
 
     def set_racial_bonus(self, characteristic: str, bonus: int):
         """Définit un bonus racial pour une caractéristique"""
@@ -107,8 +130,17 @@ class CharacteristicsManager:
         if characteristic in self.names:
             self.values[characteristic] = value
 
-    def get_all_characteristics(self) -> Dict[str, Dict]:
-        """Retourne toutes les caractéristiques avec leurs informations"""
+    def get_all_characteristics(self) -> Dict:
+        """Retourne le fichier characteristics.json complet"""
+        return {
+            "characteristics": self.characteristics_info,
+            "bonus_table": self.bonus_table,
+            "cost_table": self.cost_table,
+            "starting_points": self.starting_points
+        }
+
+    def get_all_characteristics_with_values(self) -> Dict[str, Dict]:
+        """Retourne toutes les caractéristiques avec leurs informations et valeurs actuelles"""
         result = {}
         for name in self.names:
             result[name] = {
