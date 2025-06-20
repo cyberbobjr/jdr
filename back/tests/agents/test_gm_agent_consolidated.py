@@ -44,7 +44,6 @@ class TestGMAgentConsolidated:
             "concept": "Guerrier loyal",
             "race": "Humain",
             "culture": "Royaume de Fer",
-            "profession": "Guerrier",
             "caracteristiques": {
                 "Force": 14,
                 "Constitution": 13,
@@ -163,7 +162,6 @@ class TestGMAgentConsolidated:
             "id": "test-id",
             "name": "Test Character",
             "race": "Humain",
-            "profession": "Guerrier",
             "culture": "Test",
             "attributes": {"Vigueur": 10},
             "skills": {},

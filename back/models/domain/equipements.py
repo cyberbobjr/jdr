@@ -291,21 +291,20 @@ class Equipements:
             "total_cost": total_cost,
             "total_weight": total_weight,
             "equipment_details": equipment_details,
-            "item_count": len(equipment_details)
-        }
+            "item_count": len(equipment_details)        }
     
-    def validate_equipment_purchase(self, equipment_list: List[str], available_money: float) -> Dict[str, Any]:
-        """Valide un achat d'équipement selon l'argent disponible"""
+    def validate_equipment_purchase(self, equipment_list: List[str], available_gold: float) -> Dict[str, Any]:
+        """Valide un achat d'équipement selon l'or disponible"""
         cost_summary = self.calculate_equipment_cost(equipment_list)
         
-        remaining_money = available_money - cost_summary["total_cost"]
+        remaining_gold = available_gold - cost_summary["total_cost"]
         
         return {
             **cost_summary,
-            "available_money": available_money,
-            "remaining_money": remaining_money,
-            "can_afford": remaining_money >= 0,
-            "missing_money": max(0, -remaining_money)
+            "available_gold": available_gold,
+            "remaining_gold": remaining_gold,
+            "can_afford": remaining_gold >= 0,
+            "missing_gold": max(0, -remaining_gold)
         }
     
     def get_recommended_equipment_by_profession(self, profession: str) -> List[str]:

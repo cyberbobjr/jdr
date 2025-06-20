@@ -9,11 +9,12 @@
         :steps="stepLabels"
         :current="currentStepIndex"
         @step-click="goToStep"
-      />
-      <component
+      />      <component
         :is="currentStepComponent"
         :character-id="characterId"
         :initial-data="characterData"
+        :characteristics-data="characteristicsData"
+        :skills-data="skillsData"
         @next-step="goToNextStep"
         @update-character="updateCharacterData"
       />
@@ -30,7 +31,7 @@ import Step3 from './steps/Step3.vue';
 import Step4 from './steps/Step4.vue';
 import Step5 from './steps/Step5.vue';
 import JdrApiService from '@/core/api';
-import type { Character } from '@/core/interfaces';
+import type { Character, CharacteristicsData } from '@/core/interfaces';
 import JdrStepComponent from '@/components/JdrStepComponent.vue';
 
 const route = useRoute();
@@ -38,10 +39,12 @@ const router = useRouter();
 
 const characterId = ref<string | null>(null);
 const characterData = ref<Character | null>(null);
+const characteristicsData = ref<CharacteristicsData | null>(null);
+const skillsData = ref<any | null>(null);
 const step = ref<string>('step1');
 
 const stepLabels = [
-  'Race, Culture & Profession',
+  'Race & Culture',
   'Caractéristiques',
   'Compétences',
   'Équipement',
@@ -59,6 +62,20 @@ const currentStepComponent = computed(() => stepComponents[step.value] || stepCo
 const currentStepIndex = computed(() => steps.indexOf(step.value));
 
 onMounted(async () => {
+  // Charger les données des caractéristiques
+  try {
+    characteristicsData.value = await JdrApiService.getCharacteristics();
+  } catch (error) {
+    console.error('Erreur lors du chargement des caractéristiques:', error);
+  }
+  // Charger les données des compétences
+  try {
+    skillsData.value = await JdrApiService.getSkills();
+    console.log('Données de compétences chargées:', skillsData.value);
+  } catch (error) {
+    console.error('Erreur lors du chargement des compétences:', error);
+  }
+
   const { characterId: routeId, step: routeStep } = route.params as { characterId?: string, step?: string };
   if (routeId) {
     characterId.value = routeId;
@@ -67,8 +84,17 @@ onMounted(async () => {
   }
 });
 
-watch(() => route.params, (params) => {
-  if (params.characterId) characterId.value = params.characterId as string;
+watch(() => route.params, async (params) => {
+  if (params.characterId) {
+    characterId.value = params.characterId as string;
+    // Recharger les données du personnage quand on change de caractère ou d'étape
+    try {
+      characterData.value = await JdrApiService.getCharacter(params.characterId as string);
+      console.log('Données du personnage rechargées:', characterData.value);
+    } catch (error) {
+      console.error('Erreur lors du rechargement des données du personnage:', error);
+    }
+  }
   if (params.step) step.value = params.step as string;
 });
 

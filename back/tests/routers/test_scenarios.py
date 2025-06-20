@@ -261,7 +261,7 @@ def test_list_active_sessions(client, session_manager, isolated_data_dir, monkey
         "name": "Test Hero Sessions",
         "race": "Humain",
         "culture": "Rurale",
-        "profession": "Aventurier",
+        
         "caracteristiques": {
             "Force": 10,
             "Constitution": 10,
@@ -278,7 +278,6 @@ def test_list_active_sessions(client, session_manager, isolated_data_dir, monkey
         "gold": 0,
         "inventory": [],
         "spells": [],
-        "equipment_summary": {"total_weight": 0.0, "total_value": 0.0, "remaining_gold": 0.0},
         "culture_bonuses": {"Endurance": 1}
     }
     test_character = {"state": state}

@@ -4,7 +4,6 @@ Migration progressive de Haystack vers PydanticAI.
 """
 
 import os
-import pathlib
 from typing import Optional, Dict, Any
 from dotenv import load_dotenv
 from pydantic_ai import Agent
@@ -14,6 +13,7 @@ from back.services.session_service import SessionService
 from back.storage.pydantic_jsonl_store import PydanticJsonlStore
 from back.models.domain.character import Character
 from back.agents.PROMPT import build_system_prompt
+from back.config import get_data_dir
 
 # Charger les variables d'environnement depuis le fichier .env
 load_dotenv()
@@ -30,20 +30,18 @@ class GMAgentDependencies:
     **Attributs :**
     - `session_id` (str) : Identifiant de session
     - `character_data` (Character) : Données du personnage (modèle typé)
-    - `store` (PydanticJsonlStore) : Store pour l'historique des messages
-    - `message_history` (List[ModelMessage]) : Historique des messages PydanticAI
+    - `store` (PydanticJsonlStore) : Store pour l'historique des messages    - `message_history` (List[ModelMessage]) : Historique des messages PydanticAI
     """
     
     def __init__(self, session_id: str, character_data: Optional[Character] = None):
         self.session_id = session_id
         self.character_data = character_data
         # Initialiser le store pour l'historique
-        project_root = pathlib.Path(__file__).parent.parent.parent
         if not os.path.isabs(session_id):
-            history_path = str(project_root / "data" / "sessions" / f"{session_id}.jsonl")
+            history_path = os.path.join(get_data_dir(), "sessions", f"{session_id}.jsonl")
         else:
             history_path = session_id + ".jsonl"
-        self.store = PydanticJsonlStore(history_path)    
+        self.store = PydanticJsonlStore(history_path)
 
 def build_gm_agent_pydantic(session_id: str, scenario_name: str = "Les_Pierres_du_Passe.md", character_id: Optional[str] = None):
     """

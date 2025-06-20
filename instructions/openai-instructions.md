@@ -86,12 +86,10 @@ class Item(BaseModel):
     weight: float
     base_value: float
 
-class Character(BaseModel):
-    id: UUID
+class Character(BaseModel):    id: UUID
     name: str
     race: str
     culture: str
-    profession: str
     caracteristiques: Dict[str, int]
     competences: Dict[str, int]
     hp: int = 100  # calculé à partir de Constitution
@@ -176,19 +174,18 @@ Toutes les clés JSON suivent le **snake\_case** (minuscules + « \_ ») pour 
 
 | Type de fichier                                                         | Emplacement                        | Clés obligatoires                                                                                                             | Exemple minimal |
 | ----------------------------------------------------------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| **Fiche personnage**                                                    | `data/characters/{player_id}.json` | `id`, `name`, `race`, `culture`, `profession`, `hp`, `hp_max`, `xp`, `caracteristiques`, `competences`, `wallet`, `inventory` | \`\`\`json      |
+| **Fiche personnage**                                                    | `data/characters/{player_id}.json` | `id`, `name`, `race`, `culture`, `hp`, `hp_max`, `xp`, `caracteristiques`, `competences`, `gold`, `inventory` | \`\`\`json      |
 | {                                                                       |                                    |                                                                                                                               |                 |
 | "id": "123e4567-e89b-12d3-a456-426614174000",                           |                                    |                                                                                                                               |                 |
 | "name": "Galadhwen",                                                    |                                    |                                                                                                                               |                 |
 | "race": "Elfe",                                                         |                                    |                                                                                                                               |                 |
 | "culture": "Sindar",                                                    |                                    |                                                                                                                               |                 |
-| "profession": "Rôdeuse",                                                |                                    |                                                                                                                               |                 |
 | "hp": 76,                                                               |                                    |                                                                                                                               |                 |
 | "hp\_max": 100,                                                         |                                    |                                                                                                                               |                 |
 | "xp": 235,                                                              |                                    |                                                                                                                               |                 |
 | "caracteristiques": {"force": 70, "constitution": 65, "dexterite": 80}, |                                    |                                                                                                                               |                 |
 | "competences": {"esquive": 45, "connaissance\_generale": 60},           |                                    |                                                                                                                               |                 |
-| "wallet": {"gold": 3, "silver": 12, "copper": 40},                      |                                    |                                                                                                                               |                 |
+| "gold": 125,                                                            |                                    |                                                                                                                               |                 |
 | "inventory": \[                                                         |                                    |                                                                                                                               |                 |
 
 ```

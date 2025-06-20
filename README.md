@@ -153,7 +153,7 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
 │   └── sessions/               # Historique des conversations et états des sessions de jeu
 ├── docs/                        # Documentation du système de jeu
 │   ├── 00 - introduction.md    # Introduction générale au système de jeu
-│   ├── 01 - Caractéristiques, Races, Professions et Cultures.md
+│   ├── 01 - Caractéristiques, Races et Cultures.md
 │   ├── 02 - Guide Complet des Compétences.md
 │   ├── 03 - Talents.md         # Système des talents spéciaux
 │   ├── 04 - Equipement, armes et armures.md
@@ -392,13 +392,11 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
 **Format de réponse :**
 ```json
 {
-    "characters": [
-        {
+    "characters": [        {
             "id": "d7763165-4c03-4c8d-9bc6-6a2568b79eb3",
             "name": "Aragorn",
             "race": "Humain",
             "culture": "Gondor",
-            "profession": "Rôdeur",
             "caracteristiques": {
                 "Force": 85,
                 "Constitution": 80,
@@ -415,9 +413,10 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
                 "Survie": 55,
                 "Nature": 65,
                 "Influence": 40,
-                "Athlétique": 50
-            },
-            "hp": 85,            "inventory": [
+                "Athlétique": 50            },
+            "hp": 85,
+            "gold": 200,
+            "inventory": [
                 {
                     "id": "sword_001",
                     "name": "Coutelas",
@@ -449,14 +448,8 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
                     "is_equipped": true,
                     "crafting_time": "-",
                     "special_properties": null
-                }
-            ],
+                }            ],
             "spells": [],
-            "equipment_summary": {
-                "total_weight": 8.5,
-                "total_value": 500.0,
-                "remaining_gold": 200.0
-            },
             "culture_bonuses": {
                 "Combat": 5,
                 "Influence": 3,
@@ -478,7 +471,6 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
   - **Propriétés économiques** : Prix en pièces de cuivre, poids en kg
   - **Propriétés de jeu** : Dégâts pour armes, protection pour armures
   - **Statut d'équipement** : `is_equipped` pour savoir si l'objet est actuellement utilisé
-- L'`equipment_summary` fournit un résumé des totaux (poids, valeur, or restant)
 - **Conversion automatique** : Les anciens formats `equipment: List[str]` sont automatiquement convertis vers `inventory: List[Item]`
 
 ### 2. `GET /api/characters/{character_id}` - Détail d'un Personnage
@@ -491,19 +483,15 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
 **Format de réponse :**
 ```json
 {
-  "id": "d7763165-4c03-4c8d-9bc6-6a2568b79eb3",
-  "name": "Aragorn",
+  "id": "d7763165-4c03-4c8d-9bc6-6a2568b79eb3",  "name": "Aragorn",
   "race": "Humain",
   "culture": "Gondor",
-  "profession": "Rôdeur",
   "caracteristiques": { ... },
   "competences": { ... },
   "hp": 85,
-  "xp": 0,
-  "gold": 0,
+  "xp": 0,  "gold": 0,
   "inventory": [ ... ],
   "spells": [],
-  "equipment_summary": { ... },
   "culture_bonuses": { ... }
 }
 ```
@@ -515,7 +503,7 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
 
 ## Service de création de personnage (2025)
 
-- **character_creation_service.py** : Service dédié à la création de personnage, gérant l'allocation automatique des caractéristiques selon la profession et la race, la validation des points, et la fourniture des listes (professions, races, compétences, cultures, équipements, sorts).
+- **character_creation_service.py** : Service dédié à la création de personnage, gérant l'allocation automatique des caractéristiques selon la race, la validation des points, et la fourniture des listes (races, compétences, cultures, équipements, sorts).
 - **creation.py** : Routeur FastAPI spécialisé pour la création de personnage, exposant les routes pour chaque étape, l'enregistrement et le suivi du statut de création.
 - **Tests** : Les tests unitaires sont disponibles dans `/back/tests/services/test_character_creation_service.py`.
 
@@ -670,19 +658,15 @@ Le système empêche automatiquement la création de sessions dupliquées en dé
 
 ```json
 {
-  "id": "d1a4064a-c956-4d46-b6ea-5e688cf2f78b",
-  "name": "Test Hero",
+  "id": "d1a4064a-c956-4d46-b6ea-5e688cf2f78b",  "name": "Test Hero",
   "race": "Humain",
   "culture": "Rurale",
-  "profession": "Aventurier",
   "caracteristiques": {"Force": 10, ...},
   "competences": {"Athletisme": 5},
   "hp": 42,
-  "xp": 0,
-  "gold": 0,
+  "xp": 0,  "gold": 0,
   "inventory": [],
   "spells": [],
-  "equipment_summary": {},
   "culture_bonuses": {},
   "created_at": "2025-06-14T19:08:31.148010",
   "last_update": "2025-06-14T19:08:31.148010",

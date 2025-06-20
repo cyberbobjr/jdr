@@ -7,47 +7,72 @@ from back.models.schema import Character, Item
 from back.utils.logger import log_debug
 from back.services.character_persistence_service import CharacterPersistenceService
 from back.services.item_service import ItemService
+from back.models.domain.equipment_manager import EquipmentManager
 from back.config import get_data_dir
 
 class CharacterService:
-    
-    def __init__(self, character_id: str):
+    def __init__(self, character_id: str, strict_validation: bool = True):
         """
         ### __init__
         **Description:** Initialise le service de personnage pour un personnage spécifique
         **Paramètres:**
         - `character_id` (str): Identifiant du personnage à gérer
-        **Retour:** Aucun
+        - `strict_validation` (bool): Si True, valide strictement avec le modèle Character. Si False, accepte les personnages incomplets.        **Retour:** Aucun
         """
         self.character_id = character_id
+        self.strict_validation = strict_validation       
         self.character_data = self._load_character()
-    def _load_character(self) -> Character:
+        
+    def _load_character(self):
         """
         ### _load_character
         **Description:** Charge les données du personnage depuis le stockage persistant
-        **Retour:** Objet Character chargé
+        **Retour:** Objet Character chargé ou dict pour personnages incomplets
         """
         character_data = CharacterPersistenceService.load_character_data(self.character_id)
         # On prend directement la racine du JSON
         state_data = character_data
-        # Convertir l'ancien format equipment vers inventory si nécessaire
-        self._convert_equipment_to_inventory(state_data)
+        # Convertir l'ancien format equipment vers inventory si nécessaire        self._convert_equipment_to_inventory(state_data)
         # Ajouter les champs manquants avec des valeurs par défaut
         state_data.setdefault("xp", 0)
-        state_data.setdefault("gold", 0)
+        state_data.setdefault("gold", 0.0)
         state_data.setdefault("hp", 100)
         # L'ID est le nom du fichier (sans .json)
         state_data["id"] = self.character_id
-        log_debug("Chargement du personnage", action="_load_character", character_id=self.character_id)
-        return Character(**state_data)
-    
+          # Vérifier si le personnage est complet
+        is_incomplete = (
+            state_data.get("name") is None or 
+            state_data.get("status") == "en_cours" or
+            state_data.get("status") is None
+        )
+        
+        if is_incomplete:
+            state_data["status"] = "en_cours"
+            
+        log_debug("Chargement du personnage", action="_load_character", character_id=self.character_id, is_incomplete=is_incomplete)
+        
+        # Si validation stricte et personnage complet, retourner un objet Character
+        if self.strict_validation and not is_incomplete:
+            try:
+                return Character(**state_data)
+            except Exception as e:
+                log_debug("Erreur validation stricte, retour en mode dict", error=str(e))
+                return state_data
+        else:
+            # Sinon, retourner le dictionnaire brut
+            return state_data
     def save_character(self) -> None:
         """
         ### save_character
         **Description:** Sauvegarde les données du personnage vers le stockage persistant
         **Retour:** Aucun
         """
-        character_dict = self.character_data.model_dump()
+        # Gérer le cas où character_data est un dict ou un objet Character
+        if hasattr(self.character_data, 'model_dump'):
+            character_dict = self.character_data.model_dump()
+        else:
+            character_dict = self.character_data.copy() if isinstance(self.character_data, dict) else self.character_data
+            
         # Retirer l'ID car il ne doit pas être dans le fichier
         character_dict.pop('id', None)
         CharacterPersistenceService.save_character_data(self.character_id, character_dict)
@@ -96,11 +121,10 @@ class CharacterService:
             
             # Supprimer l'ancien champ equipment après conversion
             del state_data['equipment']
-        
-        # Si on n'a ni equipment ni inventory, créer un inventaire vide
+          # Si on n'a ni equipment ni inventory, créer un inventaire vide
         elif 'inventory' not in state_data and 'equipment' not in state_data:
             state_data['inventory'] = []
-
+    
     @staticmethod
     def get_all_characters() -> List[object]:
         """
@@ -111,40 +135,62 @@ class CharacterService:
         """
         characters = []
         characters_dir = os.path.join(get_data_dir(), "characters")
-        required_fields = ["name", "race", "culture", "profession", "caracteristiques", "competences"]
         
         for filename in os.listdir(characters_dir):
             if filename.endswith(".json"):
                 character_id = filename[:-5]  # Retire l'extension .json
                 try:
                     character_data = CharacterPersistenceService.load_character_data(character_id)
-                    status = character_data.get("status", None)
-                    if status == "en_cours":
-                        # On ajoute le dict brut pour les personnages en cours de création
-                        character_data["id"] = character_id
+                    
+                    # Ajouter l'ID dans tous les cas
+                    character_data["id"] = character_id
+                      # Vérifier si le personnage est complet ou en cours de création
+                    is_incomplete = (
+                        character_data.get("name") is None or 
+                        character_data.get("status") == "en_cours" or
+                        character_data.get("status") is None
+                    )
+                    
+                    if is_incomplete:
+                        # Pour les personnages incomplets, définir le statut à "en_cours"
+                        character_data["status"] = "en_cours"
+                        log_debug("Personnage incomplet détecté", 
+                                 action="get_all_characters_incomplete", 
+                                 character_id=character_id,
+                                 name=character_data.get("name"),
+                                 status=character_data.get("status"))
                         characters.append(character_data)
                         continue
-                    if not all(field in character_data for field in required_fields):
-                        log_debug("Personnage ignoré (champs manquants)", 
-                                 action="get_all_characters", 
-                                 filename=filename, 
-                                 missing_fields=[field for field in required_fields if field not in character_data])
-                        continue
+                      # Pour les personnages complets, on essaie de créer un objet Character
+                    # Définir le statut à "complet" pour les personnages complets
+                    character_data["status"] = "complet"
+                    
                     # Convertir l'ancien format equipment vers inventory si nécessaire
                     CharacterService._convert_equipment_to_inventory(character_data)
-                    # Ajouter les champs manquants avec des valeurs par défaut
+                      # Ajouter les champs manquants avec des valeurs par défaut
                     character_data.setdefault("xp", 0)
-                    character_data.setdefault("gold", 0)
+                    character_data.setdefault("gold", 0.0)
                     character_data.setdefault("hp", 100)
-                    # L'ID est le nom du fichier (sans .json)
-                    character_data["id"] = character_id
-                    characters.append(Character(**character_data))
+                    
+                    try:
+                        characters.append(Character(**character_data))
+                        log_debug("Personnage complet chargé", 
+                                 action="get_all_characters_complete", 
+                                 character_id=character_id)
+                    except Exception as validation_error:
+                        # Si la validation échoue, on retourne quand même le dict brut
+                        log_debug("Erreur de validation, personnage retourné en dict brut", 
+                                 action="get_all_characters_validation_error", 
+                                 character_id=character_id,
+                                 error=str(validation_error))
+                        characters.append(character_data)
+                        
                 except (FileNotFoundError, ValueError) as e:
                     log_debug("Erreur lors du chargement du personnage", 
                              action="get_all_characters_error", 
                              filename=filename, 
                              error=str(e))
-                    continue
+                    continue                    
         log_debug("Chargement de tous les personnages", action="get_all_characters", count=len(characters))
         return characters
     
@@ -166,19 +212,36 @@ class CharacterService:
             
             # Ajouter les champs manquants avec des valeurs par défaut
             state_data.setdefault("xp", 0)
-            state_data.setdefault("gold", 0)
+            state_data.setdefault("gold", 0.0)
             state_data.setdefault("hp", 100)
             
             # L'ID est le nom du fichier (sans .json)
             state_data["id"] = character_id
+              # Vérifier si le personnage est complet ou en cours de création
+            is_incomplete = (
+                state_data.get("name") is None or 
+                state_data.get("status") == "en_cours" or
+                state_data.get("status") is None
+            )
+            
+            if is_incomplete:
+                # Pour les personnages incomplets, définir le statut à "en_cours"
+                state_data["status"] = "en_cours"
+                log_debug("Personnage incomplet - statut mis à jour", 
+                         action="get_character_incomplete", 
+                         character_id=character_id,
+                         name=state_data.get("name"))
+            else:
+                # Pour les personnages complets, définir le statut à "complet"
+                state_data["status"] = "complet"
+                log_debug("Personnage complet", 
+                         action="get_character_complete", 
+                         character_id=character_id)
             
             log_debug("Chargement du personnage", action="get_character", character_id=character_id)
             return state_data
         except Exception as e:
             raise e
-        state_data["id"] = character_id
-        log_debug("Chargement du personnage", action="get_character", character_id=character_id)
-        return Character(**state_data)
 
     def apply_xp(self, xp: int) -> None:
         """
@@ -194,15 +257,15 @@ class CharacterService:
         self.save_character()
         log_debug("Ajout d'XP", action="apply_xp", player_id=self.character_id, xp_ajoute=xp, xp_total=new_xp)
 
-    def add_gold(self, gold: int) -> None:
+    def add_gold(self, gold: float) -> None:
         """
         ### add_gold
         **Description:** Ajoute de l'or au portefeuille du personnage
         **Paramètres:**
-        - `gold` (int): Montant d'or à ajouter
+        - `gold` (float): Montant d'or à ajouter (peut avoir des décimales)
         **Retour:** Aucun
         """
-        current_gold = getattr(self.character_data, 'gold', 0)
+        current_gold = getattr(self.character_data, 'gold', 0.0)
         new_gold = current_gold + gold
         self.character_data.gold = new_gold
         self.save_character()
@@ -328,7 +391,7 @@ class CharacterService:
         **Paramètres:**
         - `item_id` (str): L'identifiant de l'objet
         **Retour:** dict - Résumé de l'inventaire mis à jour avec l'objet équipé
-        """
+        """        
         if hasattr(self.character_data, 'inventory') and self.character_data.inventory:
             for item in self.character_data.inventory:
                 if hasattr(item, 'id') and item.id == item_id:
@@ -353,6 +416,165 @@ class CharacterService:
                     if hasattr(item, 'is_equipped'):
                         item.is_equipped = False
                     break
-        
         self.save_character()
         return {"inventory": [item.model_dump() if hasattr(item, 'model_dump') else item for item in self.character_data.inventory]}
+    
+    def buy_equipment(self, equipment_name: str) -> Dict:
+        """
+        ### buy_equipment
+        **Description:** Achète un équipement et débite l'argent correspondant du budget de création.
+        **Paramètres:**
+        - `equipment_name` (str): Nom de l'équipement à acheter
+        **Retour:** dict - Résumé avec statut, argent restant, poids total et détails de l'équipement
+        """
+        log_debug("Achat d'équipement", action="buy_equipment", character_id=self.character_id, equipment_name=equipment_name)
+        
+        # Récupérer les détails de l'équipement
+        equipment_manager = EquipmentManager()
+        equipment_details = equipment_manager.get_equipment_by_name(equipment_name)
+        if not equipment_details:
+            raise ValueError(f"Équipement '{equipment_name}' non trouvé")
+        
+        # Vérifier le budget avec la clé 'gold'
+        # Gérer le cas où character_data est un dict ou un objet Character
+        if hasattr(self.character_data, 'model_dump'):
+            character_dict = self.character_data.model_dump()
+        else:
+            character_dict = self.character_data.copy() if isinstance(self.character_data, dict) else self.character_data
+            
+        current_gold = character_dict.get('gold', 0)
+        equipment_cost = equipment_details.get('cost', 0)
+        
+        if current_gold < equipment_cost:
+            raise ValueError("Pas assez d'argent pour acheter cet équipement")
+        
+        # Ajouter l'équipement à la liste
+        equipment_list = character_dict.get('equipment', [])
+        if equipment_name not in equipment_list:
+            equipment_list.append(equipment_name)
+          # Mettre à jour l'or du personnage
+        new_gold = current_gold - equipment_cost
+        
+        # Calculer le poids total pour la réponse
+        total_weight = 0
+        for equipment_name_in_list in equipment_list:
+            equipment_item = equipment_manager.get_equipment_by_name(equipment_name_in_list)
+            if equipment_item:
+                total_weight += equipment_item.get('weight', 0)
+        
+        # Mettre à jour les données du personnage
+        if hasattr(self.character_data, 'equipment'):
+            self.character_data.equipment = equipment_list
+        else:
+            self.character_data['equipment'] = equipment_list
+        
+        if hasattr(self.character_data, 'gold'):
+            self.character_data.gold = new_gold
+        else:
+            self.character_data['gold'] = new_gold
+        
+        self.save_character()
+        
+        return {
+            'status': 'success',
+            'gold': new_gold,
+            'total_weight': total_weight,
+            'equipment_added': {
+                'name': equipment_name,
+                **equipment_details
+            }
+        }
+
+    def sell_equipment(self, equipment_name: str) -> Dict:
+        """
+        ### sell_equipment
+        **Description:** Vend un équipement et rembourse l'argent correspondant au budget de création.
+        **Paramètres:**
+        - `equipment_name` (str): Nom de l'équipement à vendre
+        **Retour:** dict - Résumé avec statut, argent restant, poids total et détails de l'équipement
+        """
+        log_debug("Vente d'équipement", action="sell_equipment", character_id=self.character_id, equipment_name=equipment_name)
+        
+        # Récupérer les détails de l'équipement
+        equipment_manager = EquipmentManager()
+        equipment_details = equipment_manager.get_equipment_by_name(equipment_name)
+        if not equipment_details:
+            raise ValueError(f"Équipement '{equipment_name}' non trouvé")
+        
+        # Retirer l'équipement de la liste
+        # Gérer le cas où character_data est un dict ou un objet Character
+        if hasattr(self.character_data, 'model_dump'):
+            character_dict = self.character_data.model_dump()
+        else:
+            character_dict = self.character_data.copy() if isinstance(self.character_data, dict) else self.character_data
+            
+        equipment_list = character_dict.get('equipment', [])
+        if equipment_name not in equipment_list:
+            raise ValueError(f"L'équipement '{equipment_name}' n'est pas dans l'inventaire")
+            
+        equipment_list.remove(equipment_name)
+        
+        # Rembourser l'or du personnage
+        current_gold = character_dict.get('gold', 0)
+        equipment_cost = equipment_details.get('cost', 0)
+        new_gold = current_gold + equipment_cost
+        
+        # Calculer le poids total pour la réponse
+        total_weight = 0
+        for equipment_name_in_list in equipment_list:
+            equipment_item = equipment_manager.get_equipment_by_name(equipment_name_in_list)
+            if equipment_item:
+                total_weight += equipment_item.get('weight', 0)
+        
+        # Mettre à jour les données du personnage
+        if hasattr(self.character_data, 'equipment'):
+            self.character_data.equipment = equipment_list
+        else:
+            self.character_data['equipment'] = equipment_list
+            
+        if hasattr(self.character_data, 'gold'):
+            self.character_data.gold = new_gold
+        else:
+            self.character_data['gold'] = new_gold
+        self.save_character()
+        
+        return {
+            'status': 'success',
+            'gold': new_gold,
+            'total_weight': total_weight,
+            'equipment_removed': {
+                'name': equipment_name,
+                **equipment_details
+            }
+        }
+
+    def update_money(self, amount: int) -> Dict:
+        """
+        ### update_money
+        **Description:** Met à jour l'argent du personnage (positif pour ajouter, négatif pour retirer).
+        **Paramètres:**
+        - `amount` (int): Montant à ajouter/retirer
+        **Retour:** dict - Résumé avec statut et nouvel argent
+        """
+        log_debug("Mise à jour de l'argent", action="update_money", character_id=self.character_id, amount=amount)
+          # Mettre à jour l'argent avec la clé 'gold'
+        # Gérer le cas où character_data est un dict ou un objet Character
+        if hasattr(self.character_data, 'model_dump'):
+            character_dict = self.character_data.model_dump()
+        else:
+            character_dict = self.character_data.copy() if isinstance(self.character_data, dict) else self.character_data
+            
+        current_gold = character_dict.get('gold', 0)
+        new_gold = max(0, current_gold + amount)  # Ne pas aller en négatif
+        
+        # Mettre à jour les données du personnage
+        if hasattr(self.character_data, 'gold'):
+            self.character_data.gold = new_gold
+        else:
+            self.character_data['gold'] = new_gold
+        self.save_character()
+        
+        return {
+            'status': 'success',
+            'gold': new_gold
+        }

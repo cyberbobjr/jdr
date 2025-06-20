@@ -227,9 +227,7 @@ def character_79e55c14(isolated_data_dir):
         "equipment": ["Bandoulière", "Coutelas", "Bottes de cuir", "Gants de cuir"],
         "talents": [],
         "notes": "",
-        "background": "",
-        "spells": [],
-        "equipment_summary": None,
+        "background": "",        "spells": [],
         "culture_bonuses": {},
         "physical_description": "",
     }

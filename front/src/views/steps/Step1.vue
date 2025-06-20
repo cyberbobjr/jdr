@@ -222,9 +222,5 @@ function goToNextStep() {
   max-width: 320px;
   box-sizing: border-box;
 }
-button.jdr-btn.disabled,
-button.jdr-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+
 </style>

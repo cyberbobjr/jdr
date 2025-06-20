@@ -8,6 +8,7 @@ import pathlib
 from typing import Optional
 from back.models.domain.combat_state import CombatState
 from back.utils.logger import log_debug
+from back.config import get_data_dir
 
 
 class CombatStateService:
@@ -21,7 +22,7 @@ class CombatStateService:
         ### __init__
         **Description :** Initialise le service avec le chemin vers le répertoire de données.
         """
-        self.data_dir = pathlib.Path(__file__).parent.parent.parent / "data" / "combat"
+        self.data_dir = pathlib.Path(get_data_dir()) / "combat"
         self.data_dir.mkdir(exist_ok=True, parents=True)
     
     def _get_combat_file_path(self, session_id: str) -> pathlib.Path:

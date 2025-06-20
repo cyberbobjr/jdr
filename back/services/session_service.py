@@ -9,6 +9,7 @@ from typing import Dict, Any, Optional, List
 
 from back.services.character_service import CharacterService
 from back.storage.pydantic_jsonl_store import PydanticJsonlStore
+from back.config import get_data_dir
 
 
 class SessionService:
@@ -35,12 +36,10 @@ class SessionService:
         self.character_id = character_id
         self.character_data: Dict[str, Any] = {}
         self.scenario_name: str = ""
-        self.character_service: Optional[CharacterService] = None
-        
+        self.character_service: Optional[CharacterService] = None        
         # Initialiser le store pour l'historique
-        project_root = pathlib.Path(__file__).parent.parent.parent
         if not os.path.isabs(session_id):
-            history_path = str(project_root / "data" / "sessions" / f"{session_id}.jsonl")
+            history_path = os.path.join(get_data_dir(), "sessions", f"{session_id}.jsonl")
         else:
             history_path = session_id + ".jsonl"
         self.store = PydanticJsonlStore(history_path)
@@ -57,10 +56,8 @@ class SessionService:
         """
         ### _load_session_data
         **Description :** Charge les données de session (personnage et scénario) depuis les fichiers.
-        **Retour :** True si la session existe, False sinon.
-        """
-        project_root = pathlib.Path(__file__).parent.parent.parent
-        session_dir = project_root / "data" / "sessions" / self.session_id
+        **Retour :** True si la session existe, False sinon.        """
+        session_dir = pathlib.Path(get_data_dir()) / "sessions" / self.session_id
         if session_dir.exists() and session_dir.is_dir():
             # Charger l'ID du personnage
             character_file = session_dir / "character.txt"
@@ -89,12 +86,10 @@ class SessionService:
         """
         ### _create_session
         **Description :** Crée une nouvelle session avec l'ID du personnage et le nom du scénario.
-        **Paramètres :**
-        - `character_id` (str) : ID du personnage
+        **Paramètres :**        - `character_id` (str) : ID du personnage
         - `scenario_name` (str) : Nom du scénario
         """
-        project_root = pathlib.Path(__file__).parent.parent.parent
-        session_dir = project_root / "data" / "sessions" / self.session_id
+        session_dir = pathlib.Path(get_data_dir()) / "sessions" / self.session_id
         
         # Créer le répertoire de session
         session_dir.mkdir(parents=True, exist_ok=True)
@@ -121,12 +116,10 @@ class SessionService:
     @staticmethod
     def list_all_sessions() -> List[Dict[str, Any]]:
         """
-        ### list_all_sessions
-        **Description :** Récupère la liste de toutes les sessions avec les informations du scénario et du personnage.
+        ### list_all_sessions        **Description :** Récupère la liste de toutes les sessions avec les informations du scénario et du personnage.
         **Retour :** Liste de dictionnaires contenant les informations de chaque session
         """
-        project_root = pathlib.Path(__file__).parent.parent.parent
-        sessions_dir = project_root / "data" / "sessions"
+        sessions_dir = pathlib.Path(get_data_dir()) / "sessions"
         
         all_sessions = []
         

@@ -28,7 +28,7 @@ def make_minimal_character():
         "name": "Test Nom",
         "race": "Humain",
         "culture": "Rurale",
-        "profession": "Aventurier",
+        
         "caracteristiques": {"Force": 10, "Constitution": 10},
         "competences": {"Athletisme": 5},
         "hp": 42,
@@ -161,7 +161,7 @@ def test_generate_character_background_partial(monkeypatch, isolated_data_dir):
     os.makedirs(char_dir, exist_ok=True)
     with open(os.path.join(char_dir, f"{character['id']}.json"), "w", encoding="utf-8") as f:
         json.dump(character, f, ensure_ascii=False)
-    partial = {"id": character["id"], "race": "Nain", "profession": "Guerrier"}
+    partial = {"id": character["id"], "race": "Nain", }
     response = client.post("/api/creation/generate-background", json=partial)
     if response.status_code != 200:
         print("\n[DEBUG] Response text:", response.text)

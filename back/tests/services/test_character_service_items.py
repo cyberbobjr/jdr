@@ -13,7 +13,7 @@ def create_test_character(character_id, data_dir):
         "name": "Test Hero",
         "race": "Humain",
         "culture": "Rurale",
-        "profession": "Aventurier",
+        
         "caracteristiques": {"Force": 10},
         "competences": {},
         "hp": 42,
@@ -21,7 +21,6 @@ def create_test_character(character_id, data_dir):
         "gold": 0,
         "inventory": [],
         "spells": [],
-        "equipment_summary": {},
         "culture_bonuses": {}
     }
     characters_dir = data_dir / "characters"

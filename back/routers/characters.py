@@ -21,12 +21,10 @@ def list_characters():
     ```json
         {
             "characters": [
-                {
-                    "id": "d7763165-4c03-4c8d-9bc6-6a2568b79eb3",
+                {                    "id": "d7763165-4c03-4c8d-9bc6-6a2568b79eb3",
                     "name": "Aragorn",
                     "race": "Humain",
                     "culture": "Gondor",
-                    "profession": "Rôdeur",
                     "caracteristiques": {
                         "Force": 85,
                         "Constitution": 80,
@@ -51,18 +49,12 @@ def list_characters():
                             "weight": 1.5,
                             "base_value": 150.0
                         }
-                    ],
-                    "equipment": ["Épée longue", "Armure de cuir"],
+                    ],                    "equipment": ["Épée longue", "Armure de cuir"],
                     "spells": [],
-                    "equipment_summary": {
-                        "total_weight": 8.5,
-                        "total_value": 500.0,
-                        "remaining_gold": 200.0
-                    },
+                    "gold": 200,
                     "culture_bonuses": {
                         "Combat": 5,
-                        "Influence": 3
-                    }
+                        "Influence": 3                    }
                 }
             ]
         }
@@ -79,12 +71,29 @@ def list_characters():
             c = c.copy()
             if "id" in c and not isinstance(c["id"], str):
                 c["id"] = str(c["id"])
+            # Debug: vérifier le statut avant traitement
+            log_debug("Character dict status avant traitement", character_id=c.get("id"), status=c.get("status"))
+            # S'assurer que le statut est présent même s'il est None
+            if "status" not in c or c["status"] is None:
+                c["status"] = "inconnu"
+                log_debug("Statut mis à 'inconnu'", character_id=c.get("id"))
             result.append(c)
         else:
             d = c.model_dump()
             if "id" in d and not isinstance(d["id"], str):
                 d["id"] = str(d["id"])
+            # Debug: vérifier le statut avant traitement
+            log_debug("Character object status avant traitement", character_id=d.get("id"), status=d.get("status"))
+            # S'assurer que le statut est présent même s'il est None
+            if "status" not in d or d["status"] is None:
+                d["status"] = "inconnu"
+                log_debug("Statut mis à 'inconnu'", character_id=d.get("id"))
             result.append(d)
+    
+    # Debug: vérifier le résultat final
+    for r in result:
+        log_debug("Résultat final", character_id=r.get("id"), status=r.get("status"))
+    
     return {"characters": result}
 
 @router.get("/{character_id}", response_model=CharacterAny)

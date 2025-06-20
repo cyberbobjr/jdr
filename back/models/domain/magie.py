@@ -2,6 +2,7 @@ from typing import Optional, List, Dict
 import csv
 import os
 from .base import Spell
+from ...config import get_data_dir
 
 class Magie:
     """Gestion de la magie et des sorts"""
@@ -13,7 +14,7 @@ class Magie:
     def _load_spells(self) -> Dict[str, Spell]:
         """Charge tous les sorts depuis le fichier CSV"""
         spells = {}
-        csv_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'sorts.csv')
+        csv_path = os.path.join(get_data_dir(), 'sorts.csv')
         
         try:
             with open(csv_path, 'r', encoding='utf-8') as csvfile:

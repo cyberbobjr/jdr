@@ -1,6 +1,7 @@
 import json
+import os
 from typing import Dict, List, Optional
-from pathlib import Path
+from ...config import get_data_dir
 
 class SpellsManager:
     """Gestionnaire des sorts utilisant le nouveau système JSON simplifié pour l'agent LLM"""
@@ -10,7 +11,7 @@ class SpellsManager:
     
     def _load_spells_data(self):
         """Charge les données depuis le fichier JSON"""
-        data_path = Path(__file__).parent.parent.parent.parent / "data" / "spells.json"
+        data_path = os.path.join(get_data_dir(), "spells.json")
         try:
             with open(data_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)

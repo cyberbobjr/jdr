@@ -11,7 +11,7 @@ def test_list_characters(client, isolated_data_dir):
         "name": "Test Hero",
         "race": "Humain",
         "culture": "Rurale",
-        "profession": "Aventurier",
+        
         "caracteristiques": {
             "Force": 10,
             "Constitution": 10,
@@ -28,7 +28,6 @@ def test_list_characters(client, isolated_data_dir):
         "gold": 0,
         "inventory": [],
         "spells": [],
-        "equipment_summary": {"total_weight": 0.0, "total_value": 0.0, "remaining_gold": 0.0},
         "culture_bonuses": {"Endurance": 1}
     }
     (characters_dir / f"{character_id}.json").write_text(json.dumps(character_data), encoding="utf-8")
@@ -52,7 +51,7 @@ def test_get_character_detail(client, isolated_data_dir):
         "name": "Test Hero",
         "race": "Humain",
         "culture": "Rurale",
-        "profession": "Aventurier",
+        
         "caracteristiques": {
             "Force": 10,
             "Constitution": 10,
@@ -69,7 +68,6 @@ def test_get_character_detail(client, isolated_data_dir):
         "gold": 0,
         "inventory": [],
         "spells": [],
-        "equipment_summary": {"total_weight": 0.0, "total_value": 0.0, "remaining_gold": 0.0},
         "culture_bonuses": {"Endurance": 1}
     }
     (characters_dir / f"{character_id}.json").write_text(json.dumps(character_data), encoding="utf-8")
@@ -79,4 +77,3 @@ def test_get_character_detail(client, isolated_data_dir):
     assert data["id"] == character_id
     assert data["name"] == "Test Hero"
     assert data["race"] == "Humain"
-    assert data["profession"] == "Aventurier"

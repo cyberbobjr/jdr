@@ -109,7 +109,7 @@
     <JdrModale
       v-if="showDetailsModal && selectedCharacter"
       :title="selectedCharacter.name"
-      :subtitle="selectedCharacter.profession + ' - ' + selectedCharacter.race.name"
+      :subtitle="selectedCharacter.race.name"
       :showOk="false"
       :showCancel="true"
       cancelLabel="Fermer"
@@ -126,10 +126,6 @@
             <div>
               <h4 class="jdr-title jdr-title-sm jdr-mb-1">Culture</h4>
               <div class="jdr-text-primary jdr-text-center">{{ selectedCharacter.culture?.name || 'Culture non définie' }}</div>
-            </div>
-            <div>
-              <h4 class="jdr-title jdr-title-sm jdr-mb-1">Profession</h4>
-              <div class="jdr-text-primary jdr-text-center">{{ selectedCharacter.profession }}</div>
             </div>
           </div>
         </div>

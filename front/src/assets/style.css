@@ -796,7 +796,11 @@ h4 {
     padding: 0.5rem;
   }
 }
-
+button.jdr-btn.disabled,
+button.jdr-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 /* ========================================
    CLASSES SPÉCIFIQUES JDR
    ======================================== */

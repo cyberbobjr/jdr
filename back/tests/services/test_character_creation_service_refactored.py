@@ -5,12 +5,10 @@ from back.services.character_creation_service import CharacterCreationService
 
 class TestCharacterCreationService:
     def test_allocate_attributes_auto(self):
-        # Test avec des professions et races réelles depuis les JSON
-        professions = CharacterCreationService.get_professions()
+        # Test avec des races réelles depuis les JSON
         races = CharacterCreationService.get_races()
         
-        if professions and races:
-            profession = professions[0]
+        if races:
             race_data = races[0]  # races[0] est déjà un objet RaceData
             result = CharacterCreationService.allocate_attributes_auto(race_data)
             
@@ -40,22 +38,6 @@ class TestCharacterCreationService:
         invalid_attributes = {char: 200 for char in valid_attributes.keys()}
         invalid = CharacterCreationService.check_attributes_points(invalid_attributes)
         assert invalid == False
-
-    def test_get_professions(self):
-        professions = CharacterCreationService.get_professions()
-        assert isinstance(professions, list)
-        assert len(professions) > 0
-        for profession in professions:
-            assert isinstance(profession, str)
-
-    def test_get_professions_full(self):
-        professions = CharacterCreationService.get_professions_full()
-        assert isinstance(professions, list)
-        assert len(professions) > 0
-        for profession in professions:
-            assert isinstance(profession, dict)
-            assert "name" in profession
-            assert "description" in profession
 
     def test_get_races(self):
         races = CharacterCreationService.get_races()
@@ -91,28 +73,18 @@ class TestCharacterCreationService:
             assert isinstance(spell, str)
 
     def test_check_skills_points(self):
-        professions = CharacterCreationService.get_professions()
+        # Test avec des compétences valides (vides)
+        valid_skills = {}
+        result = CharacterCreationService.check_skills_points(valid_skills)
+        assert isinstance(result, bool)
         
-        if professions:
-            profession = professions[0]
-            
-            # Test avec des compétences valides (vides)
-            valid_skills = {}
-            result = CharacterCreationService.check_skills_points(valid_skills, profession)
-            assert isinstance(result, bool)
-            
-            # Test avec des compétences invalides (trop de rangs)
-            invalid_skills = {"Perception": 10}  # Trop de rangs
-            result = CharacterCreationService.check_skills_points(invalid_skills, profession)
-            assert result == False
-
-    def test_calculate_skills_cost(self):
-        professions = CharacterCreationService.get_professions()
+        # Test avec des compétences invalides (trop de rangs)
+        invalid_skills = {"Perception": 10}  # Trop de rangs
+        result = CharacterCreationService.check_skills_points(invalid_skills)
+        assert result == False    def test_calculate_skills_cost(self):
+        # Test du calcul de coût sans profession
+        skills = {"Perception": 2}
         
-        if professions:
-            profession = professions[0]
-            skills = {"Perception": 2}
-            
-            cost = CharacterCreationService.calculate_skills_cost(skills, profession)
-            assert isinstance(cost, int)
-            assert cost >= 0
+        cost = CharacterCreationService.calculate_skills_cost(skills)
+        assert isinstance(cost, int)
+        assert cost >= 0

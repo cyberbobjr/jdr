@@ -1,6 +1,7 @@
 import json
+import os
 from typing import Dict, List, Any, Optional
-from pathlib import Path
+from ...config import get_data_dir
 
 class RacesManager:
     """Gestionnaire des races et cultures utilisant le nouveau système JSON simplifié"""
@@ -10,7 +11,7 @@ class RacesManager:
     
     def _load_races_data(self):
         """Charge les données depuis le fichier JSON"""
-        data_path = Path(__file__).parent.parent.parent.parent / "data" / "races_and_cultures.json"
+        data_path = os.path.join(get_data_dir(), "races_and_cultures.json")
         try:
             with open(data_path, 'r', encoding='utf-8') as f:
                 self.races_data = json.load(f)

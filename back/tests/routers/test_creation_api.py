@@ -26,7 +26,7 @@ class TestCharacterCreationAPI:
             "id": character_id,
             "name": "TestHero",
             "race": "Nain",
-            "profession": "Guerrier",
+            
             "created_at": data["created_at"],
             "status": "en_cours"
         }

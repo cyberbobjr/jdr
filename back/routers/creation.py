@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException, Body, status
 from uuid import uuid4
 from datetime import datetime
 from typing import List
+import random
 from ..services.character_creation_service import CharacterCreationService
 from back.services.character_persistence_service import CharacterPersistenceService
 from back.models.domain.races_manager import RacesManager
@@ -16,7 +17,10 @@ from back.models.schema import (
     CheckSkillsRequest, CheckSkillsResponse,
     CreationStatusResponse,
     RaceData,  # Remplace RaceSchema
-    CharacteristicsResponse, UpdateSkillsRequest, UpdateSkillsResponse  # Nouveau schéma pour les caractéristiques
+    CharacteristicsResponse, UpdateSkillsRequest, UpdateSkillsResponse,  # Nouveau schéma pour les caractéristiques
+    AddEquipmentRequest, AddEquipmentResponse,
+    RemoveEquipmentRequest, RemoveEquipmentResponse,
+    UpdateMoneyRequest, UpdateMoneyResponse
 )
 from back.agents.gm_agent_pydantic import build_gm_agent_pydantic, enrich_user_message_with_character
 
@@ -53,6 +57,16 @@ def get_equipments():
     **Sortie** : Liste de chaînes (équipements)
     """
     return CharacterCreationService.get_equipments()
+
+@router.get("/equipments-detailed", summary="Équipements avec détails", response_model=dict)
+def get_equipments_detailed():
+    """
+    Retourne la structure complète des équipements avec leurs détails (armes, armures, objets).
+    **Sortie** : Dictionnaire complet des équipements groupés par catégorie
+    """
+    from back.models.domain.equipment_manager import EquipmentManager
+    equipment_manager = EquipmentManager()
+    return equipment_manager.get_all_equipment()
 
 @router.get("/spells", summary="Liste des sorts", response_model=list)
 def get_spells():
@@ -111,12 +125,16 @@ def create_new_character():
     """
     character_id = str(uuid4())
     now = datetime.now().isoformat()
+      # Générer l'argent de départ avec 1D100 (en pièce d'or)
+    starting_money = random.randint(1, 100)
+    
     character_data = {
         "id": character_id,
         "created_at": now,
         "last_update": now,
         "current_step": "creation",
-        "status": "en_cours"
+        "status": "en_cours",
+        "gold": starting_money  # Argent de départ (1D100 en pièce d'or)
     }
     CharacterPersistenceService.save_character_data(character_id, character_data)
     return {"id": character_id, "created_at": now, "status": "en_cours"}
@@ -269,3 +287,191 @@ def update_skills(request: UpdateSkillsRequest):
     character_data = {"competences": request.skills}
     CharacterPersistenceService.save_character_data(request.character_id, character_data)
     return UpdateSkillsResponse(status="en_cours")
+
+# === Routes pour la gestion d'équipement ===
+
+@router.post(
+    "/add-equipment",
+    response_model=AddEquipmentResponse,
+    summary="Ajouter un équipement",
+    description="Ajoute un équipement au personnage et débite l'argent correspondant."
+)
+def add_equipment(request: AddEquipmentRequest):    
+    """
+    Ajoute un équipement au personnage et débite l'argent correspondant.
+    - **Entrée** : character_id (str), equipment_name (str)
+    - **Sortie** : status (str), gold (int), total_weight (float), equipment_added (dict)
+    """
+    try:
+        # Charger les données du personnage directement
+        character_data = CharacterPersistenceService.load_character_data(request.character_id)
+        
+        # Importer EquipmentManager pour gérer l'équipement
+        from back.models.domain.equipment_manager import EquipmentManager
+        
+        # Récupérer les détails de l'équipement
+        equipment_manager = EquipmentManager()
+        equipment_details = equipment_manager.get_equipment_by_name(request.equipment_name)
+        
+        if not equipment_details:
+            raise ValueError(f"Équipement '{request.equipment_name}' non trouvé")
+          # Vérifier le budget avec la clé 'gold'
+        current_gold = character_data.get('gold', 0.0)
+        equipment_cost = equipment_details.get('cost', 0)
+        
+        if current_gold < equipment_cost:
+            raise ValueError("Pas assez d'argent pour acheter cet équipement")
+        
+        # Ajouter l'équipement à l'inventaire (nouveau format)
+        inventory = character_data.get('inventory', [])
+          # Vérifier si l'équipement n'est pas déjà présent
+        equipment_already_exists = any(
+            item.get('name') == request.equipment_name for item in inventory
+        )
+        
+        if not equipment_already_exists:            # Créer un objet Item complet pour l'inventaire selon le modèle schema.py
+            import uuid
+            
+            # Mapper le type d'équipement vers l'énumération ItemType
+            equipment_type = equipment_details.get('type', 'materiel').lower()
+            if equipment_type == 'arme':
+                item_type = 'Arme'
+            elif equipment_type == 'armure':
+                item_type = 'Armure'
+            elif equipment_type == 'nourriture':
+                item_type = 'Nourriture'
+            elif equipment_type == 'objet_magique':
+                item_type = 'Objet_Magique'
+            else:
+                item_type = 'Materiel'
+            
+            new_item = {
+                "id": str(uuid.uuid4()),  # ID unique pour cette instance
+                "name": request.equipment_name,
+                "item_type": item_type,  # Type d'objet mappé
+                "price_pc": equipment_details.get('cost', 0),  # Prix en pièces de cuivre 
+                "weight_kg": equipment_details.get('weight', 0),  # Poids en kg
+                "description": equipment_details.get('description', ''),  # Description
+                "category": equipment_details.get('category'),  # Catégorie
+                "damage": equipment_details.get('damage'),  # Dégâts si arme
+                "quantity": 1,  # Quantité
+                "is_equipped": False  # Pas équipé par défaut
+            }
+            inventory.append(new_item)
+        
+        # Mettre à jour l'or du personnage
+        new_gold = current_gold - equipment_cost
+        
+        # Calculer le poids total pour la réponse
+        total_weight = sum(item.get('weight_kg', 0) * item.get('quantity', 1) for item in inventory)
+        
+        # Mettre à jour les données du personnage
+        character_data['inventory'] = inventory
+        character_data['gold'] = new_gold
+        
+        # Sauvegarder les données mises à jour
+        CharacterPersistenceService.save_character_data(request.character_id, character_data)
+        return AddEquipmentResponse(
+            status='success',
+            gold=new_gold,
+            total_weight=total_weight,
+            equipment_added=equipment_details
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Personnage non trouvé")
+
+@router.post(
+    "/remove-equipment",
+    response_model=RemoveEquipmentResponse,
+    summary="Retirer un équipement",
+    description="Retire un équipement du personnage et rembourse l'argent correspondant."
+)
+def remove_equipment(request: RemoveEquipmentRequest):   
+    """
+    Retire un équipement du personnage et rembourse l'argent correspondant.
+    - **Entrée** : character_id (str), equipment_name (str)
+    - **Sortie** : status (str), gold (int), total_weight (float), equipment_removed (dict)
+    """
+    try:
+        # Charger les données du personnage directement
+        character_data = CharacterPersistenceService.load_character_data(request.character_id)
+        
+        # Importer EquipmentManager pour gérer l'équipement
+        from back.models.domain.equipment_manager import EquipmentManager
+        
+        # Récupérer les détails de l'équipement
+        equipment_manager = EquipmentManager()
+        equipment_details = equipment_manager.get_equipment_by_name(request.equipment_name)
+        
+        if not equipment_details:
+            raise ValueError(f"Équipement '{request.equipment_name}' non trouvé")
+          # Retirer l'équipement de l'inventaire
+        inventory = character_data.get('inventory', [])
+        
+        # Trouver l'équipement dans l'inventaire
+        item_to_remove = None
+        for item in inventory:
+            if item.get('name') == request.equipment_name:
+                item_to_remove = item
+                break
+        
+        if not item_to_remove:
+            raise ValueError(f"L'équipement '{request.equipment_name}' n'est pas dans l'inventaire")
+            
+        inventory.remove(item_to_remove)
+          # Rembourser l'or du personnage
+        current_gold = character_data.get('gold', 0.0)
+        equipment_cost = equipment_details.get('cost', 0)
+        new_gold = current_gold + equipment_cost
+          # Calculer le poids total pour la réponse
+        total_weight = sum(item.get('weight_kg', 0) * item.get('quantity', 1) for item in inventory)
+        
+        # Mettre à jour les données du personnage
+        character_data['inventory'] = inventory
+        character_data['gold'] = new_gold
+        
+        # Sauvegarder les données mises à jour
+        CharacterPersistenceService.save_character_data(request.character_id, character_data)
+        return RemoveEquipmentResponse(
+            status='success',
+            gold=new_gold,
+            total_weight=total_weight,
+            equipment_removed=equipment_details
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Personnage non trouvé")
+
+@router.post(
+    "/update-money",
+    response_model=UpdateMoneyResponse,
+    summary="Mettre à jour l'argent",
+    description="Met à jour l'argent du personnage (positif pour ajouter, négatif pour retirer)."
+)
+def update_money(request: UpdateMoneyRequest):    
+    """
+    Met à jour l'argent du personnage.
+    - **Entrée** : character_id (str), amount (int)
+    - **Sortie** : status (str), gold (int)
+    """
+    try:
+        # Charger les données du personnage directement
+        character_data = CharacterPersistenceService.load_character_data(request.character_id)
+        
+        # Mettre à jour l'or du personnage
+        current_gold = character_data.get('gold', 0.0)
+        new_gold = max(0.0, current_gold + request.amount)  # Ne pas aller en négatif
+        
+        character_data['gold'] = new_gold
+        
+        # Sauvegarder les données mises à jour
+        CharacterPersistenceService.save_character_data(request.character_id, character_data)
+        return UpdateMoneyResponse(
+            status='success',
+            gold=new_gold
+        )
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Personnage non trouvé")

@@ -71,13 +71,8 @@
                       <i class="fas fa-dragon"></i>
                       {{ character.race.name }}
                     </span>
-                    <span class="detail-item">
-                      <i class="fas fa-globe"></i>
+                    <span class="detail-item">                      <i class="fas fa-globe"></i>
                       {{ character.culture.name }}
-                    </span>
-                    <span class="detail-item">
-                      <i class="fas fa-briefcase"></i>
-                      {{ character.profession }}
                     </span>
                   </div>
                   
@@ -187,7 +182,7 @@
               </h4>
               <div v-if="selectedCharacter" class="summary-item">
                 <span class="item-name">{{ selectedCharacter.name }}</span>
-                <span class="item-details">{{ selectedCharacter.race.name }} - {{ selectedCharacter.profession }}</span>
+                <span class="item-details">{{ selectedCharacter.race.name }} - {{ selectedCharacter.culture.name }}</span>
               </div>
               <div v-else class="summary-item empty">
                 <span class="jdr-text-muted">Aucun personnage sélectionné</span>

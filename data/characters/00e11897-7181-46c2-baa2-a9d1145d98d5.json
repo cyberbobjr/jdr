@@ -1,0 +1,121 @@
+{
+  "id": "00e11897-7181-46c2-baa2-a9d1145d98d5",
+  "created_at": "2025-06-19T19:59:46.732582",
+  "last_update": "2025-06-19T19:59:46.732582",
+  "current_step": "creation",
+  "status": "en_cours",
+  "gold": 42.0,
+  "race": {
+    "name": "Elfes",
+    "characteristic_bonuses": {
+      "Agilité": 2
+    },
+    "destiny_points": 2,
+    "special_abilities": [],
+    "base_languages": [
+      "Sindarin",
+      "Ouistrain"
+    ],
+    "optional_languages": [
+      "Quenya",
+      "Sylvain",
+      "Entique",
+      "Langues anciennes"
+    ],
+    "cultures": null
+  },
+  "culture": {
+    "name": "Sindar",
+    "description": null,
+    "skill_bonuses": {
+      "Herboristerie": 1,
+      "Perception": 1
+    },
+    "characteristic_bonuses": null,
+    "free_skill_points": null,
+    "traits": "Harmonie avec la nature"
+  },
+  "name": null,
+  "profession": null,
+  "caracteristiques": {
+    "Force": 50,
+    "Constitution": 51,
+    "Agilité": 50,
+    "Rapidité": 50,
+    "Volonté": 50,
+    "Raisonnement": 50,
+    "Intuition": 50,
+    "Présence": 50
+  },
+  "competences": {
+    "Comédie": 0,
+    "Danse": 0,
+    "Imitation": 1,
+    "Musique - Chant": 0,
+    "Musique - Instrument": 0,
+    "Narration": 0,
+    "Arts Martiaux - Balayages": 0,
+    "Arts Martiaux - Coups": 0,
+    "Bagarre": 0,
+    "Maniement d'Arme": 0,
+    "Artisanat": 0,
+    "Connaissance Générale": 0,
+    "Estimation": 0,
+    "Herboristerie": 0,
+    "Perception": 0,
+    "Survie": 0,
+    "Acrobatie": 0,
+    "Escalade": 0,
+    "Natation": 0,
+    "Diplomatie": 0,
+    "Intimidation": 0,
+    "Leadership": 0,
+    "Crochetage": 0,
+    "Discrétion": 0,
+    "Vol à la Tire": 0,
+    "Tradition et fierté": 0,
+    "Culture équestre": 0,
+    "Endurance au climat": 0,
+    "Longévité ×3, +1 Point de destin": 0,
+    "Maîtres artisans": 0,
+    "Harmonie avec la nature": 0,
+    "Experts des forêts": 0,
+    "Traditions anciennes": 0,
+    "Guerriers nés": 0,
+    "Discrets et prudents": 0,
+    "Robustes et résistants": 0,
+    "Aventureux": 0
+  },
+  "hp": 100,
+  "xp": 0,
+  "inventory": [
+    {
+      "id": "9933ca41-947f-442f-8161-ddf1d6b4d63b",
+      "name": "Armure de cuir",
+      "item_type": "Armure",
+      "price_pc": 25,
+      "weight_kg": 5.0,
+      "description": "Armure légère en cuir durci",
+      "category": null,
+      "damage": null,
+      "quantity": 1,
+      "is_equipped": false
+    },
+    {
+      "id": "f13c2f6d-15f9-4b32-b728-40b054821d8e",
+      "name": "Bâton",
+      "item_type": "Arme",
+      "price_pc": 0.2,
+      "weight_kg": 2.0,
+      "description": "Bâton de combat, souvent utilisé par les mages",
+      "category": "mêlée",
+      "damage": "1d6+3",
+      "quantity": 1,
+      "is_equipped": false
+    }
+  ],
+  "spells": [],
+  "culture_bonuses": null,
+  "background": null,
+  "physical_description": null
+}

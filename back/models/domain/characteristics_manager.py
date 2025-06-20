@@ -1,6 +1,7 @@
 import json
+import os
 from typing import Dict
-from pathlib import Path
+from ...config import get_data_dir
 
 class CharacteristicsManager:
     """Gestionnaire des caractéristiques utilisant le nouveau système JSON"""
@@ -16,7 +17,7 @@ class CharacteristicsManager:
     
     def _load_characteristics_data(self):
         """Charge les données depuis le fichier JSON"""
-        data_path = Path(__file__).parent.parent.parent.parent / "data" / "characteristics.json"
+        data_path = os.path.join(get_data_dir(), "characteristics.json")
         try:
             with open(data_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)

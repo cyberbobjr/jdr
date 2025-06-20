@@ -1,11 +1,19 @@
 {
+  "_metadata": {
+    "currency_system": {
+      "base_unit": "pièce d'or",
+      "description": "Tous les coûts sont exprimés en pièces d'or (1O = 10A = 100C)"
+    },
+    "weight_unit": "kg",
+    "damage_format": "format dé + bonus (ex: 1d8+4)"
+  },
   "weapons": {
     "Épée longue": {
       "type": "arme",
       "category": "mêlée",
       "damage": "1d8+4",
       "weight": 1.5,
-      "cost": 50,
+      "cost": 2,
       "description": "Épée à une main équilibrée et polyvalente"
     },
     "Arc long": {
@@ -14,7 +22,7 @@
       "damage": "1d8+2",
       "range": 150,
       "weight": 1.0,
-      "cost": 30,
+      "cost": 1.5,
       "description": "Arc puissant pour le combat à distance"
     },
     "Dague": {
@@ -22,7 +30,7 @@
       "category": "mêlée",
       "damage": "1d4+2",
       "weight": 0.5,
-      "cost": 10,
+      "cost": 0.5,
       "description": "Petite lame discrète et rapide"
     },
     "Bâton": {
@@ -30,7 +38,7 @@
       "category": "mêlée",
       "damage": "1d6+3",
       "weight": 2.0,
-      "cost": 5,
+      "cost": 0.2,
       "description": "Bâton de combat, souvent utilisé par les mages"
     }
   },
@@ -39,21 +47,21 @@
       "type": "armure",
       "protection": 3,
       "weight": 5.0,
-      "cost": 25,
+      "cost": 1,
       "description": "Armure légère en cuir durci"
     },
     "Cotte de mailles": {
       "type": "armure",
       "protection": 6,
       "weight": 15.0,
-      "cost": 100,
+      "cost": 4,
       "description": "Armure de mailles entrelacées"
     },
     "Armure de plaques": {
       "type": "armure",
       "protection": 10,
       "weight": 25.0,
-      "cost": 300,
+      "cost": 10,
       "description": "Armure lourde en plaques de métal"
     }
   },
@@ -61,31 +69,31 @@
     "Corde (10m)": {
       "type": "équipement",
       "weight": 2.0,
-      "cost": 5,
+      "cost": 0.1,
       "description": "Corde solide de 10 mètres"
     },
     "Rations (1 jour)": {
       "type": "consommable",
       "weight": 0.5,
-      "cost": 2,
+      "cost": 0.05,
       "description": "Nourriture pour une journée"
     },
     "Torche": {
       "type": "équipement",
       "weight": 0.5,
-      "cost": 1,
+      "cost": 0.02,
       "description": "Source de lumière portable"
     },
     "Sac d'herbes": {
       "type": "équipement",
       "weight": 1.0,
-      "cost": 10,
+      "cost": 0.5,
       "description": "Assortiment d'herbes médicinales et magiques"
     },
     "Trousse de soins": {
       "type": "équipement",
       "weight": 1.0,
-      "cost": 15,
+      "cost": 0.8,
       "description": "Kit de premiers secours"
     }
   }

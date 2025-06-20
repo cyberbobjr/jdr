@@ -40,22 +40,37 @@ export interface CharacterContext {
   name: string;
   race: string;
   culture: string;
-  profession: string;
   caracteristiques: Record<string, number>;
   competences: Record<string, number>;
   hp: number;
   inventory: string[];
-  equipment: string[];
   spells: string[];
-  equipment_summary: EquipmentSummary;
+  gold: number; // Or possédé par le personnage
   culture_bonuses: Record<string, number>;
 }
 
-export interface EquipmentSummary {
-  total_cost: number;
-  total_weight: number;
-  remaining_money: number;
-  starting_money: number;
+// Interfaces pour les équipements détaillés
+export interface EquipmentItem {
+  type: string;
+  weight: number;
+  cost: number; // Coût en pièces d'or
+  description: string;
+}
+
+export interface WeaponItem extends EquipmentItem {
+  category: "mêlée" | "distance";
+  damage: string;
+  range?: number;
+}
+
+export interface ArmorItem extends EquipmentItem {
+  protection: number;
+}
+
+export interface EquipmentData {
+  weapons: Record<string, WeaponItem>;
+  armor: Record<string, ArmorItem>;
+  items: Record<string, EquipmentItem>;
 }
 
 // ================================
@@ -83,14 +98,12 @@ export interface Character {
   name: string;
   race: RaceData;
   culture: CultureData;
-  profession: string;
   caracteristiques: Record<string, number>;
   competences: Record<string, number>;
   hp: number;
   inventory: Item[];
-  equipment: string[];
   spells: string[];
-  equipment_summary?: Record<string, number> | null;
+  gold: number; // Or possédé par le personnage
   culture_bonuses?: Record<string, number> | null;
 }
 
@@ -335,11 +348,10 @@ export type SkillGroupsDict = Record<string, SkillGroup[]>;
  * Interface pour les données de caractéristique depuis characteristics.json
  */
 export interface CharacteristicData {
-  id: string;
-  name: string;
-  abbreviation: string;
+  short_name: string;
+  category: 'physical' | 'mental';
   description: string;
-  category: 'physical' | 'mental' | 'social';
+  examples: string[];
 }
 
 /**
@@ -423,7 +435,7 @@ export interface MagicSpheres {
 export interface EquipmentData {
   type: string;
   weight: number;
-  cost: number;
+  cost: number; // Coût en pièces d'or
   description: string;
   // Propriétés spécifiques selon le type
   damage?: string;
@@ -462,6 +474,42 @@ export interface CombatSystemData {
   difficulty_modifiers: Record<string, number>;
   damage_types?: Record<string, any>;
   armor_types?: Record<string, any>;
+}
+
+// === Interfaces pour les réponses d'équipement ===
+
+/**
+ * Interface pour la réponse d'ajout d'équipement
+ */
+export interface AddEquipmentResponse {
+  status: string;
+  gold: number;
+  total_weight: number;
+  equipment_added: {
+    type: string;
+    category: string;
+    damage?: string;
+    weight: number;
+    cost: number;
+    description: string;
+  };
+}
+
+/**
+ * Interface pour la réponse de suppression d'équipement
+ */
+export interface RemoveEquipmentResponse {
+  status: string;
+  gold: number;
+  total_weight: number;
+  equipment_removed: {
+    type: string;
+    category: string;
+    damage?: string;
+    weight: number;
+    cost: number;
+    description: string;
+  };
 }
 
 // === Mise à jour des interfaces existantes pour compatibilité ===

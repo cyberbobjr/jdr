@@ -1,7 +1,7 @@
 """
 Service dédié à la création de personnage pour le jeu de rôle.
 Ce service gère l'allocation automatique des caractéristiques, la vérification des règles,
-et fournit les listes de professions, races, compétences, cultures, équipements et sorts.
+et fournit les listes de races, compétences, cultures, équipements et sorts.
 """
 
 from back.models.domain.characteristics_manager import CharacteristicsManager
@@ -76,30 +76,7 @@ class CharacterCreationService:
         for v in attributes.values():
             if v < 1 or v > 105:
                 return False
-        return True
-
-    @staticmethod
-    def get_professions() -> list:
-        """
-        ### get_professions
-        **Description:** Retourne la liste des professions disponibles (noms uniquement).        **Parameters:**
-        - Aucun
-        **Returns:** Une liste de professions (str).
-        """
-        professions_manager = ProfessionsManager()
-        return professions_manager.get_profession_names()
-
-    @staticmethod
-    def get_professions_full() -> list:
-        """
-        ### get_professions_full
-        **Description:** Retourne la liste complète des objets professions (toutes les infos).
-        **Parameters:**
-        - Aucun
-        **Returns:** Une liste de dictionnaires représentant chaque profession.
-        """
-        professions_manager = ProfessionsManager()
-        return professions_manager.get_all_professions()    @staticmethod
+        return True    @staticmethod
     def get_races() -> list:
         """
         ### get_races

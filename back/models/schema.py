@@ -58,18 +58,17 @@ class Character(BaseModel):
     name: str
     race: RaceData
     culture: CultureData
-    profession: str
     caracteristiques: Dict[str, int]
     competences: Dict[str, int]
     hp: int = 100  # calculé à partir de Constitution
     xp: int = 0  # Points d'expérience
-    gold: int = 0  # Or possédé
+    gold: float = 0.0  # Or possédé (peut avoir des décimales)
     inventory: List[Item] = []  # Inventaire détaillé avec objets complets
     spells: List[str] = []
-    equipment_summary: Optional[Dict[str, float]] = None
     culture_bonuses: Optional[Dict[str, int]] = None
     background: Optional[str] = None  # Histoire du personnage
     physical_description: Optional[str] = None  # Description physique
+    status: Optional[str] = None  # Statut du personnage: "en_cours", "complet", etc.
 
 class ScenarioStatus(BaseModel):
     name: str
@@ -194,15 +193,13 @@ class CharacterAny(BaseModel):
     name: Optional[str] = None
     race: Optional[RaceData] = None
     culture: Optional[CultureData] = None
-    profession: Optional[str] = None
     caracteristiques: Optional[Dict[str, int]] = None
     competences: Optional[Dict[str, int]] = None
     hp: Optional[int] = None
     xp: Optional[int] = None
-    gold: Optional[int] = None
+    gold: Optional[float] = None
     inventory: Optional[List[Item]] = None
     spells: Optional[List[str]] = None
-    equipment_summary: Optional[Dict[str, float]] = None
     culture_bonuses: Optional[Dict[str, int]] = None
     background: Optional[str] = None
     physical_description: Optional[str] = None
@@ -213,15 +210,6 @@ class CharacterAny(BaseModel):
 
 class CharacterListAny(BaseModel):
     characters: List[CharacterAny]
-
-class ProfessionSchema(BaseModel):
-    """Modèle détaillé pour une profession (pour documentation Swagger et frontend)"""
-    name: str
-    description: str
-    favored_skill_groups: Dict[str, int]
-    main_characteristics: List[str]
-    abilities: List[str]
-    spheres: List[str]
 
 class CharacteristicSchema(BaseModel):
     """Schéma pour une caractéristique individuelle"""
@@ -245,3 +233,33 @@ class UpdateSkillsRequest(BaseModel):
 
 class UpdateSkillsResponse(BaseModel):
     status: str
+
+# === Schémas pour la gestion d'équipement ===
+
+class AddEquipmentRequest(BaseModel):
+    character_id: str
+    equipment_name: str
+
+class AddEquipmentResponse(BaseModel):
+    status: str
+    gold: float
+    total_weight: float
+    equipment_added: dict
+
+class RemoveEquipmentRequest(BaseModel):
+    character_id: str
+    equipment_name: str
+
+class RemoveEquipmentResponse(BaseModel):
+    status: str
+    gold: float
+    total_weight: float
+    equipment_removed: dict
+
+class UpdateMoneyRequest(BaseModel):
+    character_id: str
+    amount: float  # Positif pour ajouter, négatif pour retirer
+
+class UpdateMoneyResponse(BaseModel):
+    status: str
+    gold: float

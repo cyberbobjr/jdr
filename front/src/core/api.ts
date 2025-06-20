@@ -31,7 +31,11 @@ import type {
   GenerateBackgroundResponse,
   GenerateNameResponse,
   SkillGroupsDict,
-  RaceData
+  RaceData,
+  CharacteristicsData,
+  EquipmentData,
+  AddEquipmentResponse,
+  RemoveEquipmentResponse
 }
 
   from "./interfaces";
@@ -40,7 +44,7 @@ import type {
 // Configuration et types API
 // ========================================
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || "http://localhost:8000";
 
 // Types spécifiques au frontend (non présents dans l'OpenAPI)
 export interface GameSession {
@@ -366,15 +370,19 @@ export class JdrApiService {
   static async getRaces(): Promise<RaceData[]> {
     return await makeRequest<RaceData[]>("/api/creation/races");
   }
-
   /**
    * Récupère la structure complète des groupes de compétences (JSON brut)
    */
-  static async getSkills(): Promise<SkillGroupsDict> {
-    return await makeRequest<SkillGroupsDict>("/api/creation/skills");
+  static async getSkills(): Promise<any> {
+    return await makeRequest<any>("/api/creation/skills");
   }
 
   /**
+   * Récupère la structure complète des caractéristiques (JSON brut)
+   */
+  static async getCharacteristics(): Promise<CharacteristicsData> {
+    return await makeRequest<CharacteristicsData>("/api/creation/characteristics");
+  }  /**
    * Récupère la liste des équipements disponibles
    */
   static async getEquipments(): Promise<string[]> {
@@ -382,10 +390,58 @@ export class JdrApiService {
   }
 
   /**
+   * Récupère les équipements avec leurs détails complets
+   */
+  static async getEquipmentsDetailed(): Promise<EquipmentData> {
+    return await makeRequest<EquipmentData>("/api/creation/equipments-detailed");
+  }
+  /**
    * Récupère la liste des sorts disponibles
    */
   static async getSpells(): Promise<string[]> {
     return await makeRequest<string[]>("/api/creation/spells");
+  }
+
+  // ========================================
+  // Gestion d'équipement
+  // ========================================
+  /**
+   * Ajoute un équipement au personnage
+   */
+  static async addEquipment(characterId: string, equipmentName: string): Promise<AddEquipmentResponse> {
+    return await makeRequest("/api/creation/add-equipment", {
+      method: "POST",
+      body: JSON.stringify({
+        character_id: characterId,
+        equipment_name: equipmentName
+      })
+    });
+  }
+
+  /**
+   * Retire un équipement du personnage
+   */
+  static async removeEquipment(characterId: string, equipmentName: string): Promise<RemoveEquipmentResponse> {
+    return await makeRequest("/api/creation/remove-equipment", {
+      method: "POST",
+      body: JSON.stringify({
+        character_id: characterId,
+        equipment_name: equipmentName
+      })
+    });
+  }
+
+  /**
+   * Met à jour l'argent du personnage
+   */
+  static async updateMoney(characterId: string, amount: number): Promise<any> {
+    return await makeRequest("/api/creation/update-money", {
+      method: "POST",
+      body: JSON.stringify({
+        character_id: characterId,
+        amount: amount
+      })
+    });
   }
 
   // ========================================
@@ -462,25 +518,18 @@ export class JdrApiService {
   /**
    * Convertit un Character en CharacterContext pour les interfaces existantes
    */
-  static characterToContext(character: Character): CharacterContext {
-    return {
+  static characterToContext(character: Character): CharacterContext {   
+     return {
       id: character.id,
       name: character.name,
       race: character.race.name,
       culture: character.culture.name,
-      profession: character.profession,
-      caracteristiques: character.caracteristiques,
+      caracteristiques: character.caracteristiques,      
       competences: character.competences,
       hp: character.hp,
       inventory: character.inventory?.map((item) => item.name) || [],
-      equipment: character.equipment || [],
       spells: character.spells || [],
-      equipment_summary: {
-        total_cost: character.equipment_summary?.total_cost || 0,
-        total_weight: character.equipment_summary?.total_weight || 0,
-        remaining_money: character.equipment_summary?.remaining_money || 0,
-        starting_money: character.equipment_summary?.starting_money || 0,
-      },
+      gold: character.gold || 0,
       culture_bonuses: character.culture_bonuses || {},
     };
   }

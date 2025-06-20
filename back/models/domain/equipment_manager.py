@@ -136,8 +136,7 @@ class EquipmentManager:
         **Description:** Recherche un équipement par son nom.
         **Paramètres:**
         - `name` (str): Nom de l'équipement recherché.
-        **Retour:** Dictionnaire des données de l'équipement ou None si non trouvé.
-        """
+        **Retour:** Dictionnaire des données de l'équipement ou None si non trouvé.        """
         for category in self._equipment_data.values():
             if isinstance(category, dict) and name in category:
                 return category[name]
