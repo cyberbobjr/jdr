@@ -4,51 +4,35 @@
     <div class="jdr-text-center jdr-mb-4">
       <h1 class="jdr-title jdr-title-lg">Nouvelle Aventure</h1>
       <p class="jdr-subtitle">Choisissez votre personnage et le scénario pour commencer une nouvelle quête</p>
-    </div>
-
-    <!-- Indicateur de chargement initial -->
+    </div>    <!-- Indicateur de chargement initial -->
     <div v-if="initialLoading" class="jdr-text-center jdr-p-4">
       <div class="jdr-animate-pulse">
-        <i class="fas fa-dice-d20 fa-3x jdr-text-accent"></i>
+        <font-awesome-icon icon="dice-d20" size="3x" class="jdr-text-accent" />
         <p class="jdr-mt-4">Chargement des données...</p>
       </div>
-    </div>
-
-    <!-- Message d'erreur global -->
-    <div v-else-if="globalError" class="jdr-card jdr-card-highlight" style="border-color: var(--jdr-danger);">
-      <div class="jdr-card-body jdr-text-center">
-        <i class="fas fa-exclamation-triangle fa-2x" style="color: var(--jdr-danger);"></i>
-        <h3 class="jdr-title jdr-title-sm jdr-mt-4">Erreur de connexion</h3>
-        <p class="jdr-text-muted">{{ globalError }}</p>
+    </div>    <!-- Message d'erreur global -->
+    <CardComponent v-else-if="globalError" title="Erreur de connexion" class="jdr-card-highlight" style="border-color: var(--jdr-danger);">
+      <div class="jdr-text-center">
+        <font-awesome-icon icon="exclamation-triangle" size="2x" style="color: var(--jdr-danger);" />
+        <p class="jdr-text-muted jdr-mt-4">{{ globalError }}</p>
         <button @click="loadInitialData" class="jdr-btn jdr-btn-primary jdr-mt-4">
-          <i class="fas fa-redo"></i>
+          <font-awesome-icon icon="redo" />
           Réessayer
         </button>
       </div>
-    </div>
+    </CardComponent>
 
     <!-- Formulaire de création -->
     <div v-else class="creation-form jdr-animate-fadeIn">
       <div class="form-grid">
-        
-        <!-- Section Sélection du personnage -->
-        <div class="jdr-card jdr-card-character">
-          <div class="jdr-card-header">
-            <h2 class="jdr-card-title">
-              <i class="fas fa-user-shield"></i>
-              Choisir un Personnage
-            </h2>
-            <p class="jdr-card-subtitle">Sélectionnez le héros qui vivra cette aventure</p>
-          </div>
-          
-          <div class="jdr-card-body">
-            <div v-if="loadingCharacters" class="loading-state">
-              <i class="fas fa-spinner fa-spin jdr-text-accent"></i>
+          <!-- Section Sélection du personnage -->
+        <CardComponent title="Choisir un Personnage" subtitle="Sélectionnez le héros qui vivra cette aventure" class="jdr-card-character">
+          <template #default>            <div v-if="loadingCharacters" class="loading-state">
+              <font-awesome-icon icon="spinner" spin class="jdr-text-accent" />
               <span>Chargement des personnages...</span>
             </div>
-            
-            <div v-else-if="characters.length === 0" class="empty-state">
-              <i class="fas fa-user-times fa-2x jdr-text-muted"></i>
+              <div v-else-if="characters.length === 0" class="empty-state">
+              <font-awesome-icon icon="user-times" size="2x" class="jdr-text-muted" />
               <p class="jdr-mt-4 jdr-text-muted">Aucun personnage disponible</p>
             </div>
             
@@ -59,19 +43,17 @@
                 class="character-card"
                 :class="{ active: selectedCharacterId === character.id }"
                 @click="selectCharacter(character.id)"
-              >
-                <div class="character-avatar">
-                  <i class="fas fa-user-circle fa-3x"></i>
+              >                <div class="character-avatar">
+                  <font-awesome-icon icon="user-circle" size="3x" />
                 </div>
                 
                 <div class="character-info">
-                  <h3 class="character-name">{{ character.name }}</h3>
-                  <div class="character-details">
+                  <h3 class="character-name">{{ character.name }}</h3>                  <div class="character-details">
                     <span class="detail-item">
-                      <i class="fas fa-dragon"></i>
+                      <font-awesome-icon icon="dragon" />
                       {{ character.race.name }}
                     </span>
-                    <span class="detail-item">                      <i class="fas fa-globe"></i>
+                    <span class="detail-item">                      <font-awesome-icon icon="globe" />
                       {{ character.culture.name }}
                     </span>
                   </div>
@@ -89,34 +71,21 @@
                     </div>
                   </div>
                 </div>
-                
-                <div class="character-selection">
-                  <i v-if="selectedCharacterId === character.id" class="fas fa-check-circle jdr-text-accent"></i>
-                  <i v-else class="far fa-circle jdr-text-muted"></i>
+                  <div class="character-selection">
+                  <font-awesome-icon v-if="selectedCharacterId === character.id" icon="check-circle" class="jdr-text-accent" />
+                  <font-awesome-icon v-else :icon="['far', 'circle']" class="jdr-text-muted" />
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        <!-- Section Sélection du scénario -->
-        <div class="jdr-card jdr-card-scenario">
-          <div class="jdr-card-header">
-            <h2 class="jdr-card-title">
-              <i class="fas fa-scroll"></i>
-              Choisir un Scénario
-            </h2>
-            <p class="jdr-card-subtitle">Sélectionnez l'aventure que vous souhaitez vivre</p>
-          </div>
-          
-          <div class="jdr-card-body">
-            <div v-if="loadingScenarios" class="loading-state">
-              <i class="fas fa-spinner fa-spin jdr-text-accent"></i>
+          </template>
+        </CardComponent>        <!-- Section Sélection du scénario -->
+        <CardComponent title="Choisir un Scénario" subtitle="Sélectionnez l'aventure que vous souhaitez vivre" class="jdr-card-scenario">
+          <template #default>            <div v-if="loadingScenarios" class="loading-state">
+              <font-awesome-icon icon="spinner" spin class="jdr-text-accent" />
               <span>Chargement des scénarios...</span>
             </div>
-            
-            <div v-else-if="availableScenarios.length === 0" class="empty-state">
-              <i class="fas fa-scroll fa-2x jdr-text-muted"></i>
+              <div v-else-if="availableScenarios.length === 0" class="empty-state">
+              <font-awesome-icon icon="scroll" size="2x" class="jdr-text-muted" />
               <p class="jdr-mt-4 jdr-text-muted">Aucun scénario disponible</p>
             </div>
             
@@ -130,9 +99,8 @@
               >
                 <div class="scenario-header">
                   <h3 class="scenario-title">{{ formatScenarioName(scenario.name) }}</h3>
-                  <div class="scenario-status">
-                    <div class="jdr-badge" :class="getScenarioStatusClass(scenario.status)">
-                      <i :class="getScenarioStatusIcon(scenario.status)"></i>
+                  <div class="scenario-status">                    <div class="jdr-badge" :class="getScenarioStatusClass(scenario.status)">
+                      <font-awesome-icon :icon="getScenarioStatusIcon(scenario.status)" />
                       {{ getScenarioStatusLabel(scenario.status) }}
                     </div>
                   </div>
@@ -146,38 +114,26 @@
                   <button 
                     @click.stop="previewScenario(scenario.name)"
                     class="jdr-btn jdr-btn-outline jdr-btn-sm"
-                    :disabled="loadingPreview === scenario.name"
-                  >
-                    <i v-if="loadingPreview === scenario.name" class="fas fa-spinner fa-spin"></i>
-                    <i v-else class="fas fa-eye"></i>
+                    :disabled="loadingPreview === scenario.name"                  >
+                    <font-awesome-icon v-if="loadingPreview === scenario.name" icon="spinner" spin />
+                    <font-awesome-icon v-else icon="eye" />
                     Aperçu
                   </button>
-                  
-                  <div class="scenario-selection">
-                    <i v-if="selectedScenarioName === scenario.name" class="fas fa-check-circle jdr-text-accent"></i>
-                    <i v-else class="far fa-circle jdr-text-muted"></i>
+                    <div class="scenario-selection">
+                    <font-awesome-icon v-if="selectedScenarioName === scenario.name" icon="check-circle" class="jdr-text-accent" />
+                    <font-awesome-icon v-else :icon="['far', 'circle']" class="jdr-text-muted" />
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Résumé et actions -->
-      <div class="jdr-card jdr-mt-4 creation-summary">
-        <div class="jdr-card-header">
-          <h2 class="jdr-card-title">
-            <i class="fas fa-clipboard-check"></i>
-            Résumé de l'Aventure
-          </h2>
-        </div>
-        
-        <div class="jdr-card-body">
+          </template>
+        </CardComponent>
+      </div>      <!-- Résumé et actions -->
+      <CardComponent title="Résumé de l'Aventure" class="jdr-mt-4 creation-summary">
+        <template #default>
           <div class="summary-content">
-            <div class="summary-section">
-              <h4 class="summary-title">
-                <i class="fas fa-user-shield"></i>
+            <div class="summary-section">              <h4 class="summary-title">
+                <font-awesome-icon icon="user-shield" />
                 Personnage sélectionné
               </h4>
               <div v-if="selectedCharacter" class="summary-item">
@@ -189,9 +145,8 @@
               </div>
             </div>
             
-            <div class="summary-section">
-              <h4 class="summary-title">
-                <i class="fas fa-scroll"></i>
+            <div class="summary-section">              <h4 class="summary-title">
+                <font-awesome-icon icon="scroll" />
                 Scénario sélectionné
               </h4>
               <div v-if="selectedScenarioName" class="summary-item">
@@ -203,50 +158,45 @@
               </div>
             </div>
           </div>
-        </div>
+        </template>
         
-        <div class="jdr-card-footer">
-          <router-link to="/sessions" class="jdr-btn jdr-btn-outline">
-            <i class="fas fa-arrow-left"></i>
+        <template #footer>          <router-link to="/sessions" class="jdr-btn jdr-btn-outline">
+            <font-awesome-icon icon="arrow-left" />
             Retour aux sessions
           </router-link>
-          
-          <button 
+            <button 
             @click="startAdventure"
-            class="jdr-btn jdr-btn-primary jdr-btn-lg"
+            class="jdr-ml-2 jdr-btn jdr-btn-primary"
             :disabled="!canStartAdventure || startingAdventure"
           >
-            <i v-if="startingAdventure" class="fas fa-spinner fa-spin"></i>
-            <i v-else class="fas fa-play"></i>
+            <font-awesome-icon v-if="startingAdventure" icon="spinner" spin />
+            <font-awesome-icon v-else icon="play" />
             {{ startingAdventure ? 'Démarrage...' : 'Commencer l\'Aventure' }}
           </button>
-        </div>
-      </div>
+        </template>
+      </CardComponent>
     </div>
 
     <!-- Modal d'aperçu de scénario -->
     <div v-if="showPreviewModal" class="jdr-modal-overlay show" @click="closePreviewModal">
-      <div class="jdr-modal" @click.stop>
-        <div class="jdr-modal-header">
+      <div class="jdr-modal" @click.stop>        <div class="jdr-modal-header">
           <h2 class="jdr-modal-title">
-            <i class="fas fa-scroll"></i>
+            <font-awesome-icon icon="scroll" />
             {{ previewScenarioTitle }}
           </h2>
           <button @click="closePreviewModal" class="jdr-modal-close">
-            <i class="fas fa-times"></i>
+            <font-awesome-icon icon="times" />
           </button>
         </div>
         
-        <div class="jdr-modal-body">
-          <div v-if="loadingPreviewContent" class="jdr-text-center jdr-p-4">
+        <div class="jdr-modal-body">          <div v-if="loadingPreviewContent" class="jdr-text-center jdr-p-4">
             <div class="jdr-animate-pulse">
-              <i class="fas fa-spinner fa-spin fa-2x jdr-text-accent"></i>
+              <font-awesome-icon icon="spinner" spin size="2x" class="jdr-text-accent" />
               <p class="jdr-mt-4">Chargement du contenu...</p>
             </div>
           </div>
-          
-          <div v-else-if="previewError" class="jdr-text-center jdr-p-4">
-            <i class="fas fa-exclamation-triangle fa-2x" style="color: var(--jdr-danger);"></i>
+            <div v-else-if="previewError" class="jdr-text-center jdr-p-4">
+            <font-awesome-icon icon="exclamation-triangle" size="2x" style="color: var(--jdr-danger);" />
             <p class="jdr-mt-4">{{ previewError }}</p>
           </div>
           
@@ -255,9 +205,8 @@
           </div>
         </div>
         
-        <div class="jdr-modal-footer">
-          <button @click="closePreviewModal" class="jdr-btn jdr-btn-outline">
-            <i class="fas fa-times"></i>
+        <div class="jdr-modal-footer">          <button @click="closePreviewModal" class="jdr-btn jdr-btn-outline">
+            <font-awesome-icon icon="times" />
             Fermer
           </button>
           
@@ -265,8 +214,7 @@
             @click="selectScenarioFromPreview" 
             class="jdr-btn jdr-btn-primary"
             v-if="previewScenarioName && previewScenarioName !== selectedScenarioName"
-          >
-            <i class="fas fa-check"></i>
+          >            <font-awesome-icon icon="check" />
             Choisir ce scénario
           </button>
         </div>
@@ -276,9 +224,8 @@
     <!-- Message de démarrage -->
     <div v-if="startingAdventure" class="jdr-modal-overlay show">
       <div class="jdr-modal">
-        <div class="jdr-modal-body jdr-text-center">
-          <div class="jdr-animate-pulse">
-            <i class="fas fa-dragon fa-4x jdr-text-accent jdr-mb-4"></i>
+        <div class="jdr-modal-body jdr-text-center">          <div class="jdr-animate-pulse">
+            <font-awesome-icon icon="dragon" size="4x" class="jdr-text-accent jdr-mb-4" />
             <h3 class="jdr-title jdr-title-sm">L'aventure commence...</h3>
             <p class="jdr-text-muted">Préparation de votre session de jeu</p>
             
@@ -296,6 +243,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import JdrApiService, { type Character, type ScenarioStatus } from '@/core/api';
+import CardComponent from '@/components/CardComponent.vue';
 
 const router = useRouter();
 
@@ -496,10 +444,10 @@ const getScenarioStatusClass = (status: string) => {
 
 const getScenarioStatusIcon = (status: string) => {
   switch (status) {
-    case 'available': return 'fas fa-check';
-    case 'active': return 'fas fa-play';
-    case 'completed': return 'fas fa-flag-checkered';
-    default: return 'fas fa-question';
+    case 'available': return 'check';
+    case 'active': return 'play';
+    case 'completed': return 'flag-checkered';
+    default: return 'question';
   }
 };
 

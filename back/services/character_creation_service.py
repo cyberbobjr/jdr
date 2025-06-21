@@ -71,12 +71,13 @@ class CharacterCreationService:
         total_cost = characteristics_manager.calculate_cost(attributes)
         if total_cost > characteristics_manager.starting_points:
             return False
-        
-        # Vérifie les bornes (1-105)
+          # Vérifie les bornes (1-105)
         for v in attributes.values():
             if v < 1 or v > 105:
                 return False
-        return True    @staticmethod
+        return True
+    
+    @staticmethod
     def get_races() -> list:
         """
         ### get_races

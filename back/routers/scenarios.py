@@ -77,20 +77,20 @@ async def list_active_sessions():
             }
         ]
     }
-    ```
-    """
+    ```    """
     
     log_debug("Appel endpoint scenarios/list_active_sessions")
     try:
         # Récupérer toutes les sessions via SessionService
         sessions = SessionService.list_all_sessions()
-          # Enrichir chaque session avec le nom du personnage
+        
+        # Enrichir chaque session avec le nom du personnage
         enriched_sessions = []
         for session in sessions:
             try:
                 # Récupérer le nom du personnage via CharacterService (méthode statique)
                 character = CharacterService.get_character(session["character_id"])
-                character_name = character.name
+                character_name = character.get("name", "Personnage sans nom")
             except Exception as e:
                 log_debug("Erreur lors du chargement du nom du personnage", error=str(e), character_id=session["character_id"])
                 character_name = "Inconnu"

@@ -105,6 +105,8 @@ export interface Character {
   spells: string[];
   gold: number; // Or possédé par le personnage
   culture_bonuses?: Record<string, number> | null;
+  background?: string; // Histoire du personnage
+  physical_description?: string; // Description physique
 }
 
 /**
@@ -327,11 +329,15 @@ export interface GeneratePhysicalDescriptionResponse {
 }
 
 export interface GenerateBackgroundResponse {
-  background:string;
+  backgrounds: string[];
 }
 
 export interface GenerateNameResponse {
-  name:string;
+  names: string[];
+}
+
+export interface GeneratePhysicalDescriptionResponse {
+  physical_descriptions: string[];
 }
 
 // === Groupes de compétences (structure du JSON) ===

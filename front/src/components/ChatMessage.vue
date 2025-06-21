@@ -162,24 +162,32 @@ const isCodeContent = (partKind: string): boolean => {
 const formatTextContent = (content: string): string => {
   if (!content) return "";
 
-  // Conversion basique du markdown
+  // Conversion du markdown avec support des titres et actions
   return content
+    // Titres H3 (### Titre)
+    .replace(/^### (.+)$/gm, "<h3 class='markdown-h3'>$1</h3>")
+    // Titres H2 (## Titre)
+    .replace(/^## (.+)$/gm, "<h2 class='markdown-h2'>$1</h2>")
+    // Titres H1 (# Titre)
+    .replace(/^# (.+)$/gm, "<h1 class='markdown-h1'>$1</h1>")
+    // Actions entre crochets avec types spécifiques (ordre important!)
+    .replace(/\[(Jet de dés\s?:\s?[^\]]+)\]/g, "<span class='dice-roll-highlight'>[$1]</span>")
+    .replace(/\[(Action audacieuse)\]/g, "<span class='bold-action-highlight'>[$1]</span>")
+    .replace(/\[([^\]]+)\]/g, "<span class='action-highlight'>[$1]</span>")
+    // Gras et italique
     .replace(/\*\*(.*?)\*\*/g, "<span class='jdr-bold'>$1</span>")
     .replace(/\*(.*?)\*/g, "<em>$1</em>")
+    // Retours à la ligne
     .replace(/\n/g, "<br>");
 };
 </script>
 
 <style scoped>
-.jdr-bold {
-  font-weight: bold;
-  color: var(--jdr-text-primary, #1f2937);
-}
-
 .chat-container {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  color: var(--jdr-text-primary);
 }
 
 .chat-message {

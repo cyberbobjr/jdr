@@ -63,6 +63,7 @@ class SessionService:
             character_file = session_dir / "character.txt"
             if character_file.exists():
                 character_id = character_file.read_text(encoding='utf-8').strip()
+                
                 self.character_id = character_id  # Important: définir l'attribut character_id
                 
                 # Créer l'instance CharacterService pour ce personnage

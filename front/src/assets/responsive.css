@@ -50,7 +50,9 @@
 .jdr-mt-1 { margin-top: 0.25rem; }
 .jdr-mt-2 { margin-top: 0.5rem; }
 .jdr-mt-4 { margin-top: 1rem; }
+.jdr-p-1 { padding: 0.25rem; }
 .jdr-p-2 { padding: 0.5rem; }
+.jdr-p-3 { padding: 0.75rem; }
 .jdr-p-4 { padding: 1rem; }
 
 .jdr-mr-1 {
@@ -68,6 +70,23 @@
 .jdr-mr-5 {
   margin-right: 1.5rem;
 }
+
+.jdr-ml-1 {
+  margin-left: 0.25rem;
+}
+.jdr-ml-2 {
+  margin-left: 0.5rem;
+}
+.jdr-ml-3 {
+  margin-left: 0.75rem;
+}
+.jdr-ml-4 {
+  margin-left: 1rem;
+}
+.jdr-ml-5 {
+  margin-left: 1.5rem;
+}
+
 /* Responsive (breakpoints simples) */
 @media (min-width: 768px) {
   .md\:jdr-grid-cols-4 {

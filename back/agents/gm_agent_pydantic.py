@@ -48,7 +48,7 @@ def build_gm_agent_pydantic(session_id: str, scenario_name: str = "Les_Pierres_d
     ### build_gm_agent_pydantic
     **Description :** Construit l'agent GM avec PydanticAI et retourne l'agent et ses dépendances.
     **Paramètres :**
-    - `session_id` (str) : Identifiant de la session
+    - `session_id` (str) : Identifiant de la session de jeu
     - `scenario_name` (str) : Nom du fichier scénario (utilisé uniquement lors de la création d'une nouvelle session)
     - `character_id` (Optional[str]) : ID du personnage pour créer une nouvelle session
     **Retour :** Tuple (Agent PydanticAI configuré, SessionService).
@@ -208,3 +208,36 @@ def auto_enrich_message_with_combat_context(session_id: str, user_message: str) 
 
     # La gestion de l'historique (messages) doit être assurée directement par le store ou l'agent, et non par SessionService.
     # Les méthodes load_history, save_history et update_character_data ne sont plus utilisées ni exposées.
+
+def build_simple_gm_agent():
+    """
+    ### build_simple_gm_agent
+    **Description :** Construit un agent GM simple sans contexte de session pour les tâches de génération (nom, background, description).
+    **Paramètres :** Aucun
+    **Retour :** Agent PydanticAI configuré sans dépendances de session.
+    """
+    # Prompt système simple pour la génération de contenu
+    system_prompt = """Tu es un maître de jeu expert en jeu de rôle medieval-fantastique.
+Tu aides à créer des personnages cohérents et immersifs.
+Réponds toujours de manière concise et appropriée au contexte fourni."""
+    
+    # Créer l'agent avec la configuration DeepSeek
+    from pydantic_ai.models.openai import OpenAIModel
+    from pydantic_ai.providers.openai import OpenAIProvider
+    provider = OpenAIProvider(
+        base_url=api_base_url,
+        api_key=api_key
+    )
+    
+    model = OpenAIModel(
+        model_name=api_model,
+        provider=provider
+    )
+    
+    # Agent simple sans outils ni dépendances
+    agent = Agent(
+        model=model,
+        system_prompt=system_prompt
+    )
+    
+    return agent

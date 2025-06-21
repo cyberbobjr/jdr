@@ -16,7 +16,7 @@ class Item(BaseModel):
     id: str  # Identifiant unique de l'instance de l'objet
     name: str  # Nom de l'objet (ex: "Coutelas")
     item_type: ItemType  # Type d'objet (Arme, Armure, Materiel, etc.)
-    price_pc: int  # Prix en pièces de cuivre
+    price_pc: float  # Prix en pièces de cuivre (support des décimales)
     weight_kg: float  # Poids en kilogrammes
     description: str  # Description de l'objet
     category: Optional[str] = None  # Catégorie spécifique (ex: "Couteau", "Cuir", etc.)

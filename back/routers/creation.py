@@ -22,7 +22,7 @@ from back.models.schema import (
     RemoveEquipmentRequest, RemoveEquipmentResponse,
     UpdateMoneyRequest, UpdateMoneyResponse
 )
-from back.agents.gm_agent_pydantic import build_gm_agent_pydantic, enrich_user_message_with_character
+from back.agents.gm_agent_pydantic import enrich_user_message_with_character
 
 router = APIRouter(tags=["creation"])
 
@@ -188,60 +188,146 @@ def check_skills(request: CheckSkillsRequest):
     cost = CharacterCreationService.calculate_skills_cost(request.skills)
     return CheckSkillsResponse(valid=valid, cost=cost)
 
-@router.post("/generate-name", summary="Générer un nom de personnage via LLM")
+@router.post("/generate-name", summary="Générer 5 noms de personnage via LLM")
 async def generate_character_name(character: dict = Body(...)):
     """
-    Génère un nom de personnage adapté via l'agent LLM, selon la fiche de personnage partielle.
+    Génère 5 noms de personnage adaptés via l'agent LLM, selon la fiche de personnage partielle.
     **Entrée** : Fiche de personnage (partielle)
-    **Sortie** : Nom généré (str)
+    **Sortie** : Liste de 5 noms générés
     """
     try:
-        character_id = character.get("id")
-        agent, _ = build_gm_agent_pydantic(session_id="creation-nom", character_id=str(character_id) if character_id else None)
+        from back.agents.gm_agent_pydantic import build_simple_gm_agent
+        agent = build_simple_gm_agent()
         prompt = enrich_user_message_with_character(
-            "Propose un nom de personnage approprié pour cette fiche. Réponds uniquement par le nom.",
+            "Propose 5 noms de personnage appropriés pour cette fiche. Réponds avec une liste numérotée (1. Nom1, 2. Nom2, etc.).",
             character
         )
         result = await agent.run(prompt)
-        return {"name": result.strip()}
+        # Extraire les noms de la liste numérotée
+        names = []
+        for line in result.output.strip().split('\n'):
+            if line.strip() and (line.strip().startswith(('1.', '2.', '3.', '4.', '5.')) or line.strip()[0].isdigit()):
+                # Extraire le nom après le numéro
+                name = line.split('.', 1)[-1].strip()
+                if name:
+                    names.append(name)
+        
+        # S'assurer qu'on a exactement 5 noms
+        if len(names) < 5:
+            # Compléter avec des noms génériques si nécessaire
+            generic_names = ["Aragorn", "Legolas", "Gimli", "Boromir", "Faramir"]
+            names.extend(generic_names[len(names):5])
+        
+        return {"names": names[:5]}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/generate-background", summary="Générer un background de personnage via LLM")
+@router.post("/generate-background", summary="Générer 5 backgrounds de personnage via LLM")
 async def generate_character_background(character: dict = Body(...)):
     """
-    Génère un background d'histoire pour le personnage via l'agent LLM.
+    Génère 5 backgrounds d'histoire pour le personnage via l'agent LLM.
     **Entrée** : Fiche de personnage (partielle)
-    **Sortie** : Background généré (str)
+    **Sortie** : Liste de 5 backgrounds générés
     """
     try:
-        character_id = character.get("id")
-        agent, _ = build_gm_agent_pydantic(session_id="creation-background", character_id=str(character_id) if character_id else None)
+        from back.agents.gm_agent_pydantic import build_simple_gm_agent
+        agent = build_simple_gm_agent()
         prompt = enrich_user_message_with_character(
-            "Rédige un background d'histoire immersif et cohérent pour ce personnage. Réponds uniquement par le texte du background.",
+            """
+            Rédige 5 backgrounds d'histoire immersifs et cohérents pour ce personnage. 
+            Chaque background devra inclure un objectif de vie pour le personnage. 
+            Réponds avec une liste numérotée (1. Background1, 2. Background2, etc.). 
+            Chaque background doit faire 6-7 phrases.
+            """,
             character
         )
         result = await agent.run(prompt)
-        return {"background": result.strip()}
+        # Extraire les backgrounds de la liste numérotée
+        backgrounds = []
+        current_background = ""
+        
+        for line in result.output.strip().split('\n'):
+            line = line.strip()
+            if line and (line.startswith(('1.', '2.', '3.', '4.', '5.')) or (line[0].isdigit() and '.' in line)):
+                # Nouveau background
+                if current_background:
+                    backgrounds.append(current_background.strip())
+                current_background = line.split('.', 1)[-1].strip()
+            elif line and current_background:
+                # Continuation du background actuel
+                current_background += " " + line
+        
+        # Ajouter le dernier background
+        if current_background:
+            backgrounds.append(current_background.strip())
+        
+        # S'assurer qu'on a exactement 5 backgrounds
+        if len(backgrounds) < 5:
+            generic_backgrounds = [
+                "Un aventurier expérimenté ayant parcouru de nombreuses terres.",
+                "Un héros en devenir cherchant à prouver sa valeur.",
+                "Un sage possédant une connaissance ancienne des traditions.",
+                "Un guerrier courageux défendant les innocents.",
+                "Un explorateur curieux découvrant les mystères du monde."
+            ]
+            backgrounds.extend(generic_backgrounds[len(backgrounds):5])
+        
+        return {"backgrounds": backgrounds[:5]}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/generate-physical-description", summary="Générer une description physique via LLM")
+@router.post("/generate-physical-description", summary="Générer 5 descriptions physiques via LLM")
 async def generate_character_physical_description(character: dict = Body(...)):
     """
-    Génère une description physique pour le personnage via l'agent LLM.
+    Génère 5 descriptions physiques pour le personnage via l'agent LLM.
     **Entrée** : Fiche de personnage (partielle)
-    **Sortie** : Description physique générée (str)
+    **Sortie** : Liste de 5 descriptions physiques générées
     """
     try:
-        character_id = character.get("id")
-        agent, _ = build_gm_agent_pydantic(session_id="creation-description", character_id=str(character_id) if character_id else None)
+        from back.agents.gm_agent_pydantic import build_simple_gm_agent
+        agent = build_simple_gm_agent()
         prompt = enrich_user_message_with_character(
-            "Décris l'apparence physique de ce personnage de façon détaillée et immersive. Réponds uniquement par la description.",
+            """
+            Décris 5 apparences physiques différentes pour ce personnage de façon détaillée. 
+            Tu dois faire une description précise du personnage (visage, corps, vêtements) afin de générer un prompt pour un générateur d'image. 
+            Soit factuel, ne donne pas d'impression ni de ressenti, utilise des termes descriptifs, comme si tu devait décrire une personnage à un aveugle.
+            Réponds avec une liste numérotée (1. Description1, 2. Description2, etc.).
+            Chaque description doit faire 6-7 phrases.
+            """,
             character
         )
         result = await agent.run(prompt)
-        return {"physical_description": result.strip()}
+        # Extraire les descriptions de la liste numérotée
+        descriptions = []
+        current_description = ""
+        
+        for line in result.output.strip().split('\n'):
+            line = line.strip()
+            if line and (line.startswith(('1.', '2.', '3.', '4.', '5.')) or (line[0].isdigit() and '.' in line)):
+                # Nouvelle description
+                if current_description:
+                    descriptions.append(current_description.strip())
+                current_description = line.split('.', 1)[-1].strip()
+            elif line and current_description:
+                # Continuation de la description actuelle
+                current_description += " " + line
+        
+        # Ajouter la dernière description
+        if current_description:
+            descriptions.append(current_description.strip())
+        
+        # S'assurer qu'on a exactement 5 descriptions
+        if len(descriptions) < 5:
+            generic_descriptions = [
+                "Une personne aux traits fins et élégants, avec des yeux perçants et une posture noble.",
+                "Un individu robuste et imposant, avec des mains calleuses témoignant d'une vie de labeur.",
+                "Une silhouette élancée et gracieuse, se déplaçant avec une agilité naturelle.",
+                "Un visage marqué par l'expérience, avec des rides qui racontent mille histoires.",
+                "Une apparence mystérieuse et captivante, avec un regard qui semble percer les âmes."
+            ]
+            descriptions.extend(generic_descriptions[len(descriptions):5])
+        
+        return {"physical_descriptions": descriptions[:5]}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

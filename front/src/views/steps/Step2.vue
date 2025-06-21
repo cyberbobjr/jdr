@@ -114,6 +114,7 @@ const caracDetails = computed(() => {
 
 const caracs = ref<Record<string, number>>({});
 const isValid = ref(true);
+const isValidating = ref(false); // Flag pour éviter les appels redondants
 
 // Calculs des coûts et bonus
 const totalCost = computed(() => {
@@ -243,15 +244,18 @@ function getBonusClass(bonus: number): string {
 }
 
 onMounted(() => {
+  console.log('🔧 Step2 onMounted', { characterId: props.characterId, initialData: !!props.initialData });
   // Pré-remplissage si édition
   initializeCharacteristics();
-  validateCaracs();
+  // Pas de validation ici - elle sera déclenchée par le watcher initialData
 });
 
 // Watch pour détecter quand les données initiales arrivent
 watch(() => props.initialData, (newData) => {
+  console.log('👀 watch initialData:', !!newData);
   if (newData) {
     initializeCharacteristics();
+    // La validation sera déclenchée automatiquement par le watcher de caracs
   }
 }, { immediate: true });
 
@@ -268,11 +272,13 @@ function initializeCharacteristics() {
 
 // Watch avec debounce pour éviter les appels trop fréquents
 let validateTimeout: NodeJS.Timeout | null = null;
-watch(caracs, () => {
+watch(caracs, (newCaracs) => {
+  console.log('👀 watch caracs changé:', Object.keys(newCaracs).length, 'caractéristiques');
   if (validateTimeout) {
     clearTimeout(validateTimeout);
   }
   validateTimeout = setTimeout(() => {
+    console.log('⏰ timeout validation déclenché');
     validateCaracs();
   }, 300); // Attendre 300ms après le dernier changement
 }, { deep: true });
@@ -313,12 +319,44 @@ async function saveCaracs() {
 }
 
 async function validateCaracs() {
-  if (!props.characterId) return;
+  console.log('🔍 validateCaracs appelée', { 
+    characterId: props.characterId, 
+    caracsLength: Object.keys(caracs.value).length,
+    isValidating: isValidating.value 
+  });
   
-  // Pour la validation, on utilise les valeurs de base uniquement
-  // car les bonus de race/culture sont gérés côté backend
-  const res = await JdrApiService.checkAttributes({ attributes: caracs.value });
-  isValid.value = res.valid;
+  if (!props.characterId) {
+    console.log('❌ Pas de characterId');
+    return;
+  }
+  
+  // Vérifier que nous avons des données valides à valider
+  if (Object.keys(caracs.value).length === 0) {
+    console.log('❌ Pas de données de caractéristiques');
+    return;
+  }
+  
+  // Éviter les appels redondants
+  if (isValidating.value) {
+    console.log('❌ Validation déjà en cours');
+    return;
+  }
+  
+  try {
+    isValidating.value = true;
+    console.log('🚀 Appel API checkAttributes avec:', caracs.value);
+    
+    // Pour la validation, on utilise les valeurs de base uniquement
+    // car les bonus de race/culture sont gérés côté backend
+    const res = await JdrApiService.checkAttributes({ attributes: caracs.value });
+    isValid.value = res.valid;
+    console.log('✅ Réponse API:', res);
+  } catch (error) {
+    console.error('❌ Erreur lors de la validation des caractéristiques:', error);
+    isValid.value = false;
+  } finally {
+    isValidating.value = false;
+  }
 }
 
 function goToNextStep() {

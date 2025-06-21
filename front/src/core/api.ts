@@ -443,51 +443,50 @@ export class JdrApiService {
       })
     });
   }
-
   // ========================================
   // Appels aux routes LLM (génération nom, background, description physique)
   // ========================================
 
   /**
-   * Génère un nom de personnage via LLM à partir d'une fiche partielle
+   * Génère 5 noms de personnage via LLM à partir d'une fiche partielle
    */
-  static async generateCharacterName(character: Partial<Character>): Promise<string> {
+  static async generateCharacterName(character: Partial<Character>): Promise<string[]> {
     const result = await makeRequest<GenerateNameResponse>(
-      "/creation/generate-name",
+      "/api/creation/generate-name",
       {
         method: "POST",
         body: JSON.stringify(character),
       }
     );
-    return result.name;
+    return result.names;
   }
 
   /**
-   * Génère un background d'histoire via LLM (character partiel accepté)
+   * Génère 5 backgrounds d'histoire via LLM (character partiel accepté)
    */
-  static async generateCharacterBackground(character: Partial<Character>): Promise<string> {
+  static async generateCharacterBackground(character: Partial<Character>): Promise<string[]> {
     const result = await makeRequest<GenerateBackgroundResponse>(
-      "/creation/generate-background",
+      "/api/creation/generate-background",
       {
         method: "POST",
         body: JSON.stringify(character),
       }
     );
-    return result.background;
+    return result.backgrounds;
   }
 
   /**
-   * Génère une description physique via LLM (character partiel accepté)
+   * Génère 5 descriptions physiques via LLM (character partiel accepté)
    */
-  static async generateCharacterPhysicalDescription(character: Partial<Character>): Promise<string> {
+  static async generateCharacterPhysicalDescription(character: Partial<Character>): Promise<string[]> {
     const result = await makeRequest<GeneratePhysicalDescriptionResponse>(
-      "/creation/generate-physical-description",
+      "/api/creation/generate-physical-description",
       {
         method: "POST",
         body: JSON.stringify(character),
       }
     );
-    return result.physical_description;
+    return result.physical_descriptions;
   }
 
   // ========================================

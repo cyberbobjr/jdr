@@ -11,11 +11,16 @@ def character_apply_xp(ctx: RunContext[SessionService], xp: int) -> dict:
         xp (int): Le nombre d'expériences à ajouter. Ex. : 50.
     
     Returns:
-        dict: Données mises à jour du personnage.
-    """
+        dict: Données mises à jour du personnage.    """
     log_debug("Tool character_apply_xp appelé", tool="character_apply_xp", player_id=str(ctx.deps.character_id), xp=xp)
     ctx.deps.character_service.apply_xp(xp)
-    return {"character": ctx.deps.character_service.character_data.model_dump()}
+    
+    # Gérer le cas où character_data est un dict ou un objet Character
+    character_data = ctx.deps.character_service.character_data
+    if hasattr(character_data, 'model_dump'):
+        return {"character": character_data.model_dump()}
+    else:
+        return {"character": character_data}
 
 def character_add_gold(ctx: RunContext[SessionService], gold: int) -> dict:
     """
@@ -25,11 +30,16 @@ def character_add_gold(ctx: RunContext[SessionService], gold: int) -> dict:
         gold (int): Montant d'or à ajouter. Ex. : 50.
     
     Returns:
-        dict: Fiche personnage mise à jour.
-    """
+        dict: Fiche personnage mise à jour.    """
     log_debug("Tool character_add_gold appelé", tool="character_add_gold", player_id=str(ctx.deps.character_id), gold=gold)
     ctx.deps.character_service.add_gold(gold)
-    return {"character": ctx.deps.character_service.character_data.model_dump()}
+    
+    # Gérer le cas où character_data est un dict ou un objet Character
+    character_data = ctx.deps.character_service.character_data
+    if hasattr(character_data, 'model_dump'):
+        return {"character": character_data.model_dump()}
+    else:
+        return {"character": character_data}
 
 def character_take_damage(ctx: RunContext[SessionService], amount: int, source: str = "combat") -> dict:
     """
@@ -40,10 +50,15 @@ def character_take_damage(ctx: RunContext[SessionService], amount: int, source: 
         source (str): Source des dégâts. Par défaut : "combat".
     
     Returns:
-        dict: Fiche personnage mise à jour.
-    """
+        dict: Fiche personnage mise à jour.    """
     log_debug("Tool character_take_damage appelé", tool="character_take_damage", player_id=str(ctx.deps.character_id), amount=amount, source=source)
     ctx.deps.character_service.take_damage(amount, source)
-    return {"character": ctx.deps.character_service.character_data.model_dump()}
+    
+    # Gérer le cas où character_data est un dict ou un objet Character
+    character_data = ctx.deps.character_service.character_data
+    if hasattr(character_data, 'model_dump'):
+        return {"character": character_data.model_dump()}
+    else:
+        return {"character": character_data}
 
 

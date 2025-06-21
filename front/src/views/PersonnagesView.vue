@@ -155,13 +155,13 @@
               <div class="jdr-stat-value jdr-text-lg">{{ value }}</div>
             </div>
           </div>
-        </div>
-        <div v-if="selectedCharacter.equipment && selectedCharacter.equipment.length > 0" class="jdr-mb-4">
+        </div>        <div v-if="selectedCharacter.inventory && selectedCharacter.inventory.length > 0" class="jdr-mb-4">
           <h3 class="jdr-title jdr-title-sm jdr-mb-2">Équipement</h3>
           <div class="equipment-list">
-            <div v-for="item in selectedCharacter.equipment" :key="item" class="equipment-item">
-              <font-awesome-icon :icon="['fas', 'sword']" class="jdr-text-accent jdr-mr-2" />
-              <span>{{ item }}</span>
+            <div v-for="item in selectedCharacter.inventory" :key="item.id" class="equipment-item">
+              <font-awesome-icon :icon="['fas', 'hammer']" class="jdr-text-accent jdr-mr-2" />
+              <span>{{ item.name }}</span>
+              <small class="jdr-text-muted jdr-ml-2">({{ item.weight }}kg)</small>
             </div>
           </div>
         </div>

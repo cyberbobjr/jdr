@@ -65,7 +65,10 @@ class PydanticJsonlStore:
             return []
         try:
             with open(self.filepath, "r", encoding="utf-8") as f:
-                data = json.load(f)
+                content = f.read().strip()
+                if not content:  # Fichier vide
+                    return []
+                data = json.loads(content)
             history = ModelMessagesTypeAdapter.validate_python(data)
             log_debug("Historique PydanticAI rechargé (validate_python)", action="load_pydantic_history", filepath=os.path.abspath(self.filepath), count=len(history))
             return history
@@ -84,7 +87,10 @@ class PydanticJsonlStore:
             return []
         try:
             with open(self.filepath, "r", encoding="utf-8") as f:
-                data = json.load(f)
+                content = f.read().strip()
+                if not content:  # Fichier vide
+                    return []
+                data = json.loads(content)
             return data
         except Exception as e:
             log_debug("Erreur lors de la lecture du json historique brut", error=str(e), filepath=os.path.abspath(self.filepath))

@@ -19,10 +19,12 @@
   --jdr-secondary: #DAA520;         /* Or */
   --jdr-secondary-dark: #B8860B;    /* Or foncé */
   --jdr-secondary-light: #F4E99B;   /* Or clair */
+  --jdr-secondary-alpha: rgba(218, 165, 32, 0.2); /* Or avec transparence */
   
   --jdr-accent: #CD853F;            /* Pérou */
   --jdr-accent-dark: #A0522D;       /* Sienna */
   --jdr-accent-light: #DEB887;      /* Beige burlywood */
+  --jdr-accent-alpha: rgba(205, 133, 63, 0.15); /* Accent avec transparence */
   
   /* Couleurs de fond */
   --jdr-bg-primary: #2C1810;        /* Brun très foncé */
@@ -40,6 +42,7 @@
   --jdr-success: #228B22;           /* Vert forêt */
   --jdr-warning: #FF8C00;           /* Orange foncé */
   --jdr-danger: #B22222;            /* Rouge feu */
+  --jdr-danger-alpha: rgba(178, 34, 34, 0.15); /* Rouge avec transparence */
   --jdr-info: #4682B4;             /* Bleu acier */
   
   /* Ombres et effets */
@@ -58,28 +61,66 @@
   --jdr-font-body:  'Inter', 'Helvetica Neue', Arial, sans-serif;
 /*  --jdr-font-body: 'Inter', 'Helvetica Neue', Arial, sans-serif;*/
   --jdr-font-ui: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    /* Variables de hauteur pour la navigation */
+  --header-height: 88px; /* Hauteur du header pour les calculs de layout */
 }
 
 /* ========================================
    STYLES DE BASE ET TYPOGRAPHIE
    ======================================== */
 
-* {
-  box-sizing: border-box;
+/* Styles pour le markdown dans les messages de chat */
+.jdr-bold {
+  font-weight: bold;
+  color: var(--jdr-text-primary, #1f2937);
 }
 
-body {
-  font-family: var(--jdr-font-body);
-  background: var(--jdr-bg-primary);
-  color: var(--jdr-text-primary);
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
+/* Styles pour les titres markdown */
+.markdown-h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--jdr-secondary);
+  margin: 1rem 0 0.5rem 0;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-h4 {
-    font-family: var(--jdr-font-body);
+.markdown-h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--jdr-secondary);
+  margin: 0.75rem 0 0.5rem 0;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
+
+.markdown-h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--jdr-accent);
+  margin: 0.5rem 0 0.25rem 0;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Style pour les actions entre crochets */
+.action-highlight {
+  font-weight: 700;
+  color: var(--jdr-accent);
+  background: var(--jdr-accent-alpha, rgba(205, 133, 63, 0.15));
+  /* padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--jdr-accent); */
+}
+
+/* Style pour les actions audacieuses */
+.bold-action-highlight {
+  font-weight: 800;
+  color: var(--jdr-danger);
+  background: var(--jdr-danger-alpha, rgba(178, 34, 34, 0.15));
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--jdr-danger);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+}
+
 /* ========================================
    TITRES ET TYPOGRAPHIE
    ======================================== */
@@ -449,7 +490,6 @@ h4 {
 .jdr-navbar {
   background: var(--jdr-bg-primary);
   border-bottom: 2px solid var(--jdr-border-color);
-  padding: 1rem 0;
   box-shadow: var(--jdr-shadow-medium);
 }
 
@@ -614,12 +654,12 @@ h4 {
 
 .jdr-badge-danger {
   background: var(--jdr-danger);
-  color: white;
+  color: var(--jdr-text-primary);
 }
 
 .jdr-badge-info {
   background: var(--jdr-info);
-  color: white;
+  color: var(--jdr-text-primary);
 }
 
 .jdr-badge-primary {
@@ -751,6 +791,10 @@ h4 {
    ======================================== */
 
 @media (max-width: 768px) {
+  :root {
+    --header-height: 56px; /* Hauteur réduite sur mobile */
+  }
+  
   .jdr-title-xl { font-size: 2rem; }
   .jdr-title-lg { font-size: 1.75rem; }
   .jdr-title-md { font-size: 1.5rem; }
