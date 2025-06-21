@@ -48,7 +48,7 @@ class ScenarioService:
                             
                             # Récupérer le nom du personnage
                             if character_id:
-                                character = CharacterService.get_character(character_id)
+                                character = CharacterService.get_character_by_id(character_id)
                                 character_name = character.name
                                 
                         except Exception as e:

@@ -44,7 +44,7 @@ import type {
 // Configuration et types API
 // ========================================
 
-const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || "http://localhost:8000";
+const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || "http://localhost:8001";
 
 // Types spécifiques au frontend (non présents dans l'OpenAPI)
 export interface GameSession {
@@ -235,8 +235,7 @@ export class JdrApiService {
         body: JSON.stringify(request),
       }
     );
-  }
-  /**
+  }  /**
    * Récupère l'historique complet d'une session de jeu
    */
   static async getScenarioHistory(sessionId: string): Promise<ConversationMessage[]> {
@@ -245,6 +244,29 @@ export class JdrApiService {
       `/api/scenarios/history/${sessionId}`
     );
     return result.history || [];
+  }
+
+  /**
+   * Supprime un message spécifique de l'historique d'une session
+   * @param sessionId - Identifiant de la session
+   * @param messageIndex - Index du message à supprimer (base 0)
+   * @returns {Promise<any>} Informations sur la suppression réussie
+   */
+  static async deleteHistoryMessage(sessionId: string, messageIndex: number): Promise<any> {
+    this.validateSessionParams(sessionId);
+    
+    if (messageIndex < 0) {
+      throw new Error("L'index du message ne peut pas être négatif");
+    }
+
+    const result = await makeRequest<any>(
+      `/api/scenarios/history/${sessionId}/${messageIndex}`,
+      {
+        method: 'DELETE'
+      }
+    );
+    
+    return result;
   }
 
   // ========================================

@@ -125,7 +125,7 @@ class TestCharacterServiceStatus:
         
         mock_load_character_data.return_value = incomplete_data
           # Appeler la méthode
-        result = CharacterService.get_character("test-id")
+        result = CharacterService.get_character_by_id("test-id")
         
         # Vérifications
         assert result["status"] == "en_cours"
@@ -153,7 +153,7 @@ class TestCharacterServiceStatus:
         mock_load_character_data.return_value = complete_data
         
         # Appeler la méthode
-        result = CharacterService.get_character("test-id")
+        result = CharacterService.get_character_by_id("test-id")
         
         # Vérifications
         assert result["status"] == "complet"

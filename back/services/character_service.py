@@ -195,7 +195,7 @@ class CharacterService:
         return characters
     
     @staticmethod
-    def get_character(character_id: str) -> dict:
+    def get_character_by_id(character_id: str) -> dict:
         """
         ### get_character
         **Description :** Récupère un personnage à partir de son identifiant (UUID) depuis le dossier data/characters.

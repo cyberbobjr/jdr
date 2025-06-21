@@ -24,16 +24,19 @@ def skill_check_with_character(ctx: RunContext[SessionService], skill_name: str,
     Returns:
         str: Résultat détaillé du test avec jet de dé, calculs et interprétation.
     """
-    try:
-        # Récupérer la fiche du personnage via CharacterService
+    try:        # Récupérer la fiche du personnage via CharacterService
         character_service = CharacterService(ctx.deps.character_id)
-        character = character_service.get_character(ctx.deps.character_id)
-        character_data = character.dict()  # Convertir en dict Python
-        
-        # Extraction des compétences et caractéristiques
+        character = character_service.get_character()
+        # Gérer le cas où character est un dict ou un objet Character
+        if hasattr(character, 'model_dump'):
+            character_data = character.model_dump()  # Objet Character
+        else:
+            character_data = character  # Déjà un dict        # Extraction des compétences et caractéristiques
         competences = character_data.get("competences", {})
         caracteristiques = character_data.get("caracteristiques", {})
-        culture_bonuses = character_data.get("culture_bonuses", {})
+        # Récupérer les bonus culturels depuis culture.skill_bonuses
+        culture = character_data.get("culture", {})
+        culture_bonuses = culture.get("skill_bonuses", {}) if culture else {}
         
         # Déterminer la valeur à utiliser pour le test
         skill_value = 0        # Récupération des managers pour les nouvelles données

@@ -111,7 +111,7 @@ def get_character_detail(character_id: str):
     log_debug("Appel endpoint characters/get_character_detail", character_id=str(character_id))
     
     try:
-        character = CharacterService.get_character(character_id)
+        character = CharacterService.get_character_by_id(character_id)
         return character
     except FileNotFoundError as e:
         log_debug(f"Personnage non trouvé: {e}", character_id=str(character_id))

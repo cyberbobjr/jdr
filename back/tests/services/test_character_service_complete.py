@@ -319,7 +319,7 @@ class TestCharacterServiceStaticMethods:
         character_file = temp_data_dir / "characters" / f"{character_id}.json"
         character_file.write_text(json.dumps(sample_character_data))
         
-        character_data = CharacterService.get_character(character_id)
+        character_data = CharacterService.get_character_by_id(character_id)
         
         assert isinstance(character_data, dict)
         assert character_data["name"] == "Test Hero"

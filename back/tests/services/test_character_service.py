@@ -178,7 +178,7 @@ def test_get_character_static_method(isolated_data_dir):
     
     (characters_dir / f"{character_id}.json").write_text(json.dumps(character_data), encoding="utf-8")
     
-    result = CharacterService.get_character(character_id)
+    result = CharacterService.get_character_by_id(character_id)
     assert isinstance(result, dict)
     assert result["name"] == "Static Test Character"
     assert result["id"] == character_id
@@ -865,7 +865,7 @@ def test_get_character_static_method_exception(isolated_data_dir):
     
     # L'exception doit être propagée
     with pytest.raises(Exception):
-        CharacterService.get_character(character_id)
+        CharacterService.get_character_by_id(character_id)
 
 
 def test_remove_item_quantity_zero_or_negative(isolated_data_dir):

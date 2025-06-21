@@ -75,7 +75,12 @@
               <p>L'aventure va commencer...</p>
             </div>
             
-            <ChatMessage v-else :messages="history" :show-debug-info="showDebugMode" />
+            <ChatMessage 
+              v-else 
+              :messages="history" 
+              :show-debug-info="showDebugMode" 
+              @delete-message="handleDeleteMessage"
+            />
           </div>
 
           <!-- Zone de saisie dans la section chat -->
@@ -332,6 +337,29 @@ const addNewLine = () => {
 const scrollToBottom = () => {
   if (chatHistory.value) {
     chatHistory.value.scrollTop = chatHistory.value.scrollHeight;
+  }
+};
+
+const handleDeleteMessage = async (messageIndex: number) => {
+  if (!session.value) return;
+
+  try {
+    console.log(`Suppression du message à l'index ${messageIndex} de la session ${session.value.session_id}`);
+    
+    // Appeler l'API de suppression
+    await JdrApiService.deleteHistoryMessage(session.value.session_id, messageIndex);
+    
+    console.log('Message supprimé avec succès, rechargement de l\'historique...');
+    
+    // Recharger l'historique pour rafraîchir l'affichage
+    await loadHistory();
+    
+  } catch (error) {
+    console.error('Erreur lors de la suppression du message:', error);
+    
+    // Afficher une notification d'erreur à l'utilisateur
+    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue lors de la suppression';
+    alert(`Impossible de supprimer le message: ${errorMessage}`);
   }
 };
 

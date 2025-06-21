@@ -131,7 +131,7 @@ def enrich_user_message_with_character(user_message: str, character_data: Dict[s
     
     character_context = f"""<PERSONNAGE JOUEUR>
 {json.dumps(character_data, indent=2, ensure_ascii=False)}
-<PERSONNAGE JOUEUR>
+</PERSONNAGE JOUEUR>
 """
     return character_context + user_message
 

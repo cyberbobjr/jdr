@@ -101,14 +101,17 @@ class SessionService:
         
         # Sauvegarder le nom du scénario
         scenario_file = session_dir / "scenario.txt"
-        scenario_file.write_text(scenario_name, encoding='utf-8')
-          # Définir l'attribut character_id
+        scenario_file.write_text(scenario_name, encoding='utf-8')        # Définir l'attribut character_id
         self.character_id = character_id
         
         # Créer l'instance CharacterService pour ce personnage
         try:
             self.character_service = CharacterService(character_id)
-            self.character_data = self.character_service.character_data.model_dump()
+            # Gérer le cas où character_data est un dict ou un objet Character
+            if hasattr(self.character_service.character_data, 'model_dump'):
+                self.character_data = self.character_service.character_data.model_dump()
+            else:
+                self.character_data = self.character_service.character_data.copy() if isinstance(self.character_service.character_data, dict) else self.character_service.character_data
         except FileNotFoundError:
             raise ValueError(f"Personnage {character_id} introuvable")
         
