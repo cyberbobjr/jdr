@@ -395,9 +395,11 @@ def normalize_json_history(history):
             # Pour les autres types
             part_dict.setdefault('content', str(part_dict.get('content', '')))
             part_dict.setdefault('part_kind', 'text')
-        
-        # Normaliser le timestamp
-        part_dict['timestamp'] = convert_timestamp(part_dict.get('timestamp'))
+          # Normaliser le timestamp - utiliser le timestamp du message si celui de la part est None
+        part_timestamp = part_dict.get('timestamp')
+        if part_timestamp is None:
+            part_timestamp = msg_dict.get('timestamp')
+        part_dict['timestamp'] = convert_timestamp(part_timestamp)
         
         return part_dict
     
