@@ -81,7 +81,8 @@ class TestCharacterCreationService:
         # Test avec des compétences invalides (trop de rangs)
         invalid_skills = {"Perception": 10}  # Trop de rangs
         result = CharacterCreationService.check_skills_points(invalid_skills)
-        assert result == False    def test_calculate_skills_cost(self):
+        assert result == False    
+    def test_calculate_skills_cost(self):
         # Test du calcul de coût sans profession
         skills = {"Perception": 2}
         

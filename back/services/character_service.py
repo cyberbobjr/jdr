@@ -3,7 +3,8 @@
 
 import os
 from typing import List, Dict
-from back.models.schema import Character, Item
+from back.models.schema import Item, CharacterStatus
+from back.models.domain.character import Character
 from back.utils.logger import log_debug
 from back.services.character_persistence_service import CharacterPersistenceService
 from back.services.item_service import ItemService
@@ -29,10 +30,7 @@ class CharacterService:
         **Description:** Charge les données du personnage depuis le stockage persistant
         **Retour:** Objet Character chargé ou dict pour personnages incomplets
         """
-        character_data = CharacterPersistenceService.load_character_data(self.character_id)
-        # On prend directement la racine du JSON
-        state_data = character_data
-        # Convertir l'ancien format equipment vers inventory si nécessaire        self._convert_equipment_to_inventory(state_data)
+        state_data = CharacterPersistenceService.load_character_data(self.character_id)
         # Ajouter les champs manquants avec des valeurs par défaut
         state_data.setdefault("xp", 0)
         state_data.setdefault("gold", 0.0)
@@ -42,13 +40,10 @@ class CharacterService:
           # Vérifier si le personnage est complet
         is_incomplete = (
             state_data.get("name") is None or 
-            state_data.get("status") == "en_cours" or
+            state_data.get("status") == CharacterStatus.IN_PROGRESS or
             state_data.get("status") is None
         )
-        
-        if is_incomplete:
-            state_data["status"] = "en_cours"
-            
+                    
         log_debug("Chargement du personnage", action="_load_character", character_id=self.character_id, is_incomplete=is_incomplete)
         
         # Si validation stricte et personnage complet, retourner un objet Character
@@ -93,45 +88,13 @@ class CharacterService:
         **Retour:** String JSON des données du personnage
         """
         return self.character_data.model_dump_json()
-
-    @staticmethod
-    def _convert_equipment_to_inventory(state_data: dict) -> None:
-        """
-        ### _convert_equipment_to_inventory
-        **Description:** Convertit l'ancien format 'equipment' vers le nouveau format 'inventory'
-        **Paramètres:**
-        - `state_data` (dict): Données d'état du personnage à convertir
-        **Retour:** None (modifie state_data in-place)
-        """
-        item_service = ItemService()
-        
-        # Si on a un ancien format 'equipment' mais pas d'inventory
-        if 'equipment' in state_data and 'inventory' not in state_data:
-            equipment_names = state_data.get('equipment', [])
-            if equipment_names:
-                # Convertir les noms d'équipement en objets Item
-                inventory = item_service.convert_equipment_list_to_inventory(equipment_names)
-                state_data['inventory'] = [item.model_dump() for item in inventory]
-                log_debug("Équipement converti en inventaire", 
-                         action="convert_equipment_to_inventory", 
-                         character_equipment_count=len(equipment_names),
-                         character_inventory_count=len(inventory))
-            else:
-                state_data['inventory'] = []
-            
-            # Supprimer l'ancien champ equipment après conversion
-            del state_data['equipment']
-          # Si on n'a ni equipment ni inventory, créer un inventaire vide
-        elif 'inventory' not in state_data and 'equipment' not in state_data:
-            state_data['inventory'] = []
     
     @staticmethod
     def get_all_characters() -> List[object]:
         """
-        Récupère la liste de tous les personnages disponibles à partir des fichiers JSON.
-
-        Returns:
-            List[object]: Une liste d'objets Character ou de dicts bruts pour les personnages incomplets.
+        ### get_all_characters
+        **Description:** Récupère la liste de tous les personnages disponibles à partir des fichiers JSON.
+        **Retour:** Liste d'objets Character ou de dicts bruts pour les personnages incomplets.
         """
         characters = []
         characters_dir = os.path.join(get_data_dir(), "characters")
@@ -141,49 +104,10 @@ class CharacterService:
                 character_id = filename[:-5]  # Retire l'extension .json
                 try:
                     character_data = CharacterPersistenceService.load_character_data(character_id)
-                    
-                    # Ajouter l'ID dans tous les cas
-                    character_data["id"] = character_id
-                      # Vérifier si le personnage est complet ou en cours de création
-                    is_incomplete = (
-                        character_data.get("name") is None or 
-                        character_data.get("status") == "en_cours" or
-                        character_data.get("status") is None
+                    processed_character = CharacterService._process_character_data(
+                        character_id, character_data, "get_all_characters"
                     )
-                    
-                    if is_incomplete:
-                        # Pour les personnages incomplets, définir le statut à "en_cours"
-                        character_data["status"] = "en_cours"
-                        log_debug("Personnage incomplet détecté", 
-                                 action="get_all_characters_incomplete", 
-                                 character_id=character_id,
-                                 name=character_data.get("name"),
-                                 status=character_data.get("status"))
-                        characters.append(character_data)
-                        continue
-                      # Pour les personnages complets, on essaie de créer un objet Character
-                    # Définir le statut à "complet" pour les personnages complets
-                    character_data["status"] = "complet"
-                    
-                    # Convertir l'ancien format equipment vers inventory si nécessaire
-                    CharacterService._convert_equipment_to_inventory(character_data)
-                      # Ajouter les champs manquants avec des valeurs par défaut
-                    character_data.setdefault("xp", 0)
-                    character_data.setdefault("gold", 0.0)
-                    character_data.setdefault("hp", 100)
-                    
-                    try:
-                        characters.append(Character(**character_data))
-                        log_debug("Personnage complet chargé", 
-                                 action="get_all_characters_complete", 
-                                 character_id=character_id)
-                    except Exception as validation_error:
-                        # Si la validation échoue, on retourne quand même le dict brut
-                        log_debug("Erreur de validation, personnage retourné en dict brut", 
-                                 action="get_all_characters_validation_error", 
-                                 character_id=character_id,
-                                 error=str(validation_error))
-                        characters.append(character_data)
+                    characters.append(processed_character)
                         
                 except (FileNotFoundError, ValueError) as e:
                     log_debug("Erreur lors du chargement du personnage", 
@@ -191,55 +115,27 @@ class CharacterService:
                              filename=filename, 
                              error=str(e))
                     continue                    
+        
         log_debug("Chargement de tous les personnages", action="get_all_characters", count=len(characters))
         return characters
     
     @staticmethod
     def get_character_by_id(character_id: str) -> dict:
         """
-        ### get_character
-        **Description :** Récupère un personnage à partir de son identifiant (UUID) depuis le dossier data/characters.
-        **Paramètres :**
-        - `character_id` (str) : Identifiant du personnage (UUID).
-        **Retour :** Dictionnaire des données du personnage.
+        ### get_character_by_id
+        **Description:** Récupère un personnage à partir de son identifiant (UUID) depuis le dossier data/characters.
+        **Paramètres:**
+        - `character_id` (str): Identifiant du personnage (UUID).
+        **Retour:** Dictionnaire des données du personnage.
         """       
         try:
             character_data = CharacterPersistenceService.load_character_data(character_id)
-            
-            state_data = character_data
-            # Convertir l'ancien format equipment vers inventory si nécessaire
-            CharacterService._convert_equipment_to_inventory(state_data)
-            
-            # Ajouter les champs manquants avec des valeurs par défaut
-            state_data.setdefault("xp", 0)
-            state_data.setdefault("gold", 0.0)
-            state_data.setdefault("hp", 100)
-            
-            # L'ID est le nom du fichier (sans .json)
-            state_data["id"] = character_id
-              # Vérifier si le personnage est complet ou en cours de création
-            is_incomplete = (
-                state_data.get("name") is None or 
-                state_data.get("status") == "en_cours" or
-                state_data.get("status") is None
+            processed_character = CharacterService._process_character_data(
+                character_id, character_data, "get_character_by_id"
             )
             
-            if is_incomplete:
-                # Pour les personnages incomplets, définir le statut à "en_cours"
-                state_data["status"] = "en_cours"
-                log_debug("Personnage incomplet - statut mis à jour", 
-                         action="get_character_incomplete", 
-                         character_id=character_id,
-                         name=state_data.get("name"))
-            else:
-                # Pour les personnages complets, définir le statut à "complet"
-                state_data["status"] = "complet"
-                log_debug("Personnage complet", 
-                         action="get_character_complete", 
-                         character_id=character_id)
-            
-            log_debug("Chargement du personnage", action="get_character", character_id=character_id)
-            return state_data
+            log_debug("Chargement du personnage", action="get_character_by_id", character_id=character_id)
+            return processed_character
         except Exception as e:
             raise e
 
@@ -578,3 +474,48 @@ class CharacterService:
             'status': 'success',
             'gold': new_gold
         }
+    
+    @staticmethod
+    def _process_character_data(character_id: str, character_data: dict, action_prefix: str = "process_character") -> object:
+        """
+        ### _process_character_data
+        **Description:** Traite les données d'un personnage pour déterminer son statut et retourner l'objet approprié
+        **Paramètres:**
+        - `character_id` (str): Identifiant du personnage
+        - `character_data` (dict): Données brutes du personnage
+        - `action_prefix` (str): Préfixe pour les logs de debug
+        **Retour:** Objet Character ou dict selon l'état du personnage
+        """
+        # Ajouter l'ID dans tous les cas
+        character_data["id"] = character_id
+        
+        # Vérifier si le personnage est complet ou en cours de création
+        is_incomplete = (
+            character_data.get("name") is None or 
+            character_data.get("status") == CharacterStatus.IN_PROGRESS or
+            character_data.get("status") is None
+        )
+        
+        if is_incomplete:
+            # Pour les personnages incomplets, définir le statut à "en_cours"
+            character_data["status"] = CharacterStatus.IN_PROGRESS
+            log_debug("Personnage incomplet détecté", 
+                     action=f"{action_prefix}_incomplete", 
+                     character_id=character_id,
+                     name=character_data.get("name"),
+                     status=character_data.get("status"))
+            return character_data
+        else:            
+            try:
+                character_obj = Character(**character_data)
+                log_debug("Personnage complet chargé", 
+                         action=f"{action_prefix}_complete", 
+                         character_id=character_id)
+                return character_obj
+            except Exception as validation_error:
+                # Si la validation échoue, on retourne quand même le dict brut
+                log_debug("Erreur de validation, personnage retourné en dict brut", 
+                         action=f"{action_prefix}_validation_error", 
+                         character_id=character_id,
+                         error=str(validation_error))
+                return character_data

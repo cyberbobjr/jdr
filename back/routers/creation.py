@@ -7,11 +7,13 @@ from uuid import uuid4
 from datetime import datetime
 from typing import List
 import random
+
+from back.models.domain.character import Character
 from ..services.character_creation_service import CharacterCreationService
 from back.services.character_persistence_service import CharacterPersistenceService
 from back.models.domain.races_manager import RacesManager
 from back.models.schema import (
-    AllocateAttributesRequest, AllocateAttributesResponse,
+    AllocateAttributesRequest, AllocateAttributesResponse, CharacterStatus,
     CheckAttributesRequest, CheckAttributesResponse,
     SaveCharacterRequest, SaveCharacterResponse,
     CheckSkillsRequest, CheckSkillsResponse,
@@ -125,19 +127,20 @@ def create_new_character():
     """
     character_id = str(uuid4())
     now = datetime.now().isoformat()
-      # Générer l'argent de départ avec 1D100 (en pièce d'or)
-    starting_money = random.randint(1, 100)
+      # Générer l'or de départ avec 1D50 (en pièce d'or)
+    starting_money = random.randint(1, 50)
     
     character_data = {
         "id": character_id,
         "created_at": now,
         "last_update": now,
         "current_step": "creation",
-        "status": "en_cours",
-        "gold": starting_money  # Argent de départ (1D100 en pièce d'or)
+        "status": CharacterStatus.IN_PROGRESS,  # Statut initial
+        "xp": 0, 
+        "gold": starting_money  # Or de départ (1D50 en pièce d'or)
     }
     CharacterPersistenceService.save_character_data(character_id, character_data)
-    return {"id": character_id, "created_at": now, "status": "en_cours"}
+    return {"id": character_id, "created_at": now, "status": CharacterStatus.IN_PROGRESS}
 
 @router.post(
     "/save",
@@ -151,8 +154,15 @@ def save_character(request: SaveCharacterRequest):
     - **Entrée** : character_id (str), character (dict)
     - **Sortie** : status (str)
     """
-    CharacterPersistenceService.save_character_data(request.character_id, request.character)
-    return SaveCharacterResponse(status="en_cours")
+    character = CharacterPersistenceService.save_character_data(request.character_id, request.character)
+    Character.is_character_finalized(character)
+    if Character.is_character_finalized(character) and character.get("status") == CharacterStatus.EN_COURS:
+        # Si le personnage est finalisé, on met à jour le statut
+        character["status"] = CharacterStatus.DONE
+        character["last_update"] = datetime.now().isoformat()
+        character = CharacterPersistenceService.save_character_data(request.character_id, character)
+
+    return SaveCharacterResponse(status=character.get("status"), character=character)
 
 @router.get(
     "/status/{character_id}",

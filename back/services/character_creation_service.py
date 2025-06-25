@@ -9,7 +9,7 @@ from back.models.domain.skills_manager import SkillsManager
 from back.models.domain.races_manager import RacesManager
 from back.models.domain.spells_manager import SpellsManager
 from back.models.domain.equipment_manager import EquipmentManager
-from back.models.domain.base import RaceData
+from back.models.schema import RaceData
 
 class CharacterCreationService:
     """

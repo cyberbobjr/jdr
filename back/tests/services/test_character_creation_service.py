@@ -37,7 +37,8 @@ class TestCharacterCreationService:
         # Test avec des attributs invalides (valeurs trop hautes)
         invalid_attributes = {char: 200 for char in valid_attributes.keys()}
         invalid = CharacterCreationService.check_attributes_points(invalid_attributes)
-        assert invalid == False    def test_get_races(self):
+        assert invalid == False    
+    def test_get_races(self):
         races = CharacterCreationService.get_races()
         assert isinstance(races, list)
         assert len(races) > 0
@@ -68,7 +69,8 @@ class TestCharacterCreationService:
         assert isinstance(spells, list)
         # Peut être vide si pas de sorts définis
         for spell in spells:
-            assert isinstance(spell, str)    def test_check_skills_points(self):
+            assert isinstance(spell, str)    
+    def test_check_skills_points(self):
         # Test avec des compétences valides (vides)
         valid_skills = {}
         result = CharacterCreationService.check_skills_points(valid_skills)

@@ -1,22 +1,14 @@
 <template>
   <div>
     <h2>Étape 5 : Personnalisation finale</h2>
-    
+
     <!-- Section Nom -->
     <div class="section">
       <h3>Nom du personnage</h3>
       <div class="input-group">
-        <input
-          v-model="characterName"
-          type="text"
-          placeholder="Entrez le nom de votre personnage"
-          class="character-input"
-        />
-        <button
-          @click="generateName"
-          :disabled="isGeneratingName"
-          class="jdr-btn jdr-btn-secondary generate-btn"
-        >
+        <input v-model="characterName" type="text" placeholder="Entrez le nom de votre personnage"
+          class="character-input" />
+        <button @click="generateName" :disabled="isGeneratingName" class="jdr-btn jdr-btn-secondary generate-btn">
           {{ isGeneratingName ? 'Génération...' : 'Générer un nom' }}
         </button>
       </div>
@@ -26,17 +18,10 @@
     <div class="section">
       <h3>Histoire personnelle</h3>
       <div class="textarea-group">
-        <textarea
-          v-model="characterBackground"
-          placeholder="Décrivez l'histoire et le passé de votre personnage..."
-          class="character-textarea"
-          rows="6"
-        ></textarea>
-        <button
-          @click="generateBackground"
-          :disabled="isGeneratingBackground"
-          class="jdr-btn jdr-btn-secondary generate-btn"
-        >
+        <textarea v-model="characterBackground" placeholder="Décrivez l'histoire et le passé de votre personnage..."
+          class="character-textarea" rows="6"></textarea>
+        <button @click="generateBackground" :disabled="isGeneratingBackground"
+          class="jdr-btn jdr-btn-secondary generate-btn">
           {{ isGeneratingBackground ? 'Génération...' : 'Générer une histoire' }}
         </button>
       </div>
@@ -46,17 +31,11 @@
     <div class="section">
       <h3>Apparence physique</h3>
       <div class="textarea-group">
-        <textarea
-          v-model="characterPhysicalDescription"
-          placeholder="Décrivez l'apparence physique de votre personnage..."
-          class="character-textarea"
-          rows="4"
-        ></textarea>
-        <button
-          @click="generatePhysicalDescription"
-          :disabled="isGeneratingPhysicalDescription"
-          class="jdr-btn jdr-btn-secondary generate-btn"
-        >
+        <textarea v-model="characterPhysicalDescription"
+          placeholder="Décrivez l'apparence physique de votre personnage..." class="character-textarea"
+          rows="4"></textarea>
+        <button @click="generatePhysicalDescription" :disabled="isGeneratingPhysicalDescription"
+          class="jdr-btn jdr-btn-secondary generate-btn">
           {{ isGeneratingPhysicalDescription ? 'Génération...' : 'Générer une description' }}
         </button>
       </div>
@@ -80,14 +59,12 @@
         </div>
       </div>
 
-      <div class="form-actions">        <button
-          @click="saveAndFinalize"
-          :disabled="!isValid || isSaving"
-          class="jdr-btn jdr-btn-primary finalize-btn"
-        >
+      <div class="form-actions"> <button @click="saveAndFinalize" :disabled="!isValid || isSaving"
+          class="jdr-btn jdr-btn-primary finalize-btn">
           {{ isSaving ? 'Finalisation...' : (isValid ? 'Finaliser le personnage' : 'Compléter les étapes manquantes') }}
         </button>
-      </div>      <div v-if="!isValid" class="validation-error">
+      </div>
+      <div v-if="!isValid" class="validation-error">
         <p><strong>Pour finaliser le personnage, vous devez compléter :</strong></p>
         <ul>
           <li v-if="characterName.trim().length === 0">✗ Nom du personnage</li>
@@ -95,29 +72,21 @@
           <li v-if="characterBackground.trim().length === 0">✗ Histoire personnelle</li>
           <li v-if="!props.initialData?.race">✗ Race (retournez à l'étape 1)</li>
           <li v-if="!props.initialData?.culture">✗ Culture (retournez à l'étape 1)</li>
-          <li v-if="!props.initialData?.caracteristiques || Object.keys(props.initialData.caracteristiques).length === 0">✗ Caractéristiques (retournez à l'étape 2)</li>
-          <li v-if="!props.initialData?.competences || Object.keys(props.initialData.competences).length === 0">✗ Compétences (retournez à l'étape 3)</li>
+          <li
+            v-if="!props.initialData?.caracteristiques || Object.keys(props.initialData.caracteristiques).length === 0">
+            ✗ Caractéristiques (retournez à l'étape 2)</li>
+          <li v-if="!props.initialData?.competences || Object.keys(props.initialData.competences).length === 0">✗
+            Compétences (retournez à l'étape 3)</li>
         </ul>
       </div>
     </div>
 
     <!-- Modales de sélection -->
-    <JdrModale
-      v-if="showNameModal"
-      title="Choisissez un nom"
-      subtitle="Sélectionnez le nom qui convient le mieux à votre personnage"
-      :show-ok="false"
-      :show-cancel="true"
-      cancel-label="Annuler"
-      @close="closeNameModal"
-    >
+    <JdrModale v-if="showNameModal" title="Choisissez un nom"
+      subtitle="Sélectionnez le nom qui convient le mieux à votre personnage" :show-ok="false" :show-cancel="true"
+      cancel-label="Annuler" @close="closeNameModal">
       <div class="choices-container">
-        <div
-          v-for="(name, index) in generatedNames"
-          :key="index"
-          class="choice-item"
-          @click="selectName(name)"
-        >
+        <div v-for="(name, index) in generatedNames" :key="index" class="choice-item" @click="selectName(name)">
           <div class="choice-content">
             <h4>{{ name }}</h4>
           </div>
@@ -125,22 +94,12 @@
       </div>
     </JdrModale>
 
-    <JdrModale
-      v-if="showBackgroundModal"
-      title="Choisissez une histoire"
-      subtitle="Sélectionnez le background qui correspond le mieux à votre personnage"
-      :show-ok="false"
-      :show-cancel="true"
-      cancel-label="Annuler"
-      @close="closeBackgroundModal"
-    >
+    <JdrModale v-if="showBackgroundModal" title="Choisissez une histoire"
+      subtitle="Sélectionnez le background qui correspond le mieux à votre personnage" :show-ok="false"
+      :show-cancel="true" cancel-label="Annuler" @close="closeBackgroundModal">
       <div class="choices-container">
-        <div
-          v-for="(background, index) in generatedBackgrounds"
-          :key="index"
-          class="choice-item"
-          @click="selectBackground(background)"
-        >
+        <div v-for="(background, index) in generatedBackgrounds" :key="index" class="choice-item"
+          @click="selectBackground(background)">
           <div class="choice-content">
             <p>{{ background }}</p>
           </div>
@@ -148,22 +107,12 @@
       </div>
     </JdrModale>
 
-    <JdrModale
-      v-if="showPhysicalDescriptionModal"
-      title="Choisissez une apparence"
-      subtitle="Sélectionnez la description physique qui vous plaît le plus"
-      :show-ok="false"
-      :show-cancel="true"
-      cancel-label="Annuler"
-      @close="closePhysicalDescriptionModal"
-    >
+    <JdrModale v-if="showPhysicalDescriptionModal" title="Choisissez une apparence"
+      subtitle="Sélectionnez la description physique qui vous plaît le plus" :show-ok="false" :show-cancel="true"
+      cancel-label="Annuler" @close="closePhysicalDescriptionModal">
       <div class="choices-container">
-        <div
-          v-for="(description, index) in generatedPhysicalDescriptions"
-          :key="index"
-          class="choice-item"
-          @click="selectPhysicalDescription(description)"
-        >
+        <div v-for="(description, index) in generatedPhysicalDescriptions" :key="index" class="choice-item"
+          @click="selectPhysicalDescription(description)">
           <div class="choice-content">
             <p>{{ description }}</p>
           </div>
@@ -212,25 +161,25 @@ const isSaving = ref(false);
 // Validation complète
 const isValid = computed(() => {
   if (!props.initialData) return false;
-  
+
   // Vérifier que le nom n'est pas vide
   if (characterName.value.trim().length === 0) return false;
-  
+
   // Vérifier que la description physique n'est pas vide
   if (characterPhysicalDescription.value.trim().length === 0) return false;
-  
+
   // Vérifier que le background n'est pas vide
   if (characterBackground.value.trim().length === 0) return false;
-  
+
   // Vérifier que la race et la culture sont choisis
   if (!props.initialData.race || !props.initialData.culture) return false;
-  
+
   // Vérifier que les caractéristiques sont définies (au minimum)
   if (!props.initialData.caracteristiques || Object.keys(props.initialData.caracteristiques).length === 0) return false;
-  
+
   // Vérifier que les compétences sont définies (au minimum)
   if (!props.initialData.competences || Object.keys(props.initialData.competences).length === 0) return false;
-  
+
   return true;
 });
 
@@ -254,7 +203,7 @@ onMounted(() => {
 // Génération du nom
 async function generateName() {
   if (!props.initialData || isGeneratingName.value) return;
-  
+
   try {
     isGeneratingName.value = true;
     generatedNames.value = await JdrApiService.generateCharacterName(props.initialData);
@@ -269,7 +218,7 @@ async function generateName() {
 // Génération du background
 async function generateBackground() {
   if (!props.initialData || isGeneratingBackground.value) return;
-  
+
   try {
     isGeneratingBackground.value = true;
     generatedBackgrounds.value = await JdrApiService.generateCharacterBackground(props.initialData);
@@ -284,7 +233,7 @@ async function generateBackground() {
 // Génération de la description physique
 async function generatePhysicalDescription() {
   if (!props.initialData || isGeneratingPhysicalDescription.value) return;
-  
+
   try {
     isGeneratingPhysicalDescription.value = true;
     generatedPhysicalDescriptions.value = await JdrApiService.generateCharacterPhysicalDescription(props.initialData);
@@ -536,11 +485,12 @@ function selectPhysicalDescription(description: string) {
 }
 
 @media (max-width: 768px) {
+
   .input-group,
   .textarea-group {
     flex-direction: column;
   }
-  
+
   .generate-btn {
     align-self: stretch;
   }

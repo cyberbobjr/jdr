@@ -2,7 +2,7 @@ import uuid
 import os
 import json
 import pytest
-from back.models.schema import Character  # Ajout de l'import pour validation
+from back.models.domain.character import Character  # Ajout de l'import pour validation
 
 def make_minimal_character():
     char_id = uuid.uuid4()

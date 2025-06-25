@@ -100,7 +100,6 @@ def isolated_data_dir(tmp_path, monkeypatch) -> Path:
     monkeypatch.setattr("back.config.get_data_dir", lambda: str(tmp_path))
     monkeypatch.setattr("back.services.scenario_service.get_data_dir", lambda: str(tmp_path))
     monkeypatch.setattr("back.services.character_persistence_service.get_data_dir", lambda: str(tmp_path))
-    monkeypatch.setattr("back.models.domain.equipements.get_data_dir", lambda: str(tmp_path))
     # Patch aussi dans les tests qui importent directement get_data_dir
     monkeypatch.setattr("back.tests.agents.test_prompt.get_data_dir", lambda: str(tmp_path))
     monkeypatch.setattr("back.tests.cleanup_test_sessions.get_data_dir", lambda: str(tmp_path))

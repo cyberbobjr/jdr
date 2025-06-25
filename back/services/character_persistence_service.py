@@ -85,7 +85,7 @@ class CharacterPersistenceService:
             raise
     
     @staticmethod
-    def save_character_data(character_id: str, character_data: Dict[str, Any]) -> None:
+    def save_character_data(character_id: str, character_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         ### save_character_data
         **Description :** Sauvegarde les données complètes d'un personnage dans son fichier JSON.
@@ -93,7 +93,7 @@ class CharacterPersistenceService:
         **Paramètres :**
         - `character_id` (str) : Identifiant du personnage (UUID).
         - `character_data` (dict) : Données à sauvegarder.
-        **Retour :** Aucun
+        **Retour :** Les données complètes fusionnées du personnage (dict).
         """
         filepath = CharacterPersistenceService._get_character_file_path(character_id)
         
@@ -125,7 +125,7 @@ class CharacterPersistenceService:
                      character_id=character_id, 
                      filepath=os.path.abspath(filepath),
                      keys_updated=list(character_data.keys()))
-        
+            return merged_data
         except Exception as e:
             log_debug("Erreur lors de la sauvegarde", 
                      action="save_character_data_error", 

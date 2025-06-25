@@ -5,7 +5,7 @@ import json
 from unittest.mock import Mock, patch
 
 from back.services.character_service import CharacterService
-from back.models.schema import Character
+from back.models.domain.character import Character
 
 
 @pytest.fixture

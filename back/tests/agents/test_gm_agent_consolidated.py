@@ -41,18 +41,31 @@ class TestGMAgentConsolidated:
     def mock_character_data(self):
         """Données de personnage mockées pour les tests (conformes au modèle Character)."""
         return {
-            "concept": "Guerrier loyal",
-            "race": "Humain",
-            "culture": "Royaume de Fer",
+            "id": str(uuid.uuid4()),  # UUID comme string
+            "name": "Test Character",
+            "race": {
+                "name": "Humain",
+                "characteristic_bonuses": {"Force": 1, "Constitution": 1},
+                "destiny_points": 3,
+                "special_abilities": ["Adaptabilité"],
+                "base_languages": ["Langue commune"],
+                "optional_languages": ["Elfe", "Nain"]
+            },
+            "culture": {
+                "name": "Royaume de Fer",
+                "description": "Culture guerrière",
+                "skill_bonuses": {"Survie": 2},
+                "characteristic_bonuses": {},
+                "free_skill_points": 10,
+                "traits": "Courageux"
+            },
             "caracteristiques": {
                 "Force": 14,
                 "Constitution": 13,
-                "Agilité": 12,
-                "Rapidité": 11,
-                "Volonté": 13,
-                "Raisonnement": 10,
-                "Intuition": 11,
-                "Présence": 9
+                "Dextérité": 12,
+                "Intelligence": 10,
+                "Perception": 11,
+                "Charisme": 9
             },
             "competences": {
                 "Armes blanches": 85,
@@ -60,20 +73,15 @@ class TestGMAgentConsolidated:
                 "Combat": 75,
                 "Survie": 55
             },
-            "talents": ["Courage", "Ambidextre"],
-            "equipment": ["Épée longue", "Bouclier"],
-            "spells": [],
-            "current_step": "joueur",
-            "equipment_summary": {},
-            "culture_bonuses": {"Survie": 2},
-            "name": "Test Character",
-            "bonus_race": {"Force": 1},
             "hp": 45,
             "xp": 100,
+            "gold": 50.0,
+            "inventory": [],
+            "spells": [],
+            "culture_bonuses": {"Survie": 2},
             "background": "Né dans le Royaume de Fer, il a combattu toute sa vie.",
             "physical_description": "Grand, robuste, cheveux bruns.",
-            "created_at": "2025-06-13T00:00:00Z",
-            "last_update": "2025-06-13T00:00:00Z"
+            "status": "complet"
         }
 
     # =============================================================================
@@ -136,39 +144,58 @@ class TestGMAgentConsolidated:
     
     def test_enrich_user_message_with_character_basic(self, mock_character_data):
         """Teste l'enrichissement basique d'un message avec les données du personnage."""
-        character = Character(**mock_character_data)
         message = "Je veux attaquer l'ennemi."
-
-        enriched = enrich_user_message_with_character(message, character.model_dump())
+        
+        # Utiliser directement les données mock (déjà sérialisables)
+        enriched = enrich_user_message_with_character(message, mock_character_data)
 
         assert message in enriched
-        assert character.name in enriched
+        assert mock_character_data["name"] in enriched
         # On vérifie la présence d'une caractéristique réelle (ex: 'Force')
-        assert str(character.caracteristiques["Force"]) in enriched
+        assert str(mock_character_data["caracteristiques"]["Force"]) in enriched
 
     def test_enrich_user_message_with_character_empty_message(self, mock_character_data):
         """Teste l'enrichissement avec un message vide."""
-        character = Character(**mock_character_data)
+        
+        # Utiliser directement les données mock (déjà sérialisables)
+        enriched = enrich_user_message_with_character("", mock_character_data)
 
-        enriched = enrich_user_message_with_character("", character.model_dump())
-
-        assert character.name in enriched
+        assert mock_character_data["name"] in enriched
         # On vérifie la présence d'une clé caractéristique réelle (ex: 'Force')
         assert "Force" in enriched
 
     def test_enrich_user_message_with_character_no_skills(self):
         """Teste l'enrichissement avec un personnage sans compétences."""
         character_data = {
-            "id": "test-id",
+            "id": str(uuid.uuid4()),
             "name": "Test Character",
-            "race": "Humain",
-            "culture": "Test",
-            "attributes": {"Vigueur": 10},
-            "skills": {},
+            "race": {
+                "name": "Humain",
+                "characteristic_bonuses": {"Force": 1},
+                "destiny_points": 3,
+                "special_abilities": [],
+                "base_languages": ["Langue commune"],
+                "optional_languages": []
+            },
+            "culture": {
+                "name": "Test",
+                "description": "Culture de test",
+                "skill_bonuses": {},
+                "characteristic_bonuses": {},
+                "free_skill_points": 0,
+                "traits": None
+            },
+            "caracteristiques": {"Force": 10},
+            "competences": {},
             "hp": 30,
+            "xp": 0,
+            "gold": 0.0,
             "inventory": [],
-            "equipment": [],
-            "spells": []
+            "spells": [],
+            "culture_bonuses": {},
+            "background": None,
+            "physical_description": None,
+            "status": None
         }
         
         enriched = enrich_user_message_with_character("Test message", character_data)

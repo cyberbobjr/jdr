@@ -129,8 +129,13 @@ def enrich_user_message_with_character(user_message: str, character_data: Dict[s
     if not character_data:
         return user_message
     
+    # Créer une copie des données pour la sérialisation JSON en convertissant l'UUID en string
+    character_data_serializable = character_data.copy()
+    if 'id' in character_data_serializable and hasattr(character_data_serializable['id'], '__str__'):
+        character_data_serializable['id'] = str(character_data_serializable['id'])
+    
     character_context = f"""<PERSONNAGE JOUEUR>
-{json.dumps(character_data, indent=2, ensure_ascii=False)}
+{json.dumps(character_data_serializable, indent=2, ensure_ascii=False)}
 </PERSONNAGE JOUEUR>
 """
     return character_context + user_message

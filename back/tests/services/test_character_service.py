@@ -1,5 +1,6 @@
 from back.services.character_service import CharacterService
-from back.models.schema import Character, Item, RaceData, CultureData, ItemType
+from back.models.schema import Item, RaceData, CultureData, ItemType
+from back.models.domain.character import Character
 import json
 import uuid
 import pytest

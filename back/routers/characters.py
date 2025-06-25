@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
+from back.models.domain.character import Character
+from back.models.schema import CharacterListAny
 from back.services.character_service import CharacterService
-from back.models.schema import CharacterListAny, CharacterAny
 from back.utils.logger import log_debug
 
 router = APIRouter()
@@ -21,7 +22,8 @@ def list_characters():
     ```json
         {
             "characters": [
-                {                    "id": "d7763165-4c03-4c8d-9bc6-6a2568b79eb3",
+                {                    
+                    "id": "d7763165-4c03-4c8d-9bc6-6a2568b79eb3",
                     "name": "Aragorn",
                     "race": "Humain",
                     "culture": "Gondor",
@@ -49,12 +51,13 @@ def list_characters():
                             "weight": 1.5,
                             "base_value": 150.0
                         }
-                    ],                    "equipment": ["Épée longue", "Armure de cuir"],
+                    ],                    
                     "spells": [],
                     "gold": 200,
                     "culture_bonuses": {
                         "Combat": 5,
-                        "Influence": 3                    }
+                        "Influence": 3                    
+                    }
                 }
             ]
         }
@@ -67,28 +70,12 @@ def list_characters():
     characters = CharacterService.get_all_characters()
     result = []
     for c in characters:
-        if isinstance(c, dict):
-            c = c.copy()
-            if "id" in c and not isinstance(c["id"], str):
-                c["id"] = str(c["id"])
+        if isinstance(c, Character):
+            c = c.model_dump()
             # Debug: vérifier le statut avant traitement
             log_debug("Character dict status avant traitement", character_id=c.get("id"), status=c.get("status"))
             # S'assurer que le statut est présent même s'il est None
-            if "status" not in c or c["status"] is None:
-                c["status"] = "inconnu"
-                log_debug("Statut mis à 'inconnu'", character_id=c.get("id"))
-            result.append(c)
-        else:
-            d = c.model_dump()
-            if "id" in d and not isinstance(d["id"], str):
-                d["id"] = str(d["id"])
-            # Debug: vérifier le statut avant traitement
-            log_debug("Character object status avant traitement", character_id=d.get("id"), status=d.get("status"))
-            # S'assurer que le statut est présent même s'il est None
-            if "status" not in d or d["status"] is None:
-                d["status"] = "inconnu"
-                log_debug("Statut mis à 'inconnu'", character_id=d.get("id"))
-            result.append(d)
+        result.append(c)
     
     # Debug: vérifier le résultat final
     for r in result:
@@ -96,7 +83,7 @@ def list_characters():
     
     return {"characters": result}
 
-@router.get("/{character_id}", response_model=CharacterAny)
+@router.get("/{character_id}", response_model=dict)
 def get_character_detail(character_id: str):
     """
     Récupère le détail d'un personnage à partir de son identifiant unique.
@@ -106,7 +93,7 @@ def get_character_detail(character_id: str):
     Paramètres:
         character_id (str): L'identifiant unique du personnage à récupérer
     Retourne:
-        CharacterAny: Les informations détaillées du personnage (permissif pour les personnages en cours)
+        dict: Les informations détaillées du personnage (permissif pour les personnages en cours)
     """
     log_debug("Appel endpoint characters/get_character_detail", character_id=str(character_id))
     
