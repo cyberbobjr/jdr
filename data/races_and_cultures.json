@@ -1,165 +1,176 @@
 [
     {
-        "name": "Humains",
+        "id": "humans",
+        "name": "Humans",
         "characteristic_bonuses": {
-            "Volonté": 1
+            "Willpower": 1
         },
-        "destiny_points": 3,
         "base_languages": [
-            "Ouistrain (langue commune)"
+            "Westron (Common Tongue)"
         ],
         "optional_languages": [
             "Sindarin",
-            "Rohirrique",
-            "Langue des Haradrims",
-            "Dalien"
+            "Rohirric",
+            "Haradric",
+            "Dalish"
         ],
         "cultures": [
             {
-                "name": "Gondoriens",
+                "id": "gondorians",
+                "name": "Gondorians",
                 "skill_bonuses": {
-                    "Connaissance Générale": 1
+                    "General Knowledge": 1
                 },
-                "traits": "Tradition et fierté"
+                "traits": "Tradition and pride"
             },
             {
+                "id": "rohirrim",
                 "name": "Rohirrim",
                 "skill_bonuses": {
-                    "Équitation": 1
+                    "Riding": 1
                 },
-                "traits": "Culture équestre"
+                "traits": "Equestrian culture"
             },
             {
-                "name": "Hommes du Nord",
+                "id": "northmen",
+                "name": "Northmen",
                 "skill_bonuses": {
-                    "Survie": 1
+                    "Survival": 1
                 },
-                "traits": "Endurance au climat"
+                "traits": "Climate endurance"
             },
             {
+                "id": "dunedain",
                 "name": "Dúnedain",
                 "characteristic_bonuses": {
-                    "Volonté": 1
+                    "Willpower": 1
                 },
                 "free_skill_points": 1,
-                "traits": "Longévité ×3, +1 Point de destin",
+                "traits": "Longevity ×3, +1 Fate Point",
                 "special_traits": {
-                    "longevity_multiplier": 3,
-                    "bonus_destiny_points": 1
+                    "longevity_multiplier": 3
                 }
             }
         ]
     },
     {
-        "name": "Elfes",
+        "id": "elves",
+        "name": "Elves",
         "characteristic_bonuses": {
-            "Agilité": 2
+            "Agility": 2
         },
-        "destiny_points": 2,
         "base_languages": [
             "Sindarin",
-            "Ouistrain"
+            "Westron"
         ],
         "optional_languages": [
             "Quenya",
-            "Sylvain",
-            "Entique",
-            "Langues anciennes"
+            "Silvan",
+            "Entish",
+            "Ancient Tongues"
         ],
         "cultures": [
             {
+                "id": "noldor",
                 "name": "Noldor",
                 "skill_bonuses": {
-                    "Artisanat": 1,
-                    "Connaissance Générale": 1
+                    "Crafting": 1,
+                    "General Knowledge": 1
                 },
-                "traits": "Maîtres artisans"
+                "traits": "Master craftsmen"
             },
             {
+                "id": "sindar",
                 "name": "Sindar",
                 "skill_bonuses": {
-                    "Herboristerie": 1,
+                    "Herbalism": 1,
                     "Perception": 1
                 },
-                "traits": "Harmonie avec la nature"
+                "traits": "Harmony with nature"
             },
             {
-                "name": "Sylvains",
+                "id": "silvan",
+                "name": "Silvan",
                 "skill_bonuses": {
-                    "Discrétion": 1,
-                    "Maniement d'Arme": 1
+                    "Stealth": 1,
+                    "Weapon Handling": 1
                 },
-                "traits": "Experts des forêts"
+                "traits": "Forest experts"
             }
         ]
     },
     {
-        "name": "Nains",
+        "id": "dwarves",
+        "name": "Dwarves",
         "characteristic_bonuses": {
             "Constitution": 2
         },
-        "destiny_points": 2,
         "base_languages": [
             "Khuzdul (secret)",
-            "Ouistrain"
+            "Westron"
         ],
         "optional_languages": [
-            "Iglishmêk (langage signes)",
+            "Iglishmêk (sign language)",
             "Sindarin",
-            "Langues du commerce"
+            "Trade languages"
         ],
         "cultures": [
             {
-                "name": "Longues-Barbes",
+                "id": "longbeards",
+                "name": "Longbeards",
                 "skill_bonuses": {
-                    "Artisanat": 1
+                    "Crafting": 1
                 },
-                "traits": "Traditions anciennes"
+                "traits": "Ancient traditions"
             },
             {
-                "name": "Barbes-de-Feu",
+                "id": "firebeards",
+                "name": "Firebeards",
                 "skill_bonuses": {
-                    "Maniement d'Arme": 1
+                    "Weapon Handling": 1
                 },
-                "traits": "Guerriers nés"
+                "traits": "Born warriors"
             }
         ]
     },
     {
+        "id": "hobbits",
         "name": "Hobbits",
         "characteristic_bonuses": {
-            "Agilité": 2
+            "Agility": 2
         },
-        "destiny_points": 4,
         "base_languages": [
-            "Ouistrain"
+            "Westron"
         ],
         "optional_languages": [
-            "Ancien Hobbitique",
-            "Rohirrique",
-            "Sindarin (basique)"
+            "Old Hobbitish",
+            "Rohirric",
+            "Sindarin (basic)"
         ],
         "cultures": [
             {
-                "name": "Pied-Poilus",
+                "id": "harfoots",
+                "name": "Harfoots",
                 "skill_bonuses": {
-                    "Discrétion": 1
+                    "Stealth": 1
                 },
-                "traits": "Discrets et prudents"
+                "traits": "Discreet and cautious"
             },
             {
-                "name": "Forts",
+                "id": "stoors",
+                "name": "Stoors",
                 "characteristic_bonuses": {
                     "Constitution": 1
                 },
-                "traits": "Robustes et résistants"
+                "traits": "Sturdy and resistant"
             },
             {
-                "name": "Brandeboucs",
+                "id": "brandybucks",
+                "name": "Brandybucks",
                 "skill_bonuses": {
-                    "Survie": 1
+                    "Survival": 1
                 },
-                "traits": "Aventureux"
+                "traits": "Adventurous"
             }
         ]
     }

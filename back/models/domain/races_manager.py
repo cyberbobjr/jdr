@@ -2,151 +2,136 @@ import json
 import os
 from typing import Dict, List, Any, Optional
 from ...config import get_data_dir
+from ..schema import RaceData, CultureData
 
 class RacesManager:
-    """Gestionnaire des races et cultures utilisant le nouveau système JSON simplifié"""
-    
+    """Manages races and cultures using the new simplified JSON system"""
+
     def __init__(self):
         self._load_races_data()
-    
+
     def _load_races_data(self):
-        """Charge les données depuis le fichier JSON"""
+        """Loads data from the JSON file"""
         data_path = os.path.join(get_data_dir(), "races_and_cultures.json")
         try:
             with open(data_path, 'r', encoding='utf-8') as f:
-                self.races_data = json.load(f)
+                self.races_data = [RaceData(**race) for race in json.load(f)]
         except FileNotFoundError:
-            # Fallback vers des données minimales
+            # Fallback to minimal data
             self.races_data = [
-                {
-                    "name": "Humains",
-                    "characteristic_bonuses": {"Volonté": 1},
-                    "destiny_points": 3,
-                    "base_languages": ["Ouistrain"],
-                    "optional_languages": [],
-                    "cultures": []
-                }
+                RaceData(
+                    id="humans",
+                    name="Humans",
+                    characteristic_bonuses={"Willpower": 1},
+                    base_languages=["Westron"],
+                    optional_languages=[],
+                    cultures=[]
+                )
             ]
 
-    def get_all_races(self) -> List[dict]:
-        """Retourne la liste complète des races (dictionnaires) pour correspondre à RaceSchema"""
-        # S'assurer que chaque race a bien tous les champs attendus par RaceSchema
-        races = []
-        for race in self.races_data:
-            race_obj = dict(race)
-            # Ajout du champ special_abilities si absent
-            if 'special_abilities' not in race_obj:
-                race_obj['special_abilities'] = []
-            races.append(race_obj)
-        return races
+    def get_all_races(self) -> List[RaceData]:
+        """Returns the complete list of races"""
+        return self.races_data
 
-    def get_race_by_name(self, race_name: str) -> Optional[Dict]:
-        """Retourne les données d'une race par son nom"""
+    def get_race_by_id(self, race_id: str) -> Optional[RaceData]:
+        """Returns data for a race by its id"""
         for race in self.races_data:
-            if race["name"] == race_name:
+            if race.id == race_id:
                 return race
         return None
 
-    def get_cultures_for_race(self, race_name: str) -> List[Dict]:
-        """Retourne les cultures disponibles pour une race"""
-        race = self.get_race_by_name(race_name)
+    def get_race_by_name(self, race_name: str) -> Optional[RaceData]:
+        """Returns data for a race by its name"""
+        for race in self.races_data:
+            if race.name == race_name:
+                return race
+        return None
+
+    def get_cultures_for_race(self, race_id: str) -> List[CultureData]:
+        """Returns the available cultures for a race"""
+        race = self.get_race_by_id(race_id)
         if race:
-            return race.get("cultures", [])
+            return race.cultures or []
         return []
 
-    def get_culture_by_name(self, race_name: str, culture_name: str) -> Optional[Dict]:
-        """Retourne les données d'une culture spécifique"""
-        cultures = self.get_cultures_for_race(race_name)
+    def get_culture_by_id(self, race_id: str, culture_id: str) -> Optional[CultureData]:
+        """Returns data for a specific culture"""
+        cultures = self.get_cultures_for_race(race_id)
         for culture in cultures:
-            if culture["name"] == culture_name:
+            if culture.id == culture_id:
                 return culture
         return None
 
-    def get_characteristic_bonuses(self, race_name: str, culture_name: str = None) -> Dict[str, int]:
-        """Retourne tous les bonus de caractéristiques (race + culture)"""
+    def get_characteristic_bonuses(self, race_id: str, culture_id: str = None) -> Dict[str, int]:
+        """Returns all characteristic bonuses (race + culture)"""
         bonuses = {}
-        
-        # Bonus raciaux
-        race = self.get_race_by_name(race_name)
+
+        # Racial bonuses
+        race = self.get_race_by_id(race_id)
         if race:
-            bonuses.update(race.get("characteristic_bonuses", {}))
-        
-        # Bonus culturels (si spécifiés)
-        if culture_name:
-            culture = self.get_culture_by_name(race_name, culture_name)
+            bonuses.update(race.characteristic_bonuses or {})
+
+        # Cultural bonuses (if specified)
+        if culture_id:
+            culture = self.get_culture_by_id(race_id, culture_id)
             if culture:
-                bonuses.update(culture.get("characteristic_bonuses", {}))
-        
+                bonuses.update(culture.characteristic_bonuses or {})
+
         return bonuses
 
-    def get_skill_bonuses(self, race_name: str, culture_name: str) -> Dict[str, int]:
-        """Retourne les bonus de compétences d'une culture"""
-        culture = self.get_culture_by_name(race_name, culture_name)
+    def get_skill_bonuses(self, race_id: str, culture_id: str) -> Dict[str, int]:
+        """Returns the skill bonuses of a culture"""
+        culture = self.get_culture_by_id(race_id, culture_id)
         if culture:
-            return culture.get("skill_bonuses", {})
+            return culture.skill_bonuses or {}
         return {}
 
-    def get_destiny_points(self, race_name: str, culture_name: str = None) -> int:
-        """Retourne le nombre de points de destin"""
-        race = self.get_race_by_name(race_name)
-        base_points = race.get("destiny_points", 2) if race else 2
-        
-        # Vérifier si la culture donne des points de destin bonus
-        if culture_name:
-            culture = self.get_culture_by_name(race_name, culture_name)
-            if culture and "special_traits" in culture:
-                bonus = culture["special_traits"].get("bonus_destiny_points", 0)
-                base_points += bonus
-        
-        return base_points
-
-    def get_languages(self, race_name: str) -> Dict[str, List[str]]:
-        """Retourne les langues de base et optionnelles d'une race"""
-        race = self.get_race_by_name(race_name)
+    def get_languages(self, race_id: str) -> Dict[str, List[str]]:
+        """Returns the base and optional languages of a race"""
+        race = self.get_race_by_id(race_id)
         if race:
             return {
-                "base": race.get("base_languages", []),
-                "optional": race.get("optional_languages", [])
+                "base": race.base_languages or [],
+                "optional": race.optional_languages or []
             }
         return {"base": [], "optional": []}
 
-    def get_free_skill_points(self, race_name: str, culture_name: str) -> int:
-        """Retourne le nombre de points de compétence libres"""
-        culture = self.get_culture_by_name(race_name, culture_name)
+    def get_free_skill_points(self, race_id: str, culture_id: str) -> int:
+        """Returns the number of free skill points"""
+        culture = self.get_culture_by_id(race_id, culture_id)
         if culture:
-            return culture.get("free_skill_points", 0)
+            return culture.free_skill_points or 0
         return 0
 
-    def get_special_traits(self, race_name: str, culture_name: str) -> Dict[str, Any]:
-        """Retourne les traits spéciaux d'une culture"""
-        culture = self.get_culture_by_name(race_name, culture_name)
+    def get_special_traits(self, race_id: str, culture_id: str) -> Dict[str, Any]:
+        """Returns the special traits of a culture"""
+        culture = self.get_culture_by_id(race_id, culture_id)
         if culture:
-            return culture.get("special_traits", {})
+            return culture.special_traits or {}
         return {}
 
-    def get_culture_description(self, race_name: str, culture_name: str) -> str:
-        """Retourne la description/traits d'une culture"""
-        culture = self.get_culture_by_name(race_name, culture_name)
+    def get_culture_description(self, race_id: str, culture_id: str) -> str:
+        """Returns the description/traits of a culture"""
+        culture = self.get_culture_by_id(race_id, culture_id)
         if culture:
-            return culture.get("traits", "")
+            return culture.traits or ""
         return ""
 
-    def get_complete_character_bonuses(self, race_name: str, culture_name: str) -> Dict[str, Any]:
-        """Retourne tous les bonus et traits pour un personnage (race + culture)"""
+    def get_complete_character_bonuses(self, race_id: str, culture_id: str) -> Dict[str, Any]:
+        """Returns all bonuses and traits for a character (race + culture)"""
         return {
-            "characteristic_bonuses": self.get_characteristic_bonuses(race_name, culture_name),
-            "skill_bonuses": self.get_skill_bonuses(race_name, culture_name),
-            "destiny_points": self.get_destiny_points(race_name, culture_name),
-            "languages": self.get_languages(race_name),
-            "free_skill_points": self.get_free_skill_points(race_name, culture_name),
-            "special_traits": self.get_special_traits(race_name, culture_name),
-            "culture_description": self.get_culture_description(race_name, culture_name)
+            "characteristic_bonuses": self.get_characteristic_bonuses(race_id, culture_id),
+            "skill_bonuses": self.get_skill_bonuses(race_id, culture_id),
+            "languages": self.get_languages(race_id),
+            "free_skill_points": self.get_free_skill_points(race_id, culture_id),
+            "special_traits": self.get_special_traits(race_id, culture_id),
+            "culture_description": self.get_culture_description(race_id, culture_id)
         }
 
-    def get_all_races_data(self) -> List[Dict]:
-        """Retourne la liste complète des données de races (pas seulement les noms)"""
+    def get_all_races_data(self) -> List[RaceData]:
+        """Returns the complete list of race data (not just names)"""
         return self.races_data
 
     def get_race_names(self) -> List[str]:
-        """Retourne uniquement les noms des races"""
-        return [race["name"] for race in self.races_data]
+        """Returns only the names of the races"""
+        return [race.name for race in self.races_data]

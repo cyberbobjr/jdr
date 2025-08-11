@@ -1,0 +1,42 @@
+@startuml
+title Scenario Gameplay Sequence
+
+actor User
+participant "FastAPI Router\n(scenarios.py)" as Router
+participant "SessionService" as SessionService
+participant "GM Agent\n(gm_agent_pydantic.py)" as GmAgent
+participant "PydanticJSONLStore" as JsonlStore
+database "Session History" as SessionDB
+
+User -> Router: POST /api/scenarios/play (session_id, message)
+activate Router
+Router -> SessionService: get_session(session_id)
+activate SessionService
+SessionService -> JsonlStore: load_history(session_id)
+activate JsonlStore
+JsonlStore -> SessionDB: Read session file
+JsonlStore --> SessionService: history
+deactivate JsonlStore
+SessionService --> Router: session
+deactivate SessionService
+
+Router -> GmAgent: play(message, history)
+activate GmAgent
+
+note over GmAgent: Agent processes message,\nuses tools, and generates a response.
+
+GmAgent -> SessionService: save_message(session_id, message)
+activate SessionService
+SessionService -> JsonlStore: save_message(session_id, message)
+activate JsonlStore
+JsonlStore -> SessionDB: Append to session file
+deactivate JsonlStore
+deactivate SessionService
+
+GmAgent --> Router: llm_response
+deactivate GmAgent
+
+Router --> User: 200 OK (llm_response)
+deactivate Router
+
+@enduml

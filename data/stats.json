@@ -1,0 +1,118 @@
+{
+  "stats": {
+    "Strength": {
+      "short_name": "STR",
+      "category": "physical",
+      "description": "Physical strength, build. Determines melee damage and carrying capacity.",
+      "examples": [
+        "Lifting heavy objects",
+        "Breaking down a door",
+        "Melee weapon damage"
+      ]
+    },
+    "Constitution": {
+      "short_name": "CON",
+      "category": "physical",
+      "description": "Health, endurance, vigor. Determines Hit Points and resistance to diseases.",
+      "examples": [
+        "Resisting poison",
+        "Enduring fatigue",
+        "Surviving injuries"
+      ]
+    },
+    "Agility": {
+      "short_name": "AGI",
+      "category": "physical",
+      "description": "Manual dexterity, flexibility. Determines initiative and defense.",
+      "examples": [
+        "Dodging an attack",
+        "Pickpocketing",
+        "Acrobatics"
+      ]
+    },
+    "Speed": {
+      "short_name": "SPD",
+      "category": "physical",
+      "description": "Reflexes, reaction time, coordination. Determines the order of action.",
+      "examples": [
+        "Reacting quickly",
+        "Initiative in combat",
+        "Complex coordination"
+      ]
+    },
+    "Willpower": {
+      "short_name": "WIL",
+      "category": "mental",
+      "description": "Determination, mental resistance, courage. Determines resistance to magic.",
+      "examples": [
+        "Resisting fear",
+        "Concentration",
+        "Mental resistance"
+      ]
+    },
+    "Reasoning": {
+      "short_name": "REA",
+      "category": "mental",
+      "description": "Logical thinking, analysis, intelligence. Determines magic Power Points.",
+      "examples": [
+        "Solving a riddle",
+        "Analyzing a situation",
+        "Theoretical knowledge"
+      ]
+    },
+    "Intuition": {
+      "short_name": "INT",
+      "category": "mental",
+      "description": "Intuition, perception, insight. Determines perception and instinct.",
+      "examples": [
+        "Sensing danger",
+        "Understanding motivations",
+        "Sensory perception"
+      ]
+    },
+    "Presence": {
+      "short_name": "PRE",
+      "category": "social",
+      "description": "Charisma, self-confidence, leadership. Determines social influence.",
+      "examples": [
+        "Persuading someone",
+        "Commanding troops",
+        "Impressing"
+      ]
+    }
+  },
+  "bonus_table": {
+    "1-5": -18,
+    "6-10": -16,
+    "11-15": -14,
+    "16-20": -12,
+    "21-25": -10,
+    "26-30": -8,
+    "31-35": -6,
+    "36-40": -4,
+    "41-45": -2,
+    "46-50": 0,
+    "51-55": 1,
+    "56-60": 2,
+    "61-65": 3,
+    "66-70": 4,
+    "71-75": 5,
+    "76-80": 6,
+    "81-85": 7,
+    "86-90": 8,
+    "91-95": 9,
+    "96-100": 10,
+    "101": 11,
+    "102": 12,
+    "103": 13,
+    "104": 14,
+    "105": 15
+  },
+  "cost_table": {
+    "1-90": 1,
+    "91-95": 2,
+    "96-100": 3,
+    "101-105": 10
+  },
+  "starting_points": 550
+}

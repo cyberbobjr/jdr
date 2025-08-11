@@ -1,6 +1,6 @@
 """
-Routeur FastAPI pour la création de personnage.
-Expose les routes nécessaires à chaque étape de la création et au suivi du statut.
+FastAPI router for character creation.
+Exposes the necessary routes for each creation step and status tracking.
 """
 from fastapi import APIRouter, HTTPException, Body, status
 from uuid import uuid4
@@ -18,8 +18,8 @@ from back.models.schema import (
     SaveCharacterRequest, SaveCharacterResponse,
     CheckSkillsRequest, CheckSkillsResponse,
     CreationStatusResponse,
-    RaceData,  # Remplace RaceSchema
-    CharacteristicsResponse, UpdateSkillsRequest, UpdateSkillsResponse,  # Nouveau schéma pour les caractéristiques
+    RaceData,
+    StatsResponse, UpdateSkillsRequest, UpdateSkillsResponse,
     AddEquipmentRequest, AddEquipmentResponse,
     RemoveEquipmentRequest, RemoveEquipmentResponse,
     UpdateMoneyRequest, UpdateMoneyResponse
@@ -28,73 +28,71 @@ from back.agents.gm_agent_pydantic import enrich_user_message_with_character
 
 router = APIRouter(tags=["creation"])
 
-@router.get("/races", summary="Liste des races", response_model=List[RaceData])
+@router.get("/races", summary="List of races", response_model=List[RaceData])
 def get_races():
     """
-    Retourne la liste complète des races disponibles (structure typée RaceData pour documentation Swagger).
-    **Sortie** : Liste d'objets RaceData (structure complète issue du JSON).
+    Returns the complete list of available races (typed RaceData structure for Swagger documentation).
+    **Output**: List of RaceData objects (complete structure from JSON).
     """
-    from back.models.domain.races_manager import RacesManager
     races_manager = RacesManager()
     return races_manager.get_all_races()
 
 @router.get(
     "/skills",
-    summary="Compétences détaillées (LLM)",
-    response_model=dict,  # Pour Swagger, on expose le schéma JSON complet
-    response_description="Structure complète du fichier skills_for_llm.json (groupes, compétences, niveaux de difficulté, etc.)"
+    summary="Detailed skills (LLM)",
+    response_model=dict,
+    response_description="Complete structure of the skills_for_llm.json file (groups, skills, difficulty levels, etc.)"
 )
 def get_skills():
     """
-    Retourne la structure complète du fichier skills_for_llm.json (groupes, compétences, niveaux de difficulté, etc.).
-    **Sortie** : Dictionnaire conforme à skills_for_llm.json
+    Returns the complete structure of the skills_for_llm.json file (groups, skills, difficulty levels, etc.).
+    **Output**: Dictionary conforming to skills_for_llm.json
     """
     return CharacterCreationService.get_skills()
 
 
-@router.get("/equipments", summary="Liste des équipements", response_model=list)
+@router.get("/equipments", summary="List of equipments", response_model=list)
 def get_equipments():
     """
-    Retourne la liste des équipements disponibles.
-    **Sortie** : Liste de chaînes (équipements)
+    Returns the list of available equipment.
+    **Output**: List of strings (equipment)
     """
     return CharacterCreationService.get_equipments()
 
-@router.get("/equipments-detailed", summary="Équipements avec détails", response_model=dict)
+@router.get("/equipments-detailed", summary="Equipment with details", response_model=dict)
 def get_equipments_detailed():
     """
-    Retourne la structure complète des équipements avec leurs détails (armes, armures, objets).
-    **Sortie** : Dictionnaire complet des équipements groupés par catégorie
+    Returns the complete structure of equipment with their details (weapons, armor, items).
+    **Output**: Complete dictionary of equipment grouped by category
     """
     from back.models.domain.equipment_manager import EquipmentManager
     equipment_manager = EquipmentManager()
     return equipment_manager.get_all_equipment()
 
-@router.get("/spells", summary="Liste des sorts", response_model=list)
+@router.get("/spells", summary="List of spells", response_model=list)
 def get_spells():
     """
-    Retourne la liste des sorts disponibles.
-    **Sortie** : Liste de chaînes (sorts)
+    Returns the list of available spells.
+    **Output**: List of strings (spells)
     """
     return CharacterCreationService.get_spells()
 
 @router.post(
     "/allocate-attributes",
     response_model=AllocateAttributesResponse,
-    summary="Allocation automatique des caractéristiques",
-    description="Alloue automatiquement les caractéristiques selon la race fournie."
+    summary="Automatic attribute allocation",
+    description="Automatically allocates attributes according to the provided race."
 )
 def allocate_attributes(request: AllocateAttributesRequest):
     """
-    Alloue automatiquement les caractéristiques selon la race.
-    - **Entrée** : race (str)
-    - **Sortie** : Dictionnaire des caractéristiques allouées
+    Automatically allocates attributes according to the race.
+    - **Input**: race_id (str)
+    - **Output**: Dictionary of allocated attributes
     """
-    # Récupérer l'objet RaceData complet à partir du nom
     races_manager = RacesManager()
-    race_data = races_manager.get_race_by_name(request.race)
+    race_data = races_manager.get_race_by_id(request.race_id)
     if not race_data:
-        raise HTTPException(status_code=404, detail=f"Race '{request.race}' not found")
+        raise HTTPException(status_code=404, detail=f"Race with id '{request.race_id}' not found")
     
     attributes = CharacterCreationService.allocate_attributes_auto(race_data)
     return AllocateAttributesResponse(attributes=attributes)
@@ -102,14 +100,14 @@ def allocate_attributes(request: AllocateAttributesRequest):
 @router.post(
     "/check-attributes",
     response_model=CheckAttributesResponse,
-    summary="Validation des caractéristiques",
-    description="Vérifie que la répartition des points de caractéristiques respecte les règles du jeu."
+    summary="Attribute validation",
+    description="Checks that the distribution of attribute points respects the game rules."
 )
 def check_attributes(request: CheckAttributesRequest):
     """
-    Vérifie que les points de caractéristiques respectent les règles (budget, bornes).
-    - **Entrée** : attributes (dict)
-    - **Sortie** : valid (bool)
+    Checks that the attribute points respect the rules (budget, bounds).
+    - **Input**: attributes (dict)
+    - **Output**: valid (bool)
     """
     valid = CharacterCreationService.check_attributes_points(request.attributes)
     return CheckAttributesResponse(valid=valid)
@@ -117,17 +115,16 @@ def check_attributes(request: CheckAttributesRequest):
 @router.post(
     "/new",
     response_model=CreationStatusResponse,
-    summary="Création d'un nouveau personnage",
-    description="Crée un nouveau personnage (état initial, id et date de création)."
+    summary="Create a new character",
+    description="Creates a new character (initial state, id and creation date)."
 )
 def create_new_character():
     """
-    Crée un nouveau personnage (état initial, id et date de création).
-    - **Sortie** : character_id (str), created_at (str), status (str)
+    Creates a new character (initial state, id and creation date).
+    - **Output**: character_id (str), created_at (str), status (str)
     """
     character_id = str(uuid4())
     now = datetime.now().isoformat()
-      # Générer l'or de départ avec 1D50 (en pièce d'or)
     starting_money = random.randint(1, 50)
     
     character_data = {
@@ -135,9 +132,9 @@ def create_new_character():
         "created_at": now,
         "last_update": now,
         "current_step": "creation",
-        "status": CharacterStatus.IN_PROGRESS,  # Statut initial
+        "status": CharacterStatus.IN_PROGRESS,
         "xp": 0, 
-        "gold": starting_money  # Or de départ (1D50 en pièce d'or)
+        "gold": starting_money
     }
     CharacterPersistenceService.save_character_data(character_id, character_data)
     return {"id": character_id, "created_at": now, "status": CharacterStatus.IN_PROGRESS}
@@ -145,19 +142,17 @@ def create_new_character():
 @router.post(
     "/save",
     response_model=SaveCharacterResponse,
-    summary="Sauvegarde du personnage",
-    description="Enregistre ou met à jour les données du personnage en cours de création."
+    summary="Save character",
+    description="Saves or updates the data of the character being created."
 )
 def save_character(request: SaveCharacterRequest):
     """
-    Enregistre ou met à jour les données du personnage en cours de création.
-    - **Entrée** : character_id (str), character (dict)
-    - **Sortie** : status (str)
+    Saves or updates the data of the character being created.
+    - **Input**: character_id (str), character (dict)
+    - **Output**: status (str)
     """
     character = CharacterPersistenceService.save_character_data(request.character_id, request.character)
-    Character.is_character_finalized(character)
-    if Character.is_character_finalized(character) and character.get("status") == CharacterStatus.EN_COURS:
-        # Si le personnage est finalisé, on met à jour le statut
+    if Character.is_character_finalized(character) and character.get("status") == CharacterStatus.IN_PROGRESS:
         character["status"] = CharacterStatus.DONE
         character["last_update"] = datetime.now().isoformat()
         character = CharacterPersistenceService.save_character_data(request.character_id, character)
@@ -167,64 +162,60 @@ def save_character(request: SaveCharacterRequest):
 @router.get(
     "/status/{character_id}",
     response_model=CreationStatusResponse,
-    summary="Statut de création du personnage",
-    description="Retourne le statut de création du personnage (en cours, terminé, non trouvé)."
+    summary="Character creation status",
+    description="Returns the creation status of the character (in progress, finished, not found)."
 )
 def get_creation_status(character_id: str):
     """
-    Retourne le statut de création du personnage (en cours, terminé, non trouvé).
-    - **Entrée** : character_id (str)
-    - **Sortie** : status (str)
+    Returns the creation status of the character (in progress, finished, not found).
+    - **Input**: character_id (str)
+    - **Output**: status (str)
     """
     try:
         data = CharacterPersistenceService.load_character_data(character_id)
-        return CreationStatusResponse(character_id=character_id, status=data.get("status", "en_cours"))
+        return CreationStatusResponse(character_id=character_id, status=data.get("status", "in_progress"))
     except FileNotFoundError:
         return CreationStatusResponse(character_id=character_id, status="not_found")
 
 @router.post(
     "/check-skills",
     response_model=CheckSkillsResponse,
-    summary="Validation des compétences",
-    description="Vérifie que la répartition des points de compétences respecte les règles (budget, groupes favoris, max par compétence)."
+    summary="Skill validation",
+    description="Checks that the distribution of skill points respects the rules (budget, favorite groups, max per skill)."
 )
 def check_skills(request: CheckSkillsRequest):
     """
-    Vérifie que la répartition des points de compétences respecte les règles (budget, groupes favoris, max par compétence).
-    - **Entrée** : skills (dict)
-    - **Sortie** : valid (bool), cost (int)
+    Checks that the distribution of skill points respects the rules (budget, favorite groups, max per skill).
+    - **Input**: skills (dict)
+    - **Output**: valid (bool), cost (int)
     """
     valid = CharacterCreationService.check_skills_points(request.skills)
     cost = CharacterCreationService.calculate_skills_cost(request.skills)
     return CheckSkillsResponse(valid=valid, cost=cost)
 
-@router.post("/generate-name", summary="Générer 5 noms de personnage via LLM")
+@router.post("/generate-name", summary="Generate 5 character names via LLM")
 async def generate_character_name(character: dict = Body(...)):
     """
-    Génère 5 noms de personnage adaptés via l'agent LLM, selon la fiche de personnage partielle.
-    **Entrée** : Fiche de personnage (partielle)
-    **Sortie** : Liste de 5 noms générés
+    Generates 5 appropriate character names via the LLM agent, based on the partial character sheet.
+    **Input**: Partial character sheet
+    **Output**: List of 5 generated names
     """
     try:
         from back.agents.gm_agent_pydantic import build_simple_gm_agent
         agent = build_simple_gm_agent()
         prompt = enrich_user_message_with_character(
-            "Propose 5 noms de personnage appropriés pour cette fiche. Réponds avec une liste numérotée (1. Nom1, 2. Nom2, etc.).",
+            "Suggest 5 appropriate character names for this sheet. Respond with a numbered list (1. Name1, 2. Name2, etc.).",
             character
         )
         result = await agent.run(prompt)
-        # Extraire les noms de la liste numérotée
         names = []
         for line in result.output.strip().split('\n'):
             if line.strip() and (line.strip().startswith(('1.', '2.', '3.', '4.', '5.')) or line.strip()[0].isdigit()):
-                # Extraire le nom après le numéro
                 name = line.split('.', 1)[-1].strip()
                 if name:
                     names.append(name)
         
-        # S'assurer qu'on a exactement 5 noms
         if len(names) < 5:
-            # Compléter avec des noms génériques si nécessaire
             generic_names = ["Aragorn", "Legolas", "Gimli", "Boromir", "Faramir"]
             names.extend(generic_names[len(names):5])
         
@@ -232,53 +223,48 @@ async def generate_character_name(character: dict = Body(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/generate-background", summary="Générer 5 backgrounds de personnage via LLM")
+@router.post("/generate-background", summary="Generate 5 character backgrounds via LLM")
 async def generate_character_background(character: dict = Body(...)):
     """
-    Génère 5 backgrounds d'histoire pour le personnage via l'agent LLM.
-    **Entrée** : Fiche de personnage (partielle)
-    **Sortie** : Liste de 5 backgrounds générés
+    Generates 5 story backgrounds for the character via the LLM agent.
+    **Input**: Partial character sheet
+    **Output**: List of 5 generated backgrounds
     """
     try:
         from back.agents.gm_agent_pydantic import build_simple_gm_agent
         agent = build_simple_gm_agent()
         prompt = enrich_user_message_with_character(
             """
-            Rédige 5 backgrounds d'histoire immersifs et cohérents pour ce personnage. 
-            Chaque background devra inclure un objectif de vie pour le personnage. 
-            Réponds avec une liste numérotée (1. Background1, 2. Background2, etc.). 
-            Chaque background doit faire 6-7 phrases.
+            Write 5 immersive and coherent story backgrounds for this character. 
+            Each background should include a life goal for the character. 
+            Respond with a numbered list (1. Background1, 2. Background2, etc.). 
+            Each background should be 6-7 sentences long.
             """,
             character
         )
         result = await agent.run(prompt)
-        # Extraire les backgrounds de la liste numérotée
         backgrounds = []
         current_background = ""
         
         for line in result.output.strip().split('\n'):
             line = line.strip()
             if line and (line.startswith(('1.', '2.', '3.', '4.', '5.')) or (line[0].isdigit() and '.' in line)):
-                # Nouveau background
                 if current_background:
                     backgrounds.append(current_background.strip())
                 current_background = line.split('.', 1)[-1].strip()
             elif line and current_background:
-                # Continuation du background actuel
                 current_background += " " + line
         
-        # Ajouter le dernier background
         if current_background:
             backgrounds.append(current_background.strip())
         
-        # S'assurer qu'on a exactement 5 backgrounds
         if len(backgrounds) < 5:
             generic_backgrounds = [
-                "Un aventurier expérimenté ayant parcouru de nombreuses terres.",
-                "Un héros en devenir cherchant à prouver sa valeur.",
-                "Un sage possédant une connaissance ancienne des traditions.",
-                "Un guerrier courageux défendant les innocents.",
-                "Un explorateur curieux découvrant les mystères du monde."
+                "An experienced adventurer who has traveled many lands.",
+                "A hero in the making seeking to prove his worth.",
+                "A wise man with an ancient knowledge of traditions.",
+                "A brave warrior defending the innocent.",
+                "A curious explorer discovering the mysteries of the world."
             ]
             backgrounds.extend(generic_backgrounds[len(backgrounds):5])
         
@@ -286,54 +272,49 @@ async def generate_character_background(character: dict = Body(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/generate-physical-description", summary="Générer 5 descriptions physiques via LLM")
+@router.post("/generate-physical-description", summary="Generate 5 physical descriptions via LLM")
 async def generate_character_physical_description(character: dict = Body(...)):
     """
-    Génère 5 descriptions physiques pour le personnage via l'agent LLM.
-    **Entrée** : Fiche de personnage (partielle)
-    **Sortie** : Liste de 5 descriptions physiques générées
+    Generates 5 physical descriptions for the character via the LLM agent.
+    **Input**: Partial character sheet
+    **Output**: List of 5 generated physical descriptions
     """
     try:
         from back.agents.gm_agent_pydantic import build_simple_gm_agent
         agent = build_simple_gm_agent()
         prompt = enrich_user_message_with_character(
             """
-            Décris 5 apparences physiques différentes pour ce personnage de façon détaillée. 
-            Tu dois faire une description précise du personnage (visage, corps, vêtements) afin de générer un prompt pour un générateur d'image. 
-            Soit factuel, ne donne pas d'impression ni de ressenti, utilise des termes descriptifs, comme si tu devait décrire une personnage à un aveugle.
-            Réponds avec une liste numérotée (1. Description1, 2. Description2, etc.).
-            Chaque description doit faire 6-7 phrases.
+            Describe 5 different physical appearances for this character in detail. 
+            You must provide a precise description of the character (face, body, clothes) in order to generate a prompt for an image generator. 
+            Be factual, do not give impressions or feelings, use descriptive terms, as if you were describing a character to a blind person.
+            Respond with a numbered list (1. Description1, 2. Description2, etc.).
+            Each description should be 6-7 sentences long.
             """,
             character
         )
         result = await agent.run(prompt)
-        # Extraire les descriptions de la liste numérotée
         descriptions = []
         current_description = ""
         
         for line in result.output.strip().split('\n'):
             line = line.strip()
             if line and (line.startswith(('1.', '2.', '3.', '4.', '5.')) or (line[0].isdigit() and '.' in line)):
-                # Nouvelle description
                 if current_description:
                     descriptions.append(current_description.strip())
                 current_description = line.split('.', 1)[-1].strip()
             elif line and current_description:
-                # Continuation de la description actuelle
                 current_description += " " + line
         
-        # Ajouter la dernière description
         if current_description:
             descriptions.append(current_description.strip())
         
-        # S'assurer qu'on a exactement 5 descriptions
         if len(descriptions) < 5:
             generic_descriptions = [
-                "Une personne aux traits fins et élégants, avec des yeux perçants et une posture noble.",
-                "Un individu robuste et imposant, avec des mains calleuses témoignant d'une vie de labeur.",
-                "Une silhouette élancée et gracieuse, se déplaçant avec une agilité naturelle.",
-                "Un visage marqué par l'expérience, avec des rides qui racontent mille histoires.",
-                "Une apparence mystérieuse et captivante, avec un regard qui semble percer les âmes."
+                "A person with fine and elegant features, with piercing eyes and a noble posture.",
+                "A robust and imposing individual, with calloused hands testifying to a life of labor.",
+                "A slender and graceful figure, moving with natural agility.",
+                "A face marked by experience, with wrinkles that tell a thousand stories.",
+                "A mysterious and captivating appearance, with a gaze that seems to pierce souls."
             ]
             descriptions.extend(generic_descriptions[len(descriptions):5])
         
@@ -341,26 +322,26 @@ async def generate_character_physical_description(character: dict = Body(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/characteristics", summary="Données complètes des caractéristiques", response_model=CharacteristicsResponse)
-def get_characteristics():
+@router.get("/stats", summary="Complete stats data", response_model=StatsResponse)
+def get_stats():
     """
-    Retourne le fichier characteristics.json complet avec toutes les données :
-    - Définitions des caractéristiques (Force, Agilité, etc.)
-    - Table des bonus par valeur
-    - Table des coûts en points
-    - Points de départ
-    **Sortie** : Contenu complet du fichier characteristics.json
+    Returns the complete stats.json file with all data:
+    - Definitions of stats (Strength, Agility, etc.)
+    - Bonus table by value
+    - Point cost table
+    - Starting points
+    **Output**: Complete content of the stats.json file
     """
-    from back.models.domain.characteristics_manager import CharacteristicsManager
-    manager = CharacteristicsManager()
-    return manager.get_all_characteristics()
+    from back.models.domain.stats_manager import StatsManager
+    manager = StatsManager()
+    return manager.get_all_stats_data()
 
-@router.delete("/delete/{character_id}", summary="Supprimer un personnage", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/delete/{character_id}", summary="Delete a character", status_code=status.HTTP_204_NO_CONTENT)
 def delete_character(character_id: str):
     """
-    Supprime un personnage à partir de son identifiant.
-    **Entrée** : character_id (str)
-    **Sortie** : 204 No Content si succès
+    Deletes a character from their ID.
+    **Input**: character_id (str)
+    **Output**: 204 No Content if successful
     """
     from back.services.character_persistence_service import CharacterPersistenceService
     CharacterPersistenceService.delete_character_data(character_id)
@@ -369,103 +350,91 @@ def delete_character(character_id: str):
 @router.post(
     "/update-skills",
     response_model=UpdateSkillsResponse,
-    summary="Mise à jour des compétences",
-    description="Met à jour uniquement les compétences du personnage en cours de création."
+    summary="Update skills",
+    description="Updates only the skills of the character being created."
 )
 def update_skills(request: UpdateSkillsRequest):
     """
-    Met à jour uniquement les compétences du personnage en cours de création.
-    Effectue un merge avec les données existantes.
-    - **Entrée** : character_id (str), skills (dict)
-    - **Sortie** : status (str)
+    Updates only the skills of the character being created.
+    Performs a merge with existing data.
+    - **Input**: character_id (str), skills (dict)
+    - **Output**: status (str)
     """
-    # Créer un dictionnaire avec seulement les compétences
-    character_data = {"competences": request.skills}
+    character_data = {"skills": request.skills}
     CharacterPersistenceService.save_character_data(request.character_id, character_data)
-    return UpdateSkillsResponse(status="en_cours")
+    return UpdateSkillsResponse(status="in_progress")
 
-# === Routes pour la gestion d'équipement ===
+# === Routes for equipment management ===
 
 @router.post(
     "/add-equipment",
     response_model=AddEquipmentResponse,
-    summary="Ajouter un équipement",
-    description="Ajoute un équipement au personnage et débite l'argent correspondant."
+    summary="Add equipment",
+    description="Adds equipment to the character and deducts the corresponding money."
 )
 def add_equipment(request: AddEquipmentRequest):    
     """
-    Ajoute un équipement au personnage et débite l'argent correspondant.
-    - **Entrée** : character_id (str), equipment_name (str)
-    - **Sortie** : status (str), gold (int), total_weight (float), equipment_added (dict)
+    Adds equipment to the character and deducts the corresponding money.
+    - **Input**: character_id (str), equipment_name (str)
+    - **Output**: status (str), gold (int), total_weight (float), equipment_added (dict)
     """
     try:
-        # Charger les données du personnage directement
         character_data = CharacterPersistenceService.load_character_data(request.character_id)
         
-        # Importer EquipmentManager pour gérer l'équipement
         from back.models.domain.equipment_manager import EquipmentManager
         
-        # Récupérer les détails de l'équipement
         equipment_manager = EquipmentManager()
         equipment_details = equipment_manager.get_equipment_by_name(request.equipment_name)
         
         if not equipment_details:
-            raise ValueError(f"Équipement '{request.equipment_name}' non trouvé")
-          # Vérifier le budget avec la clé 'gold'
+            raise ValueError(f"Equipment '{request.equipment_name}' not found")
         current_gold = character_data.get('gold', 0.0)
         equipment_cost = equipment_details.get('cost', 0)
         
         if current_gold < equipment_cost:
-            raise ValueError("Pas assez d'argent pour acheter cet équipement")
+            raise ValueError("Not enough money to buy this equipment")
         
-        # Ajouter l'équipement à l'inventaire (nouveau format)
         inventory = character_data.get('inventory', [])
-          # Vérifier si l'équipement n'est pas déjà présent
         equipment_already_exists = any(
             item.get('name') == request.equipment_name for item in inventory
         )
         
-        if not equipment_already_exists:            # Créer un objet Item complet pour l'inventaire selon le modèle schema.py
+        if not equipment_already_exists:
             import uuid
             
-            # Mapper le type d'équipement vers l'énumération ItemType
-            equipment_type = equipment_details.get('type', 'materiel').lower()
-            if equipment_type == 'arme':
-                item_type = 'Arme'
-            elif equipment_type == 'armure':
-                item_type = 'Armure'
-            elif equipment_type == 'nourriture':
-                item_type = 'Nourriture'
-            elif equipment_type == 'objet_magique':
-                item_type = 'Objet_Magique'
+            equipment_type = equipment_details.get('type', 'material').lower()
+            if equipment_type == 'weapon':
+                item_type = 'Weapon'
+            elif equipment_type == 'armor':
+                item_type = 'Armor'
+            elif equipment_type == 'food':
+                item_type = 'Food'
+            elif equipment_type == 'magic_item':
+                item_type = 'Magic_Item'
             else:
-                item_type = 'Materiel'
+                item_type = 'Material'
             
             new_item = {
-                "id": str(uuid.uuid4()),  # ID unique pour cette instance
+                "id": str(uuid.uuid4()),
                 "name": request.equipment_name,
-                "item_type": item_type,  # Type d'objet mappé
-                "price_pc": equipment_details.get('cost', 0),  # Prix en pièces de cuivre 
-                "weight_kg": equipment_details.get('weight', 0),  # Poids en kg
-                "description": equipment_details.get('description', ''),  # Description
-                "category": equipment_details.get('category'),  # Catégorie
-                "damage": equipment_details.get('damage'),  # Dégâts si arme
-                "quantity": 1,  # Quantité
-                "is_equipped": False  # Pas équipé par défaut
+                "item_type": item_type,
+                "price_pc": equipment_details.get('cost', 0),
+                "weight_kg": equipment_details.get('weight', 0),
+                "description": equipment_details.get('description', ''),
+                "category": equipment_details.get('category'),
+                "damage": equipment_details.get('damage'),
+                "quantity": 1,
+                "is_equipped": False
             }
             inventory.append(new_item)
         
-        # Mettre à jour l'or du personnage
         new_gold = current_gold - equipment_cost
         
-        # Calculer le poids total pour la réponse
         total_weight = sum(item.get('weight_kg', 0) * item.get('quantity', 1) for item in inventory)
         
-        # Mettre à jour les données du personnage
         character_data['inventory'] = inventory
         character_data['gold'] = new_gold
         
-        # Sauvegarder les données mises à jour
         CharacterPersistenceService.save_character_data(request.character_id, character_data)
         return AddEquipmentResponse(
             status='success',
@@ -476,37 +445,32 @@ def add_equipment(request: AddEquipmentRequest):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="Personnage non trouvé")
+        raise HTTPException(status_code=404, detail="Character not found")
 
 @router.post(
     "/remove-equipment",
     response_model=RemoveEquipmentResponse,
-    summary="Retirer un équipement",
-    description="Retire un équipement du personnage et rembourse l'argent correspondant."
+    summary="Remove equipment",
+    description="Removes equipment from the character and refunds the corresponding money."
 )
 def remove_equipment(request: RemoveEquipmentRequest):   
     """
-    Retire un équipement du personnage et rembourse l'argent correspondant.
-    - **Entrée** : character_id (str), equipment_name (str)
-    - **Sortie** : status (str), gold (int), total_weight (float), equipment_removed (dict)
+    Removes equipment from the character and refunds the corresponding money.
+    - **Input**: character_id (str), equipment_name (str)
+    - **Output**: status (str), gold (int), total_weight (float), equipment_removed (dict)
     """
     try:
-        # Charger les données du personnage directement
         character_data = CharacterPersistenceService.load_character_data(request.character_id)
         
-        # Importer EquipmentManager pour gérer l'équipement
         from back.models.domain.equipment_manager import EquipmentManager
         
-        # Récupérer les détails de l'équipement
         equipment_manager = EquipmentManager()
         equipment_details = equipment_manager.get_equipment_by_name(request.equipment_name)
         
         if not equipment_details:
-            raise ValueError(f"Équipement '{request.equipment_name}' non trouvé")
-          # Retirer l'équipement de l'inventaire
+            raise ValueError(f"Equipment '{request.equipment_name}' not found")
         inventory = character_data.get('inventory', [])
         
-        # Trouver l'équipement dans l'inventaire
         item_to_remove = None
         for item in inventory:
             if item.get('name') == request.equipment_name:
@@ -514,21 +478,17 @@ def remove_equipment(request: RemoveEquipmentRequest):
                 break
         
         if not item_to_remove:
-            raise ValueError(f"L'équipement '{request.equipment_name}' n'est pas dans l'inventaire")
+            raise ValueError(f"Equipment '{request.equipment_name}' is not in the inventory")
             
         inventory.remove(item_to_remove)
-          # Rembourser l'or du personnage
         current_gold = character_data.get('gold', 0.0)
         equipment_cost = equipment_details.get('cost', 0)
         new_gold = current_gold + equipment_cost
-          # Calculer le poids total pour la réponse
         total_weight = sum(item.get('weight_kg', 0) * item.get('quantity', 1) for item in inventory)
         
-        # Mettre à jour les données du personnage
         character_data['inventory'] = inventory
         character_data['gold'] = new_gold
         
-        # Sauvegarder les données mises à jour
         CharacterPersistenceService.save_character_data(request.character_id, character_data)
         return RemoveEquipmentResponse(
             status='success',
@@ -539,35 +499,32 @@ def remove_equipment(request: RemoveEquipmentRequest):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="Personnage non trouvé")
+        raise HTTPException(status_code=404, detail="Character not found")
 
 @router.post(
     "/update-money",
     response_model=UpdateMoneyResponse,
-    summary="Mettre à jour l'argent",
-    description="Met à jour l'argent du personnage (positif pour ajouter, négatif pour retirer)."
+    summary="Update money",
+    description="Updates the character's money (positive to add, negative to remove)."
 )
 def update_money(request: UpdateMoneyRequest):    
     """
-    Met à jour l'argent du personnage.
-    - **Entrée** : character_id (str), amount (int)
-    - **Sortie** : status (str), gold (int)
+    Updates the character's money.
+    - **Input**: character_id (str), amount (int)
+    - **Output**: status (str), gold (int)
     """
     try:
-        # Charger les données du personnage directement
         character_data = CharacterPersistenceService.load_character_data(request.character_id)
         
-        # Mettre à jour l'or du personnage
         current_gold = character_data.get('gold', 0.0)
-        new_gold = max(0.0, current_gold + request.amount)  # Ne pas aller en négatif
+        new_gold = max(0.0, current_gold + request.amount)
         
         character_data['gold'] = new_gold
         
-        # Sauvegarder les données mises à jour
         CharacterPersistenceService.save_character_data(request.character_id, character_data)
         return UpdateMoneyResponse(
             status='success',
             gold=new_gold
         )
     except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="Personnage non trouvé")
+        raise HTTPException(status_code=404, detail="Character not found")

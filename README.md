@@ -687,7 +687,7 @@ Le système empêche automatiquement la création de sessions dupliquées en dé
 - Un nouveau groupe de compétences "Culture" a été ajouté dans `data/skills_for_llm.json`.
 - Chaque trait de culture issu de `data/races_and_cultures.json` est désormais représenté comme un skill de culture, avec une propriété `culture` précisant la ou les cultures associées.
 - Ces skills de culture ne peuvent être acquis naturellement que par les personnages issus de la culture correspondante.
-- La structure d'un skill de culture est identique à celle des autres skills : `name`, `description`, `characteristics`, `examples`, et `culture`.
+- La structure d'un skill de culture est identique à celle des autres skills : `name`, `description`, `stats`, `examples`, et `culture`.
 
 - **Affinités culturelles pour les compétences** :
   - Les affinités entre cultures et compétences sont centralisées dans `data/skills_affinities.json`.

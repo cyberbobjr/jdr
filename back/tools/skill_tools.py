@@ -10,7 +10,7 @@ from back.utils.logger import log_debug
 from back.services.session_service import SessionService
 from back.services.character_service import CharacterService
 from back.models.domain.skills_manager import SkillsManager
-from back.models.domain.characteristics_manager import CharacteristicsManager
+from back.models.domain.stats_manager import StatsManager
 
 def skill_check_with_character(ctx: RunContext[SessionService], skill_name: str, difficulty_name: str = "Moyenne", difficulty_modifier: int = 0) -> str:
     """
@@ -41,7 +41,7 @@ def skill_check_with_character(ctx: RunContext[SessionService], skill_name: str,
         # Déterminer la valeur à utiliser pour le test
         skill_value = 0        # Récupération des managers pour les nouvelles données
         skills_manager = SkillsManager()
-        characteristics_manager = CharacteristicsManager()
+        characteristics_manager = StatsManager()
         
         source_used = ""
         

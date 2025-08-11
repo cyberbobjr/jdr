@@ -47,21 +47,23 @@ class Item(BaseModel):
     special_properties: Optional[List[str]] = None  # Propriétés spéciales
 
 class RaceData(BaseModel):
+    id: str
     name: str
     characteristic_bonuses: Dict[str, int]
-    destiny_points: int
-    special_abilities: List[str]
+    special_abilities: Optional[List[str]] = []
     base_languages: List[str]
     optional_languages: List[str]
-    cultures: Optional[List['CultureData']] = None  # Optionnel pour éviter de l'envoyer lors de la sauvegarde
+    cultures: Optional[List['CultureData']] = None
 
 class CultureData(BaseModel):
+    id: str
     name: str
     description: Optional[str] = None
     skill_bonuses: Optional[Dict[str, int]] = None
     characteristic_bonuses: Optional[Dict[str, int]] = None
     free_skill_points: Optional[int] = None
-    traits: Optional[str] = None  # Pour la compatibilité avec le JSON actuel
+    traits: Optional[str] = None
+    special_traits: Optional[Dict[str, Any]] = None
 
 class ScenarioStatus(BaseModel):
     name: str

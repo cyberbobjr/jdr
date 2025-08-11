@@ -1,0 +1,55 @@
+@startuml
+title Character Creation Sequence
+
+actor User
+participant "FastAPI Router\n(creation.py)" as Router
+participant "CharacterCreationService" as CreationService
+participant "CharacterPersistenceService" as PersistenceService
+database "Character JSON" as CharacterDB
+
+User -> Router: POST /api/creation/start
+activate Router
+Router -> CreationService: start_creation()
+activate CreationService
+CreationService -> PersistenceService: create_character_template()
+activate PersistenceService
+PersistenceService -> CharacterDB: Save new character
+PersistenceService --> CreationService: character_id
+deactivate PersistenceService
+CreationService --> Router: character_id
+deactivate CreationService
+Router --> User: 200 OK (character_id)
+deactivate Router
+
+loop for each creation step
+    User -> Router: POST /api/creation/next_step (data)
+    activate Router
+    Router -> CreationService: process_step(character_id, data)
+    activate CreationService
+    CreationService -> CreationService: validate_data()
+    CreationService -> PersistenceService: update_character(character_id, data)
+    activate PersistenceService
+    PersistenceService -> CharacterDB: Update character
+    PersistenceService --> CreationService:
+    deactivate PersistenceService
+    CreationService --> Router: next_step_info
+    deactivate CreationService
+    Router --> User: 200 OK (next_step_info)
+    deactivate Router
+end
+
+User -> Router: POST /api/creation/finish
+activate Router
+Router -> CreationService: finish_creation(character_id)
+activate CreationService
+CreationService -> PersistenceService: finalize_character(character_id)
+activate PersistenceService
+PersistenceService -> CharacterDB: Update character status
+PersistenceService --> CreationService:
+deactivate PersistenceService
+CreationService --> Router: final_character
+deactivate CreationService
+Router --> User: 200 OK (final_character)
+deactivate Router
+
+@enduml

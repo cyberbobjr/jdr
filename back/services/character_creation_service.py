@@ -1,10 +1,10 @@
 """
-Service dédié à la création de personnage pour le jeu de rôle.
-Ce service gère l'allocation automatique des caractéristiques, la vérification des règles,
-et fournit les listes de races, compétences, cultures, équipements et sorts.
+Service dedicated to character creation for the role-playing game.
+This service manages the automatic allocation of characteristics, rule checking,
+and provides lists of races, skills, cultures, equipment, and spells.
 """
 
-from back.models.domain.characteristics_manager import CharacteristicsManager
+from back.models.domain.stats_manager import StatsManager
 from back.models.domain.skills_manager import SkillsManager
 from back.models.domain.races_manager import RacesManager
 from back.models.domain.spells_manager import SpellsManager
@@ -13,32 +13,32 @@ from back.models.schema import RaceData
 
 class CharacterCreationService:
     """
-    Service pour la gestion de la création de personnage.
+    Service for managing character creation.
     """
 
     @staticmethod
     def allocate_attributes_auto(race_data: RaceData) -> dict:
         """
         ### allocate_attributes_auto
-        **Description:** Alloue automatiquement les caractéristiques d'un personnage selon sa race, en optimisant la répartition selon les recommandations métier et en intégrant les bonus raciaux dans le calcul du budget, sans boucle infinie.
+        **Description:** Automatically allocates a character's attributes according to their race, optimizing the distribution according to business recommendations and integrating racial bonuses into the budget calculation, without an infinite loop.
         **Parameters:**
-        - `race_data` (RaceData): L'objet race complet du personnage.
-        **Returns:** Un dictionnaire des caractéristiques allouées.
+        - `race_data` (RaceData): The character's complete race object.
+        **Returns:** A dictionary of allocated attributes.
         """
-        characteristics_manager = CharacteristicsManager()
-          # Obtenir les noms des caractéristiques et le budget
-        char_names = list(characteristics_manager.get_all_characteristics().keys())
-        starting_points = characteristics_manager.starting_points
+        stats_manager = StatsManager()
+        # Get the names of the characteristics and the budget
+        char_names = list(stats_manager.get_all_stats_names())
+        starting_points = stats_manager.starting_points
         
-        # Bonus raciaux à intégrer dans la répartition
+        # Racial bonuses to be integrated into the distribution
         racial_bonuses = race_data.characteristic_bonuses if race_data else {}
         
-        # 1. On part d'une base minimale (50 partout)
+        # 1. Start from a minimum base (50 everywhere)
         values = {name: 50 for name in char_names}
-          # 2. Pour simplifier, on distribue équitablement le budget restant
+        # 2. To simplify, we distribute the remaining budget equally
         remaining_budget = starting_points - sum(values.values())
         
-        # 3. Distribution équitable
+        # 3. Equal distribution
         while remaining_budget > 0 and any(values[name] < 90 for name in char_names):
             improved = False
             for char_name in char_names:
@@ -49,7 +49,7 @@ class CharacterCreationService:
             if not improved:
                 break
         
-        # 4. On applique les bonus raciaux pour le résultat final
+        # 4. Apply racial bonuses for the final result
         for char_name in char_names:
             if char_name in racial_bonuses:
                 values[char_name] += racial_bonuses[char_name]
@@ -60,18 +60,21 @@ class CharacterCreationService:
     def check_attributes_points(attributes: dict) -> bool:
         """
         ### check_attributes_points
-        **Description:** Vérifie que les points de caractéristiques respectent les règles de création (budget, limites, etc.).
+        **Description:** Checks that the attribute points respect the creation rules (budget, limits, etc.).
         **Parameters:**
-        - `attributes` (dict): Dictionnaire des caractéristiques du personnage.
-        **Returns:** Un booléen indiquant si les points sont valides.
+        - `attributes` (dict): Dictionary of the character's attributes.
+        **Returns:** A boolean indicating if the points are valid.
         """
-        characteristics_manager = CharacteristicsManager()
+        stats_manager = StatsManager()
         
-        # Vérifie le budget total
-        total_cost = characteristics_manager.calculate_cost(attributes)
-        if total_cost > characteristics_manager.starting_points:
+        # Check the total budget
+        total_cost = 0
+        for value in attributes.values():
+            total_cost += stats_manager.calculate_cost(value)
+
+        if total_cost > stats_manager.starting_points:
             return False
-          # Vérifie les bornes (1-105)
+        # Check the bounds (1-105)
         for v in attributes.values():
             if v < 1 or v > 105:
                 return False
@@ -81,10 +84,10 @@ class CharacterCreationService:
     def get_races() -> list:
         """
         ### get_races
-        **Description:** Retourne la liste complète des races disponibles avec toutes leurs informations (cultures, bonus, etc).
+        **Description:** Returns the complete list of available races with all their information (cultures, bonuses, etc.).
         **Parameters:**
-        - Aucun
-        **Returns:** Une liste d'objets RaceData (structure complète issue du JSON).
+        - None
+        **Returns:** A list of RaceData objects (complete structure from JSON).
         """
         races_manager = RacesManager()
         return races_manager.get_all_races_data()
@@ -93,10 +96,10 @@ class CharacterCreationService:
     def get_skills() -> dict:
         """
         ### get_skills
-        **Description:** Retourne la structure complète du fichier skills_for_llm.json (groupes, compétences, niveaux de difficulté, etc.) pour documentation Swagger et frontend.
+        **Description:** Returns the complete structure of the skills_for_llm.json file (groups, skills, difficulty levels, etc.) for Swagger and frontend documentation.
         **Parameters:**
-        - Aucun
-        **Returns:** Un dictionnaire détaillé conforme à skills_for_llm.json.
+        - None
+        **Returns:** A detailed dictionary conforming to skills_for_llm.json.
         """
         skills_manager = SkillsManager()
         return skills_manager.skills_data
@@ -105,12 +108,12 @@ class CharacterCreationService:
     def check_skills_points(skills: dict) -> bool:
         """
         ### check_skills_points
-        **Description:** Vérifie la validité de la répartition des points de compétences.
+        **Description:** Checks the validity of the distribution of skill points.
         **Parameters:**
-        - `skills` (dict): Dictionnaire des compétences et points attribués.
-        **Returns:** True si la répartition est valide, False sinon.
+        - `skills` (dict): Dictionary of skills and attributed points.
+        **Returns:** True if the distribution is valid, False otherwise.
         """
-        # Logique simple : chaque compétence doit être entre 0 et 6, total max 40
+        # Simple logic: each skill must be between 0 and 6, total max 40
         if not isinstance(skills, dict):
             return False
         total = 0
@@ -124,10 +127,10 @@ class CharacterCreationService:
     def calculate_skills_cost(skills: dict) -> int:
         """
         ### calculate_skills_cost
-        **Description:** Calcule le coût total de la répartition des compétences.
+        **Description:** Calculates the total cost of the skill distribution.
         **Parameters:**
-        - `skills` (dict): Dictionnaire des compétences et points attribués.
-        **Returns:** Le coût total (int).
+        - `skills` (dict): Dictionary of skills and attributed points.
+        **Returns:** The total cost (int).
         """
         if not isinstance(skills, dict):
             return 0
@@ -137,10 +140,10 @@ class CharacterCreationService:
     def get_equipments() -> list:
         """
         ### get_equipments
-        **Description:** Retourne la liste des équipements disponibles.
+        **Description:** Returns the list of available equipment.
         **Parameters:**
-        - Aucun
-        **Returns:** Une liste d'équipements (str).
+        - None
+        **Returns:** A list of equipment (str).
         """
         equipment_manager = EquipmentManager()
         return equipment_manager.get_equipment_names()
@@ -149,10 +152,10 @@ class CharacterCreationService:
     def get_spells() -> list:
         """
         ### get_spells
-        **Description:** Retourne la liste des sorts disponibles.
+        **Description:** Returns the list of available spells.
         **Parameters:**
-        - Aucun
-        **Returns:** Une liste de sorts (str).
+        - None
+        **Returns:** A list of spells (str).
         """
         spells_manager = SpellsManager()
         all_spells = []
