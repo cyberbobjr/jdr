@@ -1,142 +1,160 @@
 # JdR "Terres du Milieu" orchestré par LLM
 
-Ce projet vise à créer un jeu de rôle (JdR) se déroulant dans les Terres du Milieu, où la narration et les mécaniques de jeu sont orchestrées par un Large Language Model (LLM) agissant comme Maître du Jeu (MJ).
-
-## Nouveautés (2025)
-
-- **Modèle Character enrichi** :
-  - Ajout des champs `background` (histoire du personnage) et `physical_description` (description physique) dans le modèle métier et le schéma principal.
-  - Ces champs sont générés automatiquement via l'agent LLM lors de la création du personnage.
-- **Routes de génération LLM** :
-  - Nouvelles routes API pour générer un nom, un background et une description physique de personnage via l'agent LLM, en envoyant la fiche de personnage partielle pour contextualisation.
+Ce projet est un jeu de rôle (JdR) se déroulant dans les Terres du Milieu, où la narration et les mécaniques de jeu sont orchestrées par un Large Language Model (LLM) agissant comme Maître du Jeu (MJ).
 
 ## Architecture Générale
 
-L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (remplaçant complètement Haystack 3.x et LangChain), et d'une infrastructure DevOps. Les détails de la spécification technique se trouvent dans [instructions/openai-instructions.md](instructions/openai-instructions.md).
+L'architecture s'articule autour d'un backend FastAPI et **PydanticAI**, avec une infrastructure DevOps complète. Les détails de la spécification technique se trouvent dans [instructions/openai-instructions.md](instructions/openai-instructions.md).
 
 ### Principes architecturaux
-- **Services** (`back/services/`) : chaque service encapsule une responsabilité métier (inventaire, personnage, combat, scénario, session).
-- **Agents** (`back/agents/`) : assemblent les outils et la mémoire, orchestrent la narration via le LLM avec PydanticAI.
-- **Routers** (`back/routers/`) : exposent les endpoints REST, délèguent toute la logique métier aux services.
-- **Mémoire** : découplée de l'agent, persistée via un store JSONL custom PydanticAI.
-- **Conventions** : SRP strict, aucune logique d'E/S dans les services, aucune règle de jeu dans les routers.
+- **Services** (`back/services/`) : chaque service encapsule une responsabilité métier unique (SRP strict)
+- **Agents** (`back/agents/`) : assemblent les outils et la mémoire, orchestrent la narration via le LLM avec PydanticAI
+- **Routers** (`back/routers/`) : exposent les endpoints REST, délèguent toute la logique métier aux services
+- **Mémoire** : découplée de l'agent, persistée via un store JSONL custom PydanticAI
+- **Conventions** : SRP strict, aucune logique d'E/S dans les services, aucune règle de jeu dans les routers
 
 ### Documentation PydanticAI
 - [PydanticAI Documentation](./pydanticai.md)
 - [Gestion de la mémoire (mémoire persistante, stores, etc.)](./pydanticai.md)
 
-## Migration PydanticAI (2025) - TERMINÉE ✅
+## Architecture des Services
 
-- **Stack 100% PydanticAI :** Suppression complète de Haystack 3.x, migration de tous les outils et de l'agent MJ vers PydanticAI.
-- **Agent MJ :** Utilise `pydantic_ai.Agent` avec le modèle `openai:gpt-4o` et une mémoire persistante (JSONL) via `SessionService`.
-- **Outils :** Tous les 13 outils migrés vers PydanticAI avec signature `RunContext[SessionService]` :
-  - **Compétences :** `skill_check_with_character` (refactorisé pour supprimer la redondance avec `character_perform_skill_check`)
-  - **Personnage :** `character_apply_xp`, `character_add_gold`, `character_take_damage`
-  - **Inventaire :** `inventory_add_item`, `inventory_remove_item`
-  - **Combat :** `roll_initiative_tool`, `perform_attack_tool`, `resolve_attack_tool`, `calculate_damage_tool`, `end_combat_tool`
-  - **Utilitaires :** `logging_tool`
-- **Tests :** Suite complète de tests dans `/back/tests/` validant la migration et la refactorisation.
-- **Mémoire :** Historique des conversations stocké en JSONL via `back/storage/pydantic_jsonl_store.py`.
-  - **Prompt système non dupliqué :** Le prompt système n'est jamais stocké dans l'historique JSONL. Il est injecté dynamiquement par l'agent à chaque appel.
-  - **Compatibilité stricte :** Structure de chaque message respecte le schéma PydanticAI (sérialisation via `to_jsonable_python`).
-- **Prompt système modulaire :** Le prompt système est externalisé dans `back/agents/PROMPT.py` pour faciliter la maintenance et les modifications. Le module contient le template et les fonctions utilitaires pour l'injection du contenu des scénarios et des règles.
+Le backend utilise une architecture modulaire avec séparation stricte des responsabilités (SRP) :
 
-## Architecture d'Inventaire Refactorisée (2025) - TERMINÉE ✅
+### Services Spécialisés
 
-- **Migration vers CharacterService :** Toutes les méthodes d'inventaire (`add_item`, `remove_item`, `equip_item`, `unequip_item`) migrées de `InventoryService` vers `CharacterService`.
-- **Architecture orientée instance :** `CharacterService` transformé d'un service statique en service d'instance avec un `character_id` spécifique au constructeur.
-- **Intégration SessionService :** `CharacterService` instancié comme propriété de `SessionService` pour une cohésion maximale.
-- **Outils unifiés :** Tous les outils utilisent `ctx.deps.character_service` pour accéder aux fonctionnalités de personnage et d'inventaire.
-- **Modèle enrichi :** Champs `xp` et `gold` ajoutés au modèle `Character` avec gestion des valeurs par défaut.
-- **Tests complets :** 18/18 tests passés validant la nouvelle architecture (services + outils).
-- **Suppression du code obsolète :** Fichier `inventory_service.py` supprimé, références mises à jour partout.
+- **CharacterDataService** : Service spécialisé pour le chargement et la sauvegarde des données de personnage
+- **CharacterBusinessService** : Service spécialisé pour la logique métier (XP, or, dégâts, soins)
+- **InventoryService** : Service spécialisé pour la gestion d'inventaire (ajout, retrait, équipement)
+- **EquipmentService** : Service spécialisé pour l'achat/vente d'équipement et gestion de l'argent
 
-## Interfaces Frontend TypeScript (2025) - TERMINÉE ✅
+### Services de Support
 
-- **Interfaces strictement typées :** Génération automatique des interfaces TypeScript basées sur le fichier OpenAPI JSON du backend.
-- **Service API refactorisé :** Suppression de la duplication de code, utilisation des interfaces centralisées dans `front/src/core/interfaces.ts`.
-- **Validation robuste :** Validation des UUIDs, gestion d'erreurs typée avec `ApiErrorResponse`, méthodes utilitaires pour la robustesse.
-- **Tests complets :** Suite de tests unitaires (10/10) validant les interfaces, la validation, et la conversion de types.
-- **Documentation :** Interfaces documentées en français selon les standards du projet, noms de méthodes en anglais.
+- **CharacterPersistenceService** : Service centralisé pour la persistance des personnages (JSON)
+- **SessionService** : Gestion des sessions de jeu (historique, personnage, scénario)
+- **CombatService** : Gestion des mécaniques de combat
+- **ScenarioService** : Gestion du déroulement des scénarios
+- **CharacterCreationService** : Service dédié à la création de personnage
+
+### Agents et Outils
+
+- **Agent MJ** : Utilise `pydantic_ai.Agent` avec le modèle `openai:gpt-4o` et une mémoire persistante (JSONL)
+- **Outils PydanticAI** : Tous les outils utilisent la signature `RunContext[SessionService]` pour accéder aux services
+- **Mémoire** : Historique des conversations stocké en JSONL via `back/storage/pydantic_jsonl_store.py`
 
 ## Structure du Projet
 
 ```
 .
 ├── back/                        # Back‑end FastAPI + PydanticAI
+│   ├── __init__.py
+│   ├── .coverage
 │   ├── app.py                  # Point d'entrée FastAPI
+│   ├── config.py               # Configuration centralisée
+│   ├── config.yaml             # Fichier de configuration YAML
 │   ├── main.py                 # Target uvicorn – démarre l'app + l'agent
-│   ├── config.py               # Variables d'environnement
-│   ├── models/                 # Schémas Pydantic & objets métier
-│   │   ├── domain/             # Reprise des fichiers .py uploadés (1 concept = 1 fichier)
-│   │   └── schema.py           # DTO exposés par l'API
-│   ├── services/               # Logique métier unitaire (SRP)
+│   ├── requirements.txt        # Dépendances Python
+│   ├── agents/
+│   │   ├── __init__.py
+│   │   ├── gm_agent_pydantic.py # Agent LLM Maître du Jeu (PydanticAI - production)
+│   │   └── PROMPT.py           # Prompt système modulaire
+│   ├── docs/
+│   │   └── LOGGING_GUIDE.md    # Guide de logging
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── api_dto.py          # DTO pour l'API
+│   │   ├── schema.py           # DTO exposés par l'API
+│   │   └── domain/
+│   │       ├── __init__.py
+│   │       ├── base.py         # Classes de base
+│   │       ├── character.py    # Modèle de personnage
+│   │       ├── combat_state.py # État de combat
+│   │       ├── combat_system_manager.py # Gestionnaire du système de combat
+│   │       ├── equipment_manager.py # Gestionnaire d'équipement
+│   │       ├── races_manager.py # Gestionnaire des races
+│   │       ├── skills_manager.py # Gestionnaire des compétences
+│   │       ├── spells_manager.py # Gestionnaire des sorts
+│   │       └── stats_manager.py # Gestionnaire des statistiques
+│   ├── routers/
+│   │   ├── __init__.py
+│   │   ├── characters.py       # Endpoints pour la gestion des personnages
+│   │   ├── creation.py         # Endpoints spécialisés pour la création de personnage
+│   │   └── scenarios.py        # Endpoints pour la gestion des scénarios
+│   ├── services/
+│   │   ├── __init__.py
+│   │   ├── character_business_service.py # Service spécialisé pour la logique métier (XP, or, dégâts)
+│   │   ├── character_creation_service.py # Service dédié à la création de personnage
+│   │   ├── character_data_service.py # Service spécialisé pour le chargement/sauvegarde des données
 │   │   ├── character_persistence_service.py # Service centralisé pour la persistance des personnages (JSON)
-│   │   ├── character_service.py # Gestion des personnages (création, évolution, etc.)
-│   │   ├── combat_service.py    # ✅ Gestion complète des mécaniques de combat (initiative, attaques, dégâts, fin automatique)
-│   │   ├── combat_state_service.py # ✅ Persistance de l'état des combats actifs (sauvegarde/chargement JSON, nettoyage automatique)
-│   │   ├── skill_service.py     # Gestion des compétences et de leurs jets
+│   │   ├── character_service.py # Service legacy en cours de refactoring
+│   │   ├── combat_service.py    # Gestion des mécaniques de combat
+│   │   ├── combat_state_service.py # Persistance de l'état des combats actifs
+│   │   ├── equipment_service.py # Service spécialisé pour l'achat/vente d'équipement
+│   │   ├── inventory_service.py # Service spécialisé pour la gestion d'inventaire
+│   │   ├── item_service.py      # Gestion des objets
 │   │   ├── scenario_service.py  # Gestion du déroulement des scénarios
 │   │   ├── session_service.py   # Gestion des sessions de jeu (historique, personnage, scénario)
-│   │   ├── character_creation_service.py # Service dédié à la création de personnage (allocation, validation, listes)
-│   ├── tools/                  # Outils PydanticAI (signature RunContext[SessionService])
-│   │   ├── inventory_tools.py  # Outils pour l'inventaire (ajout, retrait, gestion d'objets)
-│   │   ├── combat_tools.py     # ✅ 6 outils de combat complets (start, end_turn, check_end, apply_damage, get_status, end_combat)
-│   │   ├── skill_tools.py      # Outils pour les compétences (refactorisé)
-│   │   └── character_tools.py  # Outils pour la gestion des personnages
-│   ├── agents/                 # Assemblage Agent PydanticAI + mémoire
-│   │   └── gm_agent_pydantic.py # Agent LLM Maître du Jeu (PydanticAI - production)
-│   ├── routers/                # Endpoints REST (FastAPI "router")
-│   │   ├── characters.py       # Endpoints pour la gestion des personnages
-│   │   ├── inventory.py        # Endpoints pour la gestion de l'inventaire
-│   │   ├── scenarios.py        # Endpoints pour la gestion des scénarios
-│   │   ├── creation.py         # Endpoints spécialisés pour la création de personnage (étapes, validation, statut)
-│   │   └── combat.py           # Endpoints pour la gestion du combat
-│   ├── storage/                # Persistance JSON & ressources
-│   │   ├── file_storage.py     # CRUD thread‑safe (aiofiles + asyncio.Lock) pour la persistance des données
+│   │   └── skill_service.py     # Gestion des compétences et de leurs jets
+│   ├── storage/
+│   │   ├── __init__.py
 │   │   └── pydantic_jsonl_store.py # Store JSONL pour l'historique des messages PydanticAI
-│   ├── utils/                  # Aides génériques
-│   │   ├── dice.py             # Fonctions pour les jets de dés
-│   │   └── logger.py           # Logger JSON (Grafana/Loki‑friendly)
-│   └── tests/                  # Tests unitaires et d'intégration (pytest)
-│       ├── agents/             # Tests pour les agents PydanticAI
-│       │   └── test_gm_agent_consolidated.py # ⭐ Suite consolidée de 29 tests (100% réussite)
-│       ├── domain/             # Tests pour les modèles du domaine
-│       │   └── test_caracteristiques.py
-│       ├── routers/            # Tests pour les endpoints REST
-│       ├── services/           # Tests pour les services
-│       │   └── test_session_service.py
-│       ├── storage/            # Tests pour la persistance
-│       ├── tools/              # Tests consolidés pour les outils PydanticAI
-│       │   ├── test_character_tools_consolidated.py    # Tests pour les outils de personnage
-│       │   ├── test_combat_tools_consolidated.py       # Tests pour les outils de combat
-│       │   ├── test_inventory_tools_consolidated.py    # Tests pour les outils d'inventaire
-│       │   ├── test_skill_tools_consolidated.py        # Tests pour les outils de compétences
-│       │   └── test_all_tools_integration_consolidated.py # Tests d'intégration généraux
-│       ├── utils/              # Tests pour les utilitaires
-│       ├── cleanup_test_sessions.py # 🧹 Script de nettoyage automatique des sessions de test
-│       ├── test_complete_migration.py # Test de migration générale
-│       ├── conftest.py         # Configuration pytest + hooks de nettoyage automatique
-│       └── __init__.py
+│   ├── tests/
+│   │   ├── __init__.py
+│   │   ├── test_character_service_refactored.py # Test spécifique du service personnage
+│   │   ├── test_logging.py     # Tests de logging
+│   │   ├── agents/
+│   │   │   ├── __init__.py
+│   │   │   └── test_gm_agent_dependency_injection.py # Tests d'injection de dépendances pour l'agent
+│   │   ├── domain/
+│   │   │   └── __init__.py
+│   │   ├── routers/
+│   │   │   ├── __init__.py
+│   │   │   └── test_characters_refactored.py # Tests refactorés pour les personnages
+│   │   ├── services/
+│   │   │   └── __init__.py
+│   │   ├── storage/
+│   │   │   └── __init__.py
+│   │   ├── tools/
+│   │   │   └── __init__.py
+│   │   └── utils/
+│   │       └── __init__.py
+│   ├── tools/
+│   │   ├── __init__.py
+│   │   ├── character_tools.py  # Outils pour la gestion des personnages
+│   │   ├── combat_tools.py     # Outils de combat
+│   │   ├── inventory_tools.py  # Outils pour l'inventaire (ajout, retrait, gestion d'objets)
+│   │   └── skill_tools.py      # Outils pour les compétences
+│   └── utils/
+│       ├── __init__.py
+│       ├── dice.py             # Fonctions pour les jets de dés
+│       ├── exceptions.py       # Exceptions personnalisées
+│       ├── logger.py           # Logger JSON (Grafana/Loki‑friendly)
+│       ├── logging_tool.py     # Outil de logging pour l'agent
+│       └── message_adapter.py  # Adaptateur de messages
 ├── front/                       # Front‑end Vue.js + TypeScript + TailwindCSS ✅
-│   ├── src/                    # Code source de l'interface utilisateur
 │   ├── src/                    # Code source de l'interface utilisateur
 │   │   ├── components/         # Composants Vue réutilisables
 │   │   │   ├── JdrDemo.vue     # Composant de démonstration avec lanceur de dés
-│   │   │   ├── ChatMessage.vue # ✅ Composant générique d'affichage des messages LLM
+│   │   │   ├── ChatMessage.vue # Composant générique d'affichage des messages LLM
+│   │   │   ├── CharacterSheet.vue # Fiche de personnage
 │   │   │   └── README-ChatMessage.md # Documentation du composant ChatMessage
 │   │   ├── views/              # Pages/vues de l'application
 │   │   │   ├── HomeView.vue    # Page d'accueil avec présentation des fonctionnalités
-│   │   │   └── AboutView.vue   # Page à propos
+│   │   │   ├── Create.vue      # Création de personnage
+│   │   │   ├── JeuView.vue     # Interface de jeu
+│   │   │   ├── PersonnagesView.vue # Gestion des personnages
+│   │   │   ├── ScenariosView.vue # Gestion des scénarios
+│   │   │   ├── SessionsView.vue # Gestion des sessions
+│   │   │   └── NouveauScenarioView.vue # Création de scénario
 │   │   ├── core/               # Services et interfaces TypeScript ✅
-│   │   │   ├── interfaces.ts   # ✅ Interfaces TypeScript basées sur OpenAPI JSON (strictement typées)
-│   │   │   ├── api.ts          # ✅ Service API refactorisé avec nouvelles interfaces (validation UUID, gestion d'erreurs)
-│   │   │   └── api.test.ts     # ✅ Tests unitaires pour les interfaces et service API (10/10 tests)
+│   │   │   ├── interfaces.ts   # Interfaces TypeScript basées sur OpenAPI JSON (strictement typées)
+│   │   │   ├── api.ts          # Service API refactorisé avec nouvelles interfaces
+│   │   │   └── api.test.ts     # Tests unitaires pour les interfaces et service API
 │   │   ├── router/             # Configuration du routage Vue Router
 │   │   ├── assets/             # Ressources CSS avec TailwindCSS configuré
 │   │   ├── App.vue             # Composant racine avec navigation et thème JDR
 │   │   └── main.ts             # Point d'entrée avec configuration FontAwesome
-│   ├── tests/                  # Tests unitaires Vitest (19 tests, 100% réussite)
+│   ├── tests/                  # Tests unitaires Vitest
 │   │   ├── setup.ts            # Configuration des tests avec mocks
 │   │   ├── App.test.ts         # Tests du composant principal
 │   │   ├── components/         # Tests des composants
@@ -150,12 +168,13 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
 │   ├── characters/             # Fiches des personnages joueurs et non-joueurs
 │   ├── combat/                 # États des combats en cours
 │   ├── scenarios/              # Fichiers Markdown décrivant les scénarios
-│   └── sessions/               # Historique des conversations et états des sessions de jeu
+│   ├── sessions/               # Historique des conversations et états des sessions de jeu
+│   └── game/                   # Données de jeu (CSV)
 ├── docs/                        # Documentation du système de jeu
 │   ├── 00 - introduction.md    # Introduction générale au système de jeu
-│   ├── 01 - Caractéristiques, Races et Cultures.md
+│   ├── 01 - Caractéristiques.md
 │   ├── 02 - Guide Complet des Compétences.md
-│   ├── 03 - Talents.md         # Système des talents spéciaux
+│   ├── 02 - Races et cultures.md
 │   ├── 04 - Equipement, armes et armures.md
 │   ├── 05 - Styles de combat.md
 │   ├── 06 - Magie.md           # Système de magie et sorts
@@ -163,49 +182,131 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
 │   └── section-6-combat.md     # Règles de combat détaillées
 ├── instructions/                # Spécifications et instructions pour le développement
 │   └── openai-instructions.md  # Document principal des spécifications techniques
-├── HaystackMemoryDoc.md         # Documentation détaillée sur la mémoire Haystack
 └── README.md                    # Ce fichier
 ```
 
-## Factorisation et Organisation (2025) - TERMINÉE ✅
+## Diagrams
 
-### Factorisation du Code Dupliqué
-- **CharacterPersistenceService** : Service centralisé pour la persistance des personnages dans les fichiers JSON
-  - Extraction de ~80 lignes de code dupliqué dans `CharacterService`
-  - API uniforme : `load_character_data()`, `save_character_data()`, `update_character_state()`, etc.
-  - Gestion d'erreurs robuste et logging centralisé
-  - Respect du principe SRP (Single Responsibility Principle)
+### Architecture Diagram
 
-### Consolidation des Tests
-- **Regroupement par catégorie** : Les 17 fichiers de test éparpillés dans `/back/tests/tools/` ont été consolidés en 5 fichiers organisés :
-  - `test_character_tools_consolidated.py` : Tests des outils de personnage (XP, or, dégâts)
-  - `test_combat_tools_consolidated.py` : Tests des outils de combat (initiative, attaque, dégâts)
-  - `test_inventory_tools_consolidated.py` : Tests des outils d'inventaire (ajout/suppression d'objets)
-  - `test_skill_tools_consolidated.py` : Tests des outils de compétences (jets de dés, difficultés)
-  - `test_all_tools_integration_consolidated.py` : Tests d'intégration généraux
+This diagram illustrates the overall backend architecture, showing the flow from entry points to agents, services, and dependencies.
 
-- **Suppression des fichiers obsolètes** : 7 fichiers vides et plusieurs fichiers redondants supprimés
-- **Structure maintenant maintenable** : 38 tests organisés et fonctionnels (100% de succès)
+```mermaid
+graph TD
+    A[main.py] --> B[uvicorn]
+    B --> C[app.py - FastAPI]
+    C --> D[routers/ - characters, scenarios, creation]
+    D --> E[services/ - character_service, scenario_service, etc.]
+    E --> F[models/domain/ - Character, CombatState, EquipmentManager]
+    E --> G[agents/ - gm_agent_pydantic.py]
+    G --> H[tools/ - character_tools, combat_tools, etc.]
+    G --> I[storage/ - pydantic_jsonl_store.py]
+    C --> J[config.py - Config class]
+    J --> K[config.yaml]
+    J --> L[LLM Config]
+    J --> M[Data Dir]
+```
 
-## Organisation des Tests ✅
+### Class Diagrams
 
-**Tous les fichiers de test ont été organisés et déplacés vers `/back/tests/` avec la structure suivante :**
+#### Character Model
 
-### Tests des Agents (`/back/tests/agents/`)
-- **`test_agent_refactored.py`** : Tests de l'agent refactorisé
-- **`test_pydantic_agent.py`** : Tests de l'agent PydanticAI
-- Tests d'intégration de l'agent MJ avec les outils PydanticAI
+```mermaid
+classDiagram
+    class Character {
+        +UUID id
+        +str name
+        +RaceData race
+        +CultureData culture
+        +Dict[str, int] stats
+        +Dict[str, int] skills
+        +int hp
+        +int xp
+        +float gold
+        +List[Item] inventory
+        +List[str] spells
+        +Dict[str, int] culture_bonuses
+        +str background
+        +str physical_description
+        +CharacterStatus status
+        +str last_update
+        +is_character_finalized(character_dict: Dict) bool
+    }
+    class RaceData {
+        +str name
+        +Dict bonuses
+    }
+    class CultureData {
+        +str name
+        +Dict bonuses
+    }
+    class Item {
+        +str id
+        +str name
+        +float weight
+        +float base_value
+    }
+    Character --> RaceData
+    Character --> CultureData
+    Character --> Item
+```
 
-### Tests des Outils (`/back/tests/tools/`)
-- **Tests de compétences** : `test_skill_direct.py`, `test_skill_functionality.py`, `test_skill_refactoring.py`
-- **Tests d'inventaire** : `test_inventory_tool.py`, `test_inventory_tools.py`
-- **Tests de combat** : `test_combat_tools.py`, `test_calculate_damage.py`
-- **Tests de personnages** : `test_character_tools.py`
-- **Tests d'intégration** : `test_all_tools.py`, `test_all_tools_integration.py`
-- **Tests de refactorisation** : `test_refactoring_simple.py`
+#### CombatState Model
 
-### Tests Généraux (`/back/tests/`)
-- **`test_complete_migration.py`** : Tests de validation de la migration complète PydanticAI
+```mermaid
+classDiagram
+    class CombatState {
+        +str combat_id
+        +int round
+        +List[Dict] participants
+        +List[str] initiative_order
+        +int current_turn
+        +List[str] log
+        +str status
+        +Optional[str] end_reason
+    }
+```
+
+#### EquipmentManager
+
+```mermaid
+classDiagram
+    class EquipmentManager {
+        -Dict _equipment_data
+        +__init__()
+        +_load_equipment_data() Dict
+        +get_all_equipment() Dict
+        +get_equipment_names() List[str]
+        +get_weapons() Dict
+        +get_armor() Dict
+        +get_items() Dict
+        +get_equipment_by_name(name: str) Optional[Dict]
+    }
+```
+
+### Sequence Diagram for API Request Workflow
+
+This diagram shows the sequence for a user playing a scenario turn via the API.
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Router as scenarios.py
+    participant Service as scenario_service.py
+    participant Agent as gm_agent_pydantic.py
+    participant Tools as tools/*.py
+    participant Storage as pydantic_jsonl_store.py
+
+    User->>Router: POST /api/scenarios/play (session_id, message)
+    Router->>Service: play_scenario(session_id, message)
+    Service->>Agent: build_gm_agent_pydantic(session_id)
+    Agent->>Agent: enrich_user_message_with_character/combat
+    Agent->>Tools: Execute tools if needed (e.g., skill_check)
+    Tools->>Storage: Access/update data if required
+    Agent->>Service: Generate response via LLM
+    Service->>Router: Return response
+    Router->>User: Response with LLM output
+```
 
 ## Tableau synthétique des routes API
 
@@ -217,16 +318,33 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
 | POST    | /api/scenarios/start                      | scenario_name (str), character_id (str) (body JSON)                     | session_id, scenario_name, character_id, message, llm_response      |
 | POST    | /api/scenarios/play                       | session_id (UUID, query), message (str, body JSON)                      | responses (list de messages générés par l'agent)                    |
 | GET     | /api/scenarios/history/{session_id}       | session_id (UUID, path)                                                 | history (list de tous les messages de la session)                   |
+| DELETE  | /api/scenarios/history/{session_id}/{message_index} | session_id (UUID, path), message_index (int, path) | Confirmation de suppression avec infos du message supprimé          |
 | GET     | /api/characters/                          | Aucun                                                                   | Liste complète des personnages avec leurs fiches détaillées         |
 | GET     | /api/characters/{character_id}            | character_id (UUID, path)                                              | Détail du personnage (`Character`)                                  |
-| POST    | /api/combat/attack                        | attacker_id (str), target_id (str), attack_value (int), combat_state (dict, body) | combat_state (état du combat mis à jour)                            |
-| POST    | /creation/generate-name                      | character (Partial<Character>, body JSON)                              | name (str) : nom généré par LLM                                      |
-| POST    | /creation/generate-background                | character (Partial<Character>, body JSON)                              | background (str) : background généré par LLM                         |
-| POST    | /creation/generate-physical-description      | character (Partial<Character>, body JSON)                              | physical_description (str) : description physique générée par LLM    |
+| GET     | /creation/races                           | Aucun                                                                   | Liste des races disponibles                                         |
+| GET     | /creation/skills                          | Aucun                                                                   | Structure complète des compétences                                  |
+| GET     | /creation/equipments                      | Aucun                                                                   | Liste des équipements disponibles                                   |
+| GET     | /creation/equipments-detailed             | Aucun                                                                   | Équipements avec détails complets                                   |
+| GET     | /creation/spells                          | Aucun                                                                   | Liste des sorts disponibles                                         |
+| POST    | /creation/allocate-attributes             | race_id (str, body JSON)                                                | Attributs alloués automatiquement                                   |
+| POST    | /creation/check-attributes                | attributes (dict, body JSON)                                            | Validation de la distribution des points d'attributs                |
+| POST    | /creation/new                             | Aucun                                                                   | Création d'un nouveau personnage avec ID                            |
+| POST    | /creation/save                            | character_id (str), character (dict, body JSON) | Statut de sauvegarde du personnage |
+| GET     | /creation/status/{character_id}           | character_id (str, path)                        | Statut de création du personnage |
+| POST    | /creation/check-skills                    | skills (dict, body JSON)                        | Validation de la distribution des points de compétences |
+| POST    | /creation/generate-name                   | character (dict, body JSON)                     | 5 noms générés par LLM |
+| POST    | /creation/generate-background             | character (dict, body JSON)                     | 5 backgrounds générés par LLM |
+| POST    | /creation/generate-physical-description   | character (dict, body JSON)                     | 5 descriptions physiques générées par LLM |
+| GET     | /creation/stats                           | Aucun                                           | Données complètes des statistiques |
+| DELETE  | /creation/delete/{character_id}           | character_id (str, path)                        | Suppression d'un personnage |
+| POST    | /creation/update-skills                   | character_id (str), skills (dict, body JSON)    | Mise à jour des compétences |
+| POST    | /creation/add-equipment                   | character_id (str), equipment_name (str, body JSON) | Ajout d'équipement avec déduction d'argent |
+| POST    | /creation/remove-equipment                | character_id (str), equipment_name (str, body JSON) | Retrait d'équipement avec remboursement |
+| POST    | /creation/update-money                    | character_id (str), amount (int, body JSON)     | Mise à jour de l'argent du personnage |
 
 > Toutes les routes sont documentées dans le code source et la [documentation technique](instructions/openai-instructions.md).
 
-## Documentation détaillée des API Scenarios
+## Documentation détaillée des API Scénarios
 
 ### 1. `GET /api/scenarios/` - Liste des Scénarios
 
@@ -381,7 +499,29 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
 - `404` : Session introuvable
 - `500` : Erreur lors de la récupération de l'historique
 
-## Documentation détaillée des API Characters
+### 7. `DELETE /api/scenarios/history/{session_id}/{message_index}` - Supprimer un Message
+
+**Description :** Supprime un message spécifique de l'historique d'une session.
+
+**Paramètres :**
+- `session_id` (path) : UUID de la session
+- `message_index` (path) : Index du message à supprimer (base 0)
+
+**Format de réponse :**
+```json
+{
+    "message": "Message à l'index 2 supprimé avec succès...",
+    "deleted_message_info": {
+        "kind": "response",
+        "timestamp": "2025-06-21T12:05:05.000000Z",
+        "parts_count": 3,
+        "model_name": "deepseek-chat"
+    },
+    "remaining_messages_count": 5
+}
+```
+
+## Documentation détaillée des API Personnages
 
 ### 1. `GET /api/characters/` - Liste des Personnages
 
@@ -392,7 +532,8 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
 **Format de réponse :**
 ```json
 {
-    "characters": [        {
+    "characters": [
+        {
             "id": "d7763165-4c03-4c8d-9bc6-6a2568b79eb3",
             "name": "Aragorn",
             "race": "Humain",
@@ -411,49 +552,22 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
                 "Perception": 60,
                 "Combat": 75,
                 "Survie": 55,
-                "Nature": 65,
-                "Influence": 40,
-                "Athlétique": 50            },
+                "Nature": 65
+            },
             "hp": 85,
             "gold": 200,
             "inventory": [
                 {
                     "id": "sword_001",
-                    "name": "Coutelas",
-                    "item_type": "Arme",
-                    "price_pc": 200,
-                    "weight_kg": 0.5,
-                    "description": "Lame courte large",
-                    "category": "Couteau",
-                    "damage": "1d4",
-                    "protection": null,
-                    "armor_type": null,
-                    "quantity": 1,
-                    "is_equipped": true,
-                    "crafting_time": "2 jours",
-                    "special_properties": null
-                },
-                {
-                    "id": "boots_001",
-                    "name": "Bottes de cuir",
-                    "item_type": "Materiel",
-                    "price_pc": 50,
-                    "weight_kg": 1.0,
-                    "description": "Chaussures en cuir",
-                    "category": "Vetement",
-                    "damage": null,
-                    "protection": null,
-                    "armor_type": null,
-                    "quantity": 1,
-                    "is_equipped": true,
-                    "crafting_time": "-",
-                    "special_properties": null
-                }            ],
+                    "name": "Épée longue",
+                    "weight": 1.5,
+                    "base_value": 150.0
+                }
+            ],
             "spells": [],
             "culture_bonuses": {
                 "Combat": 5,
-                "Influence": 3,
-                "Nature": 2
+                "Influence": 3
             }
         }
     ]
@@ -462,16 +576,6 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
 
 **Codes d'erreur :**
 - `500` : Erreur interne du serveur lors de la récupération des personnages
-
-**Notes :**
-- Retourne tous les personnages créés avec leurs fiches complètes
-- Inclut les caractéristiques, compétences, inventaire détaillé et bonus culturels  
-- L'inventaire contient des objets `Item` complets avec propriétés détaillées :
-  - **Type d'objet** : Materiel, Arme, Armure, etc.
-  - **Propriétés économiques** : Prix en pièces de cuivre, poids en kg
-  - **Propriétés de jeu** : Dégâts pour armes, protection pour armures
-  - **Statut d'équipement** : `is_equipped` pour savoir si l'objet est actuellement utilisé
-- **Conversion automatique** : Les anciens formats `equipment: List[str]` sont automatiquement convertis vers `inventory: List[Item]`
 
 ### 2. `GET /api/characters/{character_id}` - Détail d'un Personnage
 
@@ -483,13 +587,15 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
 **Format de réponse :**
 ```json
 {
-  "id": "d7763165-4c03-4c8d-9bc6-6a2568b79eb3",  "name": "Aragorn",
+  "id": "d7763165-4c03-4c8d-9bc6-6a2568b79eb3",
+  "name": "Aragorn",
   "race": "Humain",
   "culture": "Gondor",
   "caracteristiques": { ... },
   "competences": { ... },
   "hp": 85,
-  "xp": 0,  "gold": 0,
+  "xp": 0,
+  "gold": 0,
   "inventory": [ ... ],
   "spells": [],
   "culture_bonuses": { ... }
@@ -499,13 +605,10 @@ L'architecture s'articule autour d'un backend FastAPI et **PydanticAI** (rempla�
 **Codes d'erreur :**
 - `404` : Personnage introuvable
 
-> Voir aussi : tests associés dans `back/tests/routers/test_characters.py`
-
 ## Service de création de personnage (2025)
 
 - **character_creation_service.py** : Service dédié à la création de personnage, gérant l'allocation automatique des caractéristiques selon la race, la validation des points, et la fourniture des listes (races, compétences, cultures, équipements, sorts).
 - **creation.py** : Routeur FastAPI spécialisé pour la création de personnage, exposant les routes pour chaque étape, l'enregistrement et le suivi du statut de création.
-- **Tests** : Les tests unitaires sont disponibles dans `/back/tests/services/test_character_creation_service.py`.
 
 Ce module permet de découper la création de personnage en étapes validées côté backend, pour un front progressif et interactif.
 
@@ -515,7 +618,6 @@ Ce module permet de découper la création de personnage en étapes validées c�
 - La sérialisation utilise `to_jsonable_python` (PydanticAI) ; la désérialisation utilise `ModelMessagesTypeAdapter.validate_python`.
 - Seuls les messages utilisateur, assistant et outils sont persistés : le prompt système n'est jamais dupliqué.
 - La structure de chaque message respecte strictement le schéma PydanticAI (voir [pydanticai.md](./pydanticai.md)).
-- Les tests unitaires valident la compatibilité stricte avec PydanticAI (voir `back/tests/storage/test_pydantic_jsonl_store.py`).
 
 ## Outils PydanticAI
 
@@ -569,70 +671,12 @@ interface Props {
 }
 ```
 
-#### Intégration
-- Composant réutilisable pour tous les historiques de conversation
-- Compatible avec les réponses d'API `PlayScenarioResponse` et `GetScenarioHistoryResponse`
-- Styling CSS moderne avec différenciation visuelle par type
-- Gestion des références temporelles et métadonnées LLM
-
 ## Tests
 
 - Les tests unitaires et d'intégration sont dans `back/tests/`.
 - Tous les tests ont été migrés et validés pour PydanticAI.
 - Organisation par responsabilité : `agents/`, `tools/`, `services/`, `domain/`, etc.
-- Exemple : `back/tests/tools/test_all_tools_integration.py` vérifie le bon fonctionnement de tous les outils PydanticAI.
 - **Frontend** : Tests Vitest pour les composants Vue.js, dont ChatMessage
-
-## ⚔️ Système de Combat Complet (2025) ✅
-
-### Architecture Combat
-Le système de combat a été entièrement implémenté et résout le problème des boucles infinies de l'agent LLM. Il respecte l'architecture **CombatManagement.md** avec une séparation stricte entre logique métier (Python) et narration (LLM).
-
-#### Services de Combat
-- **`CombatService`** : Logique métier complète (initiative, attaques, dégâts, fin automatique)
-- **`CombatStateService`** : Persistance JSON des états de combat (sauvegarde/chargement/nettoyage)
-
-#### Outils de Combat PydanticAI (6 outils)
-```python
-# Démarrage et gestion des tours
-start_combat_tool(participants: list[dict]) -> dict
-end_turn_tool(combat_id: str) -> dict
-check_combat_end_tool(combat_id: str) -> dict
-
-# Application des effets
-apply_damage_tool(combat_id: str, target_id: str, amount: int) -> dict
-get_combat_status_tool(combat_id: str) -> dict
-end_combat_tool(combat_id: str, reason: str) -> dict
-```
-
-#### Fonctionnalités Clés
-- **Persistance automatique** : État sauvegardé à chaque action
-- **Détection automatique de fin** : Combat terminé quand un camp n'a plus de participants vivants  
-- **Injection de contexte** : État du combat injecté automatiquement dans le prompt LLM
-- **Instructions structurées** : Le prompt système guide l'agent avec la structure obligatoire des tours
-- **Normalisation des participants** : Support des formats `name`/`nom` et `health`/`hp`
-
-#### Structure Obligatoire d'un Tour (Prompt)
-```
-1. Décrire la situation (get_combat_status_tool)
-2. Résoudre l'action du participant actuel  
-3. Appliquer les dégâts (apply_damage_tool)
-4. Vérifier la fin (check_combat_end_tool)
-5. Si continue : terminer le tour (end_turn_tool)
-6. Demander l'action du joueur
-7. ATTENDRE la réponse avant de continuer
-```
-
-#### Tests Complets
-- **19 tests unitaires** : `CombatStateService` (10) + `combat_tools` (9)
-- **Test d'intégration** : Validation du flux complet de combat
-- **100% de réussite** : Tous les tests passent avec nettoyage automatique
-
-### Résolution du Problème de Boucle Infinie ✅
-Avant : L'agent LLM tournait en boucle sans s'arrêter lors des combats
-Après : L'agent utilise les outils appropriés, s'arrête automatiquement en fin de tour, et attend l'action du joueur
-
-**Test validé** : L'agent démarre un combat, gère les tours correctement, applique les dégâts, détecte la fin automatiquement et nettoie l'état.
 
 ## Système de Prévention des Sessions Dupliquées (2025)
 
@@ -658,13 +702,15 @@ Le système empêche automatiquement la création de sessions dupliquées en dé
 
 ```json
 {
-  "id": "d1a4064a-c956-4d46-b6ea-5e688cf2f78b",  "name": "Test Hero",
+  "id": "d1a4064a-c956-4d46-b6ea-5e688cf2f78b",
+  "name": "Test Hero",
   "race": "Humain",
   "culture": "Rurale",
   "caracteristiques": {"Force": 10, ...},
   "competences": {"Athletisme": 5},
   "hp": 42,
-  "xp": 0,  "gold": 0,
+  "xp": 0,
+  "gold": 0,
   "inventory": [],
   "spells": [],
   "culture_bonuses": {},
@@ -694,3 +740,117 @@ Le système empêche automatiquement la création de sessions dupliquées en dé
   - Un script (`tools/generate_skills_with_affinities.py`) injecte automatiquement la propriété `cultures` dans chaque compétence de `skills_for_llm.json`.
   - Pour ajouter une nouvelle culture ou compétence, il suffit de mettre à jour le mapping dans `skills_affinities.json` puis de relancer le script.
   - Ce système garantit la cohérence et la facilité de maintenance du fichier des compétences.
+
+## Tests
+
+- Les tests unitaires et d'intégration sont organisés dans `back/tests/` avec la structure suivante :
+  - `agents/` : Tests des agents PydanticAI
+  - `domain/` : Tests des modèles du domaine
+  - `routers/` : Tests des endpoints REST
+  - `services/` : Tests des services métier
+  - `storage/` : Tests de la persistance
+  - `tools/` : Tests des outils PydanticAI
+  - `utils/` : Tests des utilitaires
+
+- **Frontend** : Tests Vitest pour les composants Vue.js avec 100% de réussite
+
+## Développement
+
+### Installation
+```bash
+cd back
+python3.11 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### Lancement
+```bash
+# Backend
+cd back
+uvicorn main:app --reload
+
+# Frontend
+cd front
+npm install
+npm run dev
+```
+
+### Tests
+```bash
+# Backend
+cd back
+pytest tests/ -v
+
+# Frontend
+cd front
+npm test
+```
+
+## Architecture Technique
+
+### Backend (FastAPI + PydanticAI)
+- **FastAPI** : Framework web moderne pour les API REST
+- **PydanticAI** : Framework d'agents LLM avec outils structurés
+- **Pydantic** : Validation des données et modèles
+- **Uvicorn** : Serveur ASGI pour le déploiement
+
+### Système de Logging
+Le projet utilise un système de logging centralisé et configurable pour tracer les erreurs, informations de débogage et événements métier.
+
+#### Configuration
+- **Fichier** : `back/config.yaml` (section `logging`)
+- **Format** : JSON structuré compatible Grafana/Loki
+- **Niveaux** : DEBUG, INFO, WARNING, ERROR, CRITICAL
+- **Rotation** : Fichiers avec taille maximale et archivage automatique
+
+#### Utilisation
+```python
+from back.config import get_logger
+
+# Obtenir un logger pour le module
+logger = get_logger(__name__)
+
+# Utilisation standard
+logger.info("Opération réussie", action="create_character", character_id="123")
+logger.error("Erreur de validation", error=str(e), character_id="123")
+logger.debug("Détails de débogage", variable=value)
+```
+
+#### Fonctions spécialisées
+```python
+from back.utils.logger import log_debug, log_info, log_error, log_warning
+
+# Logging avec contexte métier
+log_debug("Chargement du personnage", character_id="123", action="load")
+log_info("Personnage créé avec succès", character_name="Aragorn")
+log_error("Échec de sauvegarde", error=str(e))
+```
+
+#### Modules avec logging complet
+- ✅ Services : `character_service.py`, `character_data_service.py`, etc.
+- ✅ Outils : Tous les fichiers `tools/*.py`
+- ✅ Routers : `scenarios.py`, `characters.py`
+- ✅ Stockage : `pydantic_jsonl_store.py`
+
+### Frontend (Vue.js + TypeScript)
+- **Vue.js 3** : Framework JavaScript progressif
+- **TypeScript** : Typage statique pour la robustesse
+- **TailwindCSS** : Framework CSS utilitaire
+- **Vite** : Outil de build rapide
+
+### Stockage
+- **JSONL** : Historique des conversations PydanticAI
+- **JSON** : Fiches de personnage et données de jeu
+- **Markdown** : Scénarios et documentation
+
+## Contribution
+
+Le projet suit une architecture modulaire avec séparation stricte des responsabilités :
+- Les **routers** ne contiennent que la logique HTTP
+- Les **services** encapsulent la logique métier
+- Les **agents** orchestrent les interactions LLM
+- Les **outils** fournissent des fonctionnalités spécifiques aux agents
+- Les **modèles** définissent la structure des données
+
+Toute modification doit respecter ces principes architecturaux et être accompagnée de tests appropriés.

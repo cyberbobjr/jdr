@@ -18,9 +18,13 @@ from back.config import get_data_dir
 # Charger les variables d'environnement depuis le fichier .env
 load_dotenv()
 
-api_key = os.getenv("DEEPSEEK_API_KEY")
-api_base_url = os.getenv("DEEPSEEK_API_BASE_URL")
-api_model = os.getenv("DEEPSEEK_API_MODEL")
+from back.config import get_llm_config
+
+# Configuration LLM centralisée
+llm_config = get_llm_config()
+api_key = llm_config["api_key"]
+api_base_url = llm_config["api_endpoint"]
+api_model = llm_config["model"]
 
 
 class GMAgentDependencies:

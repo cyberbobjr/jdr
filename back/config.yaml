@@ -1,0 +1,49 @@
+# Configuration du projet JdR "Terres du Milieu"
+# Fichier de configuration centralisé pour les paramètres de l'application
+
+# Configuration du modèle LLM
+llm:
+  # Modèle à utiliser (ex: deepseek-chat, gpt-4, llama3.1)
+  model: "deepseek-chat"
+
+  # Endpoint API du modèle LLM
+  api_endpoint: "https://api.deepseek.com"
+
+  # Clé API pour accéder au modèle (sera surchargée par les variables d'environnement)
+  api_key: "DEEPSEEK_API_KEY"
+
+# Configuration des données
+data:
+  # Répertoire des données (peut être surchargé par JDR_DATA_DIR)
+  directory: "../data"
+
+# Configuration de l'application
+app:
+  # Port du serveur FastAPI
+  port: 8000
+
+  # Hôte du serveur FastAPI
+  host: "0.0.0.0"
+
+  # Niveau de log
+  log_level: "INFO"
+
+# Configuration du logging
+logging:
+  # Niveau de log global (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+  level: "INFO"
+
+  # Format des logs (JSON pour Grafana/Loki)
+  format: "json"
+
+  # Fichier de log (optionnel, si non défini : sortie console uniquement)
+  file: null
+
+  # Taille maximale du fichier de log en octets (rotation automatique)
+  max_file_size: 10485760  # 10MB
+
+  # Nombre de fichiers de backup à conserver
+  backup_count: 5
+
+  # Inclure les logs de débogage détaillés
+  debug_enabled: false

@@ -14,10 +14,10 @@ def character_apply_xp(ctx: RunContext[SessionService], xp: int) -> str:
         str: Message confirmant l'application des XP.
     """
     log_debug("Tool character_apply_xp appelé", tool="character_apply_xp", player_id=str(ctx.deps.character_id), xp=xp)
-    ctx.deps.character_service.apply_xp(xp)
     
-    # Retourner un message simple au lieu de l'objet complexe
-    return f"✅ {xp} XP appliqués au personnage. Total XP: {ctx.deps.character_service.character_data.get('xp', 0) if isinstance(ctx.deps.character_service.character_data, dict) else ctx.deps.character_service.character_data.xp}"
+    # ✅ PATTERN CORRECT - Utilisation des services spécialisés via SessionService
+    character = ctx.deps.apply_xp(xp)
+    return f"✅ {xp} XP appliqués au personnage. Total XP: {character.xp}"
 
 def character_add_gold(ctx: RunContext[SessionService], gold: int) -> str:
     """
@@ -30,11 +30,10 @@ def character_add_gold(ctx: RunContext[SessionService], gold: int) -> str:
         str: Message confirmant l'ajout d'or.
     """
     log_debug("Tool character_add_gold appelé", tool="character_add_gold", player_id=str(ctx.deps.character_id), gold=gold)
-    ctx.deps.character_service.add_gold(gold)
     
-    # Retourner un message simple au lieu de l'objet complexe
-    current_gold = ctx.deps.character_service.character_data.get('gold', 0) if isinstance(ctx.deps.character_service.character_data, dict) else ctx.deps.character_service.character_data.gold
-    return f"💰 {gold} pièces d'or {'ajoutées' if gold > 0 else 'retirées'}. Total: {current_gold:.2f} po"
+    # ✅ PATTERN CORRECT - Utilisation des services spécialisés via SessionService
+    character = ctx.deps.add_gold(float(gold))
+    return f"💰 {gold} pièces d'or {'ajoutées' if gold > 0 else 'retirées'}. Total: {character.gold:.2f} po"
 
 def character_take_damage(ctx: RunContext[SessionService], amount: int, source: str = "combat") -> str:
     """
@@ -48,10 +47,7 @@ def character_take_damage(ctx: RunContext[SessionService], amount: int, source: 
         str: Message confirmant l'application des dégâts.
     """
     log_debug("Tool character_take_damage appelé", tool="character_take_damage", player_id=str(ctx.deps.character_id), amount=amount, source=source)
-    ctx.deps.character_service.take_damage(amount, source)
     
-    # Retourner un message simple au lieu de l'objet complexe
-    current_hp = ctx.deps.character_service.character_data.get('hp', 0) if isinstance(ctx.deps.character_service.character_data, dict) else ctx.deps.character_service.character_data.hp
-    return f"💔 {amount} points de dégâts subis ({source}). PV restants: {current_hp}"
-
-
+    # ✅ PATTERN CORRECT - Utilisation des services spécialisés via SessionService
+    character = ctx.deps.take_damage(amount, source)
+    return f"💔 {amount} points de dégâts subis ({source}). PV restants: {character.hp}"

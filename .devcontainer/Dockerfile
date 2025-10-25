@@ -32,3 +32,5 @@ RUN pip install --upgrade pip
 RUN git config --global user.name "Benjamin Marchand"
 RUN git config --global user.email "ben.marchand@free.fr"
 RUN git config --global core.editor "vim"
+
+RUN pnpm i -g @google/gemini-cli
