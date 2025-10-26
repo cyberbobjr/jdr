@@ -328,20 +328,6 @@ async def play_scenario(session_id: UUID, request: PlayScenarioRequest):
         )
         raise HTTPException(status_code=500, detail=f"Erreur interne: {str(e)}")
 
-def get_message_dict(obj):
-    """
-    Convertit un objet message (ModelRequest, ModelResponse, etc.) en dict.
-    Essaie .model_dump(), puis .dict(), puis vars(obj).
-    """
-    if hasattr(obj, 'model_dump'):
-        return obj.model_dump()
-    if hasattr(obj, 'dict'):
-        return obj.dict()
-    try:
-        return vars(obj)
-    except Exception:
-        return None
-
 def normalize_json_history(history):
     """
     Normalise l'historique JSON natif pour garantir la présence des champs obligatoires dans chaque part.
@@ -624,7 +610,13 @@ async def delete_history_message(session_id: UUID, message_index: int):
         
         # Sauvegarder l'historique modifié (utiliser save_pydantic_history, pas save_json_history)
         # Convertir d'abord en format PydanticAI puis sauvegarder
-        deps.store.save_pydantic_history(history)
+        try:
+            from pydantic_ai.messages import ModelMessagesTypeAdapter
+            pydantic_history = ModelMessagesTypeAdapter.validate_python(history)
+            deps.store.save_pydantic_history(pydantic_history)
+        except ImportError as e:
+            log_debug("Erreur d'import pydantic_ai.messages", error=str(e))
+            raise HTTPException(status_code=500, detail=f"Configuration PydanticAI manquante: {str(e)}")
         
         remaining_count = len(history)
         

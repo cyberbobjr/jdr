@@ -40,10 +40,10 @@ class InventoryService:
         **Retour:** Personnage modifié
         """
         logger.info("Objet ajouté à l'inventaire",
-                   extra={"action": "add_item",
-                          "character_id": str(character.id),
-                          "item_id": item_id,
-                          "quantity": quantity})
+                    extra={"action": "add_item",
+                           "character_id": str(character.id),
+                           "item_id": item_id,
+                           "quantity": quantity})
         
         # Initialiser l'inventaire si nécessaire
         if character.inventory is None:
@@ -59,6 +59,35 @@ class InventoryService:
             item_service = ItemService()
             new_item = item_service.create_item_from_name(item_id, quantity=quantity)
             character.inventory.append(new_item)
+        
+        self.data_service.save_character(character)
+        return character
+    
+    def add_item_object(self, character: Character, item: Item) -> Character:
+        """
+        ### add_item_object
+        **Description:** Ajoute un objet complet à l'inventaire du personnage.
+        **Paramètres:**
+        - `character` (Character): Personnage à modifier
+        - `item` (Item): L'objet à ajouter
+        **Retour:** Personnage modifié
+        """
+        logger.info("Objet ajouté à l'inventaire",
+                    extra={"action": "add_item_object",
+                           "character_id": str(character.id),
+                           "item_id": item.id})
+        
+        # Initialiser l'inventaire si nécessaire
+        if character.inventory is None:
+            character.inventory = []
+        
+        # Vérifier si l'objet existe déjà
+        existing_item = self._find_item_by_id(character, item.id)
+        
+        if existing_item:
+            existing_item.quantity += item.quantity
+        else:
+            character.inventory.append(item)
         
         self.data_service.save_character(character)
         return character

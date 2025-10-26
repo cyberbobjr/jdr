@@ -125,11 +125,11 @@ class TestCharacterServiceRefactored:
         with patch('back.services.character_persistence_service.CharacterPersistenceService.load_character_data') as mock_load:
             # Personnage incomplet
             mock_load.return_value = {"name": "Incomplete"}
-            
+
             service = CharacterService(self.test_character_id)
-            
-            assert service.status == CharacterStatus.PROGRESS
-            assert not service.is_complete
+
+            assert service.character_data.status == CharacterStatus.PROGRESS
+            assert not service.character_data.is_complete
     
     def test_get_all_characters_returns_normalized_dicts(self):
         """Test que get_all_characters retourne des dictionnaires normalisés"""

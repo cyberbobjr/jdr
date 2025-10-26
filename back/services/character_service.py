@@ -6,8 +6,11 @@ from typing import List, Dict
 from back.models.schema import Item, CharacterStatus
 from back.models.domain.character import Character
 from back.utils.logger import log_debug
+from back.utils.model_converter import ModelConverter
 from back.services.character_persistence_service import CharacterPersistenceService
+from back.services.character_data_service import CharacterDataService
 from back.services.item_service import ItemService
+from back.services.inventory_service import InventoryService
 from back.models.domain.equipment_manager import EquipmentManager
 from back.config import get_data_dir
 
@@ -62,12 +65,8 @@ class CharacterService:
         **Description:** Sauvegarde les données du personnage vers le stockage persistant
         **Retour:** Aucun
         """
-        # Gérer le cas où character_data est un dict ou un objet Character
-        if hasattr(self.character_data, 'model_dump'):
-            character_dict = self.character_data.model_dump()
-        else:
-            character_dict = self.character_data.copy() if isinstance(self.character_data, dict) else self.character_data
-            
+        # Utiliser ModelConverter pour une conversion cohérente
+        character_dict = ModelConverter.to_dict(self.character_data)
         # Retirer l'ID car il ne doit pas être dans le fichier
         character_dict.pop('id', None)
         CharacterPersistenceService.save_character_data(self.character_id, character_dict)
@@ -87,7 +86,7 @@ class CharacterService:
         **Description:** Retourne les données du personnage au format JSON
         **Retour:** String JSON des données du personnage
         """
-        return self.character_data.model_dump_json()
+        return ModelConverter.to_json(self.character_data)
     
     @staticmethod
     def get_all_characters() -> List[object]:
@@ -205,18 +204,14 @@ class CharacterService:
         - `item` (Item): L'objet à ajouter à l'inventaire.
         **Retour:** dict - Résumé de l'inventaire mis à jour
         """
-        if not hasattr(self.character_data, 'inventory') or self.character_data.inventory is None:
-            self.character_data.inventory = []
-        # Vérifie si l'objet existe déjà
-        for inv_item in self.character_data.inventory:
-            if hasattr(inv_item, 'id') and inv_item.id == item.id:
-                inv_item.quantity += item.quantity
-                self.save_character()
-                return {"inventory": [i.model_dump() if hasattr(i, 'model_dump') else i for i in self.character_data.inventory]}
-        # Sinon, ajoute l'objet
-        self.character_data.inventory.append(item)
-        self.save_character()
-        return {"inventory": [i.model_dump() if hasattr(i, 'model_dump') else i for i in self.character_data.inventory]}
+        # Utiliser InventoryService pour déléguer la logique
+        data_service = CharacterDataService()
+        inventory_service = InventoryService(data_service)
+        character = data_service.load_character(self.character_id)
+        inventory_service.add_item_object(character, item)
+        # Recharger les données
+        self.character_data = self._load_character()
+        return {"inventory": [ModelConverter.to_dict(i) for i in self.character_data.inventory]}
 
     def item_exists(self, item_id: str) -> bool:
         """

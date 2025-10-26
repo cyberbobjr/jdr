@@ -7,6 +7,12 @@ import os
 
 from back.utils.logger import log_debug
 
+try:
+    from pydantic_ai.messages import ModelMessagesTypeAdapter
+except ImportError:
+    # Fallback pour les environnements où pydantic_ai n'est pas disponible
+    ModelMessagesTypeAdapter = None
+
 
 class PydanticJsonlStore:
     """
@@ -42,16 +48,23 @@ class PydanticJsonlStore:
     def save_pydantic_history(self, messages: list):
         """
         ### save_pydantic_history
-        **Description :** Sérialise et sauvegarde une liste de messages PydanticAI dans le fichier JSONL, en utilisant to_jsonable_python comme recommandé dans la documentation officielle.
+        **Description :** Sérialise et sauvegarde une liste de messages PydanticAI dans le fichier JSONL, en utilisant ModelMessagesTypeAdapter.dump_json comme recommandé dans la documentation officielle.
         **Paramètres :**
         - `messages` (list) : Liste de messages PydanticAI à sauvegarder.
         """
-        from pydantic_core import to_jsonable_python
         import json
-        historique_jsonable = to_jsonable_python(messages)
+
+        # Vérifier que ModelMessagesTypeAdapter est disponible
+        if ModelMessagesTypeAdapter is None:
+            raise ImportError("pydantic_ai.messages.ModelMessagesTypeAdapter n'est pas disponible. Vérifiez que pydantic-ai est installé.")
+
+        # Utiliser dump_json pour une sérialisation cohérente avec PydanticAI
+        json_bytes = ModelMessagesTypeAdapter.dump_json(messages, indent=2)
+        json_str = json_bytes.decode('utf-8')
+
         with open(self.filepath, "w", encoding="utf-8") as f:
-            json.dump(historique_jsonable, f, ensure_ascii=False, indent=2)
-        log_debug("Historique PydanticAI sauvegardé (to_jsonable_python)", action="save_pydantic_history", filepath=os.path.abspath(self.filepath), count=len(messages))
+            f.write(json_str)
+        log_debug("Historique PydanticAI sauvegardé (ModelMessagesTypeAdapter.dump_json)", action="save_pydantic_history", filepath=os.path.abspath(self.filepath), count=len(messages))
 
     def load_pydantic_history(self) -> list:
         """
@@ -59,7 +72,6 @@ class PydanticJsonlStore:
         **Description :** Recharge l'historique complet au format PydanticAI à partir du fichier JSONL, en utilisant ModelMessagesTypeAdapter.validate_python comme dans la documentation officielle.
         **Returns :** Liste de messages PydanticAI désérialisés (list[ModelMessage]).
         """
-        from pydantic_ai.messages import ModelMessagesTypeAdapter
         import json
         if not os.path.exists(self.filepath):
             return []
@@ -69,6 +81,11 @@ class PydanticJsonlStore:
                 if not content:  # Fichier vide
                     return []
                 data = json.loads(content)
+
+            # Vérifier que ModelMessagesTypeAdapter est disponible
+            if ModelMessagesTypeAdapter is None:
+                raise ImportError("pydantic_ai.messages.ModelMessagesTypeAdapter n'est pas disponible. Vérifiez que pydantic-ai est installé.")
+
             history = ModelMessagesTypeAdapter.validate_python(data)
             log_debug("Historique PydanticAI rechargé (validate_python)", action="load_pydantic_history", filepath=os.path.abspath(self.filepath), count=len(history))
             return history

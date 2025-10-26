@@ -161,6 +161,14 @@
         "documentation": {}
     },
     {
+        "label": "Config",
+        "importPath": "back.config",
+        "description": "back.config",
+        "isExtraImport": true,
+        "detail": "back.config",
+        "documentation": {}
+    },
+    {
         "label": "get_logger",
         "importPath": "back.config",
         "description": "back.config",
@@ -626,6 +634,22 @@
         "documentation": {}
     },
     {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
         "label": "Optional",
         "importPath": "typing",
         "description": "typing",
@@ -635,6 +659,22 @@
     },
     {
         "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
         "importPath": "typing",
         "description": "typing",
         "isExtraImport": true,
@@ -1340,6 +1380,14 @@
         "documentation": {}
     },
     {
+        "label": "Item",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
         "label": "CharacterStatus",
         "importPath": "back.models.schema",
         "description": "back.models.schema",
@@ -1474,6 +1522,22 @@
         "description": "back.models.api_dto",
         "isExtraImport": true,
         "detail": "back.models.api_dto",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterDataService",
+        "importPath": "back.services.character_data_service",
+        "description": "back.services.character_data_service",
+        "isExtraImport": true,
+        "detail": "back.services.character_data_service",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterDataService",
+        "importPath": "back.services.character_data_service",
+        "description": "back.services.character_data_service",
+        "isExtraImport": true,
+        "detail": "back.services.character_data_service",
         "documentation": {}
     },
     {
@@ -1726,6 +1790,14 @@
         "documentation": {}
     },
     {
+        "label": "CharacterPersistenceService",
+        "importPath": "back.services.character_persistence_service",
+        "description": "back.services.character_persistence_service",
+        "isExtraImport": true,
+        "detail": "back.services.character_persistence_service",
+        "documentation": {}
+    },
+    {
         "label": "RacesManager",
         "importPath": "back.models.domain.races_manager",
         "description": "back.models.domain.races_manager",
@@ -1855,6 +1927,14 @@
         "documentation": {}
     },
     {
+        "label": "CharacterService",
+        "importPath": "back.services.character_service",
+        "description": "back.services.character_service",
+        "isExtraImport": true,
+        "detail": "back.services.character_service",
+        "documentation": {}
+    },
+    {
         "label": "SkillsManager",
         "importPath": "back.models.domain.skills_manager",
         "description": "back.models.domain.skills_manager",
@@ -1919,6 +1999,22 @@
         "documentation": {}
     },
     {
+        "label": "ModelConverter",
+        "importPath": "back.utils.model_converter",
+        "description": "back.utils.model_converter",
+        "isExtraImport": true,
+        "detail": "back.utils.model_converter",
+        "documentation": {}
+    },
+    {
+        "label": "ModelConverter",
+        "importPath": "back.utils.model_converter",
+        "description": "back.utils.model_converter",
+        "isExtraImport": true,
+        "detail": "back.utils.model_converter",
+        "documentation": {}
+    },
+    {
         "label": "ItemService",
         "importPath": "back.services.item_service",
         "description": "back.services.item_service",
@@ -1932,6 +2028,38 @@
         "description": "back.services.item_service",
         "isExtraImport": true,
         "detail": "back.services.item_service",
+        "documentation": {}
+    },
+    {
+        "label": "ItemService",
+        "importPath": "back.services.item_service",
+        "description": "back.services.item_service",
+        "isExtraImport": true,
+        "detail": "back.services.item_service",
+        "documentation": {}
+    },
+    {
+        "label": "InventoryService",
+        "importPath": "back.services.inventory_service",
+        "description": "back.services.inventory_service",
+        "isExtraImport": true,
+        "detail": "back.services.inventory_service",
+        "documentation": {}
+    },
+    {
+        "label": "InventoryService",
+        "importPath": "back.services.inventory_service",
+        "description": "back.services.inventory_service",
+        "isExtraImport": true,
+        "detail": "back.services.inventory_service",
+        "documentation": {}
+    },
+    {
+        "label": "InventoryService",
+        "importPath": "back.services.inventory_service",
+        "description": "back.services.inventory_service",
+        "isExtraImport": true,
+        "detail": "back.services.inventory_service",
         "documentation": {}
     },
     {
@@ -1968,11 +2096,11 @@
         "documentation": {}
     },
     {
-        "label": "InventoryService",
-        "importPath": "back.services.inventory_service",
-        "description": "back.services.inventory_service",
+        "label": "EquipmentService",
+        "importPath": "back.services.equipment_service",
+        "description": "back.services.equipment_service",
         "isExtraImport": true,
-        "detail": "back.services.inventory_service",
+        "detail": "back.services.equipment_service",
         "documentation": {}
     },
     {
@@ -2049,6 +2177,15 @@
         "documentation": {}
     },
     {
+        "label": "sys",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "sys",
+        "description": "sys",
+        "detail": "sys",
+        "documentation": {}
+    },
+    {
         "label": "logging",
         "kind": 6,
         "isExtraImport": true,
@@ -2112,15 +2249,6 @@
         "description": "haystack.dataclasses",
         "isExtraImport": true,
         "detail": "haystack.dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "sys",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "sys",
-        "description": "sys",
-        "detail": "sys",
         "documentation": {}
     },
     {
@@ -3041,15 +3169,6 @@
         "documentation": {}
     },
     {
-        "label": "get_message_dict",
-        "kind": 2,
-        "importPath": "back.routers.scenarios",
-        "description": "back.routers.scenarios",
-        "peekOfCode": "def get_message_dict(obj):\n    \"\"\"\n    Convertit un objet message (ModelRequest, ModelResponse, etc.) en dict.\n    Essaie .model_dump(), puis .dict(), puis vars(obj).\n    \"\"\"\n    if hasattr(obj, 'model_dump'):\n        return obj.model_dump()\n    if hasattr(obj, 'dict'):\n        return obj.dict()\n    try:",
-        "detail": "back.routers.scenarios",
-        "documentation": {}
-    },
-    {
         "label": "normalize_json_history",
         "kind": 2,
         "importPath": "back.routers.scenarios",
@@ -3245,6 +3364,15 @@
         "description": "back.tests.routers.test_characters_refactored",
         "peekOfCode": "client = TestClient(router)\nclass TestCharactersRouterRefactored:\n    \"\"\"Tests pour le router characters refactoré avec les nouveaux services.\"\"\"\n    @pytest.fixture\n    def mock_character(self):\n        \"\"\"Fixture pour un personnage de test.\"\"\"\n        return Character(\n            id=\"test-character-123\",\n            name=\"Aragorn\",\n            race=\"Humain\",",
         "detail": "back.tests.routers.test_characters_refactored",
+        "documentation": {}
+    },
+    {
+        "label": "TestModelConverter",
+        "kind": 6,
+        "importPath": "back.tests.utils.test_model_converter",
+        "description": "back.tests.utils.test_model_converter",
+        "peekOfCode": "class TestModelConverter:\n    \"\"\"Tests pour la classe ModelConverter.\"\"\"\n    def test_to_dict_with_pydantic_model(self):\n        \"\"\"Test la conversion d'un objet Pydantic en dict.\"\"\"\n        item = Item(id=\"sword\", name=\"Épée\", quantity=1, weight_kg=2.0)\n        result = ModelConverter.to_dict(item)\n        assert isinstance(result, dict)\n        assert result[\"id\"] == \"sword\"\n        assert result[\"name\"] == \"Épée\"\n        assert result[\"quantity\"] == 1",
+        "detail": "back.tests.utils.test_model_converter",
         "documentation": {}
     },
     {
@@ -3446,6 +3574,42 @@
         "documentation": {}
     },
     {
+        "label": "DependencyContainer",
+        "kind": 6,
+        "importPath": "back.utils.dependency_injector",
+        "description": "back.utils.dependency_injector",
+        "peekOfCode": "class DependencyContainer:\n    \"\"\"\n    Conteneur de dépendances simple pour gérer les instances de services.\n    Évite les globals et facilite les tests avec des mocks.\n    \"\"\"\n    def __init__(self):\n        self._services: Dict[str, Any] = {}\n        self._config = Config()\n        self._register_services()\n    def _register_services(self) -> None:",
+        "detail": "back.utils.dependency_injector",
+        "documentation": {}
+    },
+    {
+        "label": "get_service",
+        "kind": 2,
+        "importPath": "back.utils.dependency_injector",
+        "description": "back.utils.dependency_injector",
+        "peekOfCode": "def get_service(service_name: str) -> Any:\n    \"\"\"\n    Fonction utilitaire pour récupérer un service.\n    Args:\n        service_name: Nom du service.\n    Returns:\n        Instance du service.\n    \"\"\"\n    return container.get(service_name)\ndef register_service(service_name: str, service_instance: Any) -> None:",
+        "detail": "back.utils.dependency_injector",
+        "documentation": {}
+    },
+    {
+        "label": "register_service",
+        "kind": 2,
+        "importPath": "back.utils.dependency_injector",
+        "description": "back.utils.dependency_injector",
+        "peekOfCode": "def register_service(service_name: str, service_instance: Any) -> None:\n    \"\"\"\n    Fonction utilitaire pour enregistrer un service (pour les tests).\n    Args:\n        service_name: Nom du service.\n        service_instance: Instance du service.\n    \"\"\"\n    container.register(service_name, service_instance)",
+        "detail": "back.utils.dependency_injector",
+        "documentation": {}
+    },
+    {
+        "label": "container",
+        "kind": 5,
+        "importPath": "back.utils.dependency_injector",
+        "description": "back.utils.dependency_injector",
+        "peekOfCode": "container = DependencyContainer()\ndef get_service(service_name: str) -> Any:\n    \"\"\"\n    Fonction utilitaire pour récupérer un service.\n    Args:\n        service_name: Nom du service.\n    Returns:\n        Instance du service.\n    \"\"\"\n    return container.get(service_name)",
+        "detail": "back.utils.dependency_injector",
+        "documentation": {}
+    },
+    {
         "label": "roll_attack",
         "kind": 2,
         "importPath": "back.utils.dice",
@@ -3605,6 +3769,15 @@
         "description": "back.utils.message_adapter",
         "peekOfCode": "def extract_message_text(message):\n    role = getattr(message, 'role', None)\n    if hasattr(role, 'value'):\n        role = role.value\n    elif role is None and hasattr(message, '_role'):\n        role = message._role.value\n    else:\n        role = str(role)\n    if role == 'tool':\n        if hasattr(message, 'tool_call_results') and message.tool_call_results:",
         "detail": "back.utils.message_adapter",
+        "documentation": {}
+    },
+    {
+        "label": "ModelConverter",
+        "kind": 6,
+        "importPath": "back.utils.model_converter",
+        "description": "back.utils.model_converter",
+        "peekOfCode": "class ModelConverter:\n    \"\"\"\n    Classe utilitaire pour convertir des objets en dictionnaires de manière cohérente.\n    Gère les objets Pydantic (model_dump), les objets avec dict(), et les objets standards.\n    \"\"\"\n    @staticmethod\n    def to_dict(obj: Any) -> Dict[str, Any]:\n        \"\"\"\n        Convertit un objet en dictionnaire.\n        Args:",
+        "detail": "back.utils.model_converter",
         "documentation": {}
     },
     {

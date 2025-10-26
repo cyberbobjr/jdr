@@ -1,392 +1,335 @@
-# Diagrammes d'Architecture - JdR Terres du Milieu
+# Diagrammes Mermaid pour l'Analyse du Backend JDR
 
-## 📊 Vue d'ensemble
+Ce document contient des diagrammes Mermaid pour visualiser la structure du backend du projet JDR, basés sur le code actuel, les tests, les modèles Pydantic, les utilitaires, et les améliorations proposées (respect de SOLID, DRY, injection de dépendances).
 
-Ce document présente les diagrammes d'architecture du backend JdR, mettant en évidence les anti-patterns identifiés et l'architecture cible après refactoring.
+## Table des Matières
+1. [Diagramme de Classes - Modèles et Schémas](#diagramme-de-classes---modèles-et-schémas)
+2. [Diagramme de Séquence - Processus de Conversion](#diagramme-de-séquence---processus-de-conversion)
+3. [Diagramme de Flux - Injection de Dépendances](#diagramme-de-flux---injection-de-dépendances)
+4. [Diagramme d'Architecture - Structure Globale du Backend](#diagramme-darchitecture---structure-globale-du-backend)
+5. [Diagramme de Séquence - Tests Unitaires](#diagramme-de-séquence---tests-unitaires)
+6. [Diagramme Avant/Après - Refactorisation CharacterService](#diagramme-avantaprès---refactorisation-characterservice)
+7. [Diagramme de Flux - Workflow d'Amélioration](#diagramme-de-flux---workflow-damélioration)
 
-## 🏗️ Architecture Actuelle (Problématique)
+## Diagramme de Classes - Modèles et Schémas
 
-### Diagramme de Composants Actuel
-
-```mermaid
-graph TB
-    subgraph "Couche API"
-        R1[Routers<br/>characters.py]
-        R2[Routers<br/>creation.py]
-        R3[Routers<br/>scenarios.py]
-    end
-    
-    subgraph "Couche Services (SRP Violé)"
-        S1[CharacterService<br/>SRP Violé]
-        S2[SessionService<br/>Dépendances circulaires]
-        S3[CombatService]
-    end
-    
-    subgraph "Couche Agents PydanticAI"
-        A1[GMAgent<br/>Patterns incorrects]
-    end
-    
-    subgraph "Couche Outils"
-        T1[CharacterTools<br/>Conversion dict/objets]
-        T2[CombatTools]
-        T3[InventoryTools]
-    end
-    
-    subgraph "Couche Modèles"
-        M1[Character<br/>Pydantic]
-        M2[Schema<br/>Pydantic]
-    end
-    
-    subgraph "Couche Stockage"
-        ST1[PydanticJsonlStore]
-        ST2[CharacterPersistenceService]
-    end
-    
-    %% Connexions problématiques
-    R1 --> S1
-    R2 --> S1
-    R3 --> S2
-    S2 --> S1
-    A1 --> T1
-    T1 --> S1
-    T1 --> S2
-    
-    %% Anti-patterns
-    S1 -.->|"❌ Mixte objets/dicts"| M1
-    T1 -.->|"❌ Conversion Pydantic→dict"| M1
-    S2 -.->|"❌ Dépendances circulaires"| S1
-```
-
-### Diagramme de Flux de Données Problématique
-
-```mermaid
-sequenceDiagram
-    participant Client
-    participant Router
-    participant CharacterService
-    participant CharacterTools
-    participant GMAgent
-    
-    Client->>Router: GET /api/characters/
-    Router->>CharacterService: get_all_characters()
-    
-    Note over CharacterService: ❌ ANTI-PATTERN<br/>Mixte objets/dicts
-    
-    CharacterService->>CharacterService: _process_character_data()
-    CharacterService-->>Router: List[dict/Character]
-    Router-->>Client: CharacterListAny
-    
-    Client->>Router: POST /api/scenarios/play
-    Router->>GMAgent: build_gm_agent_pydantic()
-    
-    Note over GMAgent: ❌ ANTI-PATTERN<br/>Dépendances circulaires
-    
-    GMAgent->>CharacterTools: character_apply_xp()
-    
-    Note over CharacterTools: ❌ ANTI-PATTERN<br/>Conversion Pydantic→dict
-    
-    CharacterTools->>CharacterService: apply_xp()
-    CharacterService-->>CharacterTools: dict/Character
-    CharacterTools-->>GMAgent: str (message)
-    GMAgent-->>Router: str (response)
-    Router-->>Client: JSON
-```
-
-### Diagramme de Classes Actuel (Problèmes)
+Ce diagramme illustre les classes principales des modèles Pydantic, des services, et des utilitaires, en mettant en évidence les relations et les responsabilités.
 
 ```mermaid
 classDiagram
+    class Character {
+        +id: str
+        +name: str
+        +race: Race
+        +culture: Culture
+        +caracteristiques: Dict[str, int]
+        +competences: Dict[str, int]
+        +inventory: List[Item]
+        +equipment: List[str]
+        +gold: float
+        +xp: int
+        +hp: int
+        +status: CharacterStatus
+        +is_complete: bool
+    }
+
+    class Item {
+        +id: str
+        +name: str
+        +quantity: int
+        +weight_kg: float
+        +is_equipped: bool
+    }
+
+    class CharacterStatus {
+        <<enumeration>>
+        IN_PROGRESS
+        DONE
+    }
+
+    class ModelConverter {
+        +to_dict(obj: Any) Dict[str, Any]
+        +to_json(obj: Any) str
+    }
+
+    class DependencyContainer {
+        -_services: Dict[str, Any]
+        -_config: Config
+        +get(service_name: str) Any
+        +register(service_name: str, service_instance: Any)
+    }
+
     class CharacterService {
         -character_id: str
-        -strict_validation: bool
-        -character_data: dict/Character
-        +__init__(character_id, strict_validation)
-        +_load_character() dict/Character
+        -character_data: Character | Dict
+        +__init__(character_id: str, strict_validation: bool)
         +save_character()
         +get_character() Character
-        +get_character_json() str
-        +get_all_characters() List[object]
-        +get_character_by_id(character_id) dict
-        +apply_xp(xp)
-        +add_gold(gold)
-        +take_damage(amount, source)
-        +instantiate_item_by_id(item_id, qty) Item
-        +add_item_object(item) Dict
-        +item_exists(item_id) bool
-        +add_item(item_id, qty) Dict
-        +remove_item(item_id, qty) Dict
-        +equip_item(item_id) Dict
-        +unequip_item(item_id) Dict
-        +buy_equipment(equipment_name) Dict
-        +sell_equipment(equipment_name) Dict
-        +update_money(amount) Dict
-        +_process_character_data(character_id, character_data, action_prefix) object
+        +add_item(item_id: str, qty: int) Dict
+        +apply_xp(xp: int)
+        +add_gold(gold: float)
     }
-    
-    class SessionService {
-        -session_id: str
-        -character_id: str
-        -character_data: Dict[str, Any]
-        -scenario_name: str
-        -character_service: CharacterService
-        -store: PydanticJsonlStore
-        +__init__(session_id, character_id, scenario_name)
-        +_load_session_data() bool
-        +_create_session(character_id, scenario_name)
-        +list_all_sessions() List[Dict[str, Any]]
-    }
-    
-    class CharacterTools {
-        +character_apply_xp(ctx, xp) str
-        +character_add_gold(ctx, gold) str
-        +character_take_damage(ctx, amount, source) str
-    }
-    
-    class GMAgentPydantic {
-        +build_gm_agent_pydantic(session_id, scenario_name, character_id) Tuple[Agent, SessionService]
-        +enrich_user_message_with_character(user_message, character_data) str
-        +enrich_user_message_with_combat_state(user_message, combat_state) str
-        +auto_enrich_message_with_combat_context(session_id, user_message) str
-        +build_simple_gm_agent() Agent
-    }
-    
-    CharacterService "1" -- "1" SessionService : ❌ Dépendance circulaire
-    CharacterTools --> CharacterService : Utilise
-    CharacterTools --> SessionService : Utilise
-    GMAgentPydantic --> SessionService : Dépendance
-```
 
-## 🎯 Architecture Cible (Après Refactoring)
-
-### Diagramme de Composants Cible
-
-```mermaid
-graph TB
-    subgraph "Couche API"
-        R1[Routers<br/>DTOs clairs]
-        R2[Routers<br/>Validation]
-        R3[Routers<br/>Gestion erreurs]
-    end
-    
-    subgraph "Couche Services (SRP Respecté)"
-        S1[CharacterDataService<br/>Chargement/Sauvegarde]
-        S2[CharacterBusinessService<br/>XP/Or/Dégâts]
-        S3[InventoryService<br/>Gestion inventaire]
-        S4[EquipmentService<br/>Achat/Vente]
-        S5[SessionService<br/>Refactoré]
-    end
-    
-    subgraph "Couche Agents PydanticAI"
-        A1[GMAgent<br/>Patterns corrects]
-    end
-    
-    subgraph "Couche Outils"
-        T1[CharacterTools<br/>Objets Pydantic]
-        T2[CombatTools<br/>Objets Pydantic]
-        T3[InventoryTools<br/>Objets Pydantic]
-    end
-    
-    subgraph "Couche Modèles"
-        M1[Character<br/>Pydantic]
-        M2[Schema<br/>Pydantic]
-        M3[DTOs<br/>Réponses API]
-    end
-    
-    subgraph "Couche Stockage"
-        ST1[PydanticJsonlStore]
-        ST2[CharacterPersistenceService]
-    end
-    
-    %% Connexions propres
-    R1 --> S2
-    R1 --> S3
-    R1 --> S4
-    S2 --> S1
-    S3 --> S1
-    S4 --> S1
-    A1 --> T1
-    T1 --> S2
-    T1 --> S3
-    T1 --> S4
-    
-    %% Patterns corrects
-    S1 -.->|"✅ Objets Pydantic purs"| M1
-    T1 -.->|"✅ Accès direct aux attributs"| M1
-```
-
-### Diagramme de Flux de Données Cible
-
-```mermaid
-sequenceDiagram
-    participant Client
-    participant Router
-    participant CharacterBusinessService
-    participant CharacterTools
-    participant GMAgent
-    
-    Client->>Router: GET /api/characters/
-    Router->>CharacterBusinessService: get_all_characters()
-    
-    Note over CharacterBusinessService: ✅ Pattern correct<br/>Objets Pydantic purs
-    
-    CharacterBusinessService->>CharacterBusinessService: _load_characters()
-    CharacterBusinessService-->>Router: List[Character]
-    Router-->>Client: CharacterListDTO
-    
-    Client->>Router: POST /api/scenarios/play
-    Router->>GMAgent: build_gm_agent_pydantic()
-    
-    Note over GMAgent: ✅ Dépendances clarifiées
-    
-    GMAgent->>CharacterTools: character_apply_xp()
-    
-    Note over CharacterTools: ✅ Accès direct aux attributs
-    
-    CharacterTools->>CharacterBusinessService: apply_xp()
-    CharacterBusinessService-->>CharacterTools: Character
-    CharacterTools-->>GMAgent: str (message)
-    GMAgent-->>Router: str (response)
-    Router-->>Client: JSON
-```
-
-### Diagramme de Classes Cible
-
-```mermaid
-classDiagram
-    class CharacterDataService {
-        -character_id: str
-        +__init__(character_id)
-        +load_character() Character
-        +save_character(character: Character)
-        +get_all_characters() List[Character]
-        +get_character_by_id(character_id) Character
-    }
-    
-    class CharacterBusinessService {
-        -data_service: CharacterDataService
-        +__init__(data_service)
-        +apply_xp(character: Character, xp: int) Character
-        +add_gold(character: Character, gold: float) Character
-        +take_damage(character: Character, amount: int, source: str) Character
-    }
-    
     class InventoryService {
         -data_service: CharacterDataService
-        +__init__(data_service)
-        +add_item(character: Character, item_id: str, qty: int) Character
-        +remove_item(character: Character, item_id: str, qty: int) Character
-        +equip_item(character: Character, item_id: str) Character
-        +unequip_item(character: Character, item_id: str) Character
+        +add_item(character: Character, item_id: str, quantity: int) Character
+        +add_item_object(character: Character, item: Item) Character
+        +remove_item(character: Character, item_id: str, quantity: int) Character
     }
-    
+
     class EquipmentService {
         -data_service: CharacterDataService
-        +__init__(data_service)
+        -equipment_manager: EquipmentManager
         +buy_equipment(character: Character, equipment_name: str) Character
         +sell_equipment(character: Character, equipment_name: str) Character
         +update_money(character: Character, amount: float) Character
     }
-    
-    class CharacterTools {
-        +character_apply_xp(ctx, xp) str
-        +character_add_gold(ctx, gold) str
-        +character_take_damage(ctx, amount, source) str
+
+    class CharacterDataService {
+        +load_character(character_id: str) Character
+        +save_character(character: Character)
     }
-    
-    class SessionService {
-        -session_id: str
-        -character_id: str
-        -character_data: Character
-        -scenario_name: str
-        -data_service: CharacterDataService
-        -store: PydanticJsonlStore
-        +__init__(session_id, character_id, scenario_name)
-        +_load_session_data() bool
-        +_create_session(character_id, scenario_name)
+
+    class ItemService {
+        +create_item_from_name(name: str, quantity: int) Item
     }
-    
-    CharacterDataService "1" -- "1" CharacterBusinessService : Composition
-    CharacterDataService "1" -- "1" InventoryService : Composition
-    CharacterDataService "1" -- "1" EquipmentService : Composition
-    CharacterTools --> CharacterBusinessService : Utilise
-    CharacterTools --> InventoryService : Utilise
-    CharacterTools --> EquipmentService : Utilise
-    SessionService --> CharacterDataService : Utilise
+
+    class EquipmentManager {
+        +get_equipment_by_name(name: str) Dict
+    }
+
+    Character --> Item : inventory
+    Character --> CharacterStatus : status
+    CharacterService --> Character : character_data
+    CharacterService --> InventoryService : delegates to
+    CharacterService --> EquipmentService : delegates to
+    CharacterService --> ModelConverter : uses for conversion
+    InventoryService --> CharacterDataService : persistence
+    InventoryService --> ItemService : item creation
+    EquipmentService --> CharacterDataService : persistence
+    EquipmentService --> EquipmentManager : equipment details
+    DependencyContainer --> CharacterService : manages
+    DependencyContainer --> InventoryService : manages
+    DependencyContainer --> EquipmentService : manages
 ```
 
-## 🔍 Anti-Patterns Détailés
+## Diagramme de Séquence - Processus de Conversion
 
-### 1. Violation du Pattern PydanticAI
+Ce diagramme montre le processus de conversion d'un objet Pydantic en dictionnaire via ModelConverter, illustrant le respect de DRY.
 
-**Code problématique :**
-```python
-# back/tools/character_tools.py
-current_gold = ctx.deps.character_service.character_data.get('gold', 0) 
-if isinstance(ctx.deps.character_service.character_data, dict) 
-else ctx.deps.character_service.character_data.gold
+```mermaid
+sequenceDiagram
+    participant Client as Client Code
+    participant ModelConverter as ModelConverter
+    participant PydanticModel as Pydantic Model (e.g., Item)
+
+    Client->>ModelConverter: to_dict(obj)
+    alt obj has model_dump
+        ModelConverter->>PydanticModel: obj.model_dump()
+        PydanticModel-->>ModelConverter: dict
+    else obj has dict
+        ModelConverter->>PydanticModel: obj.dict()
+        PydanticModel-->>ModelConverter: dict
+    else obj is dict
+        ModelConverter-->>ModelConverter: return obj as is
+    else standard object
+        ModelConverter->>PydanticModel: vars(obj)
+        PydanticModel-->>ModelConverter: dict
+    end
+    ModelConverter-->>Client: dict
+
+    Note over ModelConverter: Centralise la logique<br/>Évite la duplication de code<br/>Facilite les tests
 ```
 
-**Solution :**
-```python
-# Pattern correct
-current_gold = ctx.deps.character_service.character_data.gold
+## Diagramme de Flux - Injection de Dépendances
+
+Ce diagramme illustre le flux d'injection de dépendances via DependencyContainer, remplaçant les globals et appels directs.
+
+```mermaid
+flowchart TD
+    A[Client Code] --> B{Service Needed?}
+    B -->|Yes| C[get_service(service_name)]
+    C --> D[DependencyContainer.get()]
+    D --> E{Service Registered?}
+    E -->|Yes| F[Return Service Instance]
+    E -->|No| G[Raise ValueError]
+    F --> A
+    B -->|No| H[Direct Usage]
+
+    I[Container Initialization] --> J[Register Services]
+    J --> K[Config]
+    J --> L[CharacterPersistenceService]
+    J --> M[CharacterDataService]
+    J --> N[ItemService]
+    J --> O[EquipmentService]
+    J --> P[InventoryService with data_service]
+    J --> Q[CharacterService]
+
+    Note over D,F: Respecte DIP<br/>Facilite les mocks en tests<br/>Évite les couplages forts
 ```
 
-### 2. SRP Violé dans CharacterService
+## Diagramme d'Architecture - Structure Globale du Backend
 
-**Problèmes :**
-- 20+ méthodes avec responsabilités variées
-- Mixte entre logique métier et accès données
-- Validation complexe des données
+Ce diagramme présente l'architecture globale du backend, en mettant en évidence les couches et les dépendances.
 
-**Solution :**
-- Séparation en 4 services spécialisés
-- Chaque service a une responsabilité unique
+```mermaid
+graph TB
+    subgraph "API Layer"
+        A[FastAPI App]
+        B[Characters Router]
+        C[Scenarios Router]
+        D[Creation Router]
+    end
 
-### 3. Dépendances Circulaires
+    subgraph "Service Layer"
+        E[CharacterService]
+        F[InventoryService]
+        G[EquipmentService]
+        H[ScenarioService]
+        I[CombatService]
+        J[SessionService]
+    end
 
-**Problème :**
+    subgraph "Data Layer"
+        K[CharacterDataService]
+        L[CharacterPersistenceService]
+        M[ItemService]
+        N[EquipmentManager]
+    end
+
+    subgraph "Utilities"
+        O[ModelConverter]
+        P[DependencyContainer]
+        Q[Logger]
+        R[Config]
+    end
+
+    subgraph "Models"
+        S[Character]
+        T[Item]
+        U[CharacterStatus]
+        V[Equipment]
+    end
+
+    subgraph "Agents & Tools"
+        W[GMAgentPydantic]
+        X[CharacterTools]
+        Y[CombatTools]
+        Z[InventoryTools]
+    end
+
+    subgraph "Storage"
+        AA[PydanticJsonlStore]
+        BB[JSON Files]
+    end
+
+    A --> B
+    A --> C
+    A --> D
+    B --> E
+    C --> H
+    D --> E
+    E --> F
+    E --> G
+    E --> O
+    F --> K
+    G --> K
+    H --> I
+    I --> J
+    K --> L
+    L --> AA
+    AA --> BB
+    E --> P
+    F --> P
+    G --> P
+    P --> R
+    E --> S
+    F --> T
+    S --> U
+    W --> X
+    W --> Y
+    W --> Z
+    X --> E
+    Y --> I
+    Z --> F
+
+    Note over A,AA: Architecture modulaire<br/>Séparation des couches<br/>Injection de dépendances
 ```
-GMAgent → SessionService → CharacterService → (potentiellement) GMAgent
+
+## Diagramme de Séquence - Tests Unitaires
+
+Ce diagramme illustre le processus de test unitaire pour ModelConverter, montrant l'utilisation de mocks et l'isolation des tests.
+
+```mermaid
+sequenceDiagram
+    participant Test as TestModelConverter
+    participant Mock as Mock Object
+    participant ModelConverter as ModelConverter
+    participant Assert as Assertions
+
+    Test->>Mock: Create mock object with model_dump()
+    Mock-->>Test: mock_object
+    Test->>ModelConverter: to_dict(mock_object)
+    ModelConverter->>Mock: mock_object.model_dump()
+    Mock-->>ModelConverter: {"id": "test", "name": "Test"}
+    ModelConverter-->>Test: dict
+    Test->>Assert: assert isinstance(result, dict)
+    Test->>Assert: assert result["id"] == "test"
+    Assert-->>Test: Pass
+
+    Note over Test,Assert: Tests isolés<br/>Mocks pour dépendances<br/>Validation des conversions
 ```
 
-**Solution :**
-- Architecture en couches claires
-- Injection de dépendances explicite
-- Services indépendants
+## Diagramme Avant/Après - Refactorisation CharacterService
 
-## 📈 Métriques d'Amélioration
+Ce diagramme compare la structure avant et après refactorisation de CharacterService, illustrant le respect de SRP et l'utilisation de DI.
 
-| Métrique | Actuel | Cible | Amélioration |
-|----------|--------|-------|--------------|
-| SRP respecté | 20% | 95% | +75% |
-| Utilisation objets Pydantic | 40% | 95% | +55% |
-| Dépendances circulaires | 3 | 0 | -100% |
-| Complexité cyclomatique | Élevée | Faible | -60% |
-| Maintenabilité | Faible | Élevée | +80% |
+```mermaid
+flowchart LR
+    subgraph "Avant Refactorisation"
+        A1[CharacterService] --> B1[Inventaire Logic]
+        A1 --> C1[Équipement Logic]
+        A1 --> D1[Conversion Dict/Obj]
+        A1 --> E1[Persistence]
+        B1 --> D1
+        C1 --> D1
+        D1 --> E1
+    end
 
-## 🚀 Plan de Migration
+    subgraph "Après Refactorisation"
+        A2[CharacterService] --> B2[InventoryService]
+        A2 --> C2[EquipmentService]
+        A2 --> D2[ModelConverter]
+        A2 --> E2[DependencyContainer]
+        B2 --> F2[CharacterDataService]
+        C2 --> F2
+        D2 --> G2[Conversion Centralisée]
+        E2 --> H2[Service Injection]
+    end
 
-### Phase 1 : Correction Patterns PydanticAI
-- [ ] Refactorer `back/tools/character_tools.py`
-- [ ] Utiliser `result.output` au lieu de `result.data`
-- [ ] Éliminer les conversions dict/objets
+    Note over A1,E2: Avant: Couplage fort, duplication<br/>Après: SRP respecté, DI, DRY
+```
 
-### Phase 2 : Refactoring Services
-- [ ] Créer `CharacterDataService`
-- [ ] Créer `CharacterBusinessService` 
-- [ ] Créer `InventoryService`
-- [ ] Créer `EquipmentService`
-- [ ] Refactorer `CharacterService` existant
+## Diagramme de Flux - Workflow d'Amélioration
 
-### Phase 3 : Clarification Dépendances
-- [ ] Refactorer `SessionService`
-- [ ] Éliminer les imports circulaires
-- [ ] Implémenter l'injection de dépendances
+Ce diagramme montre le workflow global des améliorations implémentées, de l'analyse à la validation.
 
-### Phase 4 : Amélioration API
-- [ ] Créer des DTOs pour les réponses
-- [ ] Standardiser la gestion d'erreurs
-- [ ] Améliorer la documentation OpenAPI
+```mermaid
+flowchart TD
+    A[Analyse du Code Existant] --> B[Identification des Problèmes<br/>- Violations SOLID<br/>- Duplication DRY<br/>- Manque de DI]
+    B --> C[Proposition d'Améliorations<br/>- ModelConverter<br/>- DependencyContainer<br/>- Refactorisation Services]
+    C --> D[Implémentation<br/>- Création des utilitaires<br/>- Refactorisation des services<br/>- Mise à jour des tests]
+    D --> E[Tests et Validation<br/>- Tests unitaires<br/>- Intégration<br/>- Vérification des diagrammes]
+    E --> F[Documentation<br/>- TODO.md<br/>- DIAGRAMS.md<br/>- Guide de migration]
 
-Ce plan permettra d'obtenir une architecture plus maintenable, testable et conforme aux bonnes pratiques de développement.
+    G[Problèmes Identifiés] -.-> A
+    H[Améliorations Proposées] -.-> C
+    I[Tests Échoués] -.-> D
+    J[Feedback Utilisateur] -.-> B
+
+    Note over A,F: Workflow itératif<br/>Améliorations progressives<br/>Validation continue
+```
+
+## Conclusion
+
+Ces diagrammes Mermaid fournissent une visualisation complète de la structure du backend JDR, des problèmes identifiés, et des améliorations implémentées. Ils facilitent la compréhension des relations entre composants, des processus de conversion, et des workflows de test, tout en illustrant le respect des principes SOLID et DRY.
