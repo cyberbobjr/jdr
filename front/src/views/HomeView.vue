@@ -49,19 +49,18 @@ onMounted(async () => {
             Vivez des aventures épiques dans l'univers du Jeu de Rôle des Terres du Milieu.<br>
             Un système complet pour gérer vos personnages, scénarios et parties.
           </p>
-          
-          <!-- Statut de connexion API -->
+            <!-- Statut de connexion API -->
           <div class="api-status jdr-mb-4">
             <div v-if="apiStatus === 'checking'" class="status-indicator checking">
-              <i class="fas fa-spinner fa-spin"></i>
+              <font-awesome-icon icon="spinner" spin />
               <span>Connexion au serveur...</span>
             </div>
             <div v-else-if="apiStatus === 'connected'" class="status-indicator connected">
-              <i class="fas fa-check-circle"></i>
+              <font-awesome-icon icon="check-circle" />
               <span>Serveur connecté</span>
             </div>
             <div v-else class="status-indicator error">
-              <i class="fas fa-exclamation-triangle"></i>
+              <font-awesome-icon icon="exclamation-triangle" />
               <span>Serveur déconnecté (mode démo)</span>
             </div>
           </div>
@@ -191,7 +190,7 @@ onMounted(async () => {
           <div class="feature-card jdr-card">
             <div class="jdr-card-header">
               <div class="feature-icon">
-                <font-awesome-icon :icon="['fas', 'sword']" />
+                <font-awesome-icon :icon="['fas', 'fist-raised']" />
               </div>
               <h3 class="jdr-card-title">Combat Tactique</h3>
             </div>

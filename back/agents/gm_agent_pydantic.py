@@ -4,7 +4,6 @@ Migration progressive de Haystack vers PydanticAI.
 """
 
 import os
-import pathlib
 from typing import Optional, Dict, Any
 from dotenv import load_dotenv
 from pydantic_ai import Agent
@@ -14,13 +13,18 @@ from back.services.session_service import SessionService
 from back.storage.pydantic_jsonl_store import PydanticJsonlStore
 from back.models.domain.character import Character
 from back.agents.PROMPT import build_system_prompt
+from back.config import get_data_dir
 
 # Charger les variables d'environnement depuis le fichier .env
 load_dotenv()
 
-api_key = os.getenv("DEEPSEEK_API_KEY")
-api_base_url = os.getenv("DEEPSEEK_API_BASE_URL")
-api_model = os.getenv("DEEPSEEK_API_MODEL")
+from back.config import get_llm_config
+
+# Configuration LLM centralisée
+llm_config = get_llm_config()
+api_key = llm_config["api_key"]
+api_base_url = llm_config["api_endpoint"]
+api_model = llm_config["model"]
 
 
 class GMAgentDependencies:
@@ -30,27 +34,25 @@ class GMAgentDependencies:
     **Attributs :**
     - `session_id` (str) : Identifiant de session
     - `character_data` (Character) : Données du personnage (modèle typé)
-    - `store` (PydanticJsonlStore) : Store pour l'historique des messages
-    - `message_history` (List[ModelMessage]) : Historique des messages PydanticAI
+    - `store` (PydanticJsonlStore) : Store pour l'historique des messages    - `message_history` (List[ModelMessage]) : Historique des messages PydanticAI
     """
     
     def __init__(self, session_id: str, character_data: Optional[Character] = None):
         self.session_id = session_id
         self.character_data = character_data
         # Initialiser le store pour l'historique
-        project_root = pathlib.Path(__file__).parent.parent.parent
         if not os.path.isabs(session_id):
-            history_path = str(project_root / "data" / "sessions" / f"{session_id}.jsonl")
+            history_path = os.path.join(get_data_dir(), "sessions", f"{session_id}.jsonl")
         else:
             history_path = session_id + ".jsonl"
-        self.store = PydanticJsonlStore(history_path)    
+        self.store = PydanticJsonlStore(history_path)
 
 def build_gm_agent_pydantic(session_id: str, scenario_name: str = "Les_Pierres_du_Passe.md", character_id: Optional[str] = None):
     """
     ### build_gm_agent_pydantic
     **Description :** Construit l'agent GM avec PydanticAI et retourne l'agent et ses dépendances.
     **Paramètres :**
-    - `session_id` (str) : Identifiant de la session
+    - `session_id` (str) : Identifiant de la session de jeu
     - `scenario_name` (str) : Nom du fichier scénario (utilisé uniquement lors de la création d'une nouvelle session)
     - `character_id` (Optional[str]) : ID du personnage pour créer une nouvelle session
     **Retour :** Tuple (Agent PydanticAI configuré, SessionService).
@@ -131,9 +133,14 @@ def enrich_user_message_with_character(user_message: str, character_data: Dict[s
     if not character_data:
         return user_message
     
+    # Créer une copie des données pour la sérialisation JSON en convertissant l'UUID en string
+    character_data_serializable = character_data.copy()
+    if 'id' in character_data_serializable and hasattr(character_data_serializable['id'], '__str__'):
+        character_data_serializable['id'] = str(character_data_serializable['id'])
+    
     character_context = f"""<PERSONNAGE JOUEUR>
-{json.dumps(character_data, indent=2, ensure_ascii=False)}
-<PERSONNAGE JOUEUR>
+{json.dumps(character_data_serializable, indent=2, ensure_ascii=False)}
+</PERSONNAGE JOUEUR>
 """
     return character_context + user_message
 
@@ -210,3 +217,36 @@ def auto_enrich_message_with_combat_context(session_id: str, user_message: str) 
 
     # La gestion de l'historique (messages) doit être assurée directement par le store ou l'agent, et non par SessionService.
     # Les méthodes load_history, save_history et update_character_data ne sont plus utilisées ni exposées.
+
+def build_simple_gm_agent():
+    """
+    ### build_simple_gm_agent
+    **Description :** Construit un agent GM simple sans contexte de session pour les tâches de génération (nom, background, description).
+    **Paramètres :** Aucun
+    **Retour :** Agent PydanticAI configuré sans dépendances de session.
+    """
+    # Prompt système simple pour la génération de contenu
+    system_prompt = """Tu es un maître de jeu expert en jeu de rôle medieval-fantastique.
+Tu aides à créer des personnages cohérents et immersifs.
+Réponds toujours de manière concise et appropriée au contexte fourni."""
+    
+    # Créer l'agent avec la configuration DeepSeek
+    from pydantic_ai.models.openai import OpenAIModel
+    from pydantic_ai.providers.openai import OpenAIProvider
+    provider = OpenAIProvider(
+        base_url=api_base_url,
+        api_key=api_key
+    )
+    
+    model = OpenAIModel(
+        model_name=api_model,
+        provider=provider
+    )
+    
+    # Agent simple sans outils ni dépendances
+    agent = Agent(
+        model=model,
+        system_prompt=system_prompt
+    )
+    
+    return agent

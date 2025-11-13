@@ -164,11 +164,11 @@ const character = ref({
     <div class="mt-8 text-center">
       <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <button class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2">
-          <font-awesome-icon :icon="['fas', 'sword']" />
+          <font-awesome-icon :icon="['fas', 'fist-raised']" />
           <span>Combat</span>
         </button>
         <button class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2">
-          <font-awesome-icon :icon="['fas', 'backpack']" />
+          <font-awesome-icon :icon="['fas', 'suitcase']" />
           <span>Inventaire</span>
         </button>
         <button class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2">

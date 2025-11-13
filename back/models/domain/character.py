@@ -1,49 +1,89 @@
 from typing import Dict, List, Optional
 from pydantic import BaseModel
+from uuid import UUID
+
+from back.models.domain.stats_manager import StatsManager
+from back.models.schema import Item, RaceData, CultureData, CharacterStatus
 
 class Character(BaseModel):
     """
     ### Character
-    **Description :** Modèle de données représentant un personnage joueur ou non-joueur du JdR. Utilisé pour typer `character_data` lors de l'initialisation de `GMAgentDependencies`.
-    **Attributs :**
-    - `concept` (str) : Concept ou archétype du personnage
-    - `race` (str) : Race du personnage
-    - `culture` (str) : Culture d'origine
-    - `profession` (str) : Profession principale
-    - `caracteristiques` (Dict[str, int]) : Caractéristiques principales (Force, Constitution, etc.)
-    - `competences` (Dict[str, int]) : Compétences et leur niveau
-    - `talents` (List[str]) : Liste des talents
-    - `equipment` (List[str]) : Liste des équipements
-    - `spells` (List[str]) : Liste des sorts connus
-    - `current_step` (str) : Étape courante de création ou d'évolution
-    - `equipment_summary` (Dict[str, float]) : Synthèse de l'équipement (coût, poids, argent restant, etc.)
-    - `culture_bonuses` (Dict[str, int]) : Bonus liés à la culture
-    - `name` (str) : Nom du personnage
-    - `bonus_race` (Dict[str, int]) : Bonus liés à la race
-    - `hp` (int) : Points de vie
-    - `xp` (int) : Expérience accumulée
-    - `background` (str) : Histoire du personnage (background narratif)
-    - `physical_description` (str) : Description physique du personnage
-    - `created_at` (Optional[str]) : Date de création (ISO)
-    - `last_update` (Optional[str]) : Date de dernière mise à jour (ISO)
+    **Description:** Data model representing a player or non-player character in the RPG. Uses the correct definition from the main schema.
+    **Attributes:**
+    - `id` (UUID): Unique identifier for the character.
+    - `name` (str): The character's name.
+    - `race` (RaceData): Complete race object with all bonuses and details.
+    - `culture` (CultureData): Complete culture object with all bonuses and details.
+    - `stats` (Dict[str, int]): Main characteristics (Strength, Constitution, etc.).
+    - `skills` (Dict[str, int]): Skills and their levels.
+    - `hp` (int): Hit points (calculated from Constitution).
+    - `xp` (int): Experience points.
+    - `gold` (float): Gold owned (can have decimals).
+    - `inventory` (List[Item]): Detailed inventory with complete items.
+    - `spells` (List[str]): List of known spells.
+    - `culture_bonuses` (Dict[str, int]): Bonuses related to culture.
+    - `background` (str): The character's story (narrative background).
+    - `physical_description` (str): The character's physical description.
+    - `status` (CharacterStatus): The character's status.
     """
-    concept: str
-    race: str
-    culture: str
-    profession: str
-    caracteristiques: Dict[str, int]
-    competences: Dict[str, int]
-    talents: List[str]
-    equipment: List[str]
-    spells: List[str]
-    current_step: str
-    equipment_summary: Dict[str, float]
-    culture_bonuses: Dict[str, int]
+    id: UUID
     name: str
-    bonus_race: Dict[str, int]
-    hp: int
-    xp: int
-    background: str
-    physical_description: str
-    created_at: Optional[str] = None
-    last_update: Optional[str] = None
+    race: RaceData
+    culture: CultureData
+    stats: Dict[str, int]
+    skills: Dict[str, int]
+    hp: int = 100  # Calculated from Constitution
+    xp: int = 0  # Experience points
+    gold: float = 0.0  # Gold owned (can have decimals)
+    inventory: List[Item] = []  # Detailed inventory with complete items
+    spells: List[str] = []
+    culture_bonuses: Dict[str, int]
+    background: str = None  # Character's story
+    physical_description: str = None  # Physical description
+    status: CharacterStatus = None  # Character's status
+    last_update: Optional[str] = None  # Date of last update
+    
+    @staticmethod
+    def is_character_finalized(character_dict: Dict) -> bool:
+        """
+        ### is_character_finalized
+        **Description:** Checks if a character passed as a dictionary contains all the mandatory fields to be considered finalized.
+        **Parameters:**
+        - `character_dict` (Dict): Dictionary representing a character.
+        **Returns:** bool - True if the character is finalized, False otherwise.
+        """
+        required_fields = [
+            'id', 
+            'name',
+            'race',
+            'culture', 
+            'stats', 
+            'skills',
+            'culture_bonuses'
+        ]
+        
+        # Check that all required fields are present and not None
+        for field in required_fields:
+            if field not in character_dict or character_dict[field] is None:
+                return False
+        
+        # Specific checks for certain fields
+        # Race must have a name
+        if 'name' not in character_dict.get('race', {}) or not character_dict['race']['name']:
+            return False
+            
+        # Culture must have a name
+        if 'name' not in character_dict.get('culture', {}) or not character_dict['culture']['name']:
+            return False
+        
+        manager = StatsManager()
+        stats = character_dict.get('stats', {})
+        for stat in manager.get_all_stats_names():
+            if stat not in stats:
+                return False
+                
+        # Skills cannot be empty
+        if not character_dict.get('skills', {}):
+            return False
+            
+        return True

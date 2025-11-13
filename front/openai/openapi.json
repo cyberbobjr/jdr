@@ -228,9 +228,7 @@
         "properties": {
           "id": { "type": "string", "format": "uuid", "title": "Id" },
           "name": { "type": "string", "title": "Name" },
-          "race": { "type": "string", "title": "Race" },
-          "culture": { "type": "string", "title": "Culture" },
-          "profession": { "type": "string", "title": "Profession" },
+          "race": { "type": "string", "title": "Race" },          "culture": { "type": "string", "title": "Culture" },
           "caracteristiques": {
             "additionalProperties": { "type": "integer" },
             "type": "object",
@@ -281,13 +279,11 @@
             "title": "Culture Bonuses"
           }
         },
-        "type": "object",
-        "required": [
+        "type": "object",        "required": [
           "id",
           "name",
           "race",
           "culture",
-          "profession",
           "caracteristiques",
           "competences"
         ],

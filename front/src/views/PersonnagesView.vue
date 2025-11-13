@@ -51,14 +51,14 @@
           v-for="character in characters"
           :key="character.id"
           :title="character.name"
-          :subtitle="character.race"
+          :subtitle="character.race?.name || 'Race non définie'"
           @click="selectCharacter(character)"
           class="jdr-w-full md:jdr-w-1/3 lg:jdr-w-1/4"
         >
           <template #default>
             <div class="jdr-mb-2">
               <span class="jdr-text-muted">Culture :</span>
-              <span>{{ character.culture }}</span>
+              <span>{{ character.culture?.name || 'Culture non définie' }}</span>
             </div>
           </template>
           <template #footer>
@@ -98,13 +98,10 @@
         <p class="jdr-text-muted jdr-mb-4">
           Il n'y a actuellement aucun personnage créé. Créez un personnage pour commencer !
         </p>
-        <button class="jdr-btn jdr-btn-primary jdr-btn-lg" disabled>
+        <button @click="onCreateCharacterClick" class="jdr-btn jdr-btn-primary jdr-btn-lg">
           <font-awesome-icon :icon="['fas', 'plus']" />
           Créer un personnage
         </button>
-        <p class="jdr-text-muted jdr-mt-4">
-          <small>Fonctionnalité à venir</small>
-        </p>
       </div>
     </div>
 
@@ -112,7 +109,7 @@
     <JdrModale
       v-if="showDetailsModal && selectedCharacter"
       :title="selectedCharacter.name"
-      :subtitle="selectedCharacter.profession + ' - ' + selectedCharacter.race"
+      :subtitle="selectedCharacter.race.name"
       :showOk="false"
       :showCancel="true"
       cancelLabel="Fermer"
@@ -124,15 +121,11 @@
           <div class="jdr-flex jdr-justify-center jdr-gap-4 jdr-mb-2">
             <div>
               <h4 class="jdr-title jdr-title-sm jdr-mb-1">Race</h4>
-              <div class="jdr-text-primary jdr-text-center">{{ selectedCharacter.race }}</div>
+              <div class="jdr-text-primary jdr-text-center">{{ selectedCharacter.race?.name || 'Race non définie' }}</div>
             </div>
             <div>
               <h4 class="jdr-title jdr-title-sm jdr-mb-1">Culture</h4>
-              <div class="jdr-text-primary jdr-text-center">{{ selectedCharacter.culture }}</div>
-            </div>
-            <div>
-              <h4 class="jdr-title jdr-title-sm jdr-mb-1">Profession</h4>
-              <div class="jdr-text-primary jdr-text-center">{{ selectedCharacter.profession }}</div>
+              <div class="jdr-text-primary jdr-text-center">{{ selectedCharacter.culture?.name || 'Culture non définie' }}</div>
             </div>
           </div>
         </div>
@@ -162,13 +155,13 @@
               <div class="jdr-stat-value jdr-text-lg">{{ value }}</div>
             </div>
           </div>
-        </div>
-        <div v-if="selectedCharacter.equipment && selectedCharacter.equipment.length > 0" class="jdr-mb-4">
+        </div>        <div v-if="selectedCharacter.inventory && selectedCharacter.inventory.length > 0" class="jdr-mb-4">
           <h3 class="jdr-title jdr-title-sm jdr-mb-2">Équipement</h3>
           <div class="equipment-list">
-            <div v-for="item in selectedCharacter.equipment" :key="item" class="equipment-item">
-              <font-awesome-icon :icon="['fas', 'sword']" class="jdr-text-accent jdr-mr-2" />
-              <span>{{ item }}</span>
+            <div v-for="item in selectedCharacter.inventory" :key="item.id" class="equipment-item">
+              <font-awesome-icon :icon="['fas', 'hammer']" class="jdr-text-accent jdr-mr-2" />
+              <span>{{ item.name }}</span>
+              <small class="jdr-text-muted jdr-ml-2">({{ item.weight }}kg)</small>
             </div>
           </div>
         </div>

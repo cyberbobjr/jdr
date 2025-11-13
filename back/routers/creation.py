@@ -1,231 +1,331 @@
 """
-Routeur FastAPI pour la création de personnage.
-Expose les routes nécessaires à chaque étape de la création et au suivi du statut.
+FastAPI router for character creation V2.
+Exposes the necessary routes for the new simplified character system using CharacterV2 models.
 """
-from fastapi import APIRouter, HTTPException, Body
+
+from fastapi import APIRouter, HTTPException, Body, status
 from uuid import uuid4
 from datetime import datetime
-from typing import List, Dict
-from ..services.character_creation_service import CharacterCreationService
+from typing import List, Dict, Any
+
+from back.models.domain.character_v2 import CharacterV2, Stats, Skills
 from back.services.character_persistence_service import CharacterPersistenceService
-from back.models.schema import (
-    AllocateAttributesRequest, AllocateAttributesResponse,
-    CheckAttributesRequest, CheckAttributesResponse,
-    SaveCharacterRequest, SaveCharacterResponse,
-    CheckSkillsRequest, CheckSkillsResponse,
-    CreationStatusResponse,
-    ProfessionSchema,
-    RaceSchema  # Ajouté
-)
-from back.agents.gm_agent_pydantic import build_gm_agent_pydantic, enrich_user_message_with_character
+from back.models.domain.races_manager import RacesManager
+from back.models.domain.stats_manager import StatsManager
+from back.models.domain.skills_manager import SkillsManager
+from back.models.domain.equipment_manager import EquipmentManager
+from back.models.schema import RaceData # Import RaceData and CultureData
 
 router = APIRouter(tags=["creation"])
 
-@router.get("/professions", summary="Professions détaillées", response_model=List[ProfessionSchema])
-def get_professions():
-    """
-    Retourne la liste complète des professions disponibles (structure détaillée pour Swagger et frontend).
-    **Sortie** : Liste d'objets ProfessionSchema (structure complète issue du JSON).
-    """
-    from back.services.character_creation_service import CharacterCreationService
-    return CharacterCreationService.get_professions_full()
+# Pydantic models for requests/responses
+from pydantic import BaseModel, Field
 
-@router.get("/races", summary="Liste des races", response_model=List[RaceSchema])
+class CreateCharacterV2Request(BaseModel):
+    """Request model for creating a new V2 character"""
+    name: str = Field(..., description="Character name")
+    race_id: str = Field(..., description="Race ID")
+    culture_id: str = Field(..., description="Culture ID")
+    stats: Dict[str, int] = Field(default={}, description="Character stats")
+    skills: Dict[str, Dict[str, int]] = Field(default_factory=dict, description="Character skills by group")
+    background: str = Field(default="", description="Character background")
+
+class CreateCharacterV2Response(BaseModel):
+    """Response model for character creation"""
+    character_id: str = Field(..., description="Unique character identifier")
+    status: str = Field(..., description="Creation status")
+    created_at: str = Field(..., description="Creation timestamp")
+
+class UpdateCharacterV2Request(BaseModel):
+    """Request model for updating a V2 character"""
+    character_id: str = Field(..., description="Character ID")
+    name: str = Field(default="", description="Character name")
+    stats: Dict[str, int] = Field(default={}, description="Character stats")
+    skills: Dict[str, int] = Field(default={}, description="Character skills")
+    background: str = Field(default="", description="Character background")
+
+class UpdateCharacterV2Response(BaseModel):
+    """Response model for character update"""
+    character: Dict[str, Any] = Field(..., description="Updated character data")
+    status: str = Field(..., description="Update status")
+
+class CharacterV2Response(BaseModel):
+    """Response model for character data"""
+    character: Dict[str, Any] = Field(..., description="Character data")
+    status: str = Field(..., description="Operation status")
+
+@router.get("/races", summary="List of races V2", response_model=List[RaceData])
 def get_races():
     """
-    Retourne la liste complète des races disponibles (structure typée RaceSchema pour documentation Swagger).
-    **Sortie** : Liste d'objets RaceSchema (structure complète issue du JSON).
+    Returns the complete list of available races for the V2 system.
+    
+    **Output**: List of RaceData objects (Pydantic models)
+    **Documentation**: Each race includes characteristics, cultures, and bonuses
     """
-    from back.models.domain.races import Races
-    races = Races()._load_races_data()
-    # Conversion RaceData -> dict pour Pydantic, cultures aussi
-    result = []
-    for r in races:
-        race_dict = r.__dict__.copy()
-        race_dict['cultures'] = [c.__dict__ for c in r.cultures]
-        result.append(race_dict)
-    return result
+    races_manager = RacesManager()
+    races_data = races_manager.get_all_races()
+    
+    # FastAPI will automatically serialize RaceData Pydantic objects to JSON
+    return races_data
 
-@router.get("/skills", summary="Groupes de compétences", response_model=Dict[str, List[Dict]])
+@router.get("/skills", summary="Skills data V2", response_model=Dict)
 def get_skills():
     """
-    Retourne le dictionnaire brut des groupes de compétences (structure du JSON centralisé).
-    **Sortie** : Dictionnaire {groupe: [compétences]}.
+    Returns the complete skills structure for the V2 system.
+    
+    **Output**: Dictionary with skill groups and individual skills
+    **Documentation**: 6 skill groups (combat, general, stealth, social, magic, crafting)
     """
-    return CharacterCreationService.get_skills()
-
-
-@router.get("/equipments", summary="Liste des équipements", response_model=list)
-def get_equipments():
-    """
-    Retourne la liste des équipements disponibles.
-    **Sortie** : Liste de chaînes (équipements)
-    """
-    return CharacterCreationService.get_equipments()
-
-@router.get("/spells", summary="Liste des sorts", response_model=list)
-def get_spells():
-    """
-    Retourne la liste des sorts disponibles.
-    **Sortie** : Liste de chaînes (sorts)
-    """
-    return CharacterCreationService.get_spells()
-
-@router.post(
-    "/allocate-attributes",
-    response_model=AllocateAttributesResponse,
-    summary="Allocation automatique des caractéristiques",
-    description="Alloue automatiquement les caractéristiques selon la profession et la race fournies."
-)
-def allocate_attributes(request: AllocateAttributesRequest):
-    """
-    Alloue automatiquement les caractéristiques selon la profession et la race.
-    - **Entrée** : profession (str), race (str)
-    - **Sortie** : Dictionnaire des caractéristiques allouées
-    """
-    attributes = CharacterCreationService.allocate_attributes_auto(request.profession, request.race)
-    return AllocateAttributesResponse(attributes=attributes)
-
-@router.post(
-    "/check-attributes",
-    response_model=CheckAttributesResponse,
-    summary="Validation des caractéristiques",
-    description="Vérifie que la répartition des points de caractéristiques respecte les règles du jeu."
-)
-def check_attributes(request: CheckAttributesRequest):
-    """
-    Vérifie que les points de caractéristiques respectent les règles (budget, bornes).
-    - **Entrée** : attributes (dict)
-    - **Sortie** : valid (bool)
-    """
-    valid = CharacterCreationService.check_attributes_points(request.attributes)
-    return CheckAttributesResponse(valid=valid)
-
-@router.post(
-    "/new",
-    response_model=CreationStatusResponse,
-    summary="Création d'un nouveau personnage",
-    description="Crée un nouveau personnage (état initial, id et date de création)."
-)
-def create_new_character():
-    """
-    Crée un nouveau personnage (état initial, id et date de création).
-    - **Sortie** : character_id (str), created_at (str), status (str)
-    """
-    character_id = str(uuid4())
-    now = datetime.now().isoformat()
-    character_data = {
-        "id": character_id,
-        "created_at": now,
-        "last_update": now,
-        "current_step": "creation",
-        "status": "en_cours"
+    skills_manager = SkillsManager()
+    return {
+        "skills_for_llm": skills_manager.skills_data,
+        "skill_groups": skills_manager.skill_groups
     }
-    CharacterPersistenceService.save_character_data(character_id, character_data)
-    return {"id": character_id, "created_at": now, "status": "en_cours"}
+
+@router.get("/equipment", summary="Equipment data V2", response_model=Dict)
+def get_equipment():
+    """
+    Returns the complete equipment structure for the V2 system.
+    
+    **Output**: Dictionary with equipment categories and items
+    **Documentation**: Weapons, armor, accessories, consumables with stats
+    """
+    equipment_manager = EquipmentManager()
+    equipment_data = equipment_manager.get_all_equipment()
+    
+    # EquipmentManager already returns a dictionary
+    return equipment_data
+
+@router.get("/stats", summary="Stats data V2", response_model=Dict)
+def get_stats():
+    """
+    Returns the complete stats structure for the V2 system.
+    
+    **Output**: Dictionary with stats definitions and bonus tables
+    **Documentation**: 6 main attributes (strength, constitution, agility, intelligence, wisdom, charisma)
+    """
+    stats_manager = StatsManager()
+    stats_data = stats_manager.get_all_stats_data()
+    
+    # StatsManager already returns a dictionary
+    return stats_data
 
 @router.post(
-    "/save",
-    response_model=SaveCharacterResponse,
-    summary="Sauvegarde du personnage",
-    description="Enregistre ou met à jour les données du personnage en cours de création."
+    "/create",
+    response_model=CreateCharacterV2Response,
+    summary="Create a new V2 character",
+    description="Creates a new character using the simplified V2 system"
 )
-def save_character(request: SaveCharacterRequest):
+def create_character_v2(request: CreateCharacterV2Request):
     """
-    Enregistre ou met à jour les données du personnage en cours de création.
-    - **Entrée** : character_id (str), character (dict)
-    - **Sortie** : status (str)
+    Creates a new character using the V2 system with validation.
+    - **Input**: Character creation data with stats, skills, race, culture
+    - **Output**: character_id, status, creation timestamp
     """
-    CharacterPersistenceService.save_character_data(request.character_id, request.character)
-    return SaveCharacterResponse(status="en_cours")
+    # Define custom exception for race validation
+    class RaceNotFoundError(ValueError):
+        pass
+
+    try:
+        # Generate unique character ID
+        character_id = str(uuid4())
+        now = datetime.now().isoformat()
+        
+        # Validate race and culture
+        races_manager = RacesManager()
+        race_data = races_manager.get_race_by_id(request.race_id)
+        if not race_data:
+            raise RaceNotFoundError(f"Race with id '{request.race_id}' not found")
+        
+        # Create character using V2 model
+        # Create character dictionary directly for V2 model
+        character_dict = {
+            "id": character_id,
+            "name": request.name,
+            "race": request.race_id,
+            "culture": request.culture_id,
+            "stats": Stats(**request.stats).model_dump() if request.stats else Stats(strength=10, constitution=10, agility=10, intelligence=10, wisdom=10, charisma=10).model_dump(),
+            "skills": Skills(**request.skills).model_dump() if request.skills else Skills().model_dump(),
+            "combat_stats": {
+                "max_hit_points": 50,
+                "current_hit_points": 50,
+                "max_mana_points": 30,
+                "current_mana_points": 30,
+                "armor_class": 10,
+                "attack_bonus": 0
+            },
+            "equipment": {
+                "weapons": [],
+                "armor": [],
+                "accessories": [],
+                "consumables": [],
+                "gold": 0
+            },
+            "spells": {
+                "known_spells": [],
+                "spell_slots": {},
+                "spell_bonus": 0
+            },
+            "level": 1,
+            "status": "draft",
+            "experience_points": 0,
+            "created_at": now,
+            "updated_at": now,
+            "description": None
+        }
+        
+        # Validate using CharacterV2 model
+        character = CharacterV2(**character_dict)
+        
+        # Validate character using Pydantic
+        character_dict = character.model_dump()
+        
+        # Save character data
+        CharacterPersistenceService.save_character_data(character_id, character_dict)
+        
+        return CreateCharacterV2Response(
+            character_id=character_id,
+            status="created",
+            created_at=now
+        )
+        
+    except RaceNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Character creation failed: {str(e)}")
+
+@router.post(
+    "/update",
+    response_model=UpdateCharacterV2Response,
+    summary="Update V2 character",
+    description="Updates an existing V2 character"
+)
+def update_character_v2(request: UpdateCharacterV2Request):
+    """
+    Updates an existing V2 character with validation.
+    - **Input**: character_id and updated fields
+    - **Output**: Updated character data and status
+    """
+    # Define custom exception for character not found
+    class CharacterNotFoundError(ValueError):
+        pass
+    
+    try:
+        # Load existing character
+        existing_data = CharacterPersistenceService.load_character_data(request.character_id)
+        if not existing_data:
+            raise CharacterNotFoundError(f"Character with id '{request.character_id}' not found")
+        
+        # Update fields
+        if request.name:
+            existing_data['name'] = request.name
+        if request.stats:
+            existing_data['stats'] = Stats(**request.stats).model_dump()
+        if request.skills:
+            existing_data['skills'] = Skills(**request.skills).model_dump()
+            
+        existing_data['updated_at'] = datetime.now().isoformat()
+        
+        # Validate updated character using V2 model
+        updated_character = CharacterV2(**existing_data)
+        updated_dict = updated_character.model_dump()
+        
+        # Save updated character
+        CharacterPersistenceService.save_character_data(request.character_id, updated_dict)
+        
+        return UpdateCharacterV2Response(
+            character=updated_dict,
+            status="updated"
+        )
+        
+    except CharacterNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Character update failed: {str(e)}")
 
 @router.get(
-    "/status/{character_id}",
-    response_model=CreationStatusResponse,
-    summary="Statut de création du personnage",
-    description="Retourne le statut de création du personnage (en cours, terminé, non trouvé)."
+    "/character/{character_id}",
+    response_model=CharacterV2Response,
+    summary="Get V2 character",
+    description="Retrieves a V2 character by ID"
 )
-def get_creation_status(character_id: str):
+def get_character_v2(character_id: str):
     """
-    Retourne le statut de création du personnage (en cours, terminé, non trouvé).
-    - **Entrée** : character_id (str)
-    - **Sortie** : status (str)
+    Retrieves a V2 character by ID.
+    - **Input**: character_id
+    - **Output**: Character data and status
     """
     try:
-        data = CharacterPersistenceService.load_character_data(character_id)
-        return CreationStatusResponse(character_id=character_id, status=data.get("status", "en_cours"))
+        character_data = CharacterPersistenceService.load_character_data(character_id)
+        if not character_data:
+            raise HTTPException(status_code=404, detail=f"Character with id '{character_id}' not found")
+        
+        # Validate character using V2 model
+        character = CharacterV2(**character_data)
+        
+        return CharacterV2Response(
+            character=character.model_dump(),
+            status="loaded"
+        )
+        
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Character retrieval failed: {str(e)}")
+
+@router.delete(
+    "/character/{character_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete V2 character",
+    description="Deletes a V2 character by ID"
+)
+def delete_character_v2(character_id: str):
+    """
+    Deletes a V2 character by ID.
+    - **Input**: character_id
+    - **Output**: 204 No Content if successful
+    """
+    try:
+        CharacterPersistenceService.load_character_data(character_id)  # Verify character exists
+        CharacterPersistenceService.delete_character_data(character_id)
+        
     except FileNotFoundError:
-        return CreationStatusResponse(character_id=character_id, status="not_found")
+        raise HTTPException(status_code=404, detail=f"Character with id '{character_id}' not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Character deletion failed: {str(e)}")
 
 @router.post(
-    "/check-skills",
-    response_model=CheckSkillsResponse,
-    summary="Validation des compétences",
-    description="Vérifie que la répartition des points de compétences respecte les règles (budget, groupes favoris, max par compétence)."
+    "/validate-character",
+    summary="Validate V2 character",
+    description="Validates a V2 character against game rules"
 )
-def check_skills(request: CheckSkillsRequest):
+def validate_character_v2(character: Dict[str, Any] = Body(...)):
     """
-    Vérifie que la répartition des points de compétences respecte les règles (budget, groupes favoris, max par compétence).
-    - **Entrée** : skills (dict), profession (str)
-    - **Sortie** : valid (bool), cost (int)
-    """
-    valid = CharacterCreationService.check_skills_points(request.skills, request.profession)
-    cost = CharacterCreationService.calculate_skills_cost(request.skills, request.profession)
-    return CheckSkillsResponse(valid=valid, cost=cost)
-
-@router.post("/generate-name", summary="Générer un nom de personnage via LLM")
-async def generate_character_name(character: dict = Body(...)):
-    """
-    Génère un nom de personnage adapté via l'agent LLM, selon la fiche de personnage partielle.
-    **Entrée** : Fiche de personnage (partielle)
-    **Sortie** : Nom généré (str)
+    Validates a V2 character against game rules.
+    - **Input**: Character data dictionary
+    - **Output**: Validation results
     """
     try:
-        character_id = character.get("id")
-        agent, _ = build_gm_agent_pydantic(session_id="creation-nom", character_id=str(character_id) if character_id else None)
-        prompt = enrich_user_message_with_character(
-            "Propose un nom de personnage approprié pour cette fiche. Réponds uniquement par le nom.",
-            character
-        )
-        result = await agent.run(prompt)
-        return {"name": result.strip()}
+        # Validate character using V2 model
+        validated_character = CharacterV2(**character)
+        
+        return {
+            "valid": True,
+            "character": validated_character.model_dump(),
+            "message": "Character is valid"
+        }
+        
+    except ValueError as e:
+        return {
+            "valid": False,
+            "errors": [str(e)],
+            "message": f"Validation failed: {str(e)}"
+        }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.post("/generate-background", summary="Générer un background de personnage via LLM")
-async def generate_character_background(character: dict = Body(...)):
-    """
-    Génère un background d'histoire pour le personnage via l'agent LLM.
-    **Entrée** : Fiche de personnage (partielle)
-    **Sortie** : Background généré (str)
-    """
-    try:
-        character_id = character.get("id")
-        agent, _ = build_gm_agent_pydantic(session_id="creation-background", character_id=str(character_id) if character_id else None)
-        prompt = enrich_user_message_with_character(
-            "Rédige un background d'histoire immersif et cohérent pour ce personnage. Réponds uniquement par le texte du background.",
-            character
-        )
-        result = await agent.run(prompt)
-        return {"background": result.strip()}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.post("/generate-physical-description", summary="Générer une description physique via LLM")
-async def generate_character_physical_description(character: dict = Body(...)):
-    """
-    Génère une description physique pour le personnage via l'agent LLM.
-    **Entrée** : Fiche de personnage (partielle)
-    **Sortie** : Description physique générée (str)
-    """
-    try:
-        character_id = character.get("id")
-        agent, _ = build_gm_agent_pydantic(session_id="creation-description", character_id=str(character_id) if character_id else None)
-        prompt = enrich_user_message_with_character(
-            "Décris l'apparence physique de ce personnage de façon détaillée et immersive. Réponds uniquement par la description.",
-            character
-        )
-        result = await agent.run(prompt)
-        return {"physical_description": result.strip()}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Validation failed: {str(e)}")

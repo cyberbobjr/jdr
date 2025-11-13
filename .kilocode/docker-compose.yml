@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  qdrant:
+    # QDrant vector database service for code indexing and semantic search
+    # Compatible with Kilo Code for efficient code embeddings and vector queries
+    image: qdrant/qdrant:v1.7.4  # Latest stable version as of 2024
+    container_name: qdrant-kilo-code-jdr
+    restart: "no"
+
+    # Port configuration
+    ports:
+      - "6333:6333"  # REST API port for HTTP requests
+      - "6334:6334"  # gRPC port for high-performance communication
+
+    # Persistent volume for data storage to prevent data loss on restarts
+    volumes:
+      - qdrant_data:/qdrant/storage  # Mount point for vector data persistence
+
+    # Environment variables for security and optimization
+    environment:
+      # API Key for secure access (set a strong key in production)
+      - QDRANT__SERVICE__API_KEY=${QDRANT_API_KEY:-your_secure_api_key_here}
+
+      # Enable advanced search features for code indexing
+      - QDRANT__STORAGE__OPTIMIZATION__MEMMAP_THRESHOLD=200000  # Optimize for large codebases
+      - QDRANT__STORAGE__OPTIMIZATION__DEFAULT_SEGMENT_NUMBER=2  # Balance performance and storage
+
+      # Logging level for debugging (adjust as needed)
+      - QDRANT__LOG_LEVEL=INFO
+
+    # Resource limits for performance optimization
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'      # Limit CPU usage to prevent resource hogging
+          memory: 4G       # Allocate sufficient memory for vector operations
+        reservations:
+          cpus: '0.5'      # Minimum CPU reservation
+          memory: 1G       # Minimum memory reservation
+
+    # Network configuration for easy integration with Kilo Code
+    networks:
+      - kilo-code-network  # Custom network for service isolation and communication
+
+    # Health check to ensure service availability
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+# Persistent volumes for data storage
+volumes:
+  qdrant_data:
+    driver: local  # Use local driver for simple persistence
+
+# Custom network for Kilo Code integration
+networks:
+  kilo-code-network:
+    driver: bridge  # Bridge network for container communication
+    name: kilo-code-network  # Explicit name for consistency
+
+# Additional notes:
+# - Set QDRANT_API_KEY environment variable before running: export QDRANT_API_KEY=your_key
+# - This setup supports Kilo Code's code indexing by providing vector storage for embeddings
+# - For production, consider using secrets management for API keys
+# - Monitor resource usage and adjust limits based on your system's capacity
+# - Ensure Kilo Code is configured to connect to QDrant at localhost:6333 for REST or localhost:6334 for gRPC

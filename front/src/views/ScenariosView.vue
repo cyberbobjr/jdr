@@ -4,50 +4,44 @@
     <div class="jdr-text-center jdr-mb-4">
       <h1 class="jdr-title jdr-title-lg">Bibliothèque de Scénarios</h1>
       <p class="jdr-subtitle">Découvrez et explorez tous les scénarios disponibles</p>
-    </div>
-
-    <!-- Indicateur de chargement -->
+    </div>    <!-- Indicateur de chargement -->
     <div v-if="loading" class="jdr-text-center jdr-p-4">
       <div class="jdr-animate-pulse">
-        <i class="fas fa-scroll fa-3x jdr-text-accent"></i>
+        <font-awesome-icon icon="scroll" size="3x" class="jdr-text-accent" />
         <p class="jdr-mt-4">Chargement des scénarios...</p>
       </div>
-    </div>
-
-    <!-- Message d'erreur -->
-    <div v-else-if="error" class="jdr-card jdr-card-highlight" style="border-color: var(--jdr-danger);">
-      <div class="jdr-card-body jdr-text-center">
-        <i class="fas fa-exclamation-triangle fa-2x" style="color: var(--jdr-danger);"></i>
-        <h3 class="jdr-title jdr-title-sm jdr-mt-4">Erreur de chargement</h3>
-        <p class="jdr-text-muted">{{ error }}</p>
+    </div>    <!-- Message d'erreur -->
+    <CardComponent v-else-if="error" title="Erreur de chargement" class="jdr-card-highlight" style="border-color: var(--jdr-danger);">
+      <div class="jdr-text-center">
+        <font-awesome-icon icon="exclamation-triangle" size="2x" style="color: var(--jdr-danger);" />
+        <p class="jdr-text-muted jdr-mt-4">{{ error }}</p>
         <button @click="loadScenarios" class="jdr-btn jdr-btn-primary jdr-mt-4">
-          <i class="fas fa-redo"></i>
+          <font-awesome-icon icon="redo" />
           Réessayer
         </button>
       </div>
-    </div>
+    </CardComponent>
 
     <!-- Liste des scénarios -->
     <div v-else-if="scenarios.length > 0" class="jdr-animate-fadeIn">
       <!-- Filtres et actions -->
-      <div class="scenarios-header jdr-flex jdr-justify-between jdr-items-center jdr-mb-4">
-        <div class="header-info">
+      <div class="scenarios-header jdr-flex jdr-justify-between jdr-items-center jdr-mb-4">        <div class="header-info">
           <div class="jdr-badge jdr-badge-info">
-            <i class="fas fa-book"></i>
+            <font-awesome-icon icon="book" />
             {{ scenarios.length }} scénario{{ scenarios.length > 1 ? 's' : '' }}
           </div>
           
           <div class="status-badges jdr-flex jdr-gap-2 jdr-mt-2">
             <div class="jdr-badge jdr-badge-success">
-              <i class="fas fa-check"></i>
+              <font-awesome-icon icon="check" />
               {{ availableCount }} disponible{{ availableCount > 1 ? 's' : '' }}
             </div>
             <div class="jdr-badge jdr-badge-warning" v-if="activeCount > 0">
-              <i class="fas fa-play"></i>
+              <font-awesome-icon icon="play" />
               {{ activeCount }} en cours
             </div>
             <div class="jdr-badge jdr-badge-info" v-if="completedCount > 0">
-              <i class="fas fa-flag-checkered"></i>
+              <font-awesome-icon icon="flag-checkered" />
               {{ completedCount }} terminé{{ completedCount > 1 ? 's' : '' }}
             </div>
           </div>
@@ -67,50 +61,40 @@
               <option value="completed">Terminés</option>
             </select>
           </div>
-          
-          <button @click="loadScenarios" class="jdr-btn jdr-btn-outline jdr-btn-sm">
-            <i class="fas fa-sync-alt"></i>
+            <button @click="loadScenarios" class="jdr-btn jdr-btn-outline jdr-btn-sm">
+            <font-awesome-icon icon="sync-alt" />
             Actualiser
           </button>
         </div>
-      </div>
-
-      <!-- Grille de scénarios -->
+      </div>      <!-- Grille de scénarios -->
       <div class="scenarios-grid">
-        <div 
+        <CardComponent
           v-for="scenario in filteredScenarios" 
           :key="scenario.name"
-          class="jdr-card jdr-card-scenario scenario-card jdr-animate-slideIn"
+          :title="formatScenarioName(scenario.name)"
+          class="jdr-card-scenario scenario-card jdr-animate-slideIn"
           :class="getScenarioCardClass(scenario)"
         >
-          <!-- En-tête du scénario -->
-          <div class="jdr-card-header">
-            <div class="scenario-header">
+          <template #default>
+            <!-- En-tête personnalisé avec icône et badge -->            <div class="scenario-header jdr-mb-4">
               <div class="scenario-icon">
-                <i class="fas fa-scroll fa-2x"></i>
+                <font-awesome-icon icon="scroll" size="2x" />
               </div>
-              <div class="scenario-title-area">
-                <h3 class="jdr-card-title">{{ formatScenarioName(scenario.name) }}</h3>
-                <div class="scenario-meta">
-                  <div class="jdr-badge" :class="getStatusBadgeClass(scenario.status)">
-                    <i :class="getStatusIcon(scenario.status)"></i>
-                    {{ getStatusLabel(scenario.status) }}
-                  </div>
+              <div class="scenario-meta">
+                <div class="jdr-badge" :class="getStatusBadgeClass(scenario.status)">
+                  <font-awesome-icon :icon="getStatusIcon(scenario.status)" />
+                  {{ getStatusLabel(scenario.status) }}
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Corps du scénario -->
-          <div class="jdr-card-body">
             <div class="scenario-description">
               <p>{{ getScenarioDescription(scenario.name) }}</p>
             </div>
             
             <!-- Informations de session active -->
-            <div v-if="scenario.session_id" class="active-session-info">
-              <h4 class="session-title">
-                <i class="fas fa-gamepad"></i>
+            <div v-if="scenario.session_id" class="active-session-info">              <h4 class="session-title">
+                <font-awesome-icon icon="gamepad" />
                 Session Active
               </h4>
               <div class="session-details">
@@ -126,101 +110,91 @@
             </div>
 
             <!-- Aperçu du contenu -->
-            <div v-if="scenarioContents[scenario.name]" class="scenario-preview">
-              <h4 class="preview-title">
-                <i class="fas fa-eye"></i>
+            <div v-if="scenarioContents[scenario.name]" class="scenario-preview">              <h4 class="preview-title">
+                <font-awesome-icon icon="eye" />
                 Aperçu
               </h4>
               <div class="preview-content">
                 {{ getPreviewText(scenarioContents[scenario.name]) }}
               </div>
             </div>
-          </div>
+          </template>
 
-          <!-- Actions -->
-          <div class="jdr-card-footer">
-            <button 
+          <template #footer>            <button 
               @click="previewScenario(scenario)"
               class="jdr-btn jdr-btn-outline jdr-btn-sm"
               :disabled="loadingPreviews.has(scenario.name)"
             >
-              <i v-if="loadingPreviews.has(scenario.name)" class="fas fa-spinner fa-spin"></i>
-              <i v-else class="fas fa-book-open"></i>
+              <font-awesome-icon v-if="loadingPreviews.has(scenario.name)" icon="spinner" spin />
+              <font-awesome-icon v-else icon="book-open" />
               {{ scenarioContents[scenario.name] ? 'Voir plus' : 'Lire' }}
             </button>
-            
-            <router-link 
+              <router-link 
               v-if="scenario.session_id"
               :to="{ name: 'jeu', params: { sessionId: scenario.session_id } }"
               class="jdr-btn jdr-btn-warning"
             >
-              <i class="fas fa-play"></i>
+              <font-awesome-icon icon="play" />
               Reprendre
             </router-link>
-            
-            <router-link 
+              <router-link 
               v-else-if="scenario.status === 'available'"
               :to="{ name: 'nouveau-scenario', query: { scenarioName: scenario.name } }"
               class="jdr-btn jdr-btn-primary"
             >
-              <i class="fas fa-rocket"></i>
+              <font-awesome-icon icon="rocket" />
               Commencer
             </router-link>
-            
-            <button 
+              <button 
               v-else 
               class="jdr-btn jdr-btn-outline" 
               disabled
             >
-              <i class="fas fa-lock"></i>
+              <font-awesome-icon icon="lock" />
               Indisponible
             </button>
-          </div>
-        </div>
+          </template>
+        </CardComponent>
       </div>
-    </div>
-
-    <!-- Aucun scénario -->
-    <div v-else class="jdr-card jdr-text-center jdr-animate-fadeIn">
-      <div class="jdr-card-body">
-        <i class="fas fa-book-dead fa-3x jdr-text-muted jdr-mb-4"></i>
-        <h3 class="jdr-title jdr-title-sm">Aucun scénario disponible</h3>
-        <p class="jdr-text-muted jdr-mb-4">
-          Il n'y a actuellement aucun scénario dans la bibliothèque.
-        </p>
+    </div>    <!-- Aucun scénario -->
+    <CardComponent v-else title="Aucun scénario disponible" class="jdr-text-center jdr-animate-fadeIn">
+      <font-awesome-icon icon="book-dead" size="3x" class="jdr-text-muted jdr-mb-4" />
+      <p class="jdr-text-muted jdr-mb-4">
+        Il n'y a actuellement aucun scénario dans la bibliothèque.
+      </p>
+      
+      <template #footer>
         <button class="jdr-btn jdr-btn-primary jdr-btn-lg" disabled>
-          <i class="fas fa-plus"></i>
+          <font-awesome-icon icon="plus" />
           Ajouter un scénario
         </button>
         <p class="jdr-text-muted jdr-mt-4">
           <small>Fonctionnalité à venir</small>
         </p>
-      </div>
-    </div>
+      </template>
+    </CardComponent>
 
     <!-- Modal de prévisualisation -->
     <div v-if="showPreviewModal" class="jdr-modal-overlay show" @click="closePreviewModal">
-      <div class="jdr-modal scenario-preview-modal" @click.stop>
-        <div class="jdr-modal-header">
+      <div class="jdr-modal scenario-preview-modal" @click.stop>        <div class="jdr-modal-header">
           <h2 class="jdr-modal-title">
-            <i class="fas fa-scroll"></i>
+            <font-awesome-icon icon="scroll" />
             {{ previewScenarioTitle }}
           </h2>
           <button @click="closePreviewModal" class="jdr-modal-close">
-            <i class="fas fa-times"></i>
+            <font-awesome-icon icon="times" />
           </button>
         </div>
         
-        <div class="jdr-modal-body">
-          <div v-if="loadingPreviewContent" class="jdr-text-center jdr-p-4">
+        <div class="jdr-modal-body">          <div v-if="loadingPreviewContent" class="jdr-text-center jdr-p-4">
             <div class="jdr-animate-pulse">
-              <i class="fas fa-spinner fa-spin fa-2x jdr-text-accent"></i>
+              <font-awesome-icon icon="spinner" spin size="2x" class="jdr-text-accent" />
               <p class="jdr-mt-4">Chargement du contenu...</p>
             </div>
           </div>
           
           <div v-else-if="previewError" class="jdr-text-center jdr-p-4">
-            <i class="fas fa-exclamation-triangle fa-2x" style="color: var(--jdr-danger);"></i>
+            <font-awesome-icon icon="exclamation-triangle" size="2x" style="color: var(--jdr-danger);" />
             <p class="jdr-mt-4">{{ previewError }}</p>
           </div>
           
@@ -228,10 +202,9 @@
             <div v-html="formattedPreviewContent"></div>
           </div>
         </div>
-        
-        <div class="jdr-modal-footer">
+          <div class="jdr-modal-footer">
           <button @click="closePreviewModal" class="jdr-btn jdr-btn-outline">
-            <i class="fas fa-times"></i>
+            <font-awesome-icon icon="times" />
             Fermer
           </button>
           
@@ -241,7 +214,7 @@
             class="jdr-btn jdr-btn-primary"
             @click="closePreviewModal"
           >
-            <i class="fas fa-rocket"></i>
+            <font-awesome-icon icon="rocket" />
             Commencer ce scénario
           </router-link>
           
@@ -251,7 +224,7 @@
             class="jdr-btn jdr-btn-warning"
             @click="closePreviewModal"
           >
-            <i class="fas fa-play"></i>
+            <font-awesome-icon icon="play" />
             Reprendre la session
           </router-link>
         </div>
@@ -263,6 +236,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import JdrApiService, { type ScenarioStatus } from '@/core/api';
+import CardComponent from '@/components/CardComponent.vue';
 
 // État réactif
 const loading = ref(true);
@@ -444,10 +418,10 @@ const getStatusBadgeClass = (status: string) => {
 
 const getStatusIcon = (status: string) => {
   switch (status) {
-    case 'available': return 'fas fa-check';
-    case 'active': return 'fas fa-play';
-    case 'completed': return 'fas fa-flag-checkered';
-    default: return 'fas fa-question';
+    case 'available': return 'check';
+    case 'active': return 'play';
+    case 'completed': return 'flag-checkered';
+    default: return 'question';
   }
 };
 

@@ -1,0 +1,202 @@
+{
+  "magic_system": {
+    "spheres": [
+      {
+        "name": "Universelle",
+        "description": "Sorts de base accessibles à tous les jeteurs",
+        "spells": [
+          {
+            "name": "Lumière",
+            "power_cost": 2,
+            "description": "Crée une source de lumière magique éclairant sur 3 mètres de rayon pendant 1 heure"
+          },
+          {
+            "name": "Détection de la Magie",
+            "power_cost": 3,
+            "description": "Permet de détecter la présence de magie dans un rayon de 15 mètres pendant 10 minutes"
+          },
+          {
+            "name": "Lecture de la Magie",
+            "power_cost": 4,
+            "description": "Permet de comprendre et lire les inscriptions magiques et les runes"
+          }
+        ]
+      },
+      {
+        "name": "Animiste",
+        "description": "Magie de la nature et des éléments",
+        "spells": [
+          {
+            "name": "Soins Mineurs",
+            "power_cost": 3,
+            "description": "Soigne les blessures légères d'un personnage, restaurant jusqu'à 25% de ses Points de Vie"
+          },
+          {
+            "name": "Congélation",
+            "power_cost": 6,
+            "description": "Abaisse la température d'un matériau, pouvant briser les objets métalliques ou ralentir les créatures"
+          },
+          {
+            "name": "Force de la Nature",
+            "power_cost": 3,
+            "description": "Confère un bonus de +5 aux attaques de mêlée pendant 2 rounds par rang du lanceur"
+          },
+          {
+            "name": "Dialectes de la Nature",
+            "power_cost": 4,
+            "description": "Permet de comprendre et parler le langage des animaux pendant 5 rounds par rang"
+          },
+          {
+            "name": "Embrasement",
+            "power_cost": 6,
+            "description": "Augmente la température d'un matériau, pouvant enflammer des objets ou blesser les créatures"
+          },
+          {
+            "name": "Mur d'Épines",
+            "power_cost": 6,
+            "description": "Crée un mur de ronces et d'épines causant des dommages aux créatures qui le traversent"
+          },
+          {
+            "name": "Mutation Animale",
+            "power_cost": 8,
+            "description": "Transforme le lanceur en animal pendant 10 rounds par rang, avec les capacités physiques de l'animal"
+          }
+        ]
+      },
+      {
+        "name": "Barde",
+        "description": "Magie de l'influence et de l'illusion",
+        "spells": [
+          {
+            "name": "Charme",
+            "power_cost": 4,
+            "description": "La cible pense que le jeteur est son ami tant qu'il se concentre, dans la limite de 5 rounds par rang"
+          },
+          {
+            "name": "Confusion",
+            "power_cost": 4,
+            "description": "La cible est confuse et ne peut entreprendre aucune action offensive, seulement se défendre avec 50% de ses capacités"
+          },
+          {
+            "name": "Distractions",
+            "power_cost": 5,
+            "description": "La cible reçoit une pénalité de -20 à toutes ses actions pendant 2 rounds par rang"
+          },
+          {
+            "name": "Fantasmes",
+            "power_cost": 5,
+            "description": "Crée une image illusoire d'un objet ou d'une personne qui se déplace selon la volonté du jeteur"
+          },
+          {
+            "name": "Quiétude",
+            "power_cost": 6,
+            "description": "La cible n'entreprend aucune action agressive ou offensive, et ne combat que si elle est attaquée"
+          },
+          {
+            "name": "Sommeil",
+            "power_cost": 4,
+            "description": "La cible tombe dans un sommeil magique léger pendant 2 rounds par rang"
+          },
+          {
+            "name": "Voix Envoutante",
+            "power_cost": 3,
+            "description": "La cible croit tous les raisonnements du jeteur tant qu'il se concentre"
+          }
+        ]
+      },
+      {
+        "name": "Aventurier",
+        "description": "Magie pratique et utilitaire",
+        "spells": [
+          {
+            "name": "Amélioration d'Armure",
+            "power_cost": 5,
+            "description": "Enchante l'armure pour lui donner un bonus défensif de +10 pendant 5 rounds par rang"
+          },
+          {
+            "name": "Arme Élémentaire",
+            "power_cost": 3,
+            "description": "Enchante une arme de mêlée pour qu'elle délivre un critique additionnel élémentaire pendant 2 rounds par rang"
+          },
+          {
+            "name": "Infravision",
+            "power_cost": 5,
+            "description": "Permet de voir dans le noir total sur 15 mètres pendant 5 rounds par rang"
+          },
+          {
+            "name": "Langages",
+            "power_cost": 4,
+            "description": "Permet de parler la langue maternelle d'une créature comme si on avait 3 rangs dans cette langue"
+          },
+          {
+            "name": "Peau d'Acier",
+            "power_cost": 4,
+            "description": "Rend la peau aussi résistante que de l'acier, donnant +10 en défense pendant 2 rounds par rang"
+          },
+          {
+            "name": "Projection Sensorielle",
+            "power_cost": 3,
+            "description": "Permet de déplacer un sens (vue, ouïe) à distance pendant 2 rounds par rang"
+          }
+        ]
+      },
+      {
+        "name": "Guérisseur",
+        "description": "Magie de soin et de guérison",
+        "spells": [
+          {
+            "name": "Soins Majeurs",
+            "power_cost": 6,
+            "description": "Soigne les blessures importantes d'un personnage, restaurant jusqu'à 50% de ses Points de Vie"
+          },
+          {
+            "name": "Purification",
+            "power_cost": 4,
+            "description": "Neutralise les poisons et purifie les maladies naturelles"
+          },
+          {
+            "name": "Régénération",
+            "power_cost": 8,
+            "description": "Permet à la cible de récupérer 1 Point de Vie par round pendant 10 rounds"
+          },
+          {
+            "name": "Restauration",
+            "power_cost": 5,
+            "description": "Restaure les caractéristiques diminuées par magie ou maladie"
+          }
+        ]
+      },
+      {
+        "name": "Mage",
+        "description": "Magie pure et élémentaire",
+        "spells": [
+          {
+            "name": "Projectile Magique",
+            "power_cost": 2,
+            "description": "Projette un missile d'énergie pure qui touche automatiquement pour 1d6 points de dégâts"
+          },
+          {
+            "name": "Bouclier Magique",
+            "power_cost": 4,
+            "description": "Crée un bouclier d'énergie magique donnant +15 en défense contre les attaques pendant 10 rounds"
+          },
+          {
+            "name": "Boule de Feu",
+            "power_cost": 8,
+            "description": "Projette une boule de feu explosive causant des dégâts de feu dans une zone"
+          },
+          {
+            "name": "Éclair",
+            "power_cost": 6,
+            "description": "Projette un éclair électrique en ligne droite causant des dégâts électriques"
+          },
+          {
+            "name": "Téléportation",
+            "power_cost": 10,
+            "description": "Transporte instantanément le lanceur à un endroit visible dans un rayon de 30 mètres"
+          }
+        ]
+      }
+    ]
+  }
+}

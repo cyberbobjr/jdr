@@ -1,0 +1,89 @@
+@startuml
+title Combat Turn Sequence
+
+participant "GM Agent\n(gm_agent_pydantic.py)" as GmAgent
+participant "Combat Tools\n(combat_tools.py)" as CombatTools
+participant "CombatService" as CombatService
+participant "CombatStateService" as CombatStateService
+database "Combat State JSON" as CombatDB
+
+activate GmAgent
+
+note over GmAgent: Agent decides to start a combat turn.
+
+loop for each combatant's turn
+    GmAgent -> CombatTools: get_combat_status_tool(combat_id)
+    activate CombatTools
+    CombatTools -> CombatStateService: load_combat_state(combat_id)
+    activate CombatStateService
+    CombatStateService -> CombatDB: Read combat state file
+    CombatStateService --> CombatTools: combat_state
+    deactivate CombatStateService
+    CombatTools --> GmAgent: combat_status
+    deactivate CombatTools
+
+    note over GmAgent: Narrates the current situation.
+
+    GmAgent -> CombatTools: perform_attack_tool(...)
+    activate CombatTools
+    CombatTools -> CombatService: perform_attack(...)
+    activate CombatService
+    CombatService -> CombatService: resolve_attack(...)
+    CombatService --> CombatTools: attack_result
+    deactivate CombatService
+    CombatTools --> GmAgent: attack_result
+    deactivate CombatTools
+
+    GmAgent -> CombatTools: apply_damage_tool(...)
+    activate CombatTools
+    CombatTools -> CombatService: apply_damage(...)
+    activate CombatService
+    CombatService -> CombatStateService: save_combat_state(...)
+    activate CombatStateService
+    CombatStateService -> CombatDB: Write combat state file
+    deactivate CombatStateService
+    CombatService --> CombatTools: damage_result
+    deactivate CombatService
+    CombatTools --> GmAgent: damage_result
+    deactivate CombatTools
+
+    GmAgent -> CombatTools: check_combat_end_tool(combat_id)
+    activate CombatTools
+    CombatTools -> CombatService: check_combat_end(combat_id)
+    activate CombatService
+    CombatService --> CombatTools: is_ended
+    deactivate CombatService
+    CombatTools --> GmAgent: is_ended
+    deactivate CombatTools
+
+    alt if combat has not ended
+        GmAgent -> CombatTools: end_turn_tool(combat_id)
+        activate CombatTools
+        CombatTools -> CombatService: end_turn(combat_id)
+        activate CombatService
+        CombatService -> CombatStateService: save_combat_state(...)
+        activate CombatStateService
+        CombatStateService -> CombatDB: Write combat state file
+        deactivate CombatStateService
+        CombatService --> CombatTools: next_turn_info
+        deactivate CombatService
+        CombatTools --> GmAgent: next_turn_info
+        deactivate CombatTools
+    else else (combat has ended)
+        GmAgent -> CombatTools: end_combat_tool(combat_id)
+        activate CombatTools
+        CombatTools -> CombatService: end_combat(combat_id)
+        activate CombatService
+        CombatService -> CombatStateService: delete_combat_state(combat_id)
+        activate CombatStateService
+        CombatStateService -> CombatDB: Delete combat state file
+        deactivate CombatStateService
+        deactivate CombatService
+        CombatTools --> GmAgent: combat_ended_message
+        deactivate CombatTools
+    end
+end
+
+deactivate GmAgent
+
+@enduml

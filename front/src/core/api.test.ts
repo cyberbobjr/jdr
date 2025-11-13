@@ -1,12 +1,14 @@
 // Tests unitaires pour le service API
 // Validation des interfaces et de la logique métier
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import JdrApiService, { ApiError, type GameSession, type CombatAttackRequest } from './api';
 import type { 
   Character, 
-  StartScenarioRequest, 
-  PlayScenarioRequest 
+  RaceData,
+  CultureData,
+  Item,
+  CharacteristicsData
 } from './interfaces';
 
 // Mock de fetch pour les tests
@@ -60,25 +62,32 @@ describe('JdrApiService', () => {
     it('doit formater correctement un nom de scénario', () => {
       const formatted = JdrApiService.formatScenarioName('Les_Pierres_du_Passe.md');
       expect(formatted).toBe('Les Pierres Du Passe');
-    });
-
-    it('doit convertir un Character en CharacterContext', () => {
+    });    it('doit convertir un Character en CharacterContext', () => {
       const character: Character = {
         id: '550e8400-e29b-41d4-a716-446655440000',
+        status: 'active',
         name: 'Test Character',
-        race: 'Hobbit',
-        culture: 'Comté',
-        profession: 'Cambrioleur',
-        caracteristiques: { force: 10, dexterite: 15 },
-        competences: { discretion: 20, crochetage: 15 },
+        race: {
+          name: 'Hobbit',
+          characteristic_bonuses: { Constitution: 2, Agilité: 1 },
+          destiny_points: 8,
+          special_abilities: ['Chance extraordinaire'],
+          base_languages: ['Hobbitais'],
+          optional_languages: ['Westron']
+        } as RaceData,
+        culture: {
+          name: 'Comté',
+          description: 'Culture paisible du Comté',
+          skill_bonuses: { 'Artisanat': 2 },
+          characteristic_bonuses: { Constitution: 1 }
+        } as CultureData,
+        caracteristiques: { Force: 10, Agilité: 15 },        competences: { Discretion: 20, Crochetage: 15 },
         hp: 100,
-        inventory: [
-          { id: '1', name: 'Épée', weight: 2.5, base_value: 100 }
+        gold: 50,        inventory: [
+          { id: '1', name: 'Épée', weight: 2.5, base_value: 100 } as Item
         ],
-        equipment: ['Armure de cuir'],
         spells: ['Lumière'],
-        equipment_summary: { total_cost: 150, total_weight: 10, remaining_money: 50, starting_money: 200 },
-        culture_bonuses: { dexterite: 2 }
+        culture_bonuses: { Constitution: 1 }
       };
 
       const context = JdrApiService.characterToContext(character);
@@ -86,7 +95,7 @@ describe('JdrApiService', () => {
       expect(context.id).toBe(character.id);
       expect(context.name).toBe(character.name);
       expect(context.inventory).toEqual(['Épée']);
-      expect(context.equipment_summary.total_cost).toBe(150);
+      expect(context.gold).toBe(50);
     });
   });
 
@@ -119,6 +128,51 @@ describe('JdrApiService', () => {
       expect(request.target_id).toBeDefined();
       expect(typeof request.attack_value).toBe('number');
       expect(typeof request.combat_state).toBe('object');
+    });
+  });
+  describe('Routes de création', () => {
+    it('doit appeler la route characteristics correctement', async () => {      const mockCharacteristics: CharacteristicsData = {
+        characteristics: {
+          "Force": {
+            "short_name": "FOR",
+            "category": "physical",
+            "description": "Force physique, carrure. Détermine les dégâts au corps à corps et la capacité de port.",
+            "examples": ["Soulever des objets lourds", "Briser une porte", "Dégâts d'arme de mêlée"]
+          }
+        },
+        bonus_table: {
+          "46-50": 0,
+          "51-55": 1,
+          "56-60": 2
+        },
+        cost_table: {
+          "1-90": 1,
+          "91-95": 2
+        },
+        starting_points: 550,
+        maximum_starting_value: 90
+      };
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockCharacteristics),
+        headers: { get: () => 'application/json' }
+      });
+
+      const result = await JdrApiService.getCharacteristics();
+      
+      expect(mockFetch).toHaveBeenCalledWith(
+        'http://localhost:8000/api/creation/characteristics',
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          })
+        })
+      );
+      expect(result).toEqual(mockCharacteristics);
+      expect(result.characteristics.Force.short_name).toBe('FOR');
+      expect(result.starting_points).toBe(550);
     });
   });
 });

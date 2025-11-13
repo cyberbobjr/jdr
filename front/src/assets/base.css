@@ -1,53 +1,58 @@
 /* color palette from <https://github.com/vuejs/theme> */
+/* Variables CSS personnalisées pour le thème */
 :root {
-  --vt-c-white: #ffffff;
-  --vt-c-white-soft: #f8f8f8;
-  --vt-c-white-mute: #f2f2f2;
-
-  --vt-c-black: #181818;
-  --vt-c-black-soft: #222222;
-  --vt-c-black-mute: #282828;
-
-  --vt-c-indigo: #2c3e50;
-
-  --vt-c-divider-light-1: rgba(60, 60, 60, 0.29);
-  --vt-c-divider-light-2: rgba(60, 60, 60, 0.12);
-  --vt-c-divider-dark-1: rgba(84, 84, 84, 0.65);
-  --vt-c-divider-dark-2: rgba(84, 84, 84, 0.48);
-
-  --vt-c-text-light-1: var(--vt-c-indigo);
-  --vt-c-text-light-2: rgba(60, 60, 60, 0.66);
-  --vt-c-text-dark-1: var(--vt-c-white);
-  --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
-}
-
-/* semantic color variables for this project */
-:root {
-  --color-background: var(--vt-c-white);
-  --color-background-soft: var(--vt-c-white-soft);
-  --color-background-mute: var(--vt-c-white-mute);
-
-  --color-border: var(--vt-c-divider-light-2);
-  --color-border-hover: var(--vt-c-divider-light-1);
-
-  --color-heading: var(--vt-c-text-light-1);
-  --color-text: var(--vt-c-text-light-1);
-
-  --section-gap: 160px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: var(--vt-c-black);
-    --color-background-soft: var(--vt-c-black-soft);
-    --color-background-mute: var(--vt-c-black-mute);
-
-    --color-border: var(--vt-c-divider-dark-2);
-    --color-border-hover: var(--vt-c-divider-dark-1);
-
-    --color-heading: var(--vt-c-text-dark-1);
-    --color-text: var(--vt-c-text-dark-2);
-  }
+  /* Couleurs principales du thème JDR */
+  --jdr-primary: #8B4513;           /* Brun selle */
+  --jdr-primary-dark: #654321;      /* Brun foncé */
+  --jdr-primary-light: #A0522D;     /* Brun sienna */
+  
+  --jdr-secondary: #DAA520;         /* Or */
+  --jdr-secondary-dark: #B8860B;    /* Or foncé */
+  --jdr-secondary-light: #F4E99B;   /* Or clair */
+  --jdr-secondary-alpha: rgba(218, 165, 32, 0.2); /* Or avec transparence */
+  
+  --jdr-accent: #CD853F;            /* Pérou */
+  --jdr-accent-dark: #A0522D;       /* Sienna */
+  --jdr-accent-light: #DEB887;      /* Beige burlywood */
+  --jdr-accent-alpha: rgba(205, 133, 63, 0.15); /* Accent avec transparence */
+  
+  /* Couleurs de fond */
+  --jdr-bg-primary: #2C1810;        /* Brun très foncé */
+  --jdr-bg-secondary: #3C2414;      /* Brun foncé */
+  --jdr-bg-tertiary: #4A2C18;       /* Brun moyen */
+  --jdr-bg-light: #F5E6D3;          /* Parchemin clair */
+  
+  /* Couleurs de texte */
+  --jdr-text-primary: #F5E6D3;      /* Parchemin clair */
+  --jdr-text-secondary: #E6D7C3;    /* Parchemin moyen */
+  --jdr-text-muted: #C4B5A0;        /* Parchemin foncé */
+  --jdr-text-dark: #2C1810;         /* Texte foncé sur fond clair */
+  
+  /* Couleurs de statut */
+  --jdr-success: #228B22;           /* Vert forêt */
+  --jdr-warning: #FF8C00;           /* Orange foncé */
+  --jdr-danger: #B22222;            /* Rouge feu */
+  --jdr-danger-alpha: rgba(178, 34, 34, 0.15); /* Rouge avec transparence */
+  --jdr-info: #4682B4;             /* Bleu acier */
+  
+  /* Ombres et effets */
+  --jdr-shadow-small: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --jdr-shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --jdr-shadow-large: 0 8px 16px rgba(0, 0, 0, 0.5);
+  --jdr-glow-gold: 0 0 10px rgba(218, 165, 32, 0.5);
+  
+  /* Bordures et rayons */
+  --jdr-border-radius: 8px;
+  --jdr-border-radius-large: 12px;
+  --jdr-border-color: #8B4513;
+  
+  /* Polices */
+  --jdr-font-fantasy:  'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --jdr-font-body:  'Inter', 'Helvetica Neue', Arial, sans-serif;
+/*  --jdr-font-body: 'Inter', 'Helvetica Neue', Arial, sans-serif;*/
+  --jdr-font-ui: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    /* Variables de hauteur pour la navigation */
+  --header-height: 88px; /* Hauteur du header pour les calculs de layout */
 }
 
 *,
@@ -62,8 +67,8 @@ html, body { height: 100%; margin: 0; }
 
 body {
   min-height: 100vh;
-  color: var(--color-text);
-  background: var(--color-background);
+  color: var(--jdr-text-primary);
+  background: var(--jdr-bg-primary);
   transition:
     color 0.5s,
     background-color 0.5s;
@@ -84,4 +89,14 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+personnage {
+  display: none;;
 }

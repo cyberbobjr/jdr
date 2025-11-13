@@ -1,12 +1,13 @@
-from fastapi import APIRouter, HTTPException
-from back.services.character_service import CharacterService
-from back.models.schema import Character, CharacterListAny
+from fastapi import APIRouter
+from back.models.api_dto import CharacterListResponse, CharacterDetailResponse
+from back.services.character_data_service import CharacterDataService
+from back.utils.exceptions import CharacterNotFoundError, InternalServerError
 from back.utils.logger import log_debug
-from uuid import UUID
 
 router = APIRouter()
 
-@router.get("/", response_model=CharacterListAny)
+
+@router.get("/", response_model=CharacterListResponse)
 def list_characters():
     """
     Récupère la liste de tous les personnages disponibles dans le système.
@@ -15,19 +16,18 @@ def list_characters():
     Les personnages incomplets (status="en_cours") sont retournés avec uniquement les champs présents.
 
     Returns:
-        CharacterListAny: Une liste contenant tous les personnages disponibles (complets ou partiels)
+        CharacterListResponse: Une liste contenant tous les personnages disponibles (complets ou partiels)
         
     Example Response:
     
     ```json
         {
             "characters": [
-                {
+                {                    
                     "id": "d7763165-4c03-4c8d-9bc6-6a2568b79eb3",
                     "name": "Aragorn",
                     "race": "Humain",
                     "culture": "Gondor",
-                    "profession": "Rôdeur",
                     "caracteristiques": {
                         "Force": 85,
                         "Constitution": 80,
@@ -52,17 +52,12 @@ def list_characters():
                             "weight": 1.5,
                             "base_value": 150.0
                         }
-                    ],
-                    "equipment": ["Épée longue", "Armure de cuir"],
+                    ],                    
                     "spells": [],
-                    "equipment_summary": {
-                        "total_weight": 8.5,
-                        "total_value": 500.0,
-                        "remaining_gold": 200.0
-                    },
+                    "gold": 200,
                     "culture_bonuses": {
                         "Combat": 5,
-                        "Influence": 3
+                        "Influence": 3                    
                     }
                 }
             ]
@@ -73,37 +68,61 @@ def list_characters():
         500: Erreur interne du serveur lors de la récupération des personnages
     """
     log_debug("Appel endpoint characters/list_characters")
-    characters = CharacterService.get_all_characters()
-    result = []
-    for c in characters:
-        if isinstance(c, dict):
-            c = c.copy()
-            if "id" in c and not isinstance(c["id"], str):
-                c["id"] = str(c["id"])
-            result.append(c)
-        else:
-            d = c.model_dump()
-            if "id" in d and not isinstance(d["id"], str):
-                d["id"] = str(d["id"])
-            result.append(d)
-    return {"characters": result}
+    
+    try:
+        data_service = CharacterDataService()
+        characters = data_service.get_all_characters()
+        
+        # Convertir les objets Character en dictionnaires pour la réponse
+        characters_data = [char.model_dump() for char in characters]
+        
+        log_debug("Liste des personnages récupérée", 
+                 action="list_characters_success", 
+                 count=len(characters_data))
+        
+        return CharacterListResponse(characters=characters_data)
+        
+    except Exception as e:
+        log_debug("Erreur lors de la récupération des personnages", 
+                 action="list_characters_error", 
+                 error=str(e))
+        raise InternalServerError(f"Erreur lors de la récupération des personnages: {str(e)}")
 
-@router.get("/{character_id}", response_model=Character)
-def get_character_detail(character_id: UUID):
+
+@router.get("/{character_id}", response_model=CharacterDetailResponse)
+def get_character_detail(character_id: str):
     """
     Récupère le détail d'un personnage à partir de son identifiant unique.
 
     Cet endpoint permet d'obtenir toutes les informations détaillées d'un personnage spécifique.
 
     Paramètres:
-        character_id (UUID): L'identifiant unique du personnage à récupérer
+        character_id (str): L'identifiant unique du personnage à récupérer
     Retourne:
-        Character: Les informations détaillées du personnage
+        CharacterDetailResponse: Les informations détaillées du personnage
     """
     log_debug("Appel endpoint characters/get_character_detail", character_id=str(character_id))
+    
     try:
-        character = CharacterService.get_character(str(character_id))
-        return character
+        data_service = CharacterDataService()
+        character = data_service.get_character_by_id(character_id)
+        
+        log_debug("Personnage récupéré avec succès", 
+                 action="get_character_detail_success", 
+                 character_id=character_id)
+        
+        return CharacterDetailResponse(**character.model_dump())
+        
+    except FileNotFoundError as e:
+        log_debug("Personnage non trouvé", 
+                 action="get_character_detail_not_found", 
+                 character_id=character_id,
+                 error=str(e))
+        raise CharacterNotFoundError(character_id)
+        
     except Exception as e:
-        log_debug(f"Erreur lors de la récupération du personnage: {e}", character_id=str(character_id))
-        raise HTTPException(status_code=404, detail="Personnage non trouvé")
+        log_debug("Erreur lors de la récupération du personnage", 
+                 action="get_character_detail_error", 
+                 character_id=character_id,
+                 error=str(e))
+        raise InternalServerError(f"Erreur lors de la récupération du personnage: {str(e)}")

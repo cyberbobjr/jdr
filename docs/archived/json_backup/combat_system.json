@@ -1,0 +1,119 @@
+{
+  "combat_system": {
+    "initiative": {
+      "formula": "1d20 + agilite_bonus + (intuition / 3)",
+      "determines": "who_acts_first",
+      "options": ["player_first", "enemy_first"],
+      "tie_breaker": "highest_intuition_characteristic"
+    },
+    "turn_structure": {
+      "player_turn": {
+        "decision_maker": "player_input",
+        "available_actions": [
+          {
+            "name": "attack",
+            "description": "Attaquer un ennemi",
+            "type": "major_action"
+          },
+          {
+            "name": "defend",
+            "description": "Se concentrer sur la défense",
+            "type": "major_action",
+            "effect": "defense_bonus_next_turn",
+            "bonus": 4
+          },
+          {
+            "name": "special_attack",
+            "description": "Attaque spéciale (puissante, précise, etc.)",
+            "type": "major_action"
+          },
+          {
+            "name": "cast_spell",
+            "description": "Lancer un sort",
+            "type": "major_action"
+          },
+          {
+            "name": "flee",
+            "description": "Tenter de fuir le combat",
+            "type": "major_action"
+          },
+          {
+            "name": "move",
+            "description": "Se déplacer",
+            "type": "minor_action",
+            "distance_formula": "agilite * 1.5_meters"
+          },
+          {
+            "name": "draw_weapon",
+            "description": "Dégainer/Rengainer une arme",
+            "type": "minor_action"
+          },
+          {
+            "name": "use_item",
+            "description": "Utiliser un objet",
+            "type": "minor_action"
+          }
+        ]
+      },
+      "enemy_turn": {
+        "decision_maker": "llm_agent",
+        "tools_to_call": [
+          "combat_tools.py",
+          "skill_tools.py"
+        ],
+        "ai_behavior": {
+          "aggressive": "Attaque directe privilégiée",
+          "defensive": "Privilégie la défense et les manœuvres",
+          "tactical": "Utilise l'environnement et les sorts",
+          "flee": "Tente de fuir si en infériorité"
+        }
+      }
+    },
+    "basic_mechanics": {
+      "attack_roll": {
+        "formula": "1d20 + weapon_skill + attribute_bonus",
+        "target": "enemy_defense_rating",
+        "critical": {
+          "trigger": "natural_20",
+          "effect": "double_damage"
+        },
+        "fumble": {
+          "trigger": "natural_1", 
+          "effect": "special_consequence"
+        }
+      },
+      "damage_calculation": {
+        "formula": "weapon_damage + strength_bonus",
+        "armor_reduction": "subtract_armor_value"
+      },
+      "defense_rating": {
+        "base": 10,
+        "formula": "10 + agilite_bonus + armor_bonus + shield_bonus"
+      }
+    },
+    "combat_modifiers": {
+      "flanking": {
+        "condition": "attacking_from_behind_or_side",
+        "bonus": 2
+      },
+      "high_ground": {
+        "condition": "attacking_from_higher_position",
+        "bonus": 1
+      },
+      "cover": {
+        "partial": {
+          "condition": "target_partially_hidden",
+          "penalty": -2
+        },
+        "full": {
+          "condition": "target_mostly_hidden",
+          "penalty": -4
+        }
+      },
+      "multiple_opponents": {
+        "condition": "facing_multiple_enemies",
+        "penalty_per_additional_enemy": -2
+      }
+    }
+  }
+}

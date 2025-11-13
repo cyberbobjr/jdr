@@ -6,6 +6,7 @@ Factorisation du code de lecture/écriture utilisé par CharacterService et autr
 import os
 import json
 from typing import Dict, Any
+from dataclasses import asdict, is_dataclass
 from back.utils.logger import log_debug
 from back.config import get_data_dir
 
@@ -84,29 +85,84 @@ class CharacterPersistenceService:
             raise
     
     @staticmethod
-    def save_character_data(character_id: str, character_data: Dict[str, Any]) -> None:
+    def save_character_data(character_id: str, character_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         ### save_character_data
         **Description :** Sauvegarde les données complètes d'un personnage dans son fichier JSON.
+        Effectue un merge avec les données existantes pour éviter l'écrasement.
         **Paramètres :**
         - `character_id` (str) : Identifiant du personnage (UUID).
         - `character_data` (dict) : Données à sauvegarder.
-        **Retour :** Aucun
+        **Retour :** Les données complètes fusionnées du personnage (dict).
         """
         filepath = CharacterPersistenceService._get_character_file_path(character_id)
         
         try:
-            with open(filepath, "w", encoding="utf-8") as file:
-                json.dump(character_data, file, ensure_ascii=False, indent=2)
+            # Charger les données existantes si le fichier existe
+            existing_data = {}
+            if os.path.exists(filepath):
+                try:
+                    with open(filepath, "r", encoding="utf-8") as file:
+                        existing_data = json.load(file)
+                except (json.JSONDecodeError, Exception) as e:
+                    log_debug("Erreur lors de la lecture du fichier existant, recréation", 
+                             action="save_character_data_warning", 
+                             character_id=character_id, 
+                             error=str(e))
+                    existing_data = {}
             
-            log_debug("Données personnage sauvegardées", 
+            # Merger les données (les nouvelles données ont priorité)
+            merged_data = {**existing_data, **character_data}
+            
+            # Créer le répertoire si nécessaire
+            os.makedirs(os.path.dirname(filepath), exist_ok=True)
+            
+            with open(filepath, "w", encoding="utf-8") as file:
+                json.dump(merged_data, file, ensure_ascii=False, indent=2)
+            
+            log_debug("Données personnage sauvegardées (merge)", 
                      action="save_character_data", 
                      character_id=character_id, 
-                     filepath=os.path.abspath(filepath))
-        
+                     filepath=os.path.abspath(filepath),
+                     keys_updated=list(character_data.keys()))
+            return merged_data
         except Exception as e:
             log_debug("Erreur lors de la sauvegarde", 
                      action="save_character_data_error", 
                      character_id=character_id, 
                      error=str(e))
             raise
+    
+    @staticmethod
+    def delete_character_data(character_id: str) -> None:
+        """
+        ### delete_character_data
+        **Description :** Supprime le fichier JSON d'un personnage à partir de son identifiant.
+        **Paramètres :**
+        - `character_id` (str) : Identifiant du personnage (UUID).
+        **Retour :** Aucun
+        """
+        filepath = CharacterPersistenceService._get_character_file_path(character_id)
+        if os.path.exists(filepath):
+            os.remove(filepath)
+            log_debug("Personnage supprimé", action="delete_character_data", character_id=character_id, filepath=filepath)
+        else:
+            log_debug("Suppression ignorée : personnage introuvable", action="delete_character_data", character_id=character_id, filepath=filepath)
+    
+    @staticmethod
+    def _serialize_for_json(obj):
+        """
+        ### _serialize_for_json
+        **Description :** Convertit récursivement les objets dataclass en dictionnaires pour la sérialisation JSON.
+        **Paramètres :**
+        - `obj` : L'objet à sérialiser
+        **Retour :** L'objet sérialisable en JSON
+        """
+        if is_dataclass(obj):
+            return asdict(obj)
+        elif isinstance(obj, dict):
+            return {k: CharacterPersistenceService._serialize_for_json(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [CharacterPersistenceService._serialize_for_json(item) for item in obj]
+        else:
+            return obj

@@ -1,0 +1,41 @@
+@startuml
+title Agent Tool Usage Sequence (Skill Check)
+
+participant "GM Agent\n(gm_agent_pydantic.py)" as GmAgent
+participant "Skill Check Tool\n(skill_tools.py)" as SkillTool
+participant "CharacterService" as CharacterService
+participant "CharacterPersistenceService" as PersistenceService
+database "Character JSON" as CharacterDB
+participant "Dice Roller\n(dice.py)" as Dice
+
+activate GmAgent
+
+note over GmAgent: LLM decides to use the skill check tool.
+GmAgent -> SkillTool: skill_check_with_character(skill_name, difficulty)
+activate SkillTool
+
+SkillTool -> CharacterService: get_character_data()
+activate CharacterService
+CharacterService -> PersistenceService: load_character_data()
+activate PersistenceService
+PersistenceService -> CharacterDB: Read character file
+PersistenceService --> CharacterService: character_data
+deactivate PersistenceService
+CharacterService --> SkillTool: character
+deactivate CharacterService
+
+SkillTool -> Dice: roll(1, 100)
+activate Dice
+Dice --> SkillTool: roll_result
+deactivate Dice
+
+SkillTool -> SkillTool: calculate_success(character, skill_name, difficulty, roll_result)
+
+SkillTool --> GmAgent: tool_result (success/failure, margin)
+deactivate SkillTool
+
+note over GmAgent: Agent uses the tool result to narrate the outcome.
+
+deactivate GmAgent
+
+@enduml

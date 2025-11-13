@@ -31,8 +31,11 @@ import type {
   GenerateBackgroundResponse,
   GenerateNameResponse,
   SkillGroupsDict,
-  RaceJson,
-  ProfessionJson
+  RaceData,
+  CharacteristicsData,
+  EquipmentData,
+  AddEquipmentResponse,
+  RemoveEquipmentResponse
 }
 
   from "./interfaces";
@@ -41,7 +44,7 @@ import type {
 // Configuration et types API
 // ========================================
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || "http://localhost:8001";
 
 // Types spécifiques au frontend (non présents dans l'OpenAPI)
 export interface GameSession {
@@ -152,16 +155,36 @@ export class JdrApiService {
    * Récupère la liste de tous les personnages disponibles
    */
   static async getCharacters(): Promise<Character[]> {
-    const result = await makeRequest<CharacterList>("/api/characters/");
-    return result.characters;
+    try {
+      const result = await makeRequest<CharacterList>("/api/characters/");
+      console.log('getCharacters result:', result);
+      return result.characters;
+    } catch (error) {
+      console.error('Erreur dans getCharacters:', error);
+      return [];
+    }
   }
 
   /**
-   * Récupère un personnage par son ID
+   * Récupère un personnage par son ID en appelant l'endpoint spécifique
    */
   static async getCharacter(id: string): Promise<Character | null> {
-    const characters = await this.getCharacters();
-    return characters.find((char) => char.id === id) || null;
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/characters/${id}`);
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          return null;
+        }
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      
+      const character = await response.json();
+      return character;
+    } catch (error) {
+      console.error('Erreur dans getCharacter:', error);
+      return null;
+    }
   }
 
   // ========================================
@@ -212,8 +235,7 @@ export class JdrApiService {
         body: JSON.stringify(request),
       }
     );
-  }
-  /**
+  }  /**
    * Récupère l'historique complet d'une session de jeu
    */
   static async getScenarioHistory(sessionId: string): Promise<ConversationMessage[]> {
@@ -222,6 +244,29 @@ export class JdrApiService {
       `/api/scenarios/history/${sessionId}`
     );
     return result.history || [];
+  }
+
+  /**
+   * Supprime un message spécifique de l'historique d'une session
+   * @param sessionId - Identifiant de la session
+   * @param messageIndex - Index du message à supprimer (base 0)
+   * @returns {Promise<any>} Informations sur la suppression réussie
+   */
+  static async deleteHistoryMessage(sessionId: string, messageIndex: number): Promise<any> {
+    this.validateSessionParams(sessionId);
+    
+    if (messageIndex < 0) {
+      throw new Error("L'index du message ne peut pas être négatif");
+    }
+
+    const result = await makeRequest<any>(
+      `/api/scenarios/history/${sessionId}/${messageIndex}`,
+      {
+        method: 'DELETE'
+      }
+    );
+    
+    return result;
   }
 
   // ========================================
@@ -261,7 +306,7 @@ export class JdrApiService {
   // ========================================
 
   /**
-   * Alloue automatiquement les caractéristiques selon la profession et la race
+   * Alloue automatiquement les caractéristiques selon la race
    */
   static async allocateAttributes(
     request: AllocateAttributesRequest
@@ -342,33 +387,36 @@ export class JdrApiService {
   }
 
   /**
-   * Récupère la liste détaillée des professions disponibles
-   */
-  static async getProfessions(): Promise<ProfessionJson[]> {
-    return await makeRequest<ProfessionJson[]>("/api/creation/professions");
-  }
-
-  /**
    * Récupère la liste brute des races (structure du JSON)
    */
-  static async getRaces(): Promise<RaceJson[]> {
-    return await makeRequest<RaceJson[]>("/api/creation/races");
+  static async getRaces(): Promise<RaceData[]> {
+    return await makeRequest<RaceData[]>("/api/creation/races");
   }
-
   /**
    * Récupère la structure complète des groupes de compétences (JSON brut)
    */
-  static async getSkills(): Promise<SkillGroupsDict> {
-    return await makeRequest<SkillGroupsDict>("/api/creation/skills");
+  static async getSkills(): Promise<any> {
+    return await makeRequest<any>("/api/creation/skills");
   }
 
   /**
+   * Récupère la structure complète des caractéristiques (JSON brut)
+   */
+  static async getCharacteristics(): Promise<CharacteristicsData> {
+    return await makeRequest<CharacteristicsData>("/api/creation/characteristics");
+  }  /**
    * Récupère la liste des équipements disponibles
    */
   static async getEquipments(): Promise<string[]> {
     return await makeRequest<string[]>("/api/creation/equipments");
   }
 
+  /**
+   * Récupère les équipements avec leurs détails complets
+   */
+  static async getEquipmentsDetailed(): Promise<EquipmentData> {
+    return await makeRequest<EquipmentData>("/api/creation/equipments-detailed");
+  }
   /**
    * Récupère la liste des sorts disponibles
    */
@@ -377,49 +425,90 @@ export class JdrApiService {
   }
 
   // ========================================
+  // Gestion d'équipement
+  // ========================================
+  /**
+   * Ajoute un équipement au personnage
+   */
+  static async addEquipment(characterId: string, equipmentName: string): Promise<AddEquipmentResponse> {
+    return await makeRequest("/api/creation/add-equipment", {
+      method: "POST",
+      body: JSON.stringify({
+        character_id: characterId,
+        equipment_name: equipmentName
+      })
+    });
+  }
+
+  /**
+   * Retire un équipement du personnage
+   */
+  static async removeEquipment(characterId: string, equipmentName: string): Promise<RemoveEquipmentResponse> {
+    return await makeRequest("/api/creation/remove-equipment", {
+      method: "POST",
+      body: JSON.stringify({
+        character_id: characterId,
+        equipment_name: equipmentName
+      })
+    });
+  }
+
+  /**
+   * Met à jour l'argent du personnage
+   */
+  static async updateMoney(characterId: string, amount: number): Promise<any> {
+    return await makeRequest("/api/creation/update-money", {
+      method: "POST",
+      body: JSON.stringify({
+        character_id: characterId,
+        amount: amount
+      })
+    });
+  }
+  // ========================================
   // Appels aux routes LLM (génération nom, background, description physique)
   // ========================================
 
   /**
-   * Génère un nom de personnage via LLM à partir d'une fiche partielle
+   * Génère 5 noms de personnage via LLM à partir d'une fiche partielle
    */
-  static async generateCharacterName(character: Partial<Character>): Promise<string> {
+  static async generateCharacterName(character: Partial<Character>): Promise<string[]> {
     const result = await makeRequest<GenerateNameResponse>(
-      "/creation/generate-name",
+      "/api/creation/generate-name",
       {
         method: "POST",
         body: JSON.stringify(character),
       }
     );
-    return result.name;
+    return result.names;
   }
 
   /**
-   * Génère un background d'histoire via LLM (character partiel accepté)
+   * Génère 5 backgrounds d'histoire via LLM (character partiel accepté)
    */
-  static async generateCharacterBackground(character: Partial<Character>): Promise<string> {
+  static async generateCharacterBackground(character: Partial<Character>): Promise<string[]> {
     const result = await makeRequest<GenerateBackgroundResponse>(
-      "/creation/generate-background",
+      "/api/creation/generate-background",
       {
         method: "POST",
         body: JSON.stringify(character),
       }
     );
-    return result.background;
+    return result.backgrounds;
   }
 
   /**
-   * Génère une description physique via LLM (character partiel accepté)
+   * Génère 5 descriptions physiques via LLM (character partiel accepté)
    */
-  static async generateCharacterPhysicalDescription(character: Partial<Character>): Promise<string> {
+  static async generateCharacterPhysicalDescription(character: Partial<Character>): Promise<string[]> {
     const result = await makeRequest<GeneratePhysicalDescriptionResponse>(
-      "/creation/generate-physical-description",
+      "/api/creation/generate-physical-description",
       {
         method: "POST",
         body: JSON.stringify(character),
       }
     );
-    return result.physical_description;
+    return result.physical_descriptions;
   }
 
   // ========================================
@@ -450,25 +539,18 @@ export class JdrApiService {
   /**
    * Convertit un Character en CharacterContext pour les interfaces existantes
    */
-  static characterToContext(character: Character): CharacterContext {
-    return {
+  static characterToContext(character: Character): CharacterContext {   
+     return {
       id: character.id,
       name: character.name,
-      race: character.race,
-      culture: character.culture,
-      profession: character.profession,
-      caracteristiques: character.caracteristiques,
+      race: character.race.name,
+      culture: character.culture.name,
+      caracteristiques: character.caracteristiques,      
       competences: character.competences,
       hp: character.hp,
       inventory: character.inventory?.map((item) => item.name) || [],
-      equipment: character.equipment || [],
       spells: character.spells || [],
-      equipment_summary: {
-        total_cost: character.equipment_summary?.total_cost || 0,
-        total_weight: character.equipment_summary?.total_weight || 0,
-        remaining_money: character.equipment_summary?.remaining_money || 0,
-        starting_money: character.equipment_summary?.starting_money || 0,
-      },
+      gold: character.gold || 0,
       culture_bonuses: character.culture_bonuses || {},
     };
   }

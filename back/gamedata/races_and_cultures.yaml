@@ -1,0 +1,114 @@
+- id: humans
+  name: Humans
+  characteristic_bonuses:
+    Willpower: 1
+  base_languages:
+  - Westron (Common Tongue)
+  optional_languages:
+  - Sindarin
+  - Rohirric
+  - Haradric
+  - Dalish
+  cultures:
+  - id: gondorians
+    name: Gondorians
+    skill_bonuses:
+      General Knowledge: 1
+    traits: Tradition and pride
+  - id: rohirrim
+    name: Rohirrim
+    skill_bonuses:
+      Riding: 1
+    traits: Equestrian culture
+  - id: northmen
+    name: Northmen
+    skill_bonuses:
+      Survival: 1
+    traits: Climate endurance
+  - id: dunedain
+    name: Dúnedain
+    characteristic_bonuses:
+      Willpower: 1
+    free_skill_points: 1
+    traits: Longevity ×3, +1 Fate Point
+    special_traits:
+      longevity_multiplier: 3
+- id: elves
+  name: Elves
+  characteristic_bonuses:
+    Agility: 2
+  base_languages:
+  - Sindarin
+  - Westron
+  optional_languages:
+  - Quenya
+  - Silvan
+  - Entish
+  - Ancient Tongues
+  cultures:
+  - id: noldor
+    name: Noldor
+    skill_bonuses:
+      Crafting: 1
+      General Knowledge: 1
+    traits: Master craftsmen
+  - id: sindar
+    name: Sindar
+    skill_bonuses:
+      Herbalism: 1
+      Perception: 1
+    traits: Harmony with nature
+  - id: silvan
+    name: Silvan
+    skill_bonuses:
+      Stealth: 1
+      Weapon Handling: 1
+    traits: Forest experts
+- id: dwarves
+  name: Dwarves
+  characteristic_bonuses:
+    Constitution: 2
+  base_languages:
+  - Khuzdul (secret)
+  - Westron
+  optional_languages:
+  - Iglishmêk (sign language)
+  - Sindarin
+  - Trade languages
+  cultures:
+  - id: longbeards
+    name: Longbeards
+    skill_bonuses:
+      Crafting: 1
+    traits: Ancient traditions
+  - id: firebeards
+    name: Firebeards
+    skill_bonuses:
+      Weapon Handling: 1
+    traits: Born warriors
+- id: hobbits
+  name: Hobbits
+  characteristic_bonuses:
+    Agility: 2
+  base_languages:
+  - Westron
+  optional_languages:
+  - Old Hobbitish
+  - Rohirric
+  - Sindarin (basic)
+  cultures:
+  - id: harfoots
+    name: Harfoots
+    skill_bonuses:
+      Stealth: 1
+    traits: Discreet and cautious
+  - id: stoors
+    name: Stoors
+    characteristic_bonuses:
+      Constitution: 1
+    traits: Sturdy and resistant
+  - id: brandybucks
+    name: Brandybucks
+    skill_bonuses:
+      Survival: 1
+    traits: Adventurous

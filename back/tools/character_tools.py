@@ -3,7 +3,7 @@ from pydantic_ai import RunContext
 from back.services.session_service import SessionService
 from back.utils.logger import log_debug
 
-def character_apply_xp(ctx: RunContext[SessionService], xp: int) -> dict:
+def character_apply_xp(ctx: RunContext[SessionService], xp: int) -> str:
     """
     Applique les XP au personnage.
 
@@ -11,13 +11,15 @@ def character_apply_xp(ctx: RunContext[SessionService], xp: int) -> dict:
         xp (int): Le nombre d'expériences à ajouter. Ex. : 50.
     
     Returns:
-        dict: Données mises à jour du personnage.
+        str: Message confirmant l'application des XP.
     """
     log_debug("Tool character_apply_xp appelé", tool="character_apply_xp", player_id=str(ctx.deps.character_id), xp=xp)
-    ctx.deps.character_service.apply_xp(xp)
-    return {"character": ctx.deps.character_service.character_data.model_dump()}
+    
+    # ✅ PATTERN CORRECT - Utilisation des services spécialisés via SessionService
+    character = ctx.deps.apply_xp(xp)
+    return f"✅ {xp} XP appliqués au personnage. Total XP: {character.xp}"
 
-def character_add_gold(ctx: RunContext[SessionService], gold: int) -> dict:
+def character_add_gold(ctx: RunContext[SessionService], gold: int) -> str:
     """
     Ajoute de l'or au portefeuille du personnage.
 
@@ -25,13 +27,15 @@ def character_add_gold(ctx: RunContext[SessionService], gold: int) -> dict:
         gold (int): Montant d'or à ajouter. Ex. : 50.
     
     Returns:
-        dict: Fiche personnage mise à jour.
+        str: Message confirmant l'ajout d'or.
     """
     log_debug("Tool character_add_gold appelé", tool="character_add_gold", player_id=str(ctx.deps.character_id), gold=gold)
-    ctx.deps.character_service.add_gold(gold)
-    return {"character": ctx.deps.character_service.character_data.model_dump()}
+    
+    # ✅ PATTERN CORRECT - Utilisation des services spécialisés via SessionService
+    character = ctx.deps.add_gold(float(gold))
+    return f"💰 {gold} pièces d'or {'ajoutées' if gold > 0 else 'retirées'}. Total: {character.gold:.2f} po"
 
-def character_take_damage(ctx: RunContext[SessionService], amount: int, source: str = "combat") -> dict:
+def character_take_damage(ctx: RunContext[SessionService], amount: int, source: str = "combat") -> str:
     """
     Applique des dégâts au personnage (réduit ses PV).
 
@@ -40,10 +44,10 @@ def character_take_damage(ctx: RunContext[SessionService], amount: int, source: 
         source (str): Source des dégâts. Par défaut : "combat".
     
     Returns:
-        dict: Fiche personnage mise à jour.
+        str: Message confirmant l'application des dégâts.
     """
     log_debug("Tool character_take_damage appelé", tool="character_take_damage", player_id=str(ctx.deps.character_id), amount=amount, source=source)
-    ctx.deps.character_service.take_damage(amount, source)
-    return {"character": ctx.deps.character_service.character_data.model_dump()}
-
-
+    
+    # ✅ PATTERN CORRECT - Utilisation des services spécialisés via SessionService
+    character = ctx.deps.take_damage(amount, source)
+    return f"💔 {amount} points de dégâts subis ({source}). PV restants: {character.hp}"

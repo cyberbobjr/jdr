@@ -1,7 +1,11 @@
 from pydantic import BaseModel
 from uuid import UUID
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, TYPE_CHECKING
 from enum import Enum
+
+# Import conditionnel pour éviter les imports circulaires
+if TYPE_CHECKING:
+    from back.models.domain.character import Character
 
 class ItemType(str, Enum):
     """Types d'objets possibles"""
@@ -11,12 +15,18 @@ class ItemType(str, Enum):
     NOURRITURE = "Nourriture"
     OBJET_MAGIQUE = "Objet_Magique"
 
+class CharacterStatus(str, Enum):
+    """Statuts possibles pour un personnage"""
+    IN_PROGRESS = "en_cours"
+    DONE = "complet"
+    ARCHIVE = "archive"
+
 class Item(BaseModel):
     """Modèle pour un objet d'inventaire avec toutes ses propriétés"""
     id: str  # Identifiant unique de l'instance de l'objet
     name: str  # Nom de l'objet (ex: "Coutelas")
     item_type: ItemType  # Type d'objet (Arme, Armure, Materiel, etc.)
-    price_pc: int  # Prix en pièces de cuivre
+    price_pc: float  # Prix en pièces de cuivre (support des décimales)
     weight_kg: float  # Poids en kilogrammes
     description: str  # Description de l'objet
     category: Optional[str] = None  # Catégorie spécifique (ex: "Couteau", "Cuir", etc.)
@@ -36,23 +46,24 @@ class Item(BaseModel):
     crafting_time: Optional[str] = None  # Temps de fabrication
     special_properties: Optional[List[str]] = None  # Propriétés spéciales
 
-class Character(BaseModel):
-    id: UUID
+class RaceData(BaseModel):
+    id: str
     name: str
-    race: str
-    culture: str
-    profession: str
-    caracteristiques: Dict[str, int]
-    competences: Dict[str, int]
-    hp: int = 100  # calculé à partir de Constitution
-    xp: int = 0  # Points d'expérience
-    gold: int = 0  # Or possédé
-    inventory: List[Item] = []  # Inventaire détaillé avec objets complets
-    spells: List[str] = []
-    equipment_summary: Optional[Dict[str, float]] = None
-    culture_bonuses: Optional[Dict[str, int]] = None
-    background: Optional[str] = None  # Histoire du personnage
-    physical_description: Optional[str] = None  # Description physique
+    characteristic_bonuses: Dict[str, int]
+    special_abilities: Optional[List[str]] = []
+    base_languages: List[str]
+    optional_languages: List[str]
+    cultures: Optional[List['CultureData']] = None
+
+class CultureData(BaseModel):
+    id: str
+    name: str
+    description: Optional[str] = None
+    skill_bonuses: Optional[Dict[str, int]] = None
+    characteristic_bonuses: Optional[Dict[str, int]] = None
+    free_skill_points: Optional[int] = None
+    traits: Optional[str] = None
+    special_traits: Optional[Dict[str, Any]] = None
 
 class ScenarioStatus(BaseModel):
     name: str
@@ -64,22 +75,12 @@ class ScenarioStatus(BaseModel):
 class ScenarioList(BaseModel):
     scenarios: List[ScenarioStatus]
 
-class CharacterList(BaseModel):
-    characters: List[Character]
-
 class MessagePart(BaseModel):
     """Modèle pour une partie de message dans l'historique de conversation"""
     content: str
     timestamp: str
     dynamic_ref: Optional[str] = None
     part_kind: str  # ex: "system-prompt", "user-prompt", "text", "tool-call", "tool-return"
-
-class ToolCall(BaseModel):
-    """Modèle pour un appel d'outil dans l'historique"""
-    tool_name: str
-    args: str  # JSON stringifié
-    tool_call_id: str
-    part_kind: str = "tool-call"
 
 class MessageUsage(BaseModel):
     """Modèle pour les informations d'usage des tokens"""
@@ -99,10 +100,6 @@ class ConversationMessage(BaseModel):
     timestamp: Optional[str] = None
     vendor_details: Optional[Any] = None
     vendor_id: Optional[str] = None
-
-class PlayScenarioResponse(BaseModel):
-    """Modèle de réponse pour l'endpoint /scenarios/play"""
-    response: List[ConversationMessage]
 
 class PlayScenarioRequest(BaseModel):
     """Modèle de requête pour l'endpoint /scenarios/play"""
@@ -134,12 +131,7 @@ class StartScenarioResponse(BaseModel):
     message: str
     llm_response: str
 
-class ScenarioHistoryResponse(BaseModel):
-    """Modèle de réponse pour l'endpoint /scenarios/history/{session_id}"""
-    history: List[ConversationMessage]
-
 class AllocateAttributesRequest(BaseModel):
-    profession: str
     race: str
 
 class AllocateAttributesResponse(BaseModel):
@@ -156,11 +148,11 @@ class SaveCharacterRequest(BaseModel):
     character: dict
 
 class SaveCharacterResponse(BaseModel):
+    character: dict
     status: str
 
 class CheckSkillsRequest(BaseModel):
     skills: Dict[str, int]
-    profession: str
 
 class CheckSkillsResponse(BaseModel):
     valid: bool
@@ -171,48 +163,58 @@ class CreationStatusResponse(BaseModel):
     status: str
     created_at: Optional[str] = None
 
-class CharacterAny(BaseModel):
-    """
-    Schéma permissif pour retourner un personnage complet ou incomplet (tous champs optionnels).
-    """
-    id: Optional[str] = None
-    name: Optional[str] = None
-    race: Optional[str] = None
-    culture: Optional[str] = None
-    profession: Optional[str] = None
-    caracteristiques: Optional[Dict[str, int]] = None
-    competences: Optional[Dict[str, int]] = None
-    hp: Optional[int] = None
-    xp: Optional[int] = None
-    gold: Optional[int] = None
-    inventory: Optional[List[Item]] = None
-    spells: Optional[List[str]] = None
-    equipment_summary: Optional[Dict[str, float]] = None
-    culture_bonuses: Optional[Dict[str, int]] = None
-    background: Optional[str] = None
-    physical_description: Optional[str] = None
-    created_at: Optional[str] = None
-    last_update: Optional[str] = None
-    current_step: Optional[str] = None
-    status: Optional[str] = None
-
 class CharacterListAny(BaseModel):
-    characters: List[CharacterAny]
+    characters: List[dict]
 
-class ProfessionSchema(BaseModel):
-    """Modèle détaillé pour une profession (pour documentation Swagger et frontend)"""
-    name: str
+class CharacteristicSchema(BaseModel):
+    """Schéma pour une caractéristique individuelle"""
+    short_name: str
+    category: str  # 'physical', 'mental', ou 'social'
     description: str
-    favored_skill_groups: Dict[str, int]
-    main_characteristics: List[str]
-    abilities: List[str]
-    spheres: List[str]
+    examples: List[str]
 
-class RaceSchema(BaseModel):
-    name: str
-    characteristic_bonuses: Dict[str, int]
-    destiny_points: int
-    special_abilities: List[str]
-    base_languages: List[str]
-    optional_languages: List[str]
-    cultures: List[Dict[str, str]]
+class CharacteristicsResponse(BaseModel):
+    """Schéma de réponse pour le endpoint /api/creation/characteristics"""
+    characteristics: Dict[str, CharacteristicSchema]
+    bonus_table: Dict[str, int]
+    cost_table: Dict[str, int]
+    starting_points: int
+
+# Les modèles RaceData et CultureData sont maintenant définis plus haut et remplacent RaceSchema et CultureSchema
+
+class UpdateSkillsRequest(BaseModel):
+    character_id: str
+    skills: Dict[str, int]
+
+class UpdateSkillsResponse(BaseModel):
+    status: str
+
+# === Schémas pour la gestion d'équipement ===
+
+class AddEquipmentRequest(BaseModel):
+    character_id: str
+    equipment_name: str
+
+class AddEquipmentResponse(BaseModel):
+    status: str
+    gold: float
+    total_weight: float
+    equipment_added: dict
+
+class RemoveEquipmentRequest(BaseModel):
+    character_id: str
+    equipment_name: str
+
+class RemoveEquipmentResponse(BaseModel):
+    status: str
+    gold: float
+    total_weight: float
+    equipment_removed: dict
+
+class UpdateMoneyRequest(BaseModel):
+    character_id: str
+    amount: float  # Positif pour ajouter, négatif pour retirer
+
+class UpdateMoneyResponse(BaseModel):
+    status: str
+    gold: float

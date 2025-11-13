@@ -22,45 +22,31 @@
         </div>
       </CardComponent>
     </div>
-    <div v-if="selectedRace">
+    <div v-if="selectedRace && selectedRace.cultures">
       <h3 class="culture-title">Choisissez une culture</h3>
       <div class="culture-cards">
         <CardComponent
           v-for="culture in selectedRace.cultures"
           :key="culture.name"
           :title="culture.name"
-          :subtitle="culture.bonus"
+          :subtitle="culture.description"
           :class="{ selected: selectedCultureName === culture.name, clickable: true }"
           @click="selectCulture(culture.name)"
         >
-          <div>
-            <strong>Traits :</strong> {{ culture.traits }}
+          <div v-if="culture.skill_bonuses">
+            <strong>Bonus de compétences :</strong> 
+            <span v-for="(bonus, skill) in culture.skill_bonuses" :key="skill">
+              {{ skill }}: +{{ bonus }}
+            </span>
           </div>
-        </CardComponent>
-      </div>
-    </div>
-    <!-- Ajout de la sélection de la profession -->
-    <div v-if="selectedRace && selectedCultureName && professions.length">
-      <h3 class="culture-title">Choisissez une profession</h3>
-      <div class="culture-cards">
-        <CardComponent
-          v-for="profession in professions"
-          :key="profession.name"
-          :title="profession.name"
-          :subtitle="profession.description"
-          :class="{ selected: selectedProfession === profession.name, clickable: true }"
-          @click="selectProfession(profession.name)"
-        >
-          <div>
-            <strong>Groupes de compétences favoris :</strong>
-            <ul>
-              <li v-for="(val, group) in profession.favored_skill_groups" :key="group">
-                {{ group }} : {{ val }}
-              </li>
-            </ul>
-            <div><strong>Caractéristiques principales :</strong> {{ profession.main_characteristics.join(', ') }}</div>
-            <div><strong>Capacités :</strong> {{ profession.abilities.join(', ') }}</div>
-            <div v-if="profession.spheres.length"><strong>Sphères :</strong> {{ profession.spheres.join(', ') }}</div>
+          <div v-if="culture.characteristic_bonuses">
+            <strong>Bonus de caractéristiques :</strong>
+            <span v-for="(bonus, char) in culture.characteristic_bonuses" :key="char">
+              {{ char }}: +{{ bonus }}
+            </span>
+          </div>
+          <div v-if="culture.free_skill_points">
+            <strong>Points de compétence gratuits :</strong> {{ culture.free_skill_points }}
           </div>
         </CardComponent>
       </div>
@@ -81,7 +67,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import JdrApiService from '@/core/api';
-import type { RaceJson, Character, ProfessionJson } from '@/core/interfaces';
+import type { RaceData, CultureData, Character } from '@/core/interfaces';
 import CardComponent from '@/components/CardComponent.vue';
 
 const props = defineProps<{
@@ -89,85 +75,104 @@ const props = defineProps<{
   initialData?: Character | null;
 }>();
 const emit = defineEmits<{
-  (e: 'next-step', payload: { race: RaceJson; culture: { name: string; bonus: string; traits: string }; profession: string }): void;
+  (e: 'next-step', payload: { race: RaceData; culture: CultureData }): void;
   (e: 'update-character', payload: Character): void;
 }>();
 
-const races = ref<RaceJson[]>([]);
-const professions = ref<ProfessionJson[]>([]);
+const races = ref<RaceData[]>([]);
 const selectedRaceName = ref<string>('');
 const selectedCultureName = ref<string>('');
-const selectedProfession = ref<string>('');
+const isInitialLoading = ref<boolean>(true); // Flag pour ignorer les changements lors du chargement initial
 
 const selectedRace = computed(() =>
   races.value.find(r => r.name === selectedRaceName.value)
 );
 
 onMounted(async () => {
+  isInitialLoading.value = true;
   races.value = await JdrApiService.getRaces();
-  professions.value = await JdrApiService.getProfessions();
-  // Pré-remplissage si édition
-  if (props.initialData) {
-    selectedRaceName.value = props.initialData.race;
-    selectedCultureName.value = props.initialData.culture;
-    selectedProfession.value = props.initialData.profession;
+  
+  // Pré-remplissage si édition - après le chargement des races
+  if (props.initialData && races.value.length > 0) {
+    selectedRaceName.value = props.initialData.race?.name || '';
+    selectedCultureName.value = props.initialData.culture?.name || '';
   }
+  
+  // Marquer que le chargement initial est terminé
+  setTimeout(() => {
+    isInitialLoading.value = false;
+  }, 100); // Petit délai pour s'assurer que tous les watchers ont fini
 });
 
 // Ajout d'un watcher pour réagir à l'arrivée tardive de initialData (cas du SSR ou du fetch asynchrone)
 watch(
   () => props.initialData,
   (newVal) => {
-    if (newVal) {
-      selectedRaceName.value = newVal.race;
-      selectedCultureName.value = newVal.culture;
-      selectedProfession.value = newVal.profession;
+    if (newVal && races.value.length > 0 && isInitialLoading.value) {
+      selectedRaceName.value = newVal.race?.name || '';
+      selectedCultureName.value = newVal.culture?.name || '';
     }
   },
   { immediate: true }
 );
 
-watch([selectedRaceName, selectedCultureName, selectedProfession], async ([race, culture, profession]) => {
-  if (props.characterId && race && culture && profession) {
-    // Enregistrement automatique côté back dès qu'une race, culture ou profession est sélectionnée
-    await JdrApiService.saveCharacter({
-      character_id: props.characterId,
-      character: {
-        ...props.initialData,
-        race,
-        culture,
-        profession
-      }
-    });
-    emit('update-character', {
-      ...(props.initialData || {}),
-      race,
-      culture,
-      profession
-    } as Character);
+// Watcher pour pré-remplir les données quand les races sont chargées (cas où races arrivent après initialData)
+watch(
+  () => races.value,
+  (newRaces) => {
+    if (newRaces.length > 0 && props.initialData && isInitialLoading.value) {
+      selectedRaceName.value = props.initialData.race?.name || '';
+      selectedCultureName.value = props.initialData.culture?.name || '';
+    }
+  },
+  { immediate: false } // Pas immediate car on gère déjà dans onMounted
+);
+
+watch([selectedRaceName, selectedCultureName], async ([raceName, cultureName]) => {
+  // Ne pas sauvegarder pendant le chargement initial
+  if (isInitialLoading.value) {
+    return;
+  }
+  
+  if (props.characterId && raceName && cultureName) {
+    const selectedRace = races.value.find(r => r.name === raceName);
+    const selectedCulture = selectedRace?.cultures?.find(c => c.name === cultureName);
+    
+    if (selectedRace && selectedCulture) {
+      // Créer une copie de la race sans la propriété cultures pour éviter la duplication
+      const { cultures, ...raceWithoutCultures } = selectedRace;
+      
+      // Enregistrement automatique côté back dès qu'une race ou culture est sélectionnée
+      await JdrApiService.saveCharacter({
+        character_id: props.characterId,
+        character: {
+          ...props.initialData,
+          race: raceWithoutCultures,
+          culture: selectedCulture
+        }
+      });
+      emit('update-character', {
+        ...(props.initialData || {}),
+        race: raceWithoutCultures as RaceData,
+        culture: selectedCulture
+      } as Character);
+    }
   }
 });
 
 function selectRace(raceName: string) {
   selectedRaceName.value = raceName;
   selectedCultureName.value = '';
-  selectedProfession.value = '';
 }
 
 function selectCulture(cultureName: string) {
   selectedCultureName.value = cultureName;
-  selectedProfession.value = '';
-}
-
-function selectProfession(profession: string) {
-  selectedProfession.value = profession;
 }
 
 const canGoNext = computed(() => {
   return (
     selectedRaceName.value &&
-    selectedCultureName.value &&
-    selectedProfession.value
+    selectedCultureName.value
   );
 });
 
@@ -175,17 +180,21 @@ function goToNextStep() {
   if (
     selectedRace.value &&
     selectedCultureName.value &&
-    selectedProfession.value &&
     canGoNext.value
   ) {
-    emit('next-step', {
-      race: selectedRace.value,
-      culture:
-        selectedRace.value.cultures.find(
-          c => c.name === selectedCultureName.value
-        ) || { name: '', bonus: '', traits: '' },
-      profession: selectedProfession.value
-    });
+    const selectedCulture = selectedRace.value.cultures?.find(
+      c => c.name === selectedCultureName.value
+    );
+    
+    if (selectedCulture) {
+      // Créer une copie de la race sans la propriété cultures pour éviter la duplication
+      const { cultures, ...raceWithoutCultures } = selectedRace.value;
+      
+      emit('next-step', {
+        race: raceWithoutCultures as RaceData,
+        culture: selectedCulture
+      });
+    }
   }
 }
 </script>
@@ -213,9 +222,5 @@ function goToNextStep() {
   max-width: 320px;
   box-sizing: border-box;
 }
-button.jdr-btn.disabled,
-button.jdr-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+
 </style>

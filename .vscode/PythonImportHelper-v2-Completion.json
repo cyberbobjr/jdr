@@ -1,0 +1,3918 @@
+[
+    {
+        "label": "pathlib",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
+        "label": "get_data_dir",
+        "importPath": "back.config",
+        "description": "back.config",
+        "isExtraImport": true,
+        "detail": "back.config",
+        "documentation": {}
+    },
+    {
+        "label": "get_data_dir",
+        "importPath": "back.config",
+        "description": "back.config",
+        "isExtraImport": true,
+        "detail": "back.config",
+        "documentation": {}
+    },
+    {
+        "label": "get_llm_config",
+        "importPath": "back.config",
+        "description": "back.config",
+        "isExtraImport": true,
+        "detail": "back.config",
+        "documentation": {}
+    },
+    {
+        "label": "get_data_dir",
+        "importPath": "back.config",
+        "description": "back.config",
+        "isExtraImport": true,
+        "detail": "back.config",
+        "documentation": {}
+    },
+    {
+        "label": "get_data_dir",
+        "importPath": "back.config",
+        "description": "back.config",
+        "isExtraImport": true,
+        "detail": "back.config",
+        "documentation": {}
+    },
+    {
+        "label": "get_logger",
+        "importPath": "back.config",
+        "description": "back.config",
+        "isExtraImport": true,
+        "detail": "back.config",
+        "documentation": {}
+    },
+    {
+        "label": "get_data_dir",
+        "importPath": "back.config",
+        "description": "back.config",
+        "isExtraImport": true,
+        "detail": "back.config",
+        "documentation": {}
+    },
+    {
+        "label": "get_data_dir",
+        "importPath": "back.config",
+        "description": "back.config",
+        "isExtraImport": true,
+        "detail": "back.config",
+        "documentation": {}
+    },
+    {
+        "label": "get_data_dir",
+        "importPath": "back.config",
+        "description": "back.config",
+        "isExtraImport": true,
+        "detail": "back.config",
+        "documentation": {}
+    },
+    {
+        "label": "get_data_dir",
+        "importPath": "back.config",
+        "description": "back.config",
+        "isExtraImport": true,
+        "detail": "back.config",
+        "documentation": {}
+    },
+    {
+        "label": "get_logger",
+        "importPath": "back.config",
+        "description": "back.config",
+        "isExtraImport": true,
+        "detail": "back.config",
+        "documentation": {}
+    },
+    {
+        "label": "get_data_dir",
+        "importPath": "back.config",
+        "description": "back.config",
+        "isExtraImport": true,
+        "detail": "back.config",
+        "documentation": {}
+    },
+    {
+        "label": "get_data_dir",
+        "importPath": "back.config",
+        "description": "back.config",
+        "isExtraImport": true,
+        "detail": "back.config",
+        "documentation": {}
+    },
+    {
+        "label": "get_data_dir",
+        "importPath": "back.config",
+        "description": "back.config",
+        "isExtraImport": true,
+        "detail": "back.config",
+        "documentation": {}
+    },
+    {
+        "label": "Config",
+        "importPath": "back.config",
+        "description": "back.config",
+        "isExtraImport": true,
+        "detail": "back.config",
+        "documentation": {}
+    },
+    {
+        "label": "get_logger",
+        "importPath": "back.config",
+        "description": "back.config",
+        "isExtraImport": true,
+        "detail": "back.config",
+        "documentation": {}
+    },
+    {
+        "label": "Config",
+        "importPath": "back.config",
+        "description": "back.config",
+        "isExtraImport": true,
+        "detail": "back.config",
+        "documentation": {}
+    },
+    {
+        "label": "get_logger",
+        "importPath": "back.config",
+        "description": "back.config",
+        "isExtraImport": true,
+        "detail": "back.config",
+        "documentation": {}
+    },
+    {
+        "label": "os",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os",
+        "description": "os",
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "TYPE_CHECKING",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "load_dotenv",
+        "importPath": "dotenv",
+        "description": "dotenv",
+        "isExtraImport": true,
+        "detail": "dotenv",
+        "documentation": {}
+    },
+    {
+        "label": "Agent",
+        "importPath": "pydantic_ai",
+        "description": "pydantic_ai",
+        "isExtraImport": true,
+        "detail": "pydantic_ai",
+        "documentation": {}
+    },
+    {
+        "label": "RunContext",
+        "importPath": "pydantic_ai",
+        "description": "pydantic_ai",
+        "isExtraImport": true,
+        "detail": "pydantic_ai",
+        "documentation": {}
+    },
+    {
+        "label": "RunContext",
+        "importPath": "pydantic_ai",
+        "description": "pydantic_ai",
+        "isExtraImport": true,
+        "detail": "pydantic_ai",
+        "documentation": {}
+    },
+    {
+        "label": "RunContext",
+        "importPath": "pydantic_ai",
+        "description": "pydantic_ai",
+        "isExtraImport": true,
+        "detail": "pydantic_ai",
+        "documentation": {}
+    },
+    {
+        "label": "RunContext",
+        "importPath": "pydantic_ai",
+        "description": "pydantic_ai",
+        "isExtraImport": true,
+        "detail": "pydantic_ai",
+        "documentation": {}
+    },
+    {
+        "label": "RunContext",
+        "importPath": "pydantic_ai",
+        "description": "pydantic_ai",
+        "isExtraImport": true,
+        "detail": "pydantic_ai",
+        "documentation": {}
+    },
+    {
+        "label": "json",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "json",
+        "description": "json",
+        "detail": "json",
+        "documentation": {}
+    },
+    {
+        "label": "SessionService",
+        "importPath": "back.services.session_service",
+        "description": "back.services.session_service",
+        "isExtraImport": true,
+        "detail": "back.services.session_service",
+        "documentation": {}
+    },
+    {
+        "label": "SessionService",
+        "importPath": "back.services.session_service",
+        "description": "back.services.session_service",
+        "isExtraImport": true,
+        "detail": "back.services.session_service",
+        "documentation": {}
+    },
+    {
+        "label": "SessionService",
+        "importPath": "back.services.session_service",
+        "description": "back.services.session_service",
+        "isExtraImport": true,
+        "detail": "back.services.session_service",
+        "documentation": {}
+    },
+    {
+        "label": "SessionService",
+        "importPath": "back.services.session_service",
+        "description": "back.services.session_service",
+        "isExtraImport": true,
+        "detail": "back.services.session_service",
+        "documentation": {}
+    },
+    {
+        "label": "SessionService",
+        "importPath": "back.services.session_service",
+        "description": "back.services.session_service",
+        "isExtraImport": true,
+        "detail": "back.services.session_service",
+        "documentation": {}
+    },
+    {
+        "label": "SessionService",
+        "importPath": "back.services.session_service",
+        "description": "back.services.session_service",
+        "isExtraImport": true,
+        "detail": "back.services.session_service",
+        "documentation": {}
+    },
+    {
+        "label": "SessionService",
+        "importPath": "back.services.session_service",
+        "description": "back.services.session_service",
+        "isExtraImport": true,
+        "detail": "back.services.session_service",
+        "documentation": {}
+    },
+    {
+        "label": "SessionService",
+        "importPath": "back.services.session_service",
+        "description": "back.services.session_service",
+        "isExtraImport": true,
+        "detail": "back.services.session_service",
+        "documentation": {}
+    },
+    {
+        "label": "PydanticJsonlStore",
+        "importPath": "back.storage.pydantic_jsonl_store",
+        "description": "back.storage.pydantic_jsonl_store",
+        "isExtraImport": true,
+        "detail": "back.storage.pydantic_jsonl_store",
+        "documentation": {}
+    },
+    {
+        "label": "PydanticJsonlStore",
+        "importPath": "back.storage.pydantic_jsonl_store",
+        "description": "back.storage.pydantic_jsonl_store",
+        "isExtraImport": true,
+        "detail": "back.storage.pydantic_jsonl_store",
+        "documentation": {}
+    },
+    {
+        "label": "Character",
+        "importPath": "back.models.domain.character",
+        "description": "back.models.domain.character",
+        "isExtraImport": true,
+        "detail": "back.models.domain.character",
+        "documentation": {}
+    },
+    {
+        "label": "Character",
+        "importPath": "back.models.domain.character",
+        "description": "back.models.domain.character",
+        "isExtraImport": true,
+        "detail": "back.models.domain.character",
+        "documentation": {}
+    },
+    {
+        "label": "Character",
+        "importPath": "back.models.domain.character",
+        "description": "back.models.domain.character",
+        "isExtraImport": true,
+        "detail": "back.models.domain.character",
+        "documentation": {}
+    },
+    {
+        "label": "Character",
+        "importPath": "back.models.domain.character",
+        "description": "back.models.domain.character",
+        "isExtraImport": true,
+        "detail": "back.models.domain.character",
+        "documentation": {}
+    },
+    {
+        "label": "Character",
+        "importPath": "back.models.domain.character",
+        "description": "back.models.domain.character",
+        "isExtraImport": true,
+        "detail": "back.models.domain.character",
+        "documentation": {}
+    },
+    {
+        "label": "Character",
+        "importPath": "back.models.domain.character",
+        "description": "back.models.domain.character",
+        "isExtraImport": true,
+        "detail": "back.models.domain.character",
+        "documentation": {}
+    },
+    {
+        "label": "Character",
+        "importPath": "back.models.domain.character",
+        "description": "back.models.domain.character",
+        "isExtraImport": true,
+        "detail": "back.models.domain.character",
+        "documentation": {}
+    },
+    {
+        "label": "Character",
+        "importPath": "back.models.domain.character",
+        "description": "back.models.domain.character",
+        "isExtraImport": true,
+        "detail": "back.models.domain.character",
+        "documentation": {}
+    },
+    {
+        "label": "Character",
+        "importPath": "back.models.domain.character",
+        "description": "back.models.domain.character",
+        "isExtraImport": true,
+        "detail": "back.models.domain.character",
+        "documentation": {}
+    },
+    {
+        "label": "Character",
+        "importPath": "back.models.domain.character",
+        "description": "back.models.domain.character",
+        "isExtraImport": true,
+        "detail": "back.models.domain.character",
+        "documentation": {}
+    },
+    {
+        "label": "build_system_prompt",
+        "importPath": "back.agents.PROMPT",
+        "description": "back.agents.PROMPT",
+        "isExtraImport": true,
+        "detail": "back.agents.PROMPT",
+        "documentation": {}
+    },
+    {
+        "label": "Enum",
+        "importPath": "enum",
+        "description": "enum",
+        "isExtraImport": true,
+        "detail": "enum",
+        "documentation": {}
+    },
+    {
+        "label": "Enum",
+        "importPath": "enum",
+        "description": "enum",
+        "isExtraImport": true,
+        "detail": "enum",
+        "documentation": {}
+    },
+    {
+        "label": "BaseModel",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "BaseModel",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "BaseModel",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "BaseModel",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "BaseModel",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "uuid",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "uuid",
+        "description": "uuid",
+        "detail": "uuid",
+        "documentation": {}
+    },
+    {
+        "label": "UUID",
+        "importPath": "uuid",
+        "description": "uuid",
+        "isExtraImport": true,
+        "detail": "uuid",
+        "documentation": {}
+    },
+    {
+        "label": "UUID",
+        "importPath": "uuid",
+        "description": "uuid",
+        "isExtraImport": true,
+        "detail": "uuid",
+        "documentation": {}
+    },
+    {
+        "label": "uuid4",
+        "importPath": "uuid",
+        "description": "uuid",
+        "isExtraImport": true,
+        "detail": "uuid",
+        "documentation": {}
+    },
+    {
+        "label": "UUID",
+        "importPath": "uuid",
+        "description": "uuid",
+        "isExtraImport": true,
+        "detail": "uuid",
+        "documentation": {}
+    },
+    {
+        "label": "uuid4",
+        "importPath": "uuid",
+        "description": "uuid",
+        "isExtraImport": true,
+        "detail": "uuid",
+        "documentation": {}
+    },
+    {
+        "label": "UUID",
+        "importPath": "uuid",
+        "description": "uuid",
+        "isExtraImport": true,
+        "detail": "uuid",
+        "documentation": {}
+    },
+    {
+        "label": "uuid4",
+        "importPath": "uuid",
+        "description": "uuid",
+        "isExtraImport": true,
+        "detail": "uuid",
+        "documentation": {}
+    },
+    {
+        "label": "StatsManager",
+        "importPath": "back.models.domain.stats_manager",
+        "description": "back.models.domain.stats_manager",
+        "isExtraImport": true,
+        "detail": "back.models.domain.stats_manager",
+        "documentation": {}
+    },
+    {
+        "label": "StatsManager",
+        "importPath": "back.models.domain.stats_manager",
+        "description": "back.models.domain.stats_manager",
+        "isExtraImport": true,
+        "detail": "back.models.domain.stats_manager",
+        "documentation": {}
+    },
+    {
+        "label": "StatsManager",
+        "importPath": "back.models.domain.stats_manager",
+        "description": "back.models.domain.stats_manager",
+        "isExtraImport": true,
+        "detail": "back.models.domain.stats_manager",
+        "documentation": {}
+    },
+    {
+        "label": "Item",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "RaceData",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "CultureData",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterStatus",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "AllocateAttributesRequest",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "AllocateAttributesResponse",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterStatus",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "CheckAttributesRequest",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "CheckAttributesResponse",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "SaveCharacterRequest",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "SaveCharacterResponse",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "CheckSkillsRequest",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "CheckSkillsResponse",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "CreationStatusResponse",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "RaceData",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "StatsResponse",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "UpdateSkillsRequest",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "UpdateSkillsResponse",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "AddEquipmentRequest",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "AddEquipmentResponse",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "RemoveEquipmentRequest",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "RemoveEquipmentResponse",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "UpdateMoneyRequest",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "UpdateMoneyResponse",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "ScenarioList",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "PlayScenarioRequest",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "ActiveSessionsResponse",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "StartScenarioRequest",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "StartScenarioResponse",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "RaceData",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterStatus",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "Item",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterStatus",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "Item",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "Item",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "ItemType",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "ScenarioStatus",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "Item",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterStatus",
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "isExtraImport": true,
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "datetime",
+        "description": "datetime",
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timezone",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "APIRouter",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "APIRouter",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "HTTPException",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Body",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "status",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "APIRouter",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "HTTPException",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "HTTPException",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "FastAPI",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterListResponse",
+        "importPath": "back.models.api_dto",
+        "description": "back.models.api_dto",
+        "isExtraImport": true,
+        "detail": "back.models.api_dto",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterDetailResponse",
+        "importPath": "back.models.api_dto",
+        "description": "back.models.api_dto",
+        "isExtraImport": true,
+        "detail": "back.models.api_dto",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterDataService",
+        "importPath": "back.services.character_data_service",
+        "description": "back.services.character_data_service",
+        "isExtraImport": true,
+        "detail": "back.services.character_data_service",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterDataService",
+        "importPath": "back.services.character_data_service",
+        "description": "back.services.character_data_service",
+        "isExtraImport": true,
+        "detail": "back.services.character_data_service",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterDataService",
+        "importPath": "back.services.character_data_service",
+        "description": "back.services.character_data_service",
+        "isExtraImport": true,
+        "detail": "back.services.character_data_service",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterDataService",
+        "importPath": "back.services.character_data_service",
+        "description": "back.services.character_data_service",
+        "isExtraImport": true,
+        "detail": "back.services.character_data_service",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterDataService",
+        "importPath": "back.services.character_data_service",
+        "description": "back.services.character_data_service",
+        "isExtraImport": true,
+        "detail": "back.services.character_data_service",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterDataService",
+        "importPath": "back.services.character_data_service",
+        "description": "back.services.character_data_service",
+        "isExtraImport": true,
+        "detail": "back.services.character_data_service",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterDataService",
+        "importPath": "back.services.character_data_service",
+        "description": "back.services.character_data_service",
+        "isExtraImport": true,
+        "detail": "back.services.character_data_service",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterDataService",
+        "importPath": "back.services.character_data_service",
+        "description": "back.services.character_data_service",
+        "isExtraImport": true,
+        "detail": "back.services.character_data_service",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterNotFoundError",
+        "importPath": "back.utils.exceptions",
+        "description": "back.utils.exceptions",
+        "isExtraImport": true,
+        "detail": "back.utils.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "InternalServerError",
+        "importPath": "back.utils.exceptions",
+        "description": "back.utils.exceptions",
+        "isExtraImport": true,
+        "detail": "back.utils.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "log_debug",
+        "importPath": "back.utils.logger",
+        "description": "back.utils.logger",
+        "isExtraImport": true,
+        "detail": "back.utils.logger",
+        "documentation": {}
+    },
+    {
+        "label": "log_debug",
+        "importPath": "back.utils.logger",
+        "description": "back.utils.logger",
+        "isExtraImport": true,
+        "detail": "back.utils.logger",
+        "documentation": {}
+    },
+    {
+        "label": "log_debug",
+        "importPath": "back.utils.logger",
+        "description": "back.utils.logger",
+        "isExtraImport": true,
+        "detail": "back.utils.logger",
+        "documentation": {}
+    },
+    {
+        "label": "log_debug",
+        "importPath": "back.utils.logger",
+        "description": "back.utils.logger",
+        "isExtraImport": true,
+        "detail": "back.utils.logger",
+        "documentation": {}
+    },
+    {
+        "label": "log_debug",
+        "importPath": "back.utils.logger",
+        "description": "back.utils.logger",
+        "isExtraImport": true,
+        "detail": "back.utils.logger",
+        "documentation": {}
+    },
+    {
+        "label": "log_debug",
+        "importPath": "back.utils.logger",
+        "description": "back.utils.logger",
+        "isExtraImport": true,
+        "detail": "back.utils.logger",
+        "documentation": {}
+    },
+    {
+        "label": "log_debug",
+        "importPath": "back.utils.logger",
+        "description": "back.utils.logger",
+        "isExtraImport": true,
+        "detail": "back.utils.logger",
+        "documentation": {}
+    },
+    {
+        "label": "log_debug",
+        "importPath": "back.utils.logger",
+        "description": "back.utils.logger",
+        "isExtraImport": true,
+        "detail": "back.utils.logger",
+        "documentation": {}
+    },
+    {
+        "label": "log_debug",
+        "importPath": "back.utils.logger",
+        "description": "back.utils.logger",
+        "isExtraImport": true,
+        "detail": "back.utils.logger",
+        "documentation": {}
+    },
+    {
+        "label": "log_debug",
+        "importPath": "back.utils.logger",
+        "description": "back.utils.logger",
+        "isExtraImport": true,
+        "detail": "back.utils.logger",
+        "documentation": {}
+    },
+    {
+        "label": "log_debug",
+        "importPath": "back.utils.logger",
+        "description": "back.utils.logger",
+        "isExtraImport": true,
+        "detail": "back.utils.logger",
+        "documentation": {}
+    },
+    {
+        "label": "log_debug",
+        "importPath": "back.utils.logger",
+        "description": "back.utils.logger",
+        "isExtraImport": true,
+        "detail": "back.utils.logger",
+        "documentation": {}
+    },
+    {
+        "label": "log_debug",
+        "importPath": "back.utils.logger",
+        "description": "back.utils.logger",
+        "isExtraImport": true,
+        "detail": "back.utils.logger",
+        "documentation": {}
+    },
+    {
+        "label": "log_debug",
+        "importPath": "back.utils.logger",
+        "description": "back.utils.logger",
+        "isExtraImport": true,
+        "detail": "back.utils.logger",
+        "documentation": {}
+    },
+    {
+        "label": "log_debug",
+        "importPath": "back.utils.logger",
+        "description": "back.utils.logger",
+        "isExtraImport": true,
+        "detail": "back.utils.logger",
+        "documentation": {}
+    },
+    {
+        "label": "log_debug",
+        "importPath": "back.utils.logger",
+        "description": "back.utils.logger",
+        "isExtraImport": true,
+        "detail": "back.utils.logger",
+        "documentation": {}
+    },
+    {
+        "label": "log_debug",
+        "importPath": "back.utils.logger",
+        "description": "back.utils.logger",
+        "isExtraImport": true,
+        "detail": "back.utils.logger",
+        "documentation": {}
+    },
+    {
+        "label": "log_debug",
+        "importPath": "back.utils.logger",
+        "description": "back.utils.logger",
+        "isExtraImport": true,
+        "detail": "back.utils.logger",
+        "documentation": {}
+    },
+    {
+        "label": "random",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "random",
+        "description": "random",
+        "detail": "random",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterPersistenceService",
+        "importPath": "back.services.character_persistence_service",
+        "description": "back.services.character_persistence_service",
+        "isExtraImport": true,
+        "detail": "back.services.character_persistence_service",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterPersistenceService",
+        "importPath": "back.services.character_persistence_service",
+        "description": "back.services.character_persistence_service",
+        "isExtraImport": true,
+        "detail": "back.services.character_persistence_service",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterPersistenceService",
+        "importPath": "back.services.character_persistence_service",
+        "description": "back.services.character_persistence_service",
+        "isExtraImport": true,
+        "detail": "back.services.character_persistence_service",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterPersistenceService",
+        "importPath": "back.services.character_persistence_service",
+        "description": "back.services.character_persistence_service",
+        "isExtraImport": true,
+        "detail": "back.services.character_persistence_service",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterPersistenceService",
+        "importPath": "back.services.character_persistence_service",
+        "description": "back.services.character_persistence_service",
+        "isExtraImport": true,
+        "detail": "back.services.character_persistence_service",
+        "documentation": {}
+    },
+    {
+        "label": "RacesManager",
+        "importPath": "back.models.domain.races_manager",
+        "description": "back.models.domain.races_manager",
+        "isExtraImport": true,
+        "detail": "back.models.domain.races_manager",
+        "documentation": {}
+    },
+    {
+        "label": "RacesManager",
+        "importPath": "back.models.domain.races_manager",
+        "description": "back.models.domain.races_manager",
+        "isExtraImport": true,
+        "detail": "back.models.domain.races_manager",
+        "documentation": {}
+    },
+    {
+        "label": "enrich_user_message_with_character",
+        "importPath": "back.agents.gm_agent_pydantic",
+        "description": "back.agents.gm_agent_pydantic",
+        "isExtraImport": true,
+        "detail": "back.agents.gm_agent_pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "build_gm_agent_pydantic",
+        "importPath": "back.agents.gm_agent_pydantic",
+        "description": "back.agents.gm_agent_pydantic",
+        "isExtraImport": true,
+        "detail": "back.agents.gm_agent_pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "enrich_user_message_with_character",
+        "importPath": "back.agents.gm_agent_pydantic",
+        "description": "back.agents.gm_agent_pydantic",
+        "isExtraImport": true,
+        "detail": "back.agents.gm_agent_pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "build_gm_agent_pydantic",
+        "importPath": "back.agents.gm_agent_pydantic",
+        "description": "back.agents.gm_agent_pydantic",
+        "isExtraImport": true,
+        "detail": "back.agents.gm_agent_pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "create_session_service",
+        "importPath": "back.agents.gm_agent_pydantic",
+        "description": "back.agents.gm_agent_pydantic",
+        "isExtraImport": true,
+        "detail": "back.agents.gm_agent_pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "create_gm_agent_with_session",
+        "importPath": "back.agents.gm_agent_pydantic",
+        "description": "back.agents.gm_agent_pydantic",
+        "isExtraImport": true,
+        "detail": "back.agents.gm_agent_pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "build_gm_agent_pydantic",
+        "importPath": "back.agents.gm_agent_pydantic",
+        "description": "back.agents.gm_agent_pydantic",
+        "isExtraImport": true,
+        "detail": "back.agents.gm_agent_pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "traceback",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "traceback",
+        "description": "traceback",
+        "detail": "traceback",
+        "documentation": {}
+    },
+    {
+        "label": "ScenarioService",
+        "importPath": "back.services.scenario_service",
+        "description": "back.services.scenario_service",
+        "isExtraImport": true,
+        "detail": "back.services.scenario_service",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterService",
+        "importPath": "back.services.character_service",
+        "description": "back.services.character_service",
+        "isExtraImport": true,
+        "detail": "back.services.character_service",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterService",
+        "importPath": "back.services.character_service",
+        "description": "back.services.character_service",
+        "isExtraImport": true,
+        "detail": "back.services.character_service",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterService",
+        "importPath": "back.services.character_service",
+        "description": "back.services.character_service",
+        "isExtraImport": true,
+        "detail": "back.services.character_service",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterService",
+        "importPath": "back.services.character_service",
+        "description": "back.services.character_service",
+        "isExtraImport": true,
+        "detail": "back.services.character_service",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterService",
+        "importPath": "back.services.character_service",
+        "description": "back.services.character_service",
+        "isExtraImport": true,
+        "detail": "back.services.character_service",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterService",
+        "importPath": "back.services.character_service",
+        "description": "back.services.character_service",
+        "isExtraImport": true,
+        "detail": "back.services.character_service",
+        "documentation": {}
+    },
+    {
+        "label": "SkillsManager",
+        "importPath": "back.models.domain.skills_manager",
+        "description": "back.models.domain.skills_manager",
+        "isExtraImport": true,
+        "detail": "back.models.domain.skills_manager",
+        "documentation": {}
+    },
+    {
+        "label": "SkillsManager",
+        "importPath": "back.models.domain.skills_manager",
+        "description": "back.models.domain.skills_manager",
+        "isExtraImport": true,
+        "detail": "back.models.domain.skills_manager",
+        "documentation": {}
+    },
+    {
+        "label": "SpellsManager",
+        "importPath": "back.models.domain.spells_manager",
+        "description": "back.models.domain.spells_manager",
+        "isExtraImport": true,
+        "detail": "back.models.domain.spells_manager",
+        "documentation": {}
+    },
+    {
+        "label": "EquipmentManager",
+        "importPath": "back.models.domain.equipment_manager",
+        "description": "back.models.domain.equipment_manager",
+        "isExtraImport": true,
+        "detail": "back.models.domain.equipment_manager",
+        "documentation": {}
+    },
+    {
+        "label": "EquipmentManager",
+        "importPath": "back.models.domain.equipment_manager",
+        "description": "back.models.domain.equipment_manager",
+        "isExtraImport": true,
+        "detail": "back.models.domain.equipment_manager",
+        "documentation": {}
+    },
+    {
+        "label": "EquipmentManager",
+        "importPath": "back.models.domain.equipment_manager",
+        "description": "back.models.domain.equipment_manager",
+        "isExtraImport": true,
+        "detail": "back.models.domain.equipment_manager",
+        "documentation": {}
+    },
+    {
+        "label": "asdict",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "is_dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "ModelConverter",
+        "importPath": "back.utils.model_converter",
+        "description": "back.utils.model_converter",
+        "isExtraImport": true,
+        "detail": "back.utils.model_converter",
+        "documentation": {}
+    },
+    {
+        "label": "ModelConverter",
+        "importPath": "back.utils.model_converter",
+        "description": "back.utils.model_converter",
+        "isExtraImport": true,
+        "detail": "back.utils.model_converter",
+        "documentation": {}
+    },
+    {
+        "label": "ItemService",
+        "importPath": "back.services.item_service",
+        "description": "back.services.item_service",
+        "isExtraImport": true,
+        "detail": "back.services.item_service",
+        "documentation": {}
+    },
+    {
+        "label": "ItemService",
+        "importPath": "back.services.item_service",
+        "description": "back.services.item_service",
+        "isExtraImport": true,
+        "detail": "back.services.item_service",
+        "documentation": {}
+    },
+    {
+        "label": "ItemService",
+        "importPath": "back.services.item_service",
+        "description": "back.services.item_service",
+        "isExtraImport": true,
+        "detail": "back.services.item_service",
+        "documentation": {}
+    },
+    {
+        "label": "InventoryService",
+        "importPath": "back.services.inventory_service",
+        "description": "back.services.inventory_service",
+        "isExtraImport": true,
+        "detail": "back.services.inventory_service",
+        "documentation": {}
+    },
+    {
+        "label": "InventoryService",
+        "importPath": "back.services.inventory_service",
+        "description": "back.services.inventory_service",
+        "isExtraImport": true,
+        "detail": "back.services.inventory_service",
+        "documentation": {}
+    },
+    {
+        "label": "InventoryService",
+        "importPath": "back.services.inventory_service",
+        "description": "back.services.inventory_service",
+        "isExtraImport": true,
+        "detail": "back.services.inventory_service",
+        "documentation": {}
+    },
+    {
+        "label": "CombatState",
+        "importPath": "back.models.domain.combat_state",
+        "description": "back.models.domain.combat_state",
+        "isExtraImport": true,
+        "detail": "back.models.domain.combat_state",
+        "documentation": {}
+    },
+    {
+        "label": "CombatState",
+        "importPath": "back.models.domain.combat_state",
+        "description": "back.models.domain.combat_state",
+        "isExtraImport": true,
+        "detail": "back.models.domain.combat_state",
+        "documentation": {}
+    },
+    {
+        "label": "csv",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "csv",
+        "description": "csv",
+        "detail": "csv",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterBusinessService",
+        "importPath": "back.services.character_business_service",
+        "description": "back.services.character_business_service",
+        "isExtraImport": true,
+        "detail": "back.services.character_business_service",
+        "documentation": {}
+    },
+    {
+        "label": "EquipmentService",
+        "importPath": "back.services.equipment_service",
+        "description": "back.services.equipment_service",
+        "isExtraImport": true,
+        "detail": "back.services.equipment_service",
+        "documentation": {}
+    },
+    {
+        "label": "EquipmentService",
+        "importPath": "back.services.equipment_service",
+        "description": "back.services.equipment_service",
+        "isExtraImport": true,
+        "detail": "back.services.equipment_service",
+        "documentation": {}
+    },
+    {
+        "label": "skill_check_with_character",
+        "importPath": "back.tools.skill_tools",
+        "description": "back.tools.skill_tools",
+        "isExtraImport": true,
+        "detail": "back.tools.skill_tools",
+        "documentation": {}
+    },
+    {
+        "label": "pytest",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pytest",
+        "description": "pytest",
+        "detail": "pytest",
+        "documentation": {}
+    },
+    {
+        "label": "Mock",
+        "importPath": "unittest.mock",
+        "description": "unittest.mock",
+        "isExtraImport": true,
+        "detail": "unittest.mock",
+        "documentation": {}
+    },
+    {
+        "label": "patch",
+        "importPath": "unittest.mock",
+        "description": "unittest.mock",
+        "isExtraImport": true,
+        "detail": "unittest.mock",
+        "documentation": {}
+    },
+    {
+        "label": "patch",
+        "importPath": "unittest.mock",
+        "description": "unittest.mock",
+        "isExtraImport": true,
+        "detail": "unittest.mock",
+        "documentation": {}
+    },
+    {
+        "label": "patch",
+        "importPath": "unittest.mock",
+        "description": "unittest.mock",
+        "isExtraImport": true,
+        "detail": "unittest.mock",
+        "documentation": {}
+    },
+    {
+        "label": "TestClient",
+        "importPath": "fastapi.testclient",
+        "description": "fastapi.testclient",
+        "isExtraImport": true,
+        "detail": "fastapi.testclient",
+        "documentation": {}
+    },
+    {
+        "label": "router",
+        "importPath": "back.routers.characters",
+        "description": "back.routers.characters",
+        "isExtraImport": true,
+        "detail": "back.routers.characters",
+        "documentation": {}
+    },
+    {
+        "label": "sys",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "sys",
+        "description": "sys",
+        "detail": "sys",
+        "documentation": {}
+    },
+    {
+        "label": "logging",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "logging",
+        "description": "logging",
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "tempfile",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "tempfile",
+        "description": "tempfile",
+        "detail": "tempfile",
+        "documentation": {}
+    },
+    {
+        "label": "roll_attack",
+        "importPath": "back.utils.dice",
+        "description": "back.utils.dice",
+        "isExtraImport": true,
+        "detail": "back.utils.dice",
+        "documentation": {}
+    },
+    {
+        "label": "CombatService",
+        "importPath": "back.services.combat_service",
+        "description": "back.services.combat_service",
+        "isExtraImport": true,
+        "detail": "back.services.combat_service",
+        "documentation": {}
+    },
+    {
+        "label": "CombatStateService",
+        "importPath": "back.services.combat_state_service",
+        "description": "back.services.combat_state_service",
+        "isExtraImport": true,
+        "detail": "back.services.combat_state_service",
+        "documentation": {}
+    },
+    {
+        "label": "CombatStateService",
+        "importPath": "back.services.combat_state_service",
+        "description": "back.services.combat_state_service",
+        "isExtraImport": true,
+        "detail": "back.services.combat_state_service",
+        "documentation": {}
+    },
+    {
+        "label": "Tool",
+        "importPath": "haystack.tools",
+        "description": "haystack.tools",
+        "isExtraImport": true,
+        "detail": "haystack.tools",
+        "documentation": {}
+    },
+    {
+        "label": "ChatMessage",
+        "importPath": "haystack.dataclasses",
+        "description": "haystack.dataclasses",
+        "isExtraImport": true,
+        "detail": "haystack.dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "argparse",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "argparse",
+        "description": "argparse",
+        "detail": "argparse",
+        "documentation": {}
+    },
+    {
+        "label": "pformat",
+        "importPath": "pprint",
+        "description": "pprint",
+        "isExtraImport": true,
+        "detail": "pprint",
+        "documentation": {}
+    },
+    {
+        "label": "pformat",
+        "importPath": "pprint",
+        "description": "pprint",
+        "isExtraImport": true,
+        "detail": "pprint",
+        "documentation": {}
+    },
+    {
+        "label": "jmespath",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "jmespath",
+        "description": "jmespath",
+        "detail": "jmespath",
+        "documentation": {}
+    },
+    {
+        "label": "exceptions",
+        "importPath": "jmespath",
+        "description": "jmespath",
+        "isExtraImport": true,
+        "detail": "jmespath",
+        "documentation": {}
+    },
+    {
+        "label": "exceptions",
+        "importPath": "jmespath",
+        "description": "jmespath",
+        "isExtraImport": true,
+        "detail": "jmespath",
+        "documentation": {}
+    },
+    {
+        "label": "CORSMiddleware",
+        "importPath": "fastapi.middleware.cors",
+        "description": "fastapi.middleware.cors",
+        "isExtraImport": true,
+        "detail": "fastapi.middleware.cors",
+        "documentation": {}
+    },
+    {
+        "label": "characters",
+        "importPath": "back.routers",
+        "description": "back.routers",
+        "isExtraImport": true,
+        "detail": "back.routers",
+        "documentation": {}
+    },
+    {
+        "label": "scenarios",
+        "importPath": "back.routers",
+        "description": "back.routers",
+        "isExtraImport": true,
+        "detail": "back.routers",
+        "documentation": {}
+    },
+    {
+        "label": "creation",
+        "importPath": "back.routers",
+        "description": "back.routers",
+        "isExtraImport": true,
+        "detail": "back.routers",
+        "documentation": {}
+    },
+    {
+        "label": "get_openapi",
+        "importPath": "fastapi.openapi.utils",
+        "description": "fastapi.openapi.utils",
+        "isExtraImport": true,
+        "detail": "fastapi.openapi.utils",
+        "documentation": {}
+    },
+    {
+        "label": "logging.handlers",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "logging.handlers",
+        "description": "logging.handlers",
+        "detail": "logging.handlers",
+        "documentation": {}
+    },
+    {
+        "label": "yaml",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "yaml",
+        "description": "yaml",
+        "detail": "yaml",
+        "documentation": {}
+    },
+    {
+        "label": "app",
+        "importPath": "back.app",
+        "description": "back.app",
+        "isExtraImport": true,
+        "detail": "back.app",
+        "documentation": {}
+    },
+    {
+        "label": "uvicorn",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "uvicorn",
+        "description": "uvicorn",
+        "detail": "uvicorn",
+        "documentation": {}
+    },
+    {
+        "label": "asyncio",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "asyncio",
+        "description": "asyncio",
+        "detail": "asyncio",
+        "documentation": {}
+    },
+    {
+        "label": "get_scenario_content",
+        "kind": 2,
+        "importPath": "back.agents.PROMPT",
+        "description": "back.agents.PROMPT",
+        "peekOfCode": "def get_scenario_content(scenario_name: str) -> str:\n    \"\"\"\n    ### get_scenario_content\n    **Description :** Charge le contenu du scénario Markdown pour l'injecter dans le prompt système.\n    **Paramètres :**\n    - `scenario_name` (str) : Nom du fichier scénario (ex: Les_Pierres_du_Passe.md)\n    **Retour :** Contenu texte du scénario (str).\n    \"\"\"\n    scenario_path = pathlib.Path(get_data_dir()) / \"scenarios\" / scenario_name\n    if scenario_path.exists():",
+        "detail": "back.agents.PROMPT",
+        "documentation": {}
+    },
+    {
+        "label": "get_rules_content",
+        "kind": 2,
+        "importPath": "back.agents.PROMPT",
+        "description": "back.agents.PROMPT",
+        "peekOfCode": "def get_rules_content() -> str:\n    \"\"\"\n    ### get_rules_content\n    **Description :** Charge le contenu des règles du jeu.\n    **Retour :** Contenu texte des règles (str).\n    \"\"\"\n    rules_path = pathlib.Path(get_data_dir()) / \"rules\" / \"Regles_Dark_Dungeon.md\"\n    if rules_path.exists():\n        with open(rules_path, 'r', encoding='utf-8') as f:\n            return f.read()",
+        "detail": "back.agents.PROMPT",
+        "documentation": {}
+    },
+    {
+        "label": "build_system_prompt",
+        "kind": 2,
+        "importPath": "back.agents.PROMPT",
+        "description": "back.agents.PROMPT",
+        "peekOfCode": "def build_system_prompt(scenario_name: str) -> str:\n    \"\"\"\n    ### build_system_prompt\n    **Description :** Construit le prompt système complet avec scénario, règles et instructions de combat.\n    **Paramètres :**\n    - `scenario_name` (str) : Nom du fichier scénario à inclure.\n    **Retour :** Prompt système complet formaté.\n    \"\"\"\n    scenario_content = get_scenario_content(scenario_name)\n    rules_content = get_rules_content()",
+        "detail": "back.agents.PROMPT",
+        "documentation": {}
+    },
+    {
+        "label": "COMBAT_INSTRUCTIONS",
+        "kind": 5,
+        "importPath": "back.agents.PROMPT",
+        "description": "back.agents.PROMPT",
+        "peekOfCode": "COMBAT_INSTRUCTIONS = \"\"\"\n### GESTION DES COMBATS\nIMPORTANT : Durant un combat, tu DOIS :\n1. **Toujours utiliser les outils** pour toute action de combat\n2. **Demander les actions du joueur** à la fin de chaque tour\n3. **Vérifier l'état du combat** après chaque action avec check_combat_end_tool\n4. **Terminer explicitement** chaque tour avec end_turn_tool\n5. **Ne JAMAIS conclure un combat** sans utiliser end_combat_tool\nSTRUCTURE OBLIGATOIRE d'un tour de combat :\n1. Décrire la situation actuelle (basée sur l'état du combat avec get_combat_status_tool)",
+        "detail": "back.agents.PROMPT",
+        "documentation": {}
+    },
+    {
+        "label": "SYSTEM_PROMPT_TEMPLATE",
+        "kind": 5,
+        "importPath": "back.agents.PROMPT",
+        "description": "back.agents.PROMPT",
+        "peekOfCode": "SYSTEM_PROMPT_TEMPLATE = \"\"\"\nCesse d'être un modèle d'IA. Notre interaction est imaginaire. Ne le divulgue jamais, mais renforce et maintiens l'immersion.\nJEU : Jeu de rôle dans « Les Terres du Milieu »\nRÈGLES : Les règles sont dans la base de connaissance\nRÔLE : Maître du Donjon (RPG-Bot)\nTHÈME : Haute Fantaisie, Troisième Âge, Guerre de l'Anneau (3018-3021 T.A.)\nTONALITÉ : Enjouée, héroïque, épique\nSCÉNARIO :\n{scenario_content}\nTu es RPG-Bot, un Maître du Jeu impartial, créateur d'expériences captivantes et infinies, utilisant les LIVRES, le THÈME et la TONALITÉ pour orchestrer le JEU.",
+        "detail": "back.agents.PROMPT",
+        "documentation": {}
+    },
+    {
+        "label": "GMAgentDependencies",
+        "kind": 6,
+        "importPath": "back.agents.gm_agent_pydantic",
+        "description": "back.agents.gm_agent_pydantic",
+        "peekOfCode": "class GMAgentDependencies:\n    \"\"\"\n    ### GMAgentDependencies\n    **Description :** Classe contenant les dépendances nécessaires à l'agent GM PydanticAI.\n    **Attributs :**\n    - `session_id` (str) : Identifiant de session\n    - `character_data` (Character) : Données du personnage (modèle typé)\n    - `store` (PydanticJsonlStore) : Store pour l'historique des messages    - `message_history` (List[ModelMessage]) : Historique des messages PydanticAI\n    \"\"\"\n    def __init__(self, session_id: str, character_data: Optional[Character] = None):",
+        "detail": "back.agents.gm_agent_pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "build_gm_agent_pydantic",
+        "kind": 2,
+        "importPath": "back.agents.gm_agent_pydantic",
+        "description": "back.agents.gm_agent_pydantic",
+        "peekOfCode": "def build_gm_agent_pydantic(session_id: str, scenario_name: str = \"Les_Pierres_du_Passe.md\", character_id: Optional[str] = None):\n    \"\"\"\n    ### build_gm_agent_pydantic\n    **Description :** Construit l'agent GM avec PydanticAI et retourne l'agent et ses dépendances.\n    **Paramètres :**\n    - `session_id` (str) : Identifiant de la session de jeu\n    - `scenario_name` (str) : Nom du fichier scénario (utilisé uniquement lors de la création d'une nouvelle session)\n    - `character_id` (Optional[str]) : ID du personnage pour créer une nouvelle session\n    **Retour :** Tuple (Agent PydanticAI configuré, SessionService).\n    \"\"\"",
+        "detail": "back.agents.gm_agent_pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "enrich_user_message_with_character",
+        "kind": 2,
+        "importPath": "back.agents.gm_agent_pydantic",
+        "description": "back.agents.gm_agent_pydantic",
+        "peekOfCode": "def enrich_user_message_with_character(user_message: str, character_data: Dict[str, Any]) -> str:\n    \"\"\"\n    ### enrich_user_message_with_character\n    **Description :** Enrichit le message utilisateur avec les données du personnage.\n    **Paramètres :**\n    - `user_message` (str) : Message original de l'utilisateur\n    - `character_data` (Dict[str, Any]) : Données du personnage\n    **Retour :** Message enrichi avec contexte du personnage.\n    \"\"\"\n    if not character_data:",
+        "detail": "back.agents.gm_agent_pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "enrich_user_message_with_combat_state",
+        "kind": 2,
+        "importPath": "back.agents.gm_agent_pydantic",
+        "description": "back.agents.gm_agent_pydantic",
+        "peekOfCode": "def enrich_user_message_with_combat_state(user_message: str, combat_state: Optional[Dict]) -> str:\n    \"\"\"\n    ### enrich_user_message_with_combat_state\n    **Description :** Enrichit le message avec l'état du combat actuel.\n    **Paramètres :**\n    - `user_message` (str) : Message original de l'utilisateur\n    - `combat_state` (Optional[Dict]) : État du combat actuel\n    **Retour :** Message enrichi avec contexte du combat.\n    \"\"\"\n    if not combat_state or combat_state.get('status') != 'en_cours':",
+        "detail": "back.agents.gm_agent_pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "auto_enrich_message_with_combat_context",
+        "kind": 2,
+        "importPath": "back.agents.gm_agent_pydantic",
+        "description": "back.agents.gm_agent_pydantic",
+        "peekOfCode": "def auto_enrich_message_with_combat_context(session_id: str, user_message: str) -> str:\n    \"\"\"\n    ### auto_enrich_message_with_combat_context\n    **Description :** Enrichit automatiquement le message avec l'état du combat s'il y en a un actif.\n    **Paramètres :**\n    - `session_id` (str) : Identifiant de la session\n    - `user_message` (str) : Message original de l'utilisateur\n    **Retour :** Message enrichi avec contexte du combat si applicable.\n    \"\"\"\n    try:",
+        "detail": "back.agents.gm_agent_pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "build_simple_gm_agent",
+        "kind": 2,
+        "importPath": "back.agents.gm_agent_pydantic",
+        "description": "back.agents.gm_agent_pydantic",
+        "peekOfCode": "def build_simple_gm_agent():\n    \"\"\"\n    ### build_simple_gm_agent\n    **Description :** Construit un agent GM simple sans contexte de session pour les tâches de génération (nom, background, description).\n    **Paramètres :** Aucun\n    **Retour :** Agent PydanticAI configuré sans dépendances de session.\n    \"\"\"\n    # Prompt système simple pour la génération de contenu\n    system_prompt = \"\"\"Tu es un maître de jeu expert en jeu de rôle medieval-fantastique.\nTu aides à créer des personnages cohérents et immersifs.",
+        "detail": "back.agents.gm_agent_pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "llm_config",
+        "kind": 5,
+        "importPath": "back.agents.gm_agent_pydantic",
+        "description": "back.agents.gm_agent_pydantic",
+        "peekOfCode": "llm_config = get_llm_config()\napi_key = llm_config[\"api_key\"]\napi_base_url = llm_config[\"api_endpoint\"]\napi_model = llm_config[\"model\"]\nclass GMAgentDependencies:\n    \"\"\"\n    ### GMAgentDependencies\n    **Description :** Classe contenant les dépendances nécessaires à l'agent GM PydanticAI.\n    **Attributs :**\n    - `session_id` (str) : Identifiant de session",
+        "detail": "back.agents.gm_agent_pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "api_key",
+        "kind": 5,
+        "importPath": "back.agents.gm_agent_pydantic",
+        "description": "back.agents.gm_agent_pydantic",
+        "peekOfCode": "api_key = llm_config[\"api_key\"]\napi_base_url = llm_config[\"api_endpoint\"]\napi_model = llm_config[\"model\"]\nclass GMAgentDependencies:\n    \"\"\"\n    ### GMAgentDependencies\n    **Description :** Classe contenant les dépendances nécessaires à l'agent GM PydanticAI.\n    **Attributs :**\n    - `session_id` (str) : Identifiant de session\n    - `character_data` (Character) : Données du personnage (modèle typé)",
+        "detail": "back.agents.gm_agent_pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "api_base_url",
+        "kind": 5,
+        "importPath": "back.agents.gm_agent_pydantic",
+        "description": "back.agents.gm_agent_pydantic",
+        "peekOfCode": "api_base_url = llm_config[\"api_endpoint\"]\napi_model = llm_config[\"model\"]\nclass GMAgentDependencies:\n    \"\"\"\n    ### GMAgentDependencies\n    **Description :** Classe contenant les dépendances nécessaires à l'agent GM PydanticAI.\n    **Attributs :**\n    - `session_id` (str) : Identifiant de session\n    - `character_data` (Character) : Données du personnage (modèle typé)\n    - `store` (PydanticJsonlStore) : Store pour l'historique des messages    - `message_history` (List[ModelMessage]) : Historique des messages PydanticAI",
+        "detail": "back.agents.gm_agent_pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "api_model",
+        "kind": 5,
+        "importPath": "back.agents.gm_agent_pydantic",
+        "description": "back.agents.gm_agent_pydantic",
+        "peekOfCode": "api_model = llm_config[\"model\"]\nclass GMAgentDependencies:\n    \"\"\"\n    ### GMAgentDependencies\n    **Description :** Classe contenant les dépendances nécessaires à l'agent GM PydanticAI.\n    **Attributs :**\n    - `session_id` (str) : Identifiant de session\n    - `character_data` (Character) : Données du personnage (modèle typé)\n    - `store` (PydanticJsonlStore) : Store pour l'historique des messages    - `message_history` (List[ModelMessage]) : Historique des messages PydanticAI\n    \"\"\"",
+        "detail": "back.agents.gm_agent_pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "Difficulty",
+        "kind": 6,
+        "importPath": "back.models.domain.base",
+        "description": "back.models.domain.base",
+        "peekOfCode": "class Difficulty(Enum):\n    ROUTINE = 60\n    VERY_EASY = 40\n    EASY = 20\n    AVERAGE = 0\n    HARD = -20\n    VERY_HARD = -40\n    EXTREMELY_HARD = -60\n    SHEER_FOLLY = -80\n    ABSURD = -100",
+        "detail": "back.models.domain.base",
+        "documentation": {}
+    },
+    {
+        "label": "Stats",
+        "kind": 6,
+        "importPath": "back.models.domain.base",
+        "description": "back.models.domain.base",
+        "peekOfCode": "class Stats(Enum):\n    STRENGTH = \"STRENGTH\"\n    CONSTITUTION = \"CONSTITUTION\"\n    INTELLIGENCE = \"INTELLIGENCE\"\n    DEXTERITY = \"DEXTERITY\"\n    PERCEPTION = \"PERCEPTION\"\n    CHARISMA = \"CHARISMA\"",
+        "detail": "back.models.domain.base",
+        "documentation": {}
+    },
+    {
+        "label": "Character",
+        "kind": 6,
+        "importPath": "back.models.domain.character",
+        "description": "back.models.domain.character",
+        "peekOfCode": "class Character(BaseModel):\n    \"\"\"\n    ### Character\n    **Description:** Data model representing a player or non-player character in the RPG. Uses the correct definition from the main schema.\n    **Attributes:**\n    - `id` (UUID): Unique identifier for the character.\n    - `name` (str): The character's name.\n    - `race` (RaceData): Complete race object with all bonuses and details.\n    - `culture` (CultureData): Complete culture object with all bonuses and details.\n    - `stats` (Dict[str, int]): Main characteristics (Strength, Constitution, etc.).",
+        "detail": "back.models.domain.character",
+        "documentation": {}
+    },
+    {
+        "label": "CombatState",
+        "kind": 6,
+        "importPath": "back.models.domain.combat_state",
+        "description": "back.models.domain.combat_state",
+        "peekOfCode": "class CombatState(BaseModel):\n    \"\"\"\n    ### CombatState\n    **Description :** Classe centrale pour stocker l’état courant du combat (participants, initiative, round, statut, etc.).\n    **Attributs :**\n    - `combat_id` (str) : Identifiant unique du combat.\n    - `round` (int) : Numéro du round en cours.\n    - `participants` (List[Dict]) : Liste des participants (id, nom, PV, statut, initiative, etc.).\n    - `initiative_order` (List[str]) : Ordre d’initiative (liste d’IDs).\n    - `current_turn` (int) : Index du participant dont c’est le tour.",
+        "detail": "back.models.domain.combat_state",
+        "documentation": {}
+    },
+    {
+        "label": "CombatSystemManager",
+        "kind": 6,
+        "importPath": "back.models.domain.combat_system_manager",
+        "description": "back.models.domain.combat_system_manager",
+        "peekOfCode": "class CombatSystemManager:\n    \"\"\"\n    Gestionnaire pour les règles et données du système de combat.\n    \"\"\"\n    def __init__(self):\n        \"\"\"\n        ### __init__\n        **Description:** Initialise le gestionnaire du système de combat et charge les données depuis le JSON.\n        **Paramètres:** Aucun\n        **Retour:** Aucun",
+        "detail": "back.models.domain.combat_system_manager",
+        "documentation": {}
+    },
+    {
+        "label": "EquipmentManager",
+        "kind": 6,
+        "importPath": "back.models.domain.equipment_manager",
+        "description": "back.models.domain.equipment_manager",
+        "peekOfCode": "class EquipmentManager:\n    \"\"\"\n    Gestionnaire pour les équipements du jeu.\n    \"\"\"\n    def __init__(self):\n        \"\"\"\n        ### __init__\n        **Description:** Initialise le gestionnaire des équipements et charge les données depuis le JSON.\n        **Paramètres:** Aucun\n        **Retour:** Aucun",
+        "detail": "back.models.domain.equipment_manager",
+        "documentation": {}
+    },
+    {
+        "label": "RacesManager",
+        "kind": 6,
+        "importPath": "back.models.domain.races_manager",
+        "description": "back.models.domain.races_manager",
+        "peekOfCode": "class RacesManager:\n    \"\"\"Manages races and cultures using the new simplified JSON system\"\"\"\n    def __init__(self):\n        self._load_races_data()\n    def _load_races_data(self):\n        \"\"\"Loads data from the JSON file\"\"\"\n        data_path = os.path.join(get_data_dir(), \"races_and_cultures.json\")\n        try:\n            with open(data_path, 'r', encoding='utf-8') as f:\n                self.races_data = [RaceData(**race) for race in json.load(f)]",
+        "detail": "back.models.domain.races_manager",
+        "documentation": {}
+    },
+    {
+        "label": "SkillsManager",
+        "kind": 6,
+        "importPath": "back.models.domain.skills_manager",
+        "description": "back.models.domain.skills_manager",
+        "peekOfCode": "class SkillsManager:\n    \"\"\"Gestionnaire des compétences utilisant le nouveau système JSON pour l'agent LLM\"\"\"\n    def __init__(self):\n        self._load_skills_data()\n    def _load_skills_data(self):\n        \"\"\"Charge les données depuis le fichier JSON\"\"\"\n        data_path = os.path.join(get_data_dir(), \"skills_for_llm.json\")\n        try:\n            with open(data_path, 'r', encoding='utf-8') as f:\n                data = json.load(f)",
+        "detail": "back.models.domain.skills_manager",
+        "documentation": {}
+    },
+    {
+        "label": "SpellsManager",
+        "kind": 6,
+        "importPath": "back.models.domain.spells_manager",
+        "description": "back.models.domain.spells_manager",
+        "peekOfCode": "class SpellsManager:\n    \"\"\"Gestionnaire des sorts utilisant le nouveau système JSON simplifié pour l'agent LLM\"\"\"\n    def __init__(self):\n        self._load_spells_data()\n    def _load_spells_data(self):\n        \"\"\"Charge les données depuis le fichier JSON\"\"\"\n        data_path = os.path.join(get_data_dir(), \"spells.json\")\n        try:\n            with open(data_path, 'r', encoding='utf-8') as f:\n                data = json.load(f)",
+        "detail": "back.models.domain.spells_manager",
+        "documentation": {}
+    },
+    {
+        "label": "StatsManager",
+        "kind": 6,
+        "importPath": "back.models.domain.stats_manager",
+        "description": "back.models.domain.stats_manager",
+        "peekOfCode": "class StatsManager:\n    \"\"\"Stats manager using the new JSON system\"\"\"\n    def __init__(self):\n        \"\"\"Initialize the stats manager with default values.\n        **Description:** Creates a new stats manager instance, loads stats\n        data from JSON file and initializes all stats with default values.\n        **Parameters:** None\n        **Returns:** None\n        \"\"\"\n        self.values = {}",
+        "detail": "back.models.domain.stats_manager",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterListResponse",
+        "kind": 6,
+        "importPath": "back.models.api_dto",
+        "description": "back.models.api_dto",
+        "peekOfCode": "class CharacterListResponse(BaseModel):\n    \"\"\"\n    Réponse standardisée pour la liste des personnages.\n    \"\"\"\n    characters: List[Dict[str, Any]]\nclass CharacterDetailResponse(BaseModel):\n    \"\"\"\n    Réponse standardisée pour les détails d'un personnage.\n    \"\"\"\n    id: str",
+        "detail": "back.models.api_dto",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterDetailResponse",
+        "kind": 6,
+        "importPath": "back.models.api_dto",
+        "description": "back.models.api_dto",
+        "peekOfCode": "class CharacterDetailResponse(BaseModel):\n    \"\"\"\n    Réponse standardisée pour les détails d'un personnage.\n    \"\"\"\n    id: str\n    name: Optional[str] = None\n    race: Optional[str] = None\n    culture: Optional[str] = None\n    status: Optional[str] = None\n    xp: int = 0",
+        "detail": "back.models.api_dto",
+        "documentation": {}
+    },
+    {
+        "label": "ErrorResponse",
+        "kind": 6,
+        "importPath": "back.models.api_dto",
+        "description": "back.models.api_dto",
+        "peekOfCode": "class ErrorResponse(BaseModel):\n    \"\"\"\n    Réponse standardisée pour les erreurs.\n    \"\"\"\n    detail: str\n    error_code: Optional[str] = None\n    timestamp: datetime = datetime.now()\nclass SuccessResponse(BaseModel):\n    \"\"\"\n    Réponse standardisée pour les opérations réussies.",
+        "detail": "back.models.api_dto",
+        "documentation": {}
+    },
+    {
+        "label": "SuccessResponse",
+        "kind": 6,
+        "importPath": "back.models.api_dto",
+        "description": "back.models.api_dto",
+        "peekOfCode": "class SuccessResponse(BaseModel):\n    \"\"\"\n    Réponse standardisée pour les opérations réussies.\n    \"\"\"\n    status: str = \"success\"\n    message: Optional[str] = None\n    data: Optional[Dict[str, Any]] = None\n    timestamp: datetime = datetime.now()\nclass CharacterOperationResponse(BaseModel):\n    \"\"\"",
+        "detail": "back.models.api_dto",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterOperationResponse",
+        "kind": 6,
+        "importPath": "back.models.api_dto",
+        "description": "back.models.api_dto",
+        "peekOfCode": "class CharacterOperationResponse(BaseModel):\n    \"\"\"\n    Réponse standardisée pour les opérations sur les personnages.\n    \"\"\"\n    status: str\n    character_id: str\n    operation: str\n    result: Dict[str, Any]\n    timestamp: datetime = datetime.now()",
+        "detail": "back.models.api_dto",
+        "documentation": {}
+    },
+    {
+        "label": "ItemType",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class ItemType(str, Enum):\n    \"\"\"Types d'objets possibles\"\"\"\n    MATERIEL = \"Materiel\"\n    ARME = \"Arme\" \n    ARMURE = \"Armure\"\n    NOURRITURE = \"Nourriture\"\n    OBJET_MAGIQUE = \"Objet_Magique\"\nclass CharacterStatus(str, Enum):\n    \"\"\"Statuts possibles pour un personnage\"\"\"\n    IN_PROGRESS = \"en_cours\"",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterStatus",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class CharacterStatus(str, Enum):\n    \"\"\"Statuts possibles pour un personnage\"\"\"\n    IN_PROGRESS = \"en_cours\"\n    DONE = \"complet\"\n    ARCHIVE = \"archive\"\nclass Item(BaseModel):\n    \"\"\"Modèle pour un objet d'inventaire avec toutes ses propriétés\"\"\"\n    id: str  # Identifiant unique de l'instance de l'objet\n    name: str  # Nom de l'objet (ex: \"Coutelas\")\n    item_type: ItemType  # Type d'objet (Arme, Armure, Materiel, etc.)",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "Item",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class Item(BaseModel):\n    \"\"\"Modèle pour un objet d'inventaire avec toutes ses propriétés\"\"\"\n    id: str  # Identifiant unique de l'instance de l'objet\n    name: str  # Nom de l'objet (ex: \"Coutelas\")\n    item_type: ItemType  # Type d'objet (Arme, Armure, Materiel, etc.)\n    price_pc: float  # Prix en pièces de cuivre (support des décimales)\n    weight_kg: float  # Poids en kilogrammes\n    description: str  # Description de l'objet\n    category: Optional[str] = None  # Catégorie spécifique (ex: \"Couteau\", \"Cuir\", etc.)\n    # Propriétés spécifiques aux armes",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "RaceData",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class RaceData(BaseModel):\n    id: str\n    name: str\n    characteristic_bonuses: Dict[str, int]\n    special_abilities: Optional[List[str]] = []\n    base_languages: List[str]\n    optional_languages: List[str]\n    cultures: Optional[List['CultureData']] = None\nclass CultureData(BaseModel):\n    id: str",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "CultureData",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class CultureData(BaseModel):\n    id: str\n    name: str\n    description: Optional[str] = None\n    skill_bonuses: Optional[Dict[str, int]] = None\n    characteristic_bonuses: Optional[Dict[str, int]] = None\n    free_skill_points: Optional[int] = None\n    traits: Optional[str] = None\n    special_traits: Optional[Dict[str, Any]] = None\nclass ScenarioStatus(BaseModel):",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "ScenarioStatus",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class ScenarioStatus(BaseModel):\n    name: str\n    status: str # Ex: \"available\", \"in_progress\", \"completed\"\n    session_id: Optional[UUID] = None\n    scenario_name: Optional[str] = None  # Nom du scénario pour les sessions en cours\n    character_name: Optional[str] = None  # Nom du personnage pour les sessions en cours\nclass ScenarioList(BaseModel):\n    scenarios: List[ScenarioStatus]\nclass MessagePart(BaseModel):\n    \"\"\"Modèle pour une partie de message dans l'historique de conversation\"\"\"",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "ScenarioList",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class ScenarioList(BaseModel):\n    scenarios: List[ScenarioStatus]\nclass MessagePart(BaseModel):\n    \"\"\"Modèle pour une partie de message dans l'historique de conversation\"\"\"\n    content: str\n    timestamp: str\n    dynamic_ref: Optional[str] = None\n    part_kind: str  # ex: \"system-prompt\", \"user-prompt\", \"text\", \"tool-call\", \"tool-return\"\nclass MessageUsage(BaseModel):\n    \"\"\"Modèle pour les informations d'usage des tokens\"\"\"",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "MessagePart",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class MessagePart(BaseModel):\n    \"\"\"Modèle pour une partie de message dans l'historique de conversation\"\"\"\n    content: str\n    timestamp: str\n    dynamic_ref: Optional[str] = None\n    part_kind: str  # ex: \"system-prompt\", \"user-prompt\", \"text\", \"tool-call\", \"tool-return\"\nclass MessageUsage(BaseModel):\n    \"\"\"Modèle pour les informations d'usage des tokens\"\"\"\n    requests: int\n    request_tokens: int",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "MessageUsage",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class MessageUsage(BaseModel):\n    \"\"\"Modèle pour les informations d'usage des tokens\"\"\"\n    requests: int\n    request_tokens: int\n    response_tokens: int\n    total_tokens: int\n    details: Optional[Dict[str, Any]] = None\nclass ConversationMessage(BaseModel):\n    \"\"\"Modèle pour un message complet dans l'historique de conversation\"\"\"\n    parts: List[MessagePart]",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "ConversationMessage",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class ConversationMessage(BaseModel):\n    \"\"\"Modèle pour un message complet dans l'historique de conversation\"\"\"\n    parts: List[MessagePart]\n    instructions: Optional[str] = None\n    kind: str  # ex: \"request\", \"response\"\n    usage: Optional[MessageUsage] = None\n    model_name: Optional[str] = None\n    timestamp: Optional[str] = None\n    vendor_details: Optional[Any] = None\n    vendor_id: Optional[str] = None",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "PlayScenarioRequest",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class PlayScenarioRequest(BaseModel):\n    \"\"\"Modèle de requête pour l'endpoint /scenarios/play\"\"\"\n    message: str\n# Modèles de réponse pour les autres endpoints scenarios\nclass SessionInfo(BaseModel):\n    \"\"\"Modèle pour les informations d'une session active\"\"\"\n    session_id: str\n    scenario_name: str\n    character_id: str\n    character_name: str",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "SessionInfo",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class SessionInfo(BaseModel):\n    \"\"\"Modèle pour les informations d'une session active\"\"\"\n    session_id: str\n    scenario_name: str\n    character_id: str\n    character_name: str\nclass ActiveSessionsResponse(BaseModel):\n    \"\"\"Modèle de réponse pour l'endpoint /scenarios/sessions\"\"\"\n    sessions: List[SessionInfo]\nclass StartScenarioRequest(BaseModel):",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "ActiveSessionsResponse",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class ActiveSessionsResponse(BaseModel):\n    \"\"\"Modèle de réponse pour l'endpoint /scenarios/sessions\"\"\"\n    sessions: List[SessionInfo]\nclass StartScenarioRequest(BaseModel):\n    \"\"\"Modèle de requête pour l'endpoint /scenarios/start\"\"\"\n    scenario_name: str\n    character_id: str\nclass StartScenarioResponse(BaseModel):\n    \"\"\"Modèle de réponse pour l'endpoint /scenarios/start\"\"\"\n    session_id: str",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "StartScenarioRequest",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class StartScenarioRequest(BaseModel):\n    \"\"\"Modèle de requête pour l'endpoint /scenarios/start\"\"\"\n    scenario_name: str\n    character_id: str\nclass StartScenarioResponse(BaseModel):\n    \"\"\"Modèle de réponse pour l'endpoint /scenarios/start\"\"\"\n    session_id: str\n    scenario_name: str\n    character_id: str\n    message: str",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "StartScenarioResponse",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class StartScenarioResponse(BaseModel):\n    \"\"\"Modèle de réponse pour l'endpoint /scenarios/start\"\"\"\n    session_id: str\n    scenario_name: str\n    character_id: str\n    message: str\n    llm_response: str\nclass AllocateAttributesRequest(BaseModel):\n    race: str\nclass AllocateAttributesResponse(BaseModel):",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "AllocateAttributesRequest",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class AllocateAttributesRequest(BaseModel):\n    race: str\nclass AllocateAttributesResponse(BaseModel):\n    attributes: Dict[str, int]\nclass CheckAttributesRequest(BaseModel):\n    attributes: Dict[str, int]\nclass CheckAttributesResponse(BaseModel):\n    valid: bool\nclass SaveCharacterRequest(BaseModel):\n    character_id: str",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "AllocateAttributesResponse",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class AllocateAttributesResponse(BaseModel):\n    attributes: Dict[str, int]\nclass CheckAttributesRequest(BaseModel):\n    attributes: Dict[str, int]\nclass CheckAttributesResponse(BaseModel):\n    valid: bool\nclass SaveCharacterRequest(BaseModel):\n    character_id: str\n    character: dict\nclass SaveCharacterResponse(BaseModel):",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "CheckAttributesRequest",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class CheckAttributesRequest(BaseModel):\n    attributes: Dict[str, int]\nclass CheckAttributesResponse(BaseModel):\n    valid: bool\nclass SaveCharacterRequest(BaseModel):\n    character_id: str\n    character: dict\nclass SaveCharacterResponse(BaseModel):\n    character: dict\n    status: str",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "CheckAttributesResponse",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class CheckAttributesResponse(BaseModel):\n    valid: bool\nclass SaveCharacterRequest(BaseModel):\n    character_id: str\n    character: dict\nclass SaveCharacterResponse(BaseModel):\n    character: dict\n    status: str\nclass CheckSkillsRequest(BaseModel):\n    skills: Dict[str, int]",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "SaveCharacterRequest",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class SaveCharacterRequest(BaseModel):\n    character_id: str\n    character: dict\nclass SaveCharacterResponse(BaseModel):\n    character: dict\n    status: str\nclass CheckSkillsRequest(BaseModel):\n    skills: Dict[str, int]\nclass CheckSkillsResponse(BaseModel):\n    valid: bool",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "SaveCharacterResponse",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class SaveCharacterResponse(BaseModel):\n    character: dict\n    status: str\nclass CheckSkillsRequest(BaseModel):\n    skills: Dict[str, int]\nclass CheckSkillsResponse(BaseModel):\n    valid: bool\n    cost: int\nclass CreationStatusResponse(BaseModel):\n    id: str",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "CheckSkillsRequest",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class CheckSkillsRequest(BaseModel):\n    skills: Dict[str, int]\nclass CheckSkillsResponse(BaseModel):\n    valid: bool\n    cost: int\nclass CreationStatusResponse(BaseModel):\n    id: str\n    status: str\n    created_at: Optional[str] = None\nclass CharacterListAny(BaseModel):",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "CheckSkillsResponse",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class CheckSkillsResponse(BaseModel):\n    valid: bool\n    cost: int\nclass CreationStatusResponse(BaseModel):\n    id: str\n    status: str\n    created_at: Optional[str] = None\nclass CharacterListAny(BaseModel):\n    characters: List[dict]\nclass CharacteristicSchema(BaseModel):",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "CreationStatusResponse",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class CreationStatusResponse(BaseModel):\n    id: str\n    status: str\n    created_at: Optional[str] = None\nclass CharacterListAny(BaseModel):\n    characters: List[dict]\nclass CharacteristicSchema(BaseModel):\n    \"\"\"Schéma pour une caractéristique individuelle\"\"\"\n    short_name: str\n    category: str  # 'physical', 'mental', ou 'social'",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterListAny",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class CharacterListAny(BaseModel):\n    characters: List[dict]\nclass CharacteristicSchema(BaseModel):\n    \"\"\"Schéma pour une caractéristique individuelle\"\"\"\n    short_name: str\n    category: str  # 'physical', 'mental', ou 'social'\n    description: str\n    examples: List[str]\nclass CharacteristicsResponse(BaseModel):\n    \"\"\"Schéma de réponse pour le endpoint /api/creation/characteristics\"\"\"",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "CharacteristicSchema",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class CharacteristicSchema(BaseModel):\n    \"\"\"Schéma pour une caractéristique individuelle\"\"\"\n    short_name: str\n    category: str  # 'physical', 'mental', ou 'social'\n    description: str\n    examples: List[str]\nclass CharacteristicsResponse(BaseModel):\n    \"\"\"Schéma de réponse pour le endpoint /api/creation/characteristics\"\"\"\n    characteristics: Dict[str, CharacteristicSchema]\n    bonus_table: Dict[str, int]",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "CharacteristicsResponse",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class CharacteristicsResponse(BaseModel):\n    \"\"\"Schéma de réponse pour le endpoint /api/creation/characteristics\"\"\"\n    characteristics: Dict[str, CharacteristicSchema]\n    bonus_table: Dict[str, int]\n    cost_table: Dict[str, int]\n    starting_points: int\n# Les modèles RaceData et CultureData sont maintenant définis plus haut et remplacent RaceSchema et CultureSchema\nclass UpdateSkillsRequest(BaseModel):\n    character_id: str\n    skills: Dict[str, int]",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "UpdateSkillsRequest",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class UpdateSkillsRequest(BaseModel):\n    character_id: str\n    skills: Dict[str, int]\nclass UpdateSkillsResponse(BaseModel):\n    status: str\n# === Schémas pour la gestion d'équipement ===\nclass AddEquipmentRequest(BaseModel):\n    character_id: str\n    equipment_name: str\nclass AddEquipmentResponse(BaseModel):",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "UpdateSkillsResponse",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class UpdateSkillsResponse(BaseModel):\n    status: str\n# === Schémas pour la gestion d'équipement ===\nclass AddEquipmentRequest(BaseModel):\n    character_id: str\n    equipment_name: str\nclass AddEquipmentResponse(BaseModel):\n    status: str\n    gold: float\n    total_weight: float",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "AddEquipmentRequest",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class AddEquipmentRequest(BaseModel):\n    character_id: str\n    equipment_name: str\nclass AddEquipmentResponse(BaseModel):\n    status: str\n    gold: float\n    total_weight: float\n    equipment_added: dict\nclass RemoveEquipmentRequest(BaseModel):\n    character_id: str",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "AddEquipmentResponse",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class AddEquipmentResponse(BaseModel):\n    status: str\n    gold: float\n    total_weight: float\n    equipment_added: dict\nclass RemoveEquipmentRequest(BaseModel):\n    character_id: str\n    equipment_name: str\nclass RemoveEquipmentResponse(BaseModel):\n    status: str",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "RemoveEquipmentRequest",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class RemoveEquipmentRequest(BaseModel):\n    character_id: str\n    equipment_name: str\nclass RemoveEquipmentResponse(BaseModel):\n    status: str\n    gold: float\n    total_weight: float\n    equipment_removed: dict\nclass UpdateMoneyRequest(BaseModel):\n    character_id: str",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "RemoveEquipmentResponse",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class RemoveEquipmentResponse(BaseModel):\n    status: str\n    gold: float\n    total_weight: float\n    equipment_removed: dict\nclass UpdateMoneyRequest(BaseModel):\n    character_id: str\n    amount: float  # Positif pour ajouter, négatif pour retirer\nclass UpdateMoneyResponse(BaseModel):\n    status: str",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "UpdateMoneyRequest",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class UpdateMoneyRequest(BaseModel):\n    character_id: str\n    amount: float  # Positif pour ajouter, négatif pour retirer\nclass UpdateMoneyResponse(BaseModel):\n    status: str\n    gold: float",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "UpdateMoneyResponse",
+        "kind": 6,
+        "importPath": "back.models.schema",
+        "description": "back.models.schema",
+        "peekOfCode": "class UpdateMoneyResponse(BaseModel):\n    status: str\n    gold: float",
+        "detail": "back.models.schema",
+        "documentation": {}
+    },
+    {
+        "label": "list_characters",
+        "kind": 2,
+        "importPath": "back.routers.characters",
+        "description": "back.routers.characters",
+        "peekOfCode": "def list_characters():\n    \"\"\"\n    Récupère la liste de tous les personnages disponibles dans le système.\n    Cet endpoint permet d'obtenir tous les personnages créés, qu'ils soient complets ou en cours de création.\n    Les personnages incomplets (status=\"en_cours\") sont retournés avec uniquement les champs présents.\n    Returns:\n        CharacterListResponse: Une liste contenant tous les personnages disponibles (complets ou partiels)\n    Example Response:\n    ```json\n        {",
+        "detail": "back.routers.characters",
+        "documentation": {}
+    },
+    {
+        "label": "get_character_detail",
+        "kind": 2,
+        "importPath": "back.routers.characters",
+        "description": "back.routers.characters",
+        "peekOfCode": "def get_character_detail(character_id: str):\n    \"\"\"\n    Récupère le détail d'un personnage à partir de son identifiant unique.\n    Cet endpoint permet d'obtenir toutes les informations détaillées d'un personnage spécifique.\n    Paramètres:\n        character_id (str): L'identifiant unique du personnage à récupérer\n    Retourne:\n        CharacterDetailResponse: Les informations détaillées du personnage\n    \"\"\"\n    log_debug(\"Appel endpoint characters/get_character_detail\", character_id=str(character_id))",
+        "detail": "back.routers.characters",
+        "documentation": {}
+    },
+    {
+        "label": "router",
+        "kind": 5,
+        "importPath": "back.routers.characters",
+        "description": "back.routers.characters",
+        "peekOfCode": "router = APIRouter()\n@router.get(\"/\", response_model=CharacterListResponse)\ndef list_characters():\n    \"\"\"\n    Récupère la liste de tous les personnages disponibles dans le système.\n    Cet endpoint permet d'obtenir tous les personnages créés, qu'ils soient complets ou en cours de création.\n    Les personnages incomplets (status=\"en_cours\") sont retournés avec uniquement les champs présents.\n    Returns:\n        CharacterListResponse: Une liste contenant tous les personnages disponibles (complets ou partiels)\n    Example Response:",
+        "detail": "back.routers.characters",
+        "documentation": {}
+    },
+    {
+        "label": "get_races",
+        "kind": 2,
+        "importPath": "back.routers.creation",
+        "description": "back.routers.creation",
+        "peekOfCode": "def get_races():\n    \"\"\"\n    Returns the complete list of available races (typed RaceData structure for Swagger documentation).\n    **Output**: List of RaceData objects (complete structure from JSON).\n    \"\"\"\n    races_manager = RacesManager()\n    return races_manager.get_all_races()\n@router.get(\n    \"/skills\",\n    summary=\"Detailed skills (LLM)\",",
+        "detail": "back.routers.creation",
+        "documentation": {}
+    },
+    {
+        "label": "get_skills",
+        "kind": 2,
+        "importPath": "back.routers.creation",
+        "description": "back.routers.creation",
+        "peekOfCode": "def get_skills():\n    \"\"\"\n    Returns the complete structure of the skills_for_llm.json file (groups, skills, difficulty levels, etc.).\n    **Output**: Dictionary conforming to skills_for_llm.json\n    \"\"\"\n    return CharacterCreationService.get_skills()\n@router.get(\"/equipments\", summary=\"List of equipments\", response_model=list)\ndef get_equipments():\n    \"\"\"\n    Returns the list of available equipment.",
+        "detail": "back.routers.creation",
+        "documentation": {}
+    },
+    {
+        "label": "get_equipments",
+        "kind": 2,
+        "importPath": "back.routers.creation",
+        "description": "back.routers.creation",
+        "peekOfCode": "def get_equipments():\n    \"\"\"\n    Returns the list of available equipment.\n    **Output**: List of strings (equipment)\n    \"\"\"\n    return CharacterCreationService.get_equipments()\n@router.get(\"/equipments-detailed\", summary=\"Equipment with details\", response_model=dict)\ndef get_equipments_detailed():\n    \"\"\"\n    Returns the complete structure of equipment with their details (weapons, armor, items).",
+        "detail": "back.routers.creation",
+        "documentation": {}
+    },
+    {
+        "label": "get_equipments_detailed",
+        "kind": 2,
+        "importPath": "back.routers.creation",
+        "description": "back.routers.creation",
+        "peekOfCode": "def get_equipments_detailed():\n    \"\"\"\n    Returns the complete structure of equipment with their details (weapons, armor, items).\n    **Output**: Complete dictionary of equipment grouped by category\n    \"\"\"\n    from back.models.domain.equipment_manager import EquipmentManager\n    equipment_manager = EquipmentManager()\n    return equipment_manager.get_all_equipment()\n@router.get(\"/spells\", summary=\"List of spells\", response_model=list)\ndef get_spells():",
+        "detail": "back.routers.creation",
+        "documentation": {}
+    },
+    {
+        "label": "get_spells",
+        "kind": 2,
+        "importPath": "back.routers.creation",
+        "description": "back.routers.creation",
+        "peekOfCode": "def get_spells():\n    \"\"\"\n    Returns the list of available spells.\n    **Output**: List of strings (spells)\n    \"\"\"\n    return CharacterCreationService.get_spells()\n@router.post(\n    \"/allocate-attributes\",\n    response_model=AllocateAttributesResponse,\n    summary=\"Automatic attribute allocation\",",
+        "detail": "back.routers.creation",
+        "documentation": {}
+    },
+    {
+        "label": "allocate_attributes",
+        "kind": 2,
+        "importPath": "back.routers.creation",
+        "description": "back.routers.creation",
+        "peekOfCode": "def allocate_attributes(request: AllocateAttributesRequest):\n    \"\"\"\n    Automatically allocates attributes according to the race.\n    - **Input**: race_id (str)\n    - **Output**: Dictionary of allocated attributes\n    \"\"\"\n    races_manager = RacesManager()\n    race_data = races_manager.get_race_by_id(request.race_id)\n    if not race_data:\n        raise HTTPException(status_code=404, detail=f\"Race with id '{request.race_id}' not found\")",
+        "detail": "back.routers.creation",
+        "documentation": {}
+    },
+    {
+        "label": "check_attributes",
+        "kind": 2,
+        "importPath": "back.routers.creation",
+        "description": "back.routers.creation",
+        "peekOfCode": "def check_attributes(request: CheckAttributesRequest):\n    \"\"\"\n    Checks that the attribute points respect the rules (budget, bounds).\n    - **Input**: attributes (dict)\n    - **Output**: valid (bool)\n    \"\"\"\n    valid = CharacterCreationService.check_attributes_points(request.attributes)\n    return CheckAttributesResponse(valid=valid)\n@router.post(\n    \"/new\",",
+        "detail": "back.routers.creation",
+        "documentation": {}
+    },
+    {
+        "label": "create_new_character",
+        "kind": 2,
+        "importPath": "back.routers.creation",
+        "description": "back.routers.creation",
+        "peekOfCode": "def create_new_character():\n    \"\"\"\n    Creates a new character (initial state, id and creation date).\n    - **Output**: character_id (str), created_at (str), status (str)\n    \"\"\"\n    character_id = str(uuid4())\n    now = datetime.now().isoformat()\n    starting_money = random.randint(1, 50)\n    character_data = {\n        \"id\": character_id,",
+        "detail": "back.routers.creation",
+        "documentation": {}
+    },
+    {
+        "label": "save_character",
+        "kind": 2,
+        "importPath": "back.routers.creation",
+        "description": "back.routers.creation",
+        "peekOfCode": "def save_character(request: SaveCharacterRequest):\n    \"\"\"\n    Saves or updates the data of the character being created.\n    - **Input**: character_id (str), character (dict)\n    - **Output**: status (str)\n    \"\"\"\n    character = CharacterPersistenceService.save_character_data(request.character_id, request.character)\n    if Character.is_character_finalized(character) and character.get(\"status\") == CharacterStatus.IN_PROGRESS:\n        character[\"status\"] = CharacterStatus.DONE\n        character[\"last_update\"] = datetime.now().isoformat()",
+        "detail": "back.routers.creation",
+        "documentation": {}
+    },
+    {
+        "label": "get_creation_status",
+        "kind": 2,
+        "importPath": "back.routers.creation",
+        "description": "back.routers.creation",
+        "peekOfCode": "def get_creation_status(character_id: str):\n    \"\"\"\n    Returns the creation status of the character (in progress, finished, not found).\n    - **Input**: character_id (str)\n    - **Output**: status (str)\n    \"\"\"\n    try:\n        data = CharacterPersistenceService.load_character_data(character_id)\n        return CreationStatusResponse(character_id=character_id, status=data.get(\"status\", \"in_progress\"))\n    except FileNotFoundError:",
+        "detail": "back.routers.creation",
+        "documentation": {}
+    },
+    {
+        "label": "check_skills",
+        "kind": 2,
+        "importPath": "back.routers.creation",
+        "description": "back.routers.creation",
+        "peekOfCode": "def check_skills(request: CheckSkillsRequest):\n    \"\"\"\n    Checks that the distribution of skill points respects the rules (budget, favorite groups, max per skill).\n    - **Input**: skills (dict)\n    - **Output**: valid (bool), cost (int)\n    \"\"\"\n    valid = CharacterCreationService.check_skills_points(request.skills)\n    cost = CharacterCreationService.calculate_skills_cost(request.skills)\n    return CheckSkillsResponse(valid=valid, cost=cost)\n@router.post(\"/generate-name\", summary=\"Generate 5 character names via LLM\")",
+        "detail": "back.routers.creation",
+        "documentation": {}
+    },
+    {
+        "label": "get_stats",
+        "kind": 2,
+        "importPath": "back.routers.creation",
+        "description": "back.routers.creation",
+        "peekOfCode": "def get_stats():\n    \"\"\"\n    Returns the complete stats.json file with all data:\n    - Definitions of stats (Strength, Agility, etc.)\n    - Bonus table by value\n    - Point cost table\n    - Starting points\n    **Output**: Complete content of the stats.json file\n    \"\"\"\n    from back.models.domain.stats_manager import StatsManager",
+        "detail": "back.routers.creation",
+        "documentation": {}
+    },
+    {
+        "label": "delete_character",
+        "kind": 2,
+        "importPath": "back.routers.creation",
+        "description": "back.routers.creation",
+        "peekOfCode": "def delete_character(character_id: str):\n    \"\"\"\n    Deletes a character from their ID.\n    **Input**: character_id (str)\n    **Output**: 204 No Content if successful\n    \"\"\"\n    from back.services.character_persistence_service import CharacterPersistenceService\n    CharacterPersistenceService.delete_character_data(character_id)\n    return None\n@router.post(",
+        "detail": "back.routers.creation",
+        "documentation": {}
+    },
+    {
+        "label": "update_skills",
+        "kind": 2,
+        "importPath": "back.routers.creation",
+        "description": "back.routers.creation",
+        "peekOfCode": "def update_skills(request: UpdateSkillsRequest):\n    \"\"\"\n    Updates only the skills of the character being created.\n    Performs a merge with existing data.\n    - **Input**: character_id (str), skills (dict)\n    - **Output**: status (str)\n    \"\"\"\n    character_data = {\"skills\": request.skills}\n    CharacterPersistenceService.save_character_data(request.character_id, character_data)\n    return UpdateSkillsResponse(status=\"in_progress\")",
+        "detail": "back.routers.creation",
+        "documentation": {}
+    },
+    {
+        "label": "add_equipment",
+        "kind": 2,
+        "importPath": "back.routers.creation",
+        "description": "back.routers.creation",
+        "peekOfCode": "def add_equipment(request: AddEquipmentRequest):    \n    \"\"\"\n    Adds equipment to the character and deducts the corresponding money.\n    - **Input**: character_id (str), equipment_name (str)\n    - **Output**: status (str), gold (int), total_weight (float), equipment_added (dict)\n    \"\"\"\n    try:\n        character_data = CharacterPersistenceService.load_character_data(request.character_id)\n        from back.models.domain.equipment_manager import EquipmentManager\n        equipment_manager = EquipmentManager()",
+        "detail": "back.routers.creation",
+        "documentation": {}
+    },
+    {
+        "label": "remove_equipment",
+        "kind": 2,
+        "importPath": "back.routers.creation",
+        "description": "back.routers.creation",
+        "peekOfCode": "def remove_equipment(request: RemoveEquipmentRequest):   \n    \"\"\"\n    Removes equipment from the character and refunds the corresponding money.\n    - **Input**: character_id (str), equipment_name (str)\n    - **Output**: status (str), gold (int), total_weight (float), equipment_removed (dict)\n    \"\"\"\n    try:\n        character_data = CharacterPersistenceService.load_character_data(request.character_id)\n        from back.models.domain.equipment_manager import EquipmentManager\n        equipment_manager = EquipmentManager()",
+        "detail": "back.routers.creation",
+        "documentation": {}
+    },
+    {
+        "label": "update_money",
+        "kind": 2,
+        "importPath": "back.routers.creation",
+        "description": "back.routers.creation",
+        "peekOfCode": "def update_money(request: UpdateMoneyRequest):    \n    \"\"\"\n    Updates the character's money.\n    - **Input**: character_id (str), amount (int)\n    - **Output**: status (str), gold (int)\n    \"\"\"\n    try:\n        character_data = CharacterPersistenceService.load_character_data(request.character_id)\n        current_gold = character_data.get('gold', 0.0)\n        new_gold = max(0.0, current_gold + request.amount)",
+        "detail": "back.routers.creation",
+        "documentation": {}
+    },
+    {
+        "label": "router",
+        "kind": 5,
+        "importPath": "back.routers.creation",
+        "description": "back.routers.creation",
+        "peekOfCode": "router = APIRouter(tags=[\"creation\"])\n@router.get(\"/races\", summary=\"List of races\", response_model=List[RaceData])\ndef get_races():\n    \"\"\"\n    Returns the complete list of available races (typed RaceData structure for Swagger documentation).\n    **Output**: List of RaceData objects (complete structure from JSON).\n    \"\"\"\n    races_manager = RacesManager()\n    return races_manager.get_all_races()\n@router.get(",
+        "detail": "back.routers.creation",
+        "documentation": {}
+    },
+    {
+        "label": "StartScenarioRequest",
+        "kind": 6,
+        "importPath": "back.routers.scenarios",
+        "description": "back.routers.scenarios",
+        "peekOfCode": "class StartScenarioRequest(BaseModel):\n    scenario_name: str\n    character_id: str\n@router.post(\"/start\", response_model=StartScenarioResponse)\nasync def start_scenario(request: StartScenarioRequest):\n    \"\"\"\n    ### start_scenario\n    **Description :** Démarre un scénario avec un personnage spécifique, retourne l'id de session et déclenche le début du scénario avec le LLM.\n    **Paramètres :**\n    - `request` (StartScenarioRequest) : Contient le nom du scénario et l'identifiant du personnage.",
+        "detail": "back.routers.scenarios",
+        "documentation": {}
+    },
+    {
+        "label": "normalize_json_history",
+        "kind": 2,
+        "importPath": "back.routers.scenarios",
+        "description": "back.routers.scenarios",
+        "peekOfCode": "def normalize_json_history(history):\n    \"\"\"\n    Normalise l'historique JSON natif pour garantir la présence des champs obligatoires dans chaque part.\n    - Ajoute un timestamp ISO si manquant (\"1970-01-01T00:00:00Z\").\n    - Convertit les objets datetime en chaînes ISO.\n    - Ajoute content vide si manquant.\n    - Ajoute part_kind 'text' si manquant.\n    \"\"\"\n    DEFAULT_TIMESTAMP = \"1970-01-01T00:00:00Z\"\n    def convert_timestamp(ts):",
+        "detail": "back.routers.scenarios",
+        "documentation": {}
+    },
+    {
+        "label": "router",
+        "kind": 5,
+        "importPath": "back.routers.scenarios",
+        "description": "back.routers.scenarios",
+        "peekOfCode": "router = APIRouter()\n@router.get(\"/\", response_model=ScenarioList)\nasync def list_scenarios():\n    \"\"\"\n    ### list_scenarios\n    **Description :** Endpoint pour lister les scénarios disponibles et en cours.\n    **Paramètres :** Aucun.\n    **Retour :** `ScenarioList` contenant une liste de scénarios avec leurs états.\n    **Format de réponse :**\n    ```json",
+        "detail": "back.routers.scenarios",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterBusinessService",
+        "kind": 6,
+        "importPath": "back.services.character_business_service",
+        "description": "back.services.character_business_service",
+        "peekOfCode": "class CharacterBusinessService:\n    \"\"\"\n    ### CharacterBusinessService\n    **Description:** Service spécialisé dans la logique métier des personnages.\n    **Responsabilité unique:** Gestion de la logique métier (XP, or, dégâts).\n    \"\"\"\n    def __init__(self, data_service: CharacterDataService):\n        \"\"\"\n        ### __init__\n        **Description:** Initialise le service de logique métier avec un service de données.",
+        "detail": "back.services.character_business_service",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "kind": 5,
+        "importPath": "back.services.character_business_service",
+        "description": "back.services.character_business_service",
+        "peekOfCode": "logger = get_logger(__name__)\nclass CharacterBusinessService:\n    \"\"\"\n    ### CharacterBusinessService\n    **Description:** Service spécialisé dans la logique métier des personnages.\n    **Responsabilité unique:** Gestion de la logique métier (XP, or, dégâts).\n    \"\"\"\n    def __init__(self, data_service: CharacterDataService):\n        \"\"\"\n        ### __init__",
+        "detail": "back.services.character_business_service",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterCreationService",
+        "kind": 6,
+        "importPath": "back.services.character_creation_service",
+        "description": "back.services.character_creation_service",
+        "peekOfCode": "class CharacterCreationService:\n    \"\"\"\n    Service for managing character creation.\n    \"\"\"\n    @staticmethod\n    def allocate_attributes_auto(race_data: RaceData) -> dict:\n        \"\"\"\n        ### allocate_attributes_auto\n        **Description:** Automatically allocates a character's attributes according to their race, optimizing the distribution according to business recommendations and integrating racial bonuses into the budget calculation, without an infinite loop.\n        **Parameters:**",
+        "detail": "back.services.character_creation_service",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterDataService",
+        "kind": 6,
+        "importPath": "back.services.character_data_service",
+        "description": "back.services.character_data_service",
+        "peekOfCode": "class CharacterDataService:\n    \"\"\"\n    ### CharacterDataService\n    **Description:** Service spécialisé dans le chargement et la sauvegarde des données de personnage.\n    **Responsabilité unique:** Gestion des opérations de persistance des données Character.\n    \"\"\"\n    def __init__(self, character_id: Optional[str] = None):\n        \"\"\"\n        ### __init__\n        **Description:** Initialise le service de données de personnage.",
+        "detail": "back.services.character_data_service",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterPersistenceService",
+        "kind": 6,
+        "importPath": "back.services.character_persistence_service",
+        "description": "back.services.character_persistence_service",
+        "peekOfCode": "class CharacterPersistenceService:\n    \"\"\"\n    ### CharacterPersistenceService\n    **Description :** Service centralisé pour la persistance des fichiers JSON des personnages.\n    Factorise toutes les opérations CRUD sur les fichiers de personnages.\n    \"\"\"\n    @staticmethod\n    def _get_character_file_path(character_id: str) -> str:\n        \"\"\"\n        ### _get_character_file_path",
+        "detail": "back.services.character_persistence_service",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterService",
+        "kind": 6,
+        "importPath": "back.services.character_service",
+        "description": "back.services.character_service",
+        "peekOfCode": "class CharacterService:\n    def __init__(self, character_id: str, strict_validation: bool = True):\n        \"\"\"\n        ### __init__\n        **Description:** Initialise le service de personnage pour un personnage spécifique\n        **Paramètres:**\n        - `character_id` (str): Identifiant du personnage à gérer\n        - `strict_validation` (bool): Si True, valide strictement avec le modèle Character. Si False, accepte les personnages incomplets.        **Retour:** Aucun\n        \"\"\"\n        self.character_id = character_id",
+        "detail": "back.services.character_service",
+        "documentation": {}
+    },
+    {
+        "label": "CombatService",
+        "kind": 6,
+        "importPath": "back.services.combat_service",
+        "description": "back.services.combat_service",
+        "peekOfCode": "class CombatService:\n    \"\"\"\n    ### CombatService\n    **Description :** Service métier pour manipuler l’état du combat (démarrage, attaque, dégâts, fin, etc.).\n    \"\"\"\n    def start_combat(self, participants: List[Dict]) -> CombatState:\n        \"\"\"\n        ### start_combat\n        **Description :** Initialise un nouveau combat avec les participants donnés.\n        **Paramètres :**",
+        "detail": "back.services.combat_service",
+        "documentation": {}
+    },
+    {
+        "label": "CombatStateService",
+        "kind": 6,
+        "importPath": "back.services.combat_state_service",
+        "description": "back.services.combat_state_service",
+        "peekOfCode": "class CombatStateService:\n    \"\"\"\n    ### CombatStateService\n    **Description :** Service pour gérer la persistance de l'état des combats actifs.\n    \"\"\"\n    def __init__(self):\n        \"\"\"\n        ### __init__\n        **Description :** Initialise le service avec le chemin vers le répertoire de données.\n        \"\"\"",
+        "detail": "back.services.combat_state_service",
+        "documentation": {}
+    },
+    {
+        "label": "EquipmentService",
+        "kind": 6,
+        "importPath": "back.services.equipment_service",
+        "description": "back.services.equipment_service",
+        "peekOfCode": "class EquipmentService:\n    \"\"\"\n    ### EquipmentService\n    **Description:** Service spécialisé dans la gestion de l'équipement des personnages.\n    **Responsabilité unique:** Achat/vente d'équipement et gestion de l'argent.\n    \"\"\"\n    def __init__(self, data_service: CharacterDataService):\n        \"\"\"\n        ### __init__\n        **Description:** Initialise le service d'équipement avec un service de données.",
+        "detail": "back.services.equipment_service",
+        "documentation": {}
+    },
+    {
+        "label": "InventoryService",
+        "kind": 6,
+        "importPath": "back.services.inventory_service",
+        "description": "back.services.inventory_service",
+        "peekOfCode": "class InventoryService:\n    \"\"\"\n    ### InventoryService\n    **Description:** Service spécialisé dans la gestion de l'inventaire des personnages.\n    **Responsabilité unique:** Gestion des objets d'inventaire (ajout, retrait, équipement).\n    \"\"\"\n    def __init__(self, data_service: CharacterDataService):\n        \"\"\"\n        ### __init__\n        **Description:** Initialise le service d'inventaire avec un service de données.",
+        "detail": "back.services.inventory_service",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "kind": 5,
+        "importPath": "back.services.inventory_service",
+        "description": "back.services.inventory_service",
+        "peekOfCode": "logger = get_logger(__name__)\nclass InventoryService:\n    \"\"\"\n    ### InventoryService\n    **Description:** Service spécialisé dans la gestion de l'inventaire des personnages.\n    **Responsabilité unique:** Gestion des objets d'inventaire (ajout, retrait, équipement).\n    \"\"\"\n    def __init__(self, data_service: CharacterDataService):\n        \"\"\"\n        ### __init__",
+        "detail": "back.services.inventory_service",
+        "documentation": {}
+    },
+    {
+        "label": "ItemService",
+        "kind": 6,
+        "importPath": "back.services.item_service",
+        "description": "back.services.item_service",
+        "peekOfCode": "class ItemService:\n    \"\"\"Service pour la gestion des objets et de l'inventaire\"\"\"\n    def __init__(self):\n        self._items_data: Optional[Dict[str, Dict]] = None\n        self._load_items_data()\n    def _load_items_data(self) -> None:\n        \"\"\"\n        ### _load_items_data\n        **Description:** Charge les données des objets depuis le fichier CSV equipements.csv        **Paramètres:** Aucun\n        **Retour:** None (stocke les données dans self._items_data)",
+        "detail": "back.services.item_service",
+        "documentation": {}
+    },
+    {
+        "label": "ScenarioService",
+        "kind": 6,
+        "importPath": "back.services.scenario_service",
+        "description": "back.services.scenario_service",
+        "peekOfCode": "class ScenarioService:\n    \"\"\"\n    ### list_scenarios\n    **Description:** Liste les scénarios disponibles et ceux en cours.\n    **Parameters:** Aucun.\n    **Returns:** Liste de `ScenarioStatus`, incluant le nom, le statut et l'ID de session (le cas échéant).\n    \"\"\"\n    @staticmethod\n    def list_scenarios() -> List[ScenarioStatus]:\n        # Définir les chemins vers les dossiers scenarios et sessions",
+        "detail": "back.services.scenario_service",
+        "documentation": {}
+    },
+    {
+        "label": "SessionService",
+        "kind": 6,
+        "importPath": "back.services.session_service",
+        "description": "back.services.session_service",
+        "peekOfCode": "class SessionService:\n    \"\"\"\n    ### SessionService\n    **Description :** Service de gestion des sessions de jeu, incluant l'historique des messages,\n    les données du personnage et du scénario.\n    **Attributs :**\n    - `session_id` (str) : Identifiant de la session\n    - `character_data` (Character) : Données du personnage de la session (objet typé)\n    - `scenario_name` (str) : Nom du scénario associé à la session\n    - `store` (PydanticJsonlStore) : Store pour l'historique des messages",
+        "detail": "back.services.session_service",
+        "documentation": {}
+    },
+    {
+        "label": "perform_skill_check_with_character",
+        "kind": 2,
+        "importPath": "back.services.skill_service",
+        "description": "back.services.skill_service",
+        "peekOfCode": "def perform_skill_check_with_character(skill_name: str, character_json: str, difficulty_name: str = \"Moyenne\", difficulty_modifier: int = 0) -> str:\n    \"\"\"\n    ### perform_skill_check_with_character\n    **Description :** Effectue un test de compétence en utilisant l'outil Haystack skill_check_with_character.\n    **Paramètres :**\n    - `skill_name` (str) : Nom de la compétence/caractéristique testée.\n    - `character_json` (str) : Données complètes du personnage au format JSON.\n    - `difficulty_name` (str) : Nom de la difficulté (\"Facile\", \"Moyenne\", \"Difficile\", \"Très Difficile\").\n    - `difficulty_modifier` (int) : Modificateur additionnel de difficulté.\n    **Retour :**",
+        "detail": "back.services.skill_service",
+        "documentation": {}
+    },
+    {
+        "label": "PydanticJsonlStore",
+        "kind": 6,
+        "importPath": "back.storage.pydantic_jsonl_store",
+        "description": "back.storage.pydantic_jsonl_store",
+        "peekOfCode": "class PydanticJsonlStore:\n    \"\"\"\n    ### PydanticJsonlStore\n    **Description :** Store JSONL adapté pour PydanticAI, compatible avec les formats de messages PydanticAI.\n    **Paramètres :**\n    - `filepath` (str) : Chemin du fichier JSONL de stockage.\n    **Méthodes :**\n    - `load()` : Charge l'historique\n    - `save_pydantic_history(messages)` : Sérialise et sauvegarde une liste de messages PydanticAI dans le fichier JSONL.\n    - `load_pydantic_history()` : Recharge l'historique complet au format PydanticAI à partir du fichier JSONL.",
+        "detail": "back.storage.pydantic_jsonl_store",
+        "documentation": {}
+    },
+    {
+        "label": "TestGMAgentDependencyInjection",
+        "kind": 6,
+        "importPath": "back.tests.agents.test_gm_agent_dependency_injection",
+        "description": "back.tests.agents.test_gm_agent_dependency_injection",
+        "peekOfCode": "class TestGMAgentDependencyInjection:\n    \"\"\"\n    ### TestGMAgentDependencyInjection\n    **Description :** Teste l'injection de dépendance dans build_gm_agent_pydantic.\n    \"\"\"\n    def test_build_gm_agent_with_injected_session_service(self):\n        \"\"\"\n        ### test_build_gm_agent_with_injected_session_service\n        **Description :** Teste que build_gm_agent_pydantic accepte un SessionService injecté.\n        \"\"\"",
+        "detail": "back.tests.agents.test_gm_agent_dependency_injection",
+        "documentation": {}
+    },
+    {
+        "label": "TestCharactersRouterRefactored",
+        "kind": 6,
+        "importPath": "back.tests.routers.test_characters_refactored",
+        "description": "back.tests.routers.test_characters_refactored",
+        "peekOfCode": "class TestCharactersRouterRefactored:\n    \"\"\"Tests pour le router characters refactoré avec les nouveaux services.\"\"\"\n    @pytest.fixture\n    def mock_character(self):\n        \"\"\"Fixture pour un personnage de test.\"\"\"\n        return Character(\n            id=\"test-character-123\",\n            name=\"Aragorn\",\n            race=\"Humain\",\n            culture=\"Gondor\",",
+        "detail": "back.tests.routers.test_characters_refactored",
+        "documentation": {}
+    },
+    {
+        "label": "TestCharactersRouterIntegration",
+        "kind": 6,
+        "importPath": "back.tests.routers.test_characters_refactored",
+        "description": "back.tests.routers.test_characters_refactored",
+        "peekOfCode": "class TestCharactersRouterIntegration:\n    \"\"\"Tests d'intégration pour le router characters.\"\"\"\n    def test_router_registration(self):\n        \"\"\"Test que le router est correctement enregistré.\"\"\"\n        # Vérifier que le router a les routes attendues\n        routes = [route for route in router.routes]\n        assert len(routes) == 2  # GET / et GET /{character_id}\n        # Vérifier les méthodes HTTP\n        get_routes = [route for route in routes if route.methods == {\"GET\"}]\n        assert len(get_routes) == 2",
+        "detail": "back.tests.routers.test_characters_refactored",
+        "documentation": {}
+    },
+    {
+        "label": "client",
+        "kind": 5,
+        "importPath": "back.tests.routers.test_characters_refactored",
+        "description": "back.tests.routers.test_characters_refactored",
+        "peekOfCode": "client = TestClient(router)\nclass TestCharactersRouterRefactored:\n    \"\"\"Tests pour le router characters refactoré avec les nouveaux services.\"\"\"\n    @pytest.fixture\n    def mock_character(self):\n        \"\"\"Fixture pour un personnage de test.\"\"\"\n        return Character(\n            id=\"test-character-123\",\n            name=\"Aragorn\",\n            race=\"Humain\",",
+        "detail": "back.tests.routers.test_characters_refactored",
+        "documentation": {}
+    },
+    {
+        "label": "TestModelConverter",
+        "kind": 6,
+        "importPath": "back.tests.utils.test_model_converter",
+        "description": "back.tests.utils.test_model_converter",
+        "peekOfCode": "class TestModelConverter:\n    \"\"\"Tests pour la classe ModelConverter.\"\"\"\n    def test_to_dict_with_pydantic_model(self):\n        \"\"\"Test la conversion d'un objet Pydantic en dict.\"\"\"\n        item = Item(id=\"sword\", name=\"Épée\", quantity=1, weight_kg=2.0)\n        result = ModelConverter.to_dict(item)\n        assert isinstance(result, dict)\n        assert result[\"id\"] == \"sword\"\n        assert result[\"name\"] == \"Épée\"\n        assert result[\"quantity\"] == 1",
+        "detail": "back.tests.utils.test_model_converter",
+        "documentation": {}
+    },
+    {
+        "label": "TestCharacterServiceRefactored",
+        "kind": 6,
+        "importPath": "back.tests.test_character_service_refactored",
+        "description": "back.tests.test_character_service_refactored",
+        "peekOfCode": "class TestCharacterServiceRefactored:\n    \"\"\"Tests pour la nouvelle architecture de CharacterService\"\"\"\n    def setup_method(self):\n        \"\"\"Setup pour chaque test\"\"\"\n        self.test_character_id = \"test-character-123\"\n    def test_load_empty_character_creates_normalized_object(self):\n        \"\"\"Test que le chargement d'un personnage vide crée un objet Character normalisé\"\"\"\n        with patch('back.services.character_persistence_service.CharacterPersistenceService.load_character_data') as mock_load:\n            # Simuler un personnage vide (nouveau)\n            mock_load.side_effect = FileNotFoundError()",
+        "detail": "back.tests.test_character_service_refactored",
+        "documentation": {}
+    },
+    {
+        "label": "TestLoggingSystem",
+        "kind": 6,
+        "importPath": "back.tests.test_logging",
+        "description": "back.tests.test_logging",
+        "peekOfCode": "class TestLoggingSystem:\n    \"\"\"Tests du système de logging centralisé.\"\"\"\n    def test_config_logging_initialization(self):\n        \"\"\"Test que la configuration de logging s'initialise correctement.\"\"\"\n        config = Config()\n        # Vérifier que la configuration de logging existe\n        logging_config = config.get_logging_config()\n        assert isinstance(logging_config, dict)\n        assert \"level\" in logging_config\n        assert \"format\" in logging_config",
+        "detail": "back.tests.test_logging",
+        "documentation": {}
+    },
+    {
+        "label": "TestLoggingConfiguration",
+        "kind": 6,
+        "importPath": "back.tests.test_logging",
+        "description": "back.tests.test_logging",
+        "peekOfCode": "class TestLoggingConfiguration:\n    \"\"\"Tests de la configuration du logging.\"\"\"\n    def test_config_file_not_found(self):\n        \"\"\"Test que Config gère correctement un fichier manquant.\"\"\"\n        with pytest.raises(FileNotFoundError):\n            Config(\"nonexistent_config.yaml\")\n    def test_invalid_yaml_config(self):\n        \"\"\"Test que Config gère correctement un YAML invalide.\"\"\"\n        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.yaml') as temp_file:\n            temp_file.write(\"invalid: yaml: content: [\\n\")",
+        "detail": "back.tests.test_logging",
+        "documentation": {}
+    },
+    {
+        "label": "TestLoggingIntegration",
+        "kind": 6,
+        "importPath": "back.tests.test_logging",
+        "description": "back.tests.test_logging",
+        "peekOfCode": "class TestLoggingIntegration:\n    \"\"\"Tests d'intégration du système de logging.\"\"\"\n    def test_multiple_loggers(self, capsys):\n        \"\"\"Test que plusieurs loggers peuvent coexister.\"\"\"\n        logger1 = get_logger(\"module1\")\n        logger2 = get_logger(\"module2\")\n        logger1.info(\"Message from module1\", module=\"1\")\n        logger2.info(\"Message from module2\", module=\"2\")\n        captured = capsys.readouterr()\n        log_lines = captured.out.strip().split('\\n')",
+        "detail": "back.tests.test_logging",
+        "documentation": {}
+    },
+    {
+        "label": "character_apply_xp",
+        "kind": 2,
+        "importPath": "back.tools.character_tools",
+        "description": "back.tools.character_tools",
+        "peekOfCode": "def character_apply_xp(ctx: RunContext[SessionService], xp: int) -> str:\n    \"\"\"\n    Applique les XP au personnage.\n    Args:\n        xp (int): Le nombre d'expériences à ajouter. Ex. : 50.\n    Returns:\n        str: Message confirmant l'application des XP.\n    \"\"\"\n    log_debug(\"Tool character_apply_xp appelé\", tool=\"character_apply_xp\", player_id=str(ctx.deps.character_id), xp=xp)\n    # ✅ PATTERN CORRECT - Utilisation des services spécialisés via SessionService",
+        "detail": "back.tools.character_tools",
+        "documentation": {}
+    },
+    {
+        "label": "character_add_gold",
+        "kind": 2,
+        "importPath": "back.tools.character_tools",
+        "description": "back.tools.character_tools",
+        "peekOfCode": "def character_add_gold(ctx: RunContext[SessionService], gold: int) -> str:\n    \"\"\"\n    Ajoute de l'or au portefeuille du personnage.\n    Args:\n        gold (int): Montant d'or à ajouter. Ex. : 50.\n    Returns:\n        str: Message confirmant l'ajout d'or.\n    \"\"\"\n    log_debug(\"Tool character_add_gold appelé\", tool=\"character_add_gold\", player_id=str(ctx.deps.character_id), gold=gold)\n    # ✅ PATTERN CORRECT - Utilisation des services spécialisés via SessionService",
+        "detail": "back.tools.character_tools",
+        "documentation": {}
+    },
+    {
+        "label": "character_take_damage",
+        "kind": 2,
+        "importPath": "back.tools.character_tools",
+        "description": "back.tools.character_tools",
+        "peekOfCode": "def character_take_damage(ctx: RunContext[SessionService], amount: int, source: str = \"combat\") -> str:\n    \"\"\"\n    Applique des dégâts au personnage (réduit ses PV).\n    Args:\n        amount (int): Points de dégâts à appliquer. Ex. : 10.\n        source (str): Source des dégâts. Par défaut : \"combat\".\n    Returns:\n        str: Message confirmant l'application des dégâts.\n    \"\"\"\n    log_debug(\"Tool character_take_damage appelé\", tool=\"character_take_damage\", player_id=str(ctx.deps.character_id), amount=amount, source=source)",
+        "detail": "back.tools.character_tools",
+        "documentation": {}
+    },
+    {
+        "label": "roll_initiative_tool",
+        "kind": 2,
+        "importPath": "back.tools.combat_tools",
+        "description": "back.tools.combat_tools",
+        "peekOfCode": "def roll_initiative_tool(ctx: RunContext[SessionService], characters: list[dict]) -> list:\n    \"\"\"\n    Calcule l'ordre d'initiative des personnages.\n    Args:\n        characters (list[dict]): Liste des personnages participant au combat.\n    Returns:\n        list: Liste triée selon l'initiative.\n    \"\"\"\n    log_debug(\"Tool roll_initiative_tool appelé\", tool=\"roll_initiative_tool\", characters=characters)\n    # Ensure each character has an 'id' for CombatState",
+        "detail": "back.tools.combat_tools",
+        "documentation": {}
+    },
+    {
+        "label": "perform_attack_tool",
+        "kind": 2,
+        "importPath": "back.tools.combat_tools",
+        "description": "back.tools.combat_tools",
+        "peekOfCode": "def perform_attack_tool(ctx: RunContext[SessionService], dice: str) -> int:\n    \"\"\"\n    Effectue un jet d'attaque.\n    Args:\n        dice (str): Notation des dés à lancer. Ex. : \"1d20\".\n    Returns:\n        int: Résultat du jet d'attaque.\n    \"\"\"\n    log_debug(\"Tool perform_attack_tool appelé\", tool=\"perform_attack_tool\", dice=dice)\n    return roll_attack(dice)",
+        "detail": "back.tools.combat_tools",
+        "documentation": {}
+    },
+    {
+        "label": "resolve_attack_tool",
+        "kind": 2,
+        "importPath": "back.tools.combat_tools",
+        "description": "back.tools.combat_tools",
+        "peekOfCode": "def resolve_attack_tool(ctx: RunContext[SessionService], attack_roll: int, defense_roll: int) -> bool:\n    \"\"\"\n    Résout une attaque en comparant les jets d'attaque et de défense.\n    Args:\n        attack_roll (int): Résultat du jet d'attaque.\n        defense_roll (int): Résultat du jet de défense.\n    Returns:\n        bool: True si l'attaque réussit, False sinon.\n    \"\"\"\n    log_debug(\"Tool resolve_attack_tool appelé\", tool=\"resolve_attack_tool\", attack_roll=attack_roll, defense_roll=defense_roll)",
+        "detail": "back.tools.combat_tools",
+        "documentation": {}
+    },
+    {
+        "label": "calculate_damage_tool",
+        "kind": 2,
+        "importPath": "back.tools.combat_tools",
+        "description": "back.tools.combat_tools",
+        "peekOfCode": "def calculate_damage_tool(ctx: RunContext[SessionService], base_damage: int, bonus: int = 0) -> int:\n    \"\"\"\n    Calcule les dégâts infligés en tenant compte des modificateurs.\n    Args:\n        base_damage (int): Dégâts de base de l'attaque.\n        bonus (int): Bonus/malus de dégâts. Par défaut : 0.\n    Returns:\n        int: Dégâts finaux infligés.\n    \"\"\"\n    log_debug(\"Tool calculate_damage_tool appelé\", tool=\"calculate_damage_tool\", base_damage=base_damage, bonus=bonus)",
+        "detail": "back.tools.combat_tools",
+        "documentation": {}
+    },
+    {
+        "label": "end_combat_tool",
+        "kind": 2,
+        "importPath": "back.tools.combat_tools",
+        "description": "back.tools.combat_tools",
+        "peekOfCode": "def end_combat_tool(ctx: RunContext[SessionService], combat_id: str, reason: str) -> dict:\n    \"\"\"\n    Termine explicitement un combat en précisant la raison.\n    Args:\n        combat_id (str): Identifiant du combat.\n        reason (str): Raison de la fin du combat (fuite, reddition, victoire, etc.).\n    Returns:\n        dict: Dictionnaire contenant le statut final du combat.\n    \"\"\"\n    try:",
+        "detail": "back.tools.combat_tools",
+        "documentation": {}
+    },
+    {
+        "label": "end_turn_tool",
+        "kind": 2,
+        "importPath": "back.tools.combat_tools",
+        "description": "back.tools.combat_tools",
+        "peekOfCode": "def end_turn_tool(ctx: RunContext[SessionService], combat_id: str) -> dict:\n    \"\"\"\n    Termine explicitement le tour courant et passe au suivant.\n    Args:\n        combat_id (str): Identifiant du combat.\n    Returns:\n        dict: État mis à jour avec le joueur suivant.\n    \"\"\"\n    log_debug(\"Tool end_turn_tool appelé\", tool=\"end_turn_tool\", combat_id=combat_id)\n    try:",
+        "detail": "back.tools.combat_tools",
+        "documentation": {}
+    },
+    {
+        "label": "check_combat_end_tool",
+        "kind": 2,
+        "importPath": "back.tools.combat_tools",
+        "description": "back.tools.combat_tools",
+        "peekOfCode": "def check_combat_end_tool(ctx: RunContext[SessionService], combat_id: str) -> dict:\n    \"\"\"\n    Vérifie automatiquement si le combat est terminé.\n    Args:\n        combat_id (str): Identifiant du combat.\n    Returns:\n        dict: Statut du combat et actions automatiques prises.\n    \"\"\"\n    log_debug(\"Tool check_combat_end_tool appelé\", tool=\"check_combat_end_tool\", combat_id=combat_id)\n    try:",
+        "detail": "back.tools.combat_tools",
+        "documentation": {}
+    },
+    {
+        "label": "apply_damage_tool",
+        "kind": 2,
+        "importPath": "back.tools.combat_tools",
+        "description": "back.tools.combat_tools",
+        "peekOfCode": "def apply_damage_tool(ctx: RunContext[SessionService], combat_id: str, target_id: str, amount: int) -> dict:\n    \"\"\"\n    Applique des dégâts à un participant et vérifie l'état du combat.\n    Args:\n        combat_id (str): Identifiant du combat.\n        target_id (str): ID de la cible.\n        amount (int): Points de dégâts à appliquer.\n    Returns:\n        dict: État mis à jour après application des dégâts.\n    \"\"\"",
+        "detail": "back.tools.combat_tools",
+        "documentation": {}
+    },
+    {
+        "label": "get_combat_status_tool",
+        "kind": 2,
+        "importPath": "back.tools.combat_tools",
+        "description": "back.tools.combat_tools",
+        "peekOfCode": "def get_combat_status_tool(ctx: RunContext[SessionService], combat_id: str) -> dict:\n    \"\"\"\n    Retourne l'état complet du combat pour injection dans le prompt.\n    Args:\n        combat_id (str): Identifiant du combat.\n    Returns:\n        dict: Résumé structuré du combat (round, qui joue, HP, etc.).\n    \"\"\"\n    log_debug(\"Tool get_combat_status_tool appelé\", tool=\"get_combat_status_tool\", combat_id=combat_id)\n    try:",
+        "detail": "back.tools.combat_tools",
+        "documentation": {}
+    },
+    {
+        "label": "start_combat_tool",
+        "kind": 2,
+        "importPath": "back.tools.combat_tools",
+        "description": "back.tools.combat_tools",
+        "peekOfCode": "def start_combat_tool(ctx: RunContext[SessionService], participants: list[dict]) -> dict:\n    \"\"\"\n    Démarre un nouveau combat avec les participants donnés.\n    Args:\n        participants (list[dict]): Liste des participants (joueur et adversaires).\n    Returns:\n        dict: État initial du combat.\n    \"\"\"\n    log_debug(\"Tool start_combat_tool appelé\", tool=\"start_combat_tool\", participants=participants)\n    try:",
+        "detail": "back.tools.combat_tools",
+        "documentation": {}
+    },
+    {
+        "label": "combat_service",
+        "kind": 5,
+        "importPath": "back.tools.combat_tools",
+        "description": "back.tools.combat_tools",
+        "peekOfCode": "combat_service = CombatService()\ncombat_state_service = CombatStateService()\ndef roll_initiative_tool(ctx: RunContext[SessionService], characters: list[dict]) -> list:\n    \"\"\"\n    Calcule l'ordre d'initiative des personnages.\n    Args:\n        characters (list[dict]): Liste des personnages participant au combat.\n    Returns:\n        list: Liste triée selon l'initiative.\n    \"\"\"",
+        "detail": "back.tools.combat_tools",
+        "documentation": {}
+    },
+    {
+        "label": "combat_state_service",
+        "kind": 5,
+        "importPath": "back.tools.combat_tools",
+        "description": "back.tools.combat_tools",
+        "peekOfCode": "combat_state_service = CombatStateService()\ndef roll_initiative_tool(ctx: RunContext[SessionService], characters: list[dict]) -> list:\n    \"\"\"\n    Calcule l'ordre d'initiative des personnages.\n    Args:\n        characters (list[dict]): Liste des personnages participant au combat.\n    Returns:\n        list: Liste triée selon l'initiative.\n    \"\"\"\n    log_debug(\"Tool roll_initiative_tool appelé\", tool=\"roll_initiative_tool\", characters=characters)",
+        "detail": "back.tools.combat_tools",
+        "documentation": {}
+    },
+    {
+        "label": "inventory_add_item",
+        "kind": 2,
+        "importPath": "back.tools.inventory_tools",
+        "description": "back.tools.inventory_tools",
+        "peekOfCode": "def inventory_add_item(ctx: RunContext[SessionService], item_id: str, qty: int = 1) -> dict:\n    \"\"\"\n    Ajoute un objet à l'inventaire du personnage.\n    Args:\n        item_id (str): Identifiant de l'objet à acquérir. Ex. : 'épée_longue'.\n        qty (int): Quantité à ajouter. Par défaut : 1.\n    Returns:\n        dict: Résumé de l'inventaire mis à jour.\n    \"\"\"\n    log_debug(\"Tool inventory_add_item appelé\", tool=\"inventory_add_item\", player_id=str(ctx.deps.character_id), item_id=item_id, qty=qty)",
+        "detail": "back.tools.inventory_tools",
+        "documentation": {}
+    },
+    {
+        "label": "inventory_remove_item",
+        "kind": 2,
+        "importPath": "back.tools.inventory_tools",
+        "description": "back.tools.inventory_tools",
+        "peekOfCode": "def inventory_remove_item(ctx: RunContext[SessionService], item_id: str, qty: int = 1) -> dict:\n    \"\"\"\n    Retire un objet de l'inventaire du personnage.\n    Args:\n        item_id (str): Identifiant de l'objet à retirer. Ex. : 'épée_longue'.\n        qty (int): Quantité à retirer. Par défaut : 1.\n    Returns:\n        dict: Résumé de l'inventaire mis à jour.\n    \"\"\"\n    log_debug(\"Tool inventory_remove_item appelé\", tool=\"inventory_remove_item\", player_id=str(ctx.deps.character_id), item_id=item_id, qty=qty)",
+        "detail": "back.tools.inventory_tools",
+        "documentation": {}
+    },
+    {
+        "label": "skill_check_with_character",
+        "kind": 2,
+        "importPath": "back.tools.skill_tools",
+        "description": "back.tools.skill_tools",
+        "peekOfCode": "def skill_check_with_character(ctx: RunContext[SessionService], skill_name: str, difficulty_name: str = \"Moyenne\", difficulty_modifier: int = 0) -> str:\n    \"\"\"\n    Effectue un test de compétence en utilisant les données du personnage de la session.\n    Args:\n        skill_name (str): Nom de la compétence/caractéristique testée (ex: \"Perception\", \"Force\", \"Discrétion\").\n        difficulty_name (str): Nom de la difficulté (\"Facile\", \"Moyenne\", \"Difficile\", \"Très Difficile\").\n        difficulty_modifier (int): Modificateur additionnel de difficulté (optionnel, par défaut 0).\n    Returns:\n        str: Résultat détaillé du test avec jet de dé, calculs et interprétation.\n    \"\"\"",
+        "detail": "back.tools.skill_tools",
+        "documentation": {}
+    },
+    {
+        "label": "DependencyContainer",
+        "kind": 6,
+        "importPath": "back.utils.dependency_injector",
+        "description": "back.utils.dependency_injector",
+        "peekOfCode": "class DependencyContainer:\n    \"\"\"\n    Conteneur de dépendances simple pour gérer les instances de services.\n    Évite les globals et facilite les tests avec des mocks.\n    \"\"\"\n    def __init__(self):\n        self._services: Dict[str, Any] = {}\n        self._config = Config()\n        self._register_services()\n    def _register_services(self) -> None:",
+        "detail": "back.utils.dependency_injector",
+        "documentation": {}
+    },
+    {
+        "label": "get_service",
+        "kind": 2,
+        "importPath": "back.utils.dependency_injector",
+        "description": "back.utils.dependency_injector",
+        "peekOfCode": "def get_service(service_name: str) -> Any:\n    \"\"\"\n    Fonction utilitaire pour récupérer un service.\n    Args:\n        service_name: Nom du service.\n    Returns:\n        Instance du service.\n    \"\"\"\n    return container.get(service_name)\ndef register_service(service_name: str, service_instance: Any) -> None:",
+        "detail": "back.utils.dependency_injector",
+        "documentation": {}
+    },
+    {
+        "label": "register_service",
+        "kind": 2,
+        "importPath": "back.utils.dependency_injector",
+        "description": "back.utils.dependency_injector",
+        "peekOfCode": "def register_service(service_name: str, service_instance: Any) -> None:\n    \"\"\"\n    Fonction utilitaire pour enregistrer un service (pour les tests).\n    Args:\n        service_name: Nom du service.\n        service_instance: Instance du service.\n    \"\"\"\n    container.register(service_name, service_instance)",
+        "detail": "back.utils.dependency_injector",
+        "documentation": {}
+    },
+    {
+        "label": "container",
+        "kind": 5,
+        "importPath": "back.utils.dependency_injector",
+        "description": "back.utils.dependency_injector",
+        "peekOfCode": "container = DependencyContainer()\ndef get_service(service_name: str) -> Any:\n    \"\"\"\n    Fonction utilitaire pour récupérer un service.\n    Args:\n        service_name: Nom du service.\n    Returns:\n        Instance du service.\n    \"\"\"\n    return container.get(service_name)",
+        "detail": "back.utils.dependency_injector",
+        "documentation": {}
+    },
+    {
+        "label": "roll_attack",
+        "kind": 2,
+        "importPath": "back.utils.dice",
+        "description": "back.utils.dice",
+        "peekOfCode": "def roll_attack(dice: str) -> int:\n    \"\"\"\n    Effectue un jet d'attaque en lançant les dés spécifiés.\n    Parameters:\n    - dice (str): La notation des dés à lancer (ex: \"1d20\").\n    Returns:\n    - int: Le résultat du jet d'attaque.\n    \"\"\"\n    num, sides = map(int, dice.lower().split('d'))\n    return sum(random.randint(1, sides) for _ in range(num))",
+        "detail": "back.utils.dice",
+        "documentation": {}
+    },
+    {
+        "label": "CharacterNotFoundError",
+        "kind": 6,
+        "importPath": "back.utils.exceptions",
+        "description": "back.utils.exceptions",
+        "peekOfCode": "class CharacterNotFoundError(HTTPException):\n    \"\"\"\n    Exception levée lorsqu'un personnage n'est pas trouvé.\n    \"\"\"\n    def __init__(self, character_id: str):\n        super().__init__(status_code=404, detail=f\"Personnage {character_id} non trouvé\")\nclass SessionNotFoundError(HTTPException):\n    \"\"\"\n    Exception levée lorsqu'une session n'est pas trouvée.\n    \"\"\"",
+        "detail": "back.utils.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "SessionNotFoundError",
+        "kind": 6,
+        "importPath": "back.utils.exceptions",
+        "description": "back.utils.exceptions",
+        "peekOfCode": "class SessionNotFoundError(HTTPException):\n    \"\"\"\n    Exception levée lorsqu'une session n'est pas trouvée.\n    \"\"\"\n    def __init__(self, session_id: str):\n        super().__init__(status_code=404, detail=f\"Session {session_id} non trouvée\")\nclass ValidationError(HTTPException):\n    \"\"\"\n    Exception levée pour les erreurs de validation.\n    \"\"\"",
+        "detail": "back.utils.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "ValidationError",
+        "kind": 6,
+        "importPath": "back.utils.exceptions",
+        "description": "back.utils.exceptions",
+        "peekOfCode": "class ValidationError(HTTPException):\n    \"\"\"\n    Exception levée pour les erreurs de validation.\n    \"\"\"\n    def __init__(self, detail: str):\n        super().__init__(status_code=422, detail=detail)\nclass BusinessLogicError(HTTPException):\n    \"\"\"\n    Exception levée pour les erreurs de logique métier.\n    \"\"\"",
+        "detail": "back.utils.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "BusinessLogicError",
+        "kind": 6,
+        "importPath": "back.utils.exceptions",
+        "description": "back.utils.exceptions",
+        "peekOfCode": "class BusinessLogicError(HTTPException):\n    \"\"\"\n    Exception levée pour les erreurs de logique métier.\n    \"\"\"\n    def __init__(self, detail: str, error_code: Optional[str] = None):\n        detail_msg = detail\n        if error_code:\n            detail_msg = f\"[{error_code}] {detail}\"\n        super().__init__(status_code=400, detail=detail_msg)\nclass InsufficientFundsError(BusinessLogicError):",
+        "detail": "back.utils.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "InsufficientFundsError",
+        "kind": 6,
+        "importPath": "back.utils.exceptions",
+        "description": "back.utils.exceptions",
+        "peekOfCode": "class InsufficientFundsError(BusinessLogicError):\n    \"\"\"\n    Exception levée lorsqu'un personnage n'a pas assez d'argent.\n    \"\"\"\n    def __init__(self, current_gold: float, required_gold: float):\n        detail = f\"Pas assez d'argent. Actuel: {current_gold}, Requis: {required_gold}\"\n        super().__init__(detail, \"INSUFFICIENT_FUNDS\")\nclass ItemNotFoundError(BusinessLogicError):\n    \"\"\"\n    Exception levée lorsqu'un objet n'est pas trouvé.",
+        "detail": "back.utils.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "ItemNotFoundError",
+        "kind": 6,
+        "importPath": "back.utils.exceptions",
+        "description": "back.utils.exceptions",
+        "peekOfCode": "class ItemNotFoundError(BusinessLogicError):\n    \"\"\"\n    Exception levée lorsqu'un objet n'est pas trouvé.\n    \"\"\"\n    def __init__(self, item_id: str):\n        detail = f\"Objet {item_id} non trouvé\"\n        super().__init__(detail, \"ITEM_NOT_FOUND\")\nclass EquipmentNotFoundError(BusinessLogicError):\n    \"\"\"\n    Exception levée lorsqu'un équipement n'est pas trouvé.",
+        "detail": "back.utils.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "EquipmentNotFoundError",
+        "kind": 6,
+        "importPath": "back.utils.exceptions",
+        "description": "back.utils.exceptions",
+        "peekOfCode": "class EquipmentNotFoundError(BusinessLogicError):\n    \"\"\"\n    Exception levée lorsqu'un équipement n'est pas trouvé.\n    \"\"\"\n    def __init__(self, equipment_name: str):\n        detail = f\"Équipement {equipment_name} non trouvé\"\n        super().__init__(detail, \"EQUIPMENT_NOT_FOUND\")\nclass InternalServerError(HTTPException):\n    \"\"\"\n    Exception levée pour les erreurs internes du serveur.",
+        "detail": "back.utils.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "InternalServerError",
+        "kind": 6,
+        "importPath": "back.utils.exceptions",
+        "description": "back.utils.exceptions",
+        "peekOfCode": "class InternalServerError(HTTPException):\n    \"\"\"\n    Exception levée pour les erreurs internes du serveur.\n    \"\"\"\n    def __init__(self, detail: str = \"Erreur interne du serveur\"):\n        super().__init__(status_code=500, detail=detail)",
+        "detail": "back.utils.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "log_debug",
+        "kind": 2,
+        "importPath": "back.utils.logger",
+        "description": "back.utils.logger",
+        "peekOfCode": "def log_debug(message: str, **kwargs):\n    \"\"\"\n    ### log_debug\n    **Description :** Écrit un message de log JSON sur la sortie standard et/ou dans un fichier si DEBUG est à true ou LOG_FILE défini.\n    **Paramètres :**\n    - `message` (str) : Message à logger.\n    - `kwargs` (dict) : Informations additionnelles à inclure dans le log.\n    **Retour :** None\n    \"\"\"\n    try:",
+        "detail": "back.utils.logger",
+        "documentation": {}
+    },
+    {
+        "label": "log_info",
+        "kind": 2,
+        "importPath": "back.utils.logger",
+        "description": "back.utils.logger",
+        "peekOfCode": "def log_info(message: str, **kwargs):\n    \"\"\"\n    ### log_info\n    **Description :** Log un message d'information.\n    **Paramètres :**\n    - `message` (str) : Message à logger.\n    - `kwargs` (dict) : Informations additionnelles.\n    \"\"\"\n    try:\n        extra_data = {\"level\": \"INFO\", **kwargs}",
+        "detail": "back.utils.logger",
+        "documentation": {}
+    },
+    {
+        "label": "log_warning",
+        "kind": 2,
+        "importPath": "back.utils.logger",
+        "description": "back.utils.logger",
+        "peekOfCode": "def log_warning(message: str, **kwargs):\n    \"\"\"\n    ### log_warning\n    **Description :** Log un message d'avertissement.\n    **Paramètres :**\n    - `message` (str) : Message à logger.\n    - `kwargs` (dict) : Informations additionnelles.\n    \"\"\"\n    try:\n        extra_data = {\"level\": \"WARNING\", **kwargs}",
+        "detail": "back.utils.logger",
+        "documentation": {}
+    },
+    {
+        "label": "log_error",
+        "kind": 2,
+        "importPath": "back.utils.logger",
+        "description": "back.utils.logger",
+        "peekOfCode": "def log_error(message: str, **kwargs):\n    \"\"\"\n    ### log_error\n    **Description :** Log un message d'erreur.\n    **Paramètres :**\n    - `message` (str) : Message à logger.\n    - `kwargs` (dict) : Informations additionnelles.\n    \"\"\"\n    try:\n        extra_data = {\"level\": \"ERROR\", **kwargs}",
+        "detail": "back.utils.logger",
+        "documentation": {}
+    },
+    {
+        "label": "log_critical",
+        "kind": 2,
+        "importPath": "back.utils.logger",
+        "description": "back.utils.logger",
+        "peekOfCode": "def log_critical(message: str, **kwargs):\n    \"\"\"\n    ### log_critical\n    **Description :** Log un message critique.\n    **Paramètres :**\n    - `message` (str) : Message à logger.\n    - `kwargs` (dict) : Informations additionnelles.\n    \"\"\"\n    try:\n        extra_data = {\"level\": \"CRITICAL\", **kwargs}",
+        "detail": "back.utils.logger",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "kind": 5,
+        "importPath": "back.utils.logger",
+        "description": "back.utils.logger",
+        "peekOfCode": "logger = get_logger(__name__)\ndef log_debug(message: str, **kwargs):\n    \"\"\"\n    ### log_debug\n    **Description :** Écrit un message de log JSON sur la sortie standard et/ou dans un fichier si DEBUG est à true ou LOG_FILE défini.\n    **Paramètres :**\n    - `message` (str) : Message à logger.\n    - `kwargs` (dict) : Informations additionnelles à inclure dans le log.\n    **Retour :** None\n    \"\"\"",
+        "detail": "back.utils.logger",
+        "documentation": {}
+    },
+    {
+        "label": "LoggingTool",
+        "kind": 6,
+        "importPath": "back.utils.logging_tool",
+        "description": "back.utils.logging_tool",
+        "peekOfCode": "class LoggingTool(Tool):\n    \"\"\"\n    ### LoggingTool\n    **Description :** Wrapper qui enveloppe un outil Haystack pour intercepter et journaliser ses appels et résultats.\n    **Paramètres :**\n    - `wrapped_tool` (Tool) : L'outil Haystack à envelopper.\n    - `store` : Instance du store pour sauvegarder l'historique des messages.\n    - `agent` : Référence à l'agent pour accéder à son historique.\n    **Retour :**\n    - Instance de LoggingTool qui conserve toutes les fonctionnalités de l'outil original.",
+        "detail": "back.utils.logging_tool",
+        "documentation": {}
+    },
+    {
+        "label": "wrap_tools_with_logging",
+        "kind": 2,
+        "importPath": "back.utils.logging_tool",
+        "description": "back.utils.logging_tool",
+        "peekOfCode": "def wrap_tools_with_logging(tools: list, store=None) -> list:\n    \"\"\"\n    ### wrap_tools_with_logging\n    **Description :** Enveloppe une liste d'outils avec LoggingTool pour activer la journalisation.\n    **Paramètres :**\n    - `tools` (list) : Liste des outils Haystack à envelopper.\n    - `store` : Instance du store pour la sauvegarde.\n    **Retour :**\n    - (list) : Liste des outils enveloppés avec LoggingTool.\n    \"\"\"",
+        "detail": "back.utils.logging_tool",
+        "documentation": {}
+    },
+    {
+        "label": "extract_message_text",
+        "kind": 2,
+        "importPath": "back.utils.message_adapter",
+        "description": "back.utils.message_adapter",
+        "peekOfCode": "def extract_message_text(message):\n    role = getattr(message, 'role', None)\n    if hasattr(role, 'value'):\n        role = role.value\n    elif role is None and hasattr(message, '_role'):\n        role = message._role.value\n    else:\n        role = str(role)\n    if role == 'tool':\n        if hasattr(message, 'tool_call_results') and message.tool_call_results:",
+        "detail": "back.utils.message_adapter",
+        "documentation": {}
+    },
+    {
+        "label": "ModelConverter",
+        "kind": 6,
+        "importPath": "back.utils.model_converter",
+        "description": "back.utils.model_converter",
+        "peekOfCode": "class ModelConverter:\n    \"\"\"\n    Classe utilitaire pour convertir des objets en dictionnaires de manière cohérente.\n    Gère les objets Pydantic (model_dump), les objets avec dict(), et les objets standards.\n    \"\"\"\n    @staticmethod\n    def to_dict(obj: Any) -> Dict[str, Any]:\n        \"\"\"\n        Convertit un objet en dictionnaire.\n        Args:",
+        "detail": "back.utils.model_converter",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "back.venv.bin.jp",
+        "description": "back.venv.bin.jp",
+        "peekOfCode": "def main():\n    parser = argparse.ArgumentParser()\n    parser.add_argument('expression')\n    parser.add_argument('-f', '--filename',\n                        help=('The filename containing the input data.  '\n                              'If a filename is not given then data is '\n                              'read from stdin.'))\n    parser.add_argument('--ast', action='store_true',\n                        help=('Pretty print the AST, do not search the data.'))\n    args = parser.parse_args()",
+        "detail": "back.venv.bin.jp",
+        "documentation": {}
+    },
+    {
+        "label": "custom_openapi",
+        "kind": 2,
+        "importPath": "back.app",
+        "description": "back.app",
+        "peekOfCode": "def custom_openapi():\n    if app.openapi_schema:\n        return app.openapi_schema\n    openapi_schema = get_openapi(\n        title=\"JdR – Terres du Milieu\",\n        version=\"1.0.0\",\n        description=\"API pour le jeu de rôle orchestré par un LLM.\",\n        routes=app.routes,\n    )\n    app.openapi_schema = openapi_schema",
+        "detail": "back.app",
+        "documentation": {}
+    },
+    {
+        "label": "app",
+        "kind": 5,
+        "importPath": "back.app",
+        "description": "back.app",
+        "peekOfCode": "app = FastAPI(title=\"JdR – Terres du Milieu\")\n# Configuration CORS pour permettre les requêtes du frontend\napp.add_middleware(\n    CORSMiddleware,\n    allow_origins=[\"http://localhost:3000\", \"http://localhost:5173\", \"http://localhost:8080\"],  # Ports communs pour dev frontend\n    allow_credentials=True,\n    allow_methods=[\"*\"],  # Permet toutes les méthodes HTTP (GET, POST, PUT, DELETE, OPTIONS, etc.)\n    allow_headers=[\"*\"],  # Permet tous les headers\n)\n# Routers REST",
+        "detail": "back.app",
+        "documentation": {}
+    },
+    {
+        "label": "Config",
+        "kind": 6,
+        "importPath": "back.config",
+        "description": "back.config",
+        "peekOfCode": "class Config:\n    \"\"\"Classe de configuration centralisée utilisant un fichier YAML.\"\"\"\n    def __init__(self, config_file: str = \"config.yaml\"):\n        self.config_file = Path(__file__).parent / config_file\n        self._config: Dict[str, Any] = {}\n        self._logger: Optional[logging.Logger] = None\n        self._load_config()\n        self._setup_logging()\n    def _load_config(self) -> None:\n        \"\"\"Charge la configuration depuis le fichier YAML.\"\"\"",
+        "detail": "back.config",
+        "documentation": {}
+    },
+    {
+        "label": "get_data_dir",
+        "kind": 2,
+        "importPath": "back.config",
+        "description": "back.config",
+        "peekOfCode": "def get_data_dir() -> str:\n    \"\"\"Fonction de compatibilité pour get_data_dir.\"\"\"\n    return config.get_data_dir()\ndef get_llm_config() -> Dict[str, str]:\n    \"\"\"Fonction de compatibilité pour la configuration LLM.\"\"\"\n    return config.get_llm_config()\ndef get_logger(name: str):\n    \"\"\"Fonction de compatibilité pour obtenir un logger configuré.\"\"\"\n    return config.get_logger(name)\n# Configuration du logging au niveau module",
+        "detail": "back.config",
+        "documentation": {}
+    },
+    {
+        "label": "get_llm_config",
+        "kind": 2,
+        "importPath": "back.config",
+        "description": "back.config",
+        "peekOfCode": "def get_llm_config() -> Dict[str, str]:\n    \"\"\"Fonction de compatibilité pour la configuration LLM.\"\"\"\n    return config.get_llm_config()\ndef get_logger(name: str):\n    \"\"\"Fonction de compatibilité pour obtenir un logger configuré.\"\"\"\n    return config.get_logger(name)\n# Configuration du logging au niveau module\nlogger = get_logger(__name__)",
+        "detail": "back.config",
+        "documentation": {}
+    },
+    {
+        "label": "get_logger",
+        "kind": 2,
+        "importPath": "back.config",
+        "description": "back.config",
+        "peekOfCode": "def get_logger(name: str):\n    \"\"\"Fonction de compatibilité pour obtenir un logger configuré.\"\"\"\n    return config.get_logger(name)\n# Configuration du logging au niveau module\nlogger = get_logger(__name__)",
+        "detail": "back.config",
+        "documentation": {}
+    },
+    {
+        "label": "config",
+        "kind": 5,
+        "importPath": "back.config",
+        "description": "back.config",
+        "peekOfCode": "config = Config()\n# Fonctions de compatibilité pour l'existant\ndef get_data_dir() -> str:\n    \"\"\"Fonction de compatibilité pour get_data_dir.\"\"\"\n    return config.get_data_dir()\ndef get_llm_config() -> Dict[str, str]:\n    \"\"\"Fonction de compatibilité pour la configuration LLM.\"\"\"\n    return config.get_llm_config()\ndef get_logger(name: str):\n    \"\"\"Fonction de compatibilité pour obtenir un logger configuré.\"\"\"",
+        "detail": "back.config",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "kind": 5,
+        "importPath": "back.config",
+        "description": "back.config",
+        "peekOfCode": "logger = get_logger(__name__)",
+        "detail": "back.config",
+        "documentation": {}
+    },
+    {
+        "label": "project_root",
+        "kind": 5,
+        "importPath": "back.main",
+        "description": "back.main",
+        "peekOfCode": "project_root = Path(__file__).parent.parent\nsys.path.insert(0, str(project_root))\nfrom back.app import app\nimport uvicorn\nif __name__ == \"__main__\":\n    uvicorn.run(app, host=\"0.0.0.0\", port=8001)",
+        "detail": "back.main",
+        "documentation": {}
+    },
+    {
+        "label": "inject_cultures_into_skills",
+        "kind": 2,
+        "importPath": "tools.generate_skills_with_affinities",
+        "description": "tools.generate_skills_with_affinities",
+        "peekOfCode": "def inject_cultures_into_skills(skills_file: str, affinities_file: str) -> None:\n    \"\"\"\n    Ajoute la propriété 'cultures' à chaque compétence selon le mapping d'affinités.\n    Paramètres :\n    - skills_file (str) : chemin du fichier JSON des compétences.\n    - affinities_file (str) : chemin du fichier JSON des affinités.\n    Retour : None\n    \"\"\"\n    with open(skills_file, encoding=\"utf-8\") as f:\n        skills_data = json.load(f)",
+        "detail": "tools.generate_skills_with_affinities",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "tools.generate_skills_with_affinities",
+        "description": "tools.generate_skills_with_affinities",
+        "peekOfCode": "def main():\n    inject_cultures_into_skills(SKILLS_FILE, AFFINITIES_FILE)\n    print(\"Injection des cultures terminée dans skills_for_llm.json.\")\nif __name__ == \"__main__\":\n    main()",
+        "detail": "tools.generate_skills_with_affinities",
+        "documentation": {}
+    },
+    {
+        "label": "SKILLS_FILE",
+        "kind": 5,
+        "importPath": "tools.generate_skills_with_affinities",
+        "description": "tools.generate_skills_with_affinities",
+        "peekOfCode": "SKILLS_FILE = \"data/skills_for_llm.json\"\nAFFINITIES_FILE = \"data/skills_affinities.json\"\ndef inject_cultures_into_skills(skills_file: str, affinities_file: str) -> None:\n    \"\"\"\n    Ajoute la propriété 'cultures' à chaque compétence selon le mapping d'affinités.\n    Paramètres :\n    - skills_file (str) : chemin du fichier JSON des compétences.\n    - affinities_file (str) : chemin du fichier JSON des affinités.\n    Retour : None\n    \"\"\"",
+        "detail": "tools.generate_skills_with_affinities",
+        "documentation": {}
+    },
+    {
+        "label": "AFFINITIES_FILE",
+        "kind": 5,
+        "importPath": "tools.generate_skills_with_affinities",
+        "description": "tools.generate_skills_with_affinities",
+        "peekOfCode": "AFFINITIES_FILE = \"data/skills_affinities.json\"\ndef inject_cultures_into_skills(skills_file: str, affinities_file: str) -> None:\n    \"\"\"\n    Ajoute la propriété 'cultures' à chaque compétence selon le mapping d'affinités.\n    Paramètres :\n    - skills_file (str) : chemin du fichier JSON des compétences.\n    - affinities_file (str) : chemin du fichier JSON des affinités.\n    Retour : None\n    \"\"\"\n    with open(skills_file, encoding=\"utf-8\") as f:",
+        "detail": "tools.generate_skills_with_affinities",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "venv.Scripts.jp",
+        "description": "venv.Scripts.jp",
+        "peekOfCode": "def main():\n    parser = argparse.ArgumentParser()\n    parser.add_argument('expression')\n    parser.add_argument('-f', '--filename',\n                        help=('The filename containing the input data.  '\n                              'If a filename is not given then data is '\n                              'read from stdin.'))\n    parser.add_argument('--ast', action='store_true',\n                        help=('Pretty print the AST, do not search the data.'))\n    args = parser.parse_args()",
+        "detail": "venv.Scripts.jp",
+        "documentation": {}
+    }
+]

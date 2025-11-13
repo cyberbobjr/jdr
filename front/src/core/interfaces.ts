@@ -40,22 +40,37 @@ export interface CharacterContext {
   name: string;
   race: string;
   culture: string;
-  profession: string;
   caracteristiques: Record<string, number>;
   competences: Record<string, number>;
   hp: number;
   inventory: string[];
-  equipment: string[];
   spells: string[];
-  equipment_summary: EquipmentSummary;
+  gold: number; // Or possédé par le personnage
   culture_bonuses: Record<string, number>;
 }
 
-export interface EquipmentSummary {
-  total_cost: number;
-  total_weight: number;
-  remaining_money: number;
-  starting_money: number;
+// Interfaces pour les équipements détaillés
+export interface EquipmentItem {
+  type: string;
+  weight: number;
+  cost: number; // Coût en pièces d'or
+  description: string;
+}
+
+export interface WeaponItem extends EquipmentItem {
+  category: "mêlée" | "distance";
+  damage: string;
+  range?: number;
+}
+
+export interface ArmorItem extends EquipmentItem {
+  protection: number;
+}
+
+export interface EquipmentData {
+  weapons: Record<string, WeaponItem>;
+  armor: Record<string, ArmorItem>;
+  items: Record<string, EquipmentItem>;
 }
 
 // ================================
@@ -81,17 +96,17 @@ export interface Character {
   id: string;
   status: string;
   name: string;
-  race: string;
-  culture: string;
-  profession: string;
+  race: RaceData;
+  culture: CultureData;
   caracteristiques: Record<string, number>;
   competences: Record<string, number>;
   hp: number;
   inventory: Item[];
-  equipment: string[];
   spells: string[];
-  equipment_summary?: Record<string, number> | null;
+  gold: number; // Or possédé par le personnage
   culture_bonuses?: Record<string, number> | null;
+  background?: string; // Histoire du personnage
+  physical_description?: string; // Description physique
 }
 
 /**
@@ -247,7 +262,6 @@ export interface ConversationMessage {
 // === Création de personnage (API /api/creation) ===
 
 export interface AllocateAttributesRequest {
-  profession: string;
   race: string;
 }
 
@@ -274,7 +288,6 @@ export interface SaveCharacterResponse {
 
 export interface CheckSkillsRequest {
   skills: Record<string, number>;
-  profession: string;
 }
 
 export interface CheckSkillsResponse {
@@ -316,11 +329,15 @@ export interface GeneratePhysicalDescriptionResponse {
 }
 
 export interface GenerateBackgroundResponse {
-  background:string;
+  backgrounds: string[];
 }
 
 export interface GenerateNameResponse {
-  name:string;
+  names: string[];
+}
+
+export interface GeneratePhysicalDescriptionResponse {
+  physical_descriptions: string[];
 }
 
 // === Groupes de compétences (structure du JSON) ===
@@ -331,27 +348,174 @@ export interface SkillGroup {
 
 export type SkillGroupsDict = Record<string, SkillGroup[]>;
 
-// === Races (structure du JSON détaillé) ===
-export interface RaceJson {
+// === Nouvelles interfaces pour les données JSON refactorisées ===
+
+/**
+ * Interface pour les données de caractéristique depuis characteristics.json
+ */
+export interface CharacteristicData {
+  short_name: string;
+  category: 'physical' | 'mental';
+  description: string;
+  examples: string[];
+}
+
+/**
+ * Interface pour les données complètes des caractéristiques
+ */
+export interface CharacteristicsData {
+  characteristics: Record<string, CharacteristicData>;
+  bonus_table: Record<string, number>;
+  cost_table: Record<string, number>;
+  starting_points: number;
+  maximum_starting_value: number;
+}
+
+/**
+ * Interface pour les données de compétence depuis skills_for_llm.json
+ */
+export interface SkillDataLLM {
+  name: string;
+  group: string;
+  description: string;
+  primary_characteristic: string;
+  difficulty_levels: {
+    facile: string;
+    moyenne: string;
+    difficile: string;
+    tres_difficile: string;
+  };
+}
+
+/**
+ * Interface pour les groupes de compétences organisés pour l'LLM
+ */
+export interface SkillGroupsLLM {
+  [groupName: string]: SkillDataLLM[];
+}
+
+/**
+ * Interface pour les données de culture depuis races_and_cultures.json
+ */
+export interface CultureData {
+  name: string;
+  description?: string;
+  skill_bonuses?: Record<string, number>;
+  characteristic_bonuses?: Record<string, number>;
+  free_skill_points?: number;
+  special_traits?: Record<string, any>;
+}
+
+/**
+ * Interface pour les données de race depuis races_and_cultures.json
+ */
+export interface RaceData {
   name: string;
   characteristic_bonuses: Record<string, number>;
   destiny_points: number;
   special_abilities: string[];
   base_languages: string[];
   optional_languages: string[];
-  cultures: {
-    name: string;
-    bonus: string;
-    traits: string;
-  }[];
+  cultures?: CultureData[]; // Optionnel pour éviter de l'envoyer lors de la sauvegarde
 }
 
-// === Professions (structure du JSON détaillé) ===
-export interface ProfessionJson {
+/**
+ * Interface pour les données de sort depuis spells.json
+ */
+export interface SpellData {
   name: string;
+  power_cost: number;
   description: string;
-  favored_skill_groups: Record<string, number>;
-  main_characteristics: string[];
-  abilities: string[];
-  spheres: string[];
 }
+
+/**
+ * Interface pour les sphères de magie avec leurs sorts
+ */
+export interface MagicSpheres {
+  [sphereName: string]: SpellData[];
+}
+
+/**
+ * Interface pour les données d'équipement depuis equipment.json
+ */
+export interface EquipmentData {
+  type: string;
+  weight: number;
+  cost: number; // Coût en pièces d'or
+  description: string;
+  // Propriétés spécifiques selon le type
+  damage?: string;
+  category?: string;
+  range?: number;
+  protection?: number;
+}
+
+/**
+ * Interface pour les catégories d'équipement
+ */
+export interface EquipmentCategories {
+  weapons: Record<string, EquipmentData>;
+  armor: Record<string, EquipmentData>;
+  items: Record<string, EquipmentData>;
+}
+
+/**
+ * Interface pour les données de système de combat depuis combat_system.json
+ */
+export interface CombatSystemData {
+  initiative: {
+    base_formula: string;
+    tie_breaker: string;
+    description: string;
+  };
+  turn_structure: {
+    action_points: number;
+    phases: string[];
+  };
+  actions: Record<string, {
+    name: string;
+    cost: number;
+    description: string;
+  }>;
+  difficulty_modifiers: Record<string, number>;
+  damage_types?: Record<string, any>;
+  armor_types?: Record<string, any>;
+}
+
+// === Interfaces pour les réponses d'équipement ===
+
+/**
+ * Interface pour la réponse d'ajout d'équipement
+ */
+export interface AddEquipmentResponse {
+  status: string;
+  gold: number;
+  total_weight: number;
+  equipment_added: {
+    type: string;
+    category: string;
+    damage?: string;
+    weight: number;
+    cost: number;
+    description: string;
+  };
+}
+
+/**
+ * Interface pour la réponse de suppression d'équipement
+ */
+export interface RemoveEquipmentResponse {
+  status: string;
+  gold: number;
+  total_weight: number;
+  equipment_removed: {
+    type: string;
+    category: string;
+    damage?: string;
+    weight: number;
+    cost: number;
+    description: string;
+  };
+}
+
+// === Mise à jour des interfaces existantes pour compatibilité ===

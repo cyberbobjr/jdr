@@ -1,212 +1,164 @@
 """
-Service dédié à la création de personnage pour le jeu de rôle.
-Ce service gère l'allocation automatique des caractéristiques, la vérification des règles,
-et fournit les listes de professions, races, compétences, cultures, équipements et sorts.
+Service dedicated to character creation for the role-playing game.
+This service manages the automatic allocation of characteristics, rule checking,
+and provides lists of races, skills, cultures, equipment, and spells.
 """
 
-from back.models.domain.competences import Competences
-from back.models.domain.equipements import Equipements
-from back.models.domain.magie import Magie
-from back.config import get_data_dir
-import json
-import os
+from back.models.domain.stats_manager import StatsManager
+from back.models.domain.skills_manager import SkillsManager
+from back.models.domain.races_manager import RacesManager
+from back.models.domain.spells_manager import SpellsManager
+from back.models.domain.equipment_manager import EquipmentManager
+from back.models.schema import RaceData
 
 class CharacterCreationService:
     """
-    Service pour la gestion de la création de personnage.
+    Service for managing character creation.
     """
 
     @staticmethod
-    def allocate_attributes_auto(profession: str, race: str) -> dict:
+    def allocate_attributes_auto(race_data: RaceData) -> dict:
         """
         ### allocate_attributes_auto
-        **Description:** Alloue automatiquement les caractéristiques d'un personnage selon sa profession et sa race, en optimisant la répartition selon les recommandations métier et en intégrant les bonus raciaux dans le calcul du budget, sans boucle infinie.
+        **Description:** Automatically allocates a character's attributes according to their race, optimizing the distribution according to business recommendations and integrating racial bonuses into the budget calculation, without an infinite loop.
         **Parameters:**
-        - `profession` (str): La profession du personnage.
-        - `race` (str): La race du personnage.
-        **Returns:** Un dictionnaire des caractéristiques allouées.
+        - `race_data` (RaceData): The character's complete race object.
+        **Returns:** A dictionary of allocated attributes.
         """
-        from back.models.domain.caracteristiques import Caracteristiques
-        from back.models.domain.races import Races
-        caracs = Caracteristiques()
-        base_names = caracs.NAMES
-        budget = 550
-        # Bonus raciaux à intégrer dans la répartition
-        races = Races().RACES_DATA
-        race_obj = races.get(race)
-        racial_bonuses = race_obj.characteristic_bonuses if race_obj else {}
-        # 1. On part d'une base minimale (50 partout)
-        values = {name: 50 for name in base_names}
-        # 2. On prépare la liste d'ordre de priorité
-        recos = caracs.get_profession_recommendations().get(profession, {})
-        main_stats = recos.get("principales", [])
-        ordered_stats = main_stats + [n for n in base_names if n not in main_stats]
-        # 3. On incrémente chaque stat dans l'ordre, en tenant compte du bonus racial, jusqu'à épuisement du budget
-        while True:
+        stats_manager = StatsManager()
+        # Get the names of the characteristics and the budget
+        char_names = list(stats_manager.get_all_stats_names())
+        starting_points = stats_manager.starting_points
+        
+        # Racial bonuses to be integrated into the distribution
+        racial_bonuses = race_data.characteristic_bonuses if race_data else {}
+        
+        # 1. Start from a minimum base (50 everywhere)
+        values = {name: 50 for name in char_names}
+        # 2. To simplify, we distribute the remaining budget equally
+        remaining_budget = starting_points - sum(values.values())
+        
+        # 3. Equal distribution
+        while remaining_budget > 0 and any(values[name] < 70 for name in char_names):
             improved = False
-            for stat in ordered_stats:
-                bonus = racial_bonuses.get(stat, 0)
-                # On ne dépasse jamais 90 au total (valeur brute + bonus racial)
-                if values[stat] + bonus < 90:
-                    # On simule l'incrément
-                    test_values = {k: values[k] + racial_bonuses.get(k, 0) for k in base_names}
-                    test_values[stat] += 1
-                    if caracs.calculate_cost(test_values) <= budget:
-                        values[stat] += 1
-                        improved = True
+            for char_name in char_names:
+                if remaining_budget > 0 and values[char_name] < 70:
+                    values[char_name] += 1
+                    remaining_budget -= 1
+                    improved = True
             if not improved:
                 break
-        # 4. On applique les bonus raciaux pour le résultat final
-        for stat in base_names:
-            if stat in racial_bonuses:
-                values[stat] += racial_bonuses[stat]
+        
+        # 4. Apply racial bonuses for the final result
+        for char_name in char_names:
+            if char_name in racial_bonuses:
+                values[char_name] += racial_bonuses[char_name]
+        
         return values
 
     @staticmethod
     def check_attributes_points(attributes: dict) -> bool:
         """
         ### check_attributes_points
-        **Description:** Vérifie que les points de caractéristiques respectent les règles de création (budget, limites, etc.).
+        **Description:** Checks that the attribute points respect the creation rules (budget, limits, etc.).
         **Parameters:**
-        - `attributes` (dict): Dictionnaire des caractéristiques du personnage.
-        **Returns:** Un booléen indiquant si les points sont valides.
+        - `attributes` (dict): Dictionary of the character's attributes.
+        **Returns:** A boolean indicating if the points are valid.
         """
-        from back.models.domain.caracteristiques import Caracteristiques
-        caracs = Caracteristiques()
-        # Vérifie le budget total
-        if not caracs.validate_distribution(attributes):
+        stats_manager = StatsManager()
+        
+        # Check the total budget
+        total_cost = 0
+        for value in attributes.values():
+            total_cost += stats_manager.calculate_cost(value)
+
+        if total_cost > stats_manager.starting_points:
             return False
-        # Vérifie les bornes (1-105)
+        # Check the bounds (1-100)
         for v in attributes.values():
-            if v < 1 or v > 105:
+            if v < 1 or v > 100:
                 return False
         return True
-
-    @staticmethod
-    def get_professions() -> list:
-        """
-        ### get_professions
-        **Description:** Retourne la liste des professions disponibles (noms uniquement).
-        **Parameters:**
-        - Aucun
-        **Returns:** Une liste de professions (str).
-        """
-        data_path = os.path.join(get_data_dir(), 'professions.json')
-        with open(data_path, encoding='utf-8') as f:
-            professions = json.load(f)
-        return [p['name'] for p in professions]
-
-    @staticmethod
-    def get_professions_full() -> list:
-        """
-        ### get_professions_full
-        **Description:** Retourne la liste complète des objets professions (toutes les infos).
-        **Parameters:**
-        - Aucun
-        **Returns:** Une liste de dictionnaires représentant chaque profession.
-        """
-        data_path = os.path.join(get_data_dir(), 'professions.json')
-        with open(data_path, encoding='utf-8') as f:
-            professions = json.load(f)
-        return professions
-
+    
     @staticmethod
     def get_races() -> list:
         """
         ### get_races
-        **Description:** Retourne la liste complète des races disponibles avec toutes leurs informations (cultures, bonus, etc).
+        **Description:** Returns the complete list of available races with all their information (cultures, bonuses, etc.).
         **Parameters:**
-        - Aucun
-        **Returns:** Une liste d'objets RaceData (structure complète issue du JSON).
+        - None
+        **Returns:** A list of RaceData objects (complete structure from JSON).
         """
-        from back.models.domain.races import Races
-        return Races().RACES_DATA
+        races_manager = RacesManager()
+        return races_manager.get_all_races_data()
 
     @staticmethod
     def get_skills() -> dict:
         """
         ### get_skills
-        **Description:** Retourne le dictionnaire brut des groupes de compétences (structure du JSON centralisé).
+        **Description:** Returns the complete structure of the skills_for_llm.json file (groups, skills, difficulty levels, etc.) for Swagger and frontend documentation.
         **Parameters:**
-        - Aucun
-        **Returns:** Un dictionnaire {groupe: [compétences]}.
+        - None
+        **Returns:** A detailed dictionary conforming to skills_for_llm.json.
         """
-        return Competences().SKILL_GROUPS
+        skills_manager = SkillsManager()
+        return skills_manager.skills_data
+
+    @staticmethod
+    def check_skills_points(skills: dict) -> bool:
+        """
+        ### check_skills_points
+        **Description:** Checks the validity of the distribution of skill points.
+        **Parameters:**
+        - `skills` (dict): Dictionary of skills and attributed points.
+        **Returns:** True if the distribution is valid, False otherwise.
+        """
+        # Simple logic: each skill must be between 0 and 6, total max 40
+        if not isinstance(skills, dict):
+            return False
+        total = 0
+        for v in skills.values():
+            if not (0 <= v <= 6):
+                return False
+            total += v
+        return total <= 40
+
+    @staticmethod
+    def calculate_skills_cost(skills: dict) -> int:
+        """
+        ### calculate_skills_cost
+        **Description:** Calculates the total cost of the skill distribution.
+        **Parameters:**
+        - `skills` (dict): Dictionary of skills and attributed points.
+        **Returns:** The total cost (int).
+        """
+        if not isinstance(skills, dict):
+            return 0
+        return sum(skills.values())
 
     @staticmethod
     def get_equipments() -> list:
         """
         ### get_equipments
-        **Description:** Retourne la liste des équipements disponibles.
+        **Description:** Returns the list of available equipment.
         **Parameters:**
-        - Aucun
-        **Returns:** Une liste d'équipements (str).
+        - None
+        **Returns:** A list of equipment (str).
         """
-        return list(Equipements().equipment.keys())
+        equipment_manager = EquipmentManager()
+        return equipment_manager.get_equipment_names()
 
     @staticmethod
     def get_spells() -> list:
         """
         ### get_spells
-        **Description:** Retourne la liste des sorts disponibles.
+        **Description:** Returns the list of available spells.
         **Parameters:**
-        - Aucun
-        **Returns:** Une liste de sorts (str).
+        - None
+        **Returns:** A list of spells (str).
         """
-        return list(Magie().spells.keys())
-
-    @staticmethod
-    def check_skills_points(skills: dict, profession: str) -> bool:
-        """
-        ### check_skills_points
-        **Description:** Vérifie que la répartition des points de compétences respecte les règles (budget, maximum par compétence, groupes favoris, etc.), en s'appuyant sur le modèle Competences.
-        **Parameters:**
-        - `skills` (dict): Dictionnaire {nom_compétence: rangs}
-        - `profession` (str): Profession du personnage (pour les groupes favoris)
-        **Returns:** True si la répartition est valide, False sinon.
-        """
-        from back.models.domain.professions import Professions
-        from back.models.domain.competences import Competences
-        MAX_RANK = 6
-        BUDGET = 40
-        prof = Professions().PROFESSIONS_DATA.get(profession)
-        if not prof:
-            return False
-        favored_groups = prof.favored_skill_groups.keys()
-        comp = Competences()
-        total_cost = 0
-        for skill, ranks in skills.items():
-            skill_obj = comp.get_skill(skill)
-            if not skill_obj:
-                return False
-            if not (0 <= ranks <= MAX_RANK):
-                return False
-            is_favored = skill_obj.group in favored_groups
-            total_cost += comp.calculate_development_cost(skill, ranks, is_favored)
-        return total_cost <= BUDGET
-
-    @staticmethod
-    def calculate_skills_cost(skills: dict, profession: str) -> int:
-        """
-        ### calculate_skills_cost
-        **Description:** Calcule le coût total en PdP de la répartition des compétences, en s'appuyant sur le modèle Competences.
-        **Parameters:**
-        - `skills` (dict): Dictionnaire {nom_compétence: rangs}
-        - `profession` (str): Profession du personnage
-        **Returns:** Le coût total (int).
-        """
-        from back.models.domain.professions import Professions
-        from back.models.domain.competences import Competences
-        prof = Professions().PROFESSIONS_DATA.get(profession)
-        if not prof:
-            return 0
-        favored_groups = prof.favored_skill_groups.keys()
-        comp = Competences()
-        total_cost = 0
-        for skill, ranks in skills.items():
-            skill_obj = comp.get_skill(skill)
-            if not skill_obj:
-                continue
-            is_favored = skill_obj.group in favored_groups
-            total_cost += comp.calculate_development_cost(skill, ranks, is_favored)
-        return total_cost
+        spells_manager = SpellsManager()
+        all_spells = []
+        for spell_data in spells_manager.get_all_spells():
+            all_spells.append(spell_data["name"])
+        return all_spells

@@ -9,13 +9,12 @@
       <!-- Instructions (si présentes) -->
       <div v-if="message.instructions" class="message-instructions">
         <strong>Instructions:</strong> {{ message.instructions }}
-      </div>
-
-      <!-- Parties du message -->
+      </div>      <!-- Parties du message -->
       <div class="message-parts">
         <div
           v-for="(part, partIndex) in message.parts"
           :key="`part-${partIndex}-${part.timestamp}`"
+          v-show="shouldShowPart(part)"
           class="message-part"
           :class="getPartClass(part.part_kind)"
         >
@@ -41,9 +40,7 @@
             <small>Référence: {{ part.dynamic_ref }}</small>
           </div>
         </div>
-      </div>
-
-      <!-- Détails d'usage (si présents et mode debug) -->
+      </div>      <!-- Détails d'usage (si présents et mode debug) -->
       <div v-if="message.usage && showDebugInfo" class="usage-details">
         <details>
           <summary>Détails d'usage</summary>
@@ -54,6 +51,17 @@
             <li>Total: {{ message.usage.total_tokens }}</li>
           </ul>
         </details>
+      </div>
+
+      <!-- Actions de debug (mode debug uniquement) -->
+      <div v-if="showDebugInfo" class="debug-actions">
+        <button 
+          class="delete-message-btn"
+          @click="handleDeleteMessage(index)"
+          title="Supprimer ce message de l'historique"
+        >
+          🗑️ Supprimer l'entrée #{{ index }}
+        </button>
       </div>
     </div>
   </div>
@@ -72,6 +80,11 @@ const props = withDefaults(defineProps<Props>(), {
   showDebugInfo: false,
 });
 
+// Émissions d'événements
+const emit = defineEmits<{
+  deleteMessage: [messageIndex: number];
+}>();
+
 const filteredMessages = computed(() => {
   if (props.showDebugInfo) {
     return props.messages;
@@ -84,6 +97,19 @@ const filteredMessages = computed(() => {
       )
   );
 });
+
+/**
+ * Gère la suppression d'un message
+ */
+const handleDeleteMessage = (messageIndex: number): void => {
+  const confirmed = confirm(
+    `Êtes-vous sûr de vouloir supprimer le message #${messageIndex} de l'historique ?\n\nCette action est irréversible.`
+  );
+  
+  if (confirmed) {
+    emit('deleteMessage', messageIndex);
+  }
+};
 
 /**
  * Formate le type de partie pour l'affichage
@@ -159,27 +185,70 @@ const isCodeContent = (partKind: string): boolean => {
 /**
  * Formate le contenu textuel (supporte le markdown basique)
  */
-const formatTextContent = (content: string): string => {
+const formatTextContent = (content: string | any): string => {
+  // Vérification du type et conversion si nécessaire
   if (!content) return "";
+  
+  let textContent: string;
+  if (typeof content === 'string') {
+    textContent = content;
+  } else {
+    // Si ce n'est pas une chaîne et qu'on n'est pas en mode debug, on n'affiche rien
+    if (!props.showDebugInfo) {
+      return "";
+    }
+    
+    // En mode debug, on sérialise les objets/autres types
+    if (typeof content === 'object') {
+      textContent = JSON.stringify(content, null, 2);
+    } else {
+      textContent = String(content);
+    }
+  }
 
-  // Conversion basique du markdown
-  return content
+  // Conversion du markdown avec support des titres et actions
+  return textContent
+    // Titres H3 (### Titre)
+    .replace(/^### (.+)$/gm, "<h3 class='markdown-h3'>$1</h3>")
+    // Titres H2 (## Titre)
+    .replace(/^## (.+)$/gm, "<h2 class='markdown-h2'>$1</h2>")
+    // Titres H1 (# Titre)
+    .replace(/^# (.+)$/gm, "<h1 class='markdown-h1'>$1</h1>")
+    // Actions entre crochets avec types spécifiques (ordre important!)
+    .replace(/\[([^\]]+)\]/g, "<span class='action-highlight'>[$1]</span>")
+    // Gras et italique
     .replace(/\*\*(.*?)\*\*/g, "<span class='jdr-bold'>$1</span>")
     .replace(/\*(.*?)\*/g, "<em>$1</em>")
+    // Retours à la ligne
     .replace(/\n/g, "<br>");
+};
+
+/**
+ * Détermine si une partie doit être affichée
+ */
+const shouldShowPart = (part: any): boolean => {
+  // Toujours afficher en mode debug
+  if (props.showDebugInfo) {
+    return true;
+  }
+  
+  // Si le contenu n'est pas une chaîne, ne pas afficher
+  if (typeof part.content !== 'string') {
+    return false;
+  }
+  
+  // Si le contenu est vide après formatage, ne pas afficher
+  const formattedContent = formatTextContent(part.content);
+  return formattedContent.trim() !== '';
 };
 </script>
 
 <style scoped>
-.jdr-bold {
-  font-weight: bold;
-  color: var(--jdr-text-primary, #1f2937);
-}
-
 .chat-container {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  color: var(--jdr-text-primary);
 }
 
 .chat-message {
@@ -380,5 +449,45 @@ const formatTextContent = (content: string): string => {
 
 .usage-details li {
   margin-bottom: 0.25rem;
+}
+
+/* Actions de debug */
+.debug-actions {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.delete-message-btn {
+  background-color: var(--jdr-danger);
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.delete-message-btn:hover {
+  background-color: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.delete-message-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.delete-message-btn:focus {
+  outline: 2px solid #ef4444;
+  outline-offset: 2px;
 }
 </style>

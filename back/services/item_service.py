@@ -9,6 +9,7 @@ from typing import Dict, List, Optional
 from uuid import uuid4
 from back.models.schema import Item, ItemType
 from back.utils.logger import log_debug
+from back.config import get_data_dir
 
 class ItemService:
     """Service pour la gestion des objets et de l'inventaire"""
@@ -20,14 +21,12 @@ class ItemService:
     def _load_items_data(self) -> None:
         """
         ### _load_items_data
-        **Description:** Charge les données des objets depuis le fichier CSV equipements.csv
-        **Paramètres:** Aucun
+        **Description:** Charge les données des objets depuis le fichier CSV equipements.csv        **Paramètres:** Aucun
         **Retour:** None (stocke les données dans self._items_data)
         """
         try:
             # Chemin vers le fichier CSV
-            base_path = os.path.dirname(os.path.dirname(__file__))
-            csv_path = os.path.join(base_path, "..", "data", "game", "equipements.csv")
+            csv_path = os.path.join(get_data_dir(), "game", "equipements.csv")
             
             self._items_data = {}
             
