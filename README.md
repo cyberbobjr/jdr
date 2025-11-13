@@ -250,7 +250,7 @@ The new system uses **6 core attributes** with **400 total points**:
 │   ├── vitest.config.ts        # Configuration des tests
 │   ├── tailwind.config.js      # Configuration TailwindCSS
 │   └── README.md               # Documentation frontend détaillée
-├── back/gamedata/               # Game data source (YAML files - synced to data/)
+├── back/gamedata/               # Game data source (YAML files)
 │   ├── stats.yaml
 │   ├── skills_for_llm.yaml
 │   ├── races_and_cultures.yaml
@@ -258,13 +258,6 @@ The new system uses **6 core attributes** with **400 total points**:
 │   ├── spells.yaml
 │   └── combat_system.yaml
 ├── data/                        # Runtime data directory
-│   ├── *.yaml                  # Game data (YAML files) ⭐ LOADED FROM HERE
-│   │   ├── stats.yaml              # Character statistics (6 attributes, 400 points)
-│   │   ├── skills_for_llm.yaml     # Skills organized in 6 groups
-│   │   ├── races_and_cultures.yaml # Available races and cultures
-│   │   ├── equipment.yaml          # Weapons, armor, items
-│   │   ├── spells.yaml             # Magic spells
-│   │   └── combat_system.yaml      # Combat mechanics
 │   ├── characters/             # Character sheets (JSON files)
 │   ├── combat/                 # Active combat states
 │   ├── scenarios/              # Scenario Markdown files
@@ -290,100 +283,6 @@ The new system uses **6 core attributes** with **400 total points**:
 ├── pydanticai.md                # PydanticAI framework documentation
 └── README.md                    # This file (comprehensive project documentation)
 ```
-
-## 🔄 Migration and Modernization
-
-### Completed Migrations ✅
-
-#### 1. Data Format Migration (JSON → YAML)
-
-All game data has been migrated from JSON to YAML format:
-
-**Benefits**:
-- Better readability and maintainability
-- Built-in comments support
-- Cleaner diffs in version control
-- Easier manual editing
-
-**Migrated Files**:
-- `stats.json` → `data/stats.yaml`
-- `skills_for_llm.json` → `data/skills_for_llm.yaml`
-- `races_and_cultures.json` → `data/races_and_cultures.yaml`
-- `equipment.json` → `data/equipment.yaml`
-- `spells.json` → `data/spells.yaml`
-- Plus: `combat_system.yaml`, `skill_groups.yaml`, `skills_affinities.yaml`
-
-**Location**: YAML files are loaded from `data/` directory (configured in `back/config.yaml`)
-**Source**: Development versions maintained in `back/gamedata/`
-**Backup**: Original JSON files preserved in `data/json_backup/` for reference
-
-#### 2. Language Translation (French → English)
-
-Complete translation of all game elements to English for international accessibility:
-
-**Statistics (Caractéristiques)**:
-- Force → Strength
-- Constitution → Constitution (unchanged)
-- Agilité → Agility
-- Intelligence → Intelligence (unchanged)
-- Sagesse/Volonté → Wisdom
-- Charisme/Présence → Charisma
-
-**Code and Models**:
-- All Pydantic model field names translated
-- All service methods and function names in English
-- All docstrings and comments in English
-- Database field names: `caracteristiques` → `stats`, `competences` → `skills`
-
-#### 3. Character System Simplification (V2)
-
-**Old System** (V1):
-- 8 characteristics with 550 points
-- 9 skill groups with 84 development points
-- Complex cost scaling
-- Mixed French/English naming
-
-**New System** (V2):
-- 6 core stats with 400 points (27% reduction)
-- 6 skill groups with 40 development points (52% reduction)
-- Simplified uniform cost: 1 point = 1 rank
-- Pure English naming
-- Strict Pydantic V2 validation
-
-**Migration Path**:
-- `character.py` - Legacy model (deprecated)
-- `character_v2.py` - New simplified model ✅
-- Both models coexist during transition period
-- Automatic migration tool planned
-
-#### 4. Framework Migration (LangChain → PydanticAI)
-
-**Why PydanticAI**:
-- Better type safety with Pydantic V2
-- Simpler agent definition
-- Native async support
-- Cleaner tool registration
-- More maintainable code
-
-**Changes**:
-- Agent creation using `pydantic_ai.Agent`
-- Tools using `@agent.tool` decorator
-- `RunContext[DepsType]` for dependency injection
-- Custom JSONL store for message history
-
-### In Progress 🔄
-
-1. **Complete CharacterV2 Migration**: Migrate all services to use CharacterV2
-2. **NPC Generation System**: Automated NPC creation with archetypes
-3. **Combat Manager Service**: Centralized combat state management
-4. **API Versioning**: Support `/api/v1` and `/api/v2` endpoints
-
-### Planned Improvements ⏳
-
-1. **Remove Fallback Data**: Eliminate hardcoded fallback data in managers (fail fast on missing config)
-2. **Enhanced Testing**: Increase test coverage to 90%+
-3. **Performance Optimization**: Caching for frequently accessed game data
-4. **Frontend Refactoring**: Update Vue components for CharacterV2
 
 ## 📊 Architecture Diagrams
 
@@ -986,69 +885,6 @@ interface Props {
 - Tous les tests ont été migrés et validés pour PydanticAI.
 - Organisation par responsabilité : `agents/`, `tools/`, `services/`, `domain/`, etc.
 - **Frontend** : Tests Vitest pour les composants Vue.js, dont ChatMessage
-
-## Système de Prévention des Sessions Dupliquées (2025)
-
-### Fonctionnalité
-Le système empêche automatiquement la création de sessions dupliquées en détectant les combinaisons existantes de `character_name` + `scenario_name`. Cette protection évite les conflits de données et assure l'intégrité des sessions de jeu.
-
-### Codes de réponse
-
-| Code HTTP | Signification | Description |
-|-----------|---------------|-------------|
-| **200** | Succès | Session créée avec succès |
-| **404** | Scénario introuvable | Le fichier de scénario n'existe pas |
-| **409** | Session dupliquée | Une session existe déjà pour cette combinaison personnage/scénario |
-
-## Migration 2025 : Suppression de la clé `state` dans les fiches de personnage
-
-- **Structure simplifiée** : Les fiches de personnage JSON n'utilisent plus de clé intermédiaire `state`. Tous les champs du personnage (nom, race, caractéristiques, inventaire, etc.) sont désormais à la racine du fichier JSON.
-- **Compatibilité** : Toute la logique de lecture/écriture, les services et les tests ont été adaptés pour fonctionner sans la clé `state`.
-- **Conséquences** :
-  - Les anciennes méthodes manipulant la section `state` (ex : `load_character_state`, `update_character_state`, etc.) ont été supprimées.
-  - Les tests unitaires et d'intégration ont été corrigés pour écrire/lire les personnages directement à la racine.
-  - Toute fiche de personnage doit désormais respecter ce format :
-
-```json
-{
-  "id": "d1a4064a-c956-4d46-b6ea-5e688cf2f78b",
-  "name": "Test Hero",
-  "race": "Humain",
-  "culture": "Rurale",
-  "caracteristiques": {"Force": 10, ...},
-  "competences": {"Athletisme": 5},
-  "hp": 42,
-  "xp": 0,
-  "gold": 0,
-  "inventory": [],
-  "spells": [],
-  "culture_bonuses": {},
-  "created_at": "2025-06-14T19:08:31.148010",
-  "last_update": "2025-06-14T19:08:31.148010",
-  "current_step": "creation",
-  "status": "en_cours"
-}
-```
-
-- **Avantages** :
-  - Lecture/écriture plus simple et plus rapide
-  - Moins d'ambiguïté sur la structure des données
-  - Maintenance facilitée pour les évolutions futures
-
-> ⚠️ Toute référence à la clé `state` dans le code ou les tests doit être supprimée pour garantir la compatibilité.
-
-## Ajout des skills de culture (2025)
-
-- Un nouveau groupe de compétences "Culture" a été ajouté dans `data/skills_for_llm.json`.
-- Chaque trait de culture issu de `data/races_and_cultures.json` est désormais représenté comme un skill de culture, avec une propriété `culture` précisant la ou les cultures associées.
-- Ces skills de culture ne peuvent être acquis naturellement que par les personnages issus de la culture correspondante.
-- La structure d'un skill de culture est identique à celle des autres skills : `name`, `description`, `stats`, `examples`, et `culture`.
-
-- **Affinités culturelles pour les compétences** :
-  - Les affinités entre cultures et compétences sont centralisées dans `data/skills_affinities.json`.
-  - Un script (`tools/generate_skills_with_affinities.py`) injecte automatiquement la propriété `cultures` dans chaque compétence de `skills_for_llm.json`.
-  - Pour ajouter une nouvelle culture ou compétence, il suffit de mettre à jour le mapping dans `skills_affinities.json` puis de relancer le script.
-  - Ce système garantit la cohérence et la facilité de maintenance du fichier des compétences.
 
 ## Tests
 

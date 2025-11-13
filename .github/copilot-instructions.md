@@ -23,73 +23,6 @@ The architecture is organized around:
 - **No game rules in routers**: Routers only handle HTTP logic
 - **English naming**: All code, models, and data use English (post-migration from French)
 
-## Recent Major Changes
-
-### 1. Data Format Migration (JSON → YAML)
-
-**Status**: ✅ Complete
-
-All game data has been migrated from JSON to YAML format and is now stored in the `data/` directory:
-
-- `data/stats.yaml` - Character statistics (6 attributes: Strength, Constitution, Agility, Intelligence, Wisdom, Charisma)
-- `data/skills_for_llm.yaml` - Skills organized in 6 groups (Combat, General, Stealth, Social, Magic, Knowledge)
-- `data/races_and_cultures.yaml` - Available races and cultures
-- `data/equipment.yaml` - Weapons, armor, and items
-- `data/spells.yaml` - Magic spells
-- `data/combat_system.yaml` - Combat mechanics
-- `data/skills_affinities.yaml` - Culture-skill affinities
-- `data/skill_groups.yaml` - Skill group definitions
-
-**Source**: YAML files are also maintained in `back/gamedata/` for development
-**Backup**: Original JSON files preserved in `data/json_backup/`
-
-### 2. French to English Translation
-
-**Status**: ✅ Complete
-
-All game characteristics, skills, and domain models have been translated to English:
-
-**Characteristics (Caractéristiques → Stats)**:
-- Force → Strength
-- Constitution → Constitution (unchanged)
-- Agilité → Agility  
-- Rapidité → (removed/merged)
-- Intelligence → Intelligence (unchanged)
-- Volonté → Wisdom
-- Raisonnement → (removed/merged)
-- Intuition → (removed/merged)
-- Présence → Charisma
-
-**Skills (Compétences → Skills)**:
-All skill names and descriptions translated to English in `skills_for_llm.yaml`
-
-**Domain Models**:
-- `caracteristiques` → `stats`
-- `competences` → `skills`
-- `nom` → `name`
-- Field names in all Pydantic models now use English
-
-### 3. Simplified Character System (V2)
-
-**Status**: ✅ Character V2 model created, migration in progress
-
-New simplified system in `back/models/domain/character_v2.py`:
-
-**Stats System**:
-- 6 main attributes (down from 8)
-- 400 total points (down from 550)
-- Simplified bonus calculation
-
-**Skills System**:
-- 6 skill groups (down from 9)
-- 40 development points (down from 84)
-- Uniform cost: 1 point = 1 rank
-
-**Validation**:
-- Strict Pydantic validation with `field_validator` and `model_validator`
-- Type safety with UUID, datetime, and Enum types
-- Combat stats automatically calculated
-
 ## Technology Stack
 
 ### Backend
@@ -199,32 +132,32 @@ front/
 All game data is loaded through manager classes that read YAML files:
 
 ### StatsManager (`back/models/domain/stats_manager.py`)
-- Loads `data/stats.yaml`
+- Loads `gamedata/stats.yaml`
 - Provides: stat info, bonus table, cost table, starting points (400)
 - Methods: `get_description()`, `get_bonus()`, `calculate_cost()`
 
 ### SkillsManager (`back/models/domain/skills_manager.py`)
-- Loads `data/skills_for_llm.yaml`
+- Loads `gamedata/skills_for_llm.yaml`
 - Provides: 6 skill groups with skills
 - Methods: `get_all_skills()`, `get_skill_by_name()`, `get_skills_by_group()`
 
 ### RacesManager (`back/models/domain/races_manager.py`)
-- Loads `data/races_and_cultures.yaml`
+- Loads `gamedata/races_and_cultures.yaml`
 - Provides: available races, cultures, bonuses
 - Methods: `get_all_races()`, `get_race_by_name()`, `get_cultures_for_race()`
 
 ### EquipmentManager (`back/models/domain/equipment_manager.py`)
-- Loads `data/equipment.yaml`
+- Loads `gamedata/equipment.yaml`
 - Provides: weapons, armor, items
 - Methods: `get_all_equipment()`, `get_equipment_by_name()`, `get_weapons()`, `get_armor()`
 
 ### SpellsManager (`back/models/domain/spells_manager.py`)
-- Loads `data/spells.yaml`
+- Loads `gamedata/spells.yaml`
 - Provides: available spells, organized by sphere
 - Methods: `get_all_spells()`, `get_spell_by_name()`, `get_spells_by_sphere()`
 
 ### CombatSystemManager (`back/models/domain/combat_system_manager.py`)
-- Loads `data/combat_system.yaml`
+- Loads `gamedata/combat_system.yaml`
 - Provides: combat rules, actions, damage calculations
 - Methods: Combat-related rule lookups
 
@@ -321,6 +254,74 @@ async def skill_check_with_character(
 5. **Error Handling**: Use custom exceptions from `utils/exceptions.py`
 6. **Logging**: Use JSON logger from `utils/logger.py`
 
+#### Python Documentation Standards
+
+All Python methods must be documented with pydoc inside the method:
+
+```python
+def calculate_bonus(stat_value: int) -> int:
+    """
+    Calculate the modifier bonus for a stat value.
+    
+    Args:
+        stat_value: The stat value (3-20)
+    
+    Returns:
+        The calculated bonus modifier (-3 to +5)
+    
+    Raises:
+        ValueError: If stat_value is out of valid range
+    """
+    if not (3 <= stat_value <= 20):
+        raise ValueError(f"Stat value must be 3-20, got {stat_value}")
+    return (stat_value - 10) // 2
+```
+
+#### FastAPI Route Documentation Standards
+
+All FastAPI routes must be documented in JSON API format with input/output samples:
+
+```python
+@router.post("/characters/new")
+async def create_character(character: CharacterCreate) -> CharacterResponse:
+    """
+    Create a new character.
+    
+    **Request Body:**
+    ```json
+    {
+        "name": "Aragorn",
+        "race": "Human",
+        "culture": "Gondor",
+        "stats": {
+            "strength": 85,
+            "constitution": 80,
+            "agility": 70
+        }
+    }
+    ```
+    
+    **Response:**
+    ```json
+    {
+        "id": "d7763165-4c03-4c8d-9bc6-6a2568b79eb3",
+        "name": "Aragorn",
+        "race": "Human",
+        "culture": "Gondor",
+        "stats": {
+            "strength": 85,
+            "constitution": 80,
+            "agility": 70
+        },
+        "hp": 85,
+        "created_at": "2025-11-13T10:30:00Z"
+    }
+    ```
+    """
+    # Implementation here
+    pass
+```
+
 ### Service Layer
 
 - Services should be stateless where possible
@@ -362,30 +363,10 @@ Key config sections:
 - `logging` - Logging configuration
 - `app` - Application settings
 
-## Migration Status
-
-### Completed
-- ✅ JSON to YAML migration for game data
-- ✅ French to English translation
-- ✅ CharacterV2 model created
-- ✅ PydanticAI agent implementation
-- ✅ YAML data managers
-- ✅ Service layer refactoring
-
-### In Progress
-- 🔄 Complete migration to CharacterV2
-- 🔄 Remove fallback data methods from managers
-- 🔄 NPC generation system
-
-### Planned
-- ⏳ Combat state management service
-- ⏳ Complete test coverage
-- ⏳ API versioning (/api/v1, /api/v2)
-
 ## Important Notes
 
 1. **Always use English**: All new code, comments, and data should be in English
-2. **Load data from YAML**: Never use JSON fallback; all game data is in `data/*.yaml` (loaded via managers)
+2. **Load data from YAML**: Never use JSON fallback; all game data is in `gamedata/*.yaml` (loaded via managers)
 3. **Use PydanticAI, not LangChain**: The project migrated from LangChain to PydanticAI
 4. **Respect SRP**: Each service should have a single, well-defined responsibility
 5. **Type everything**: Use Pydantic models and type hints extensively
