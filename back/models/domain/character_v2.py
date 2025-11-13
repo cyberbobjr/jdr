@@ -10,7 +10,7 @@ This module provides a simplified character model with:
 - Strict Pydantic validation
 """
 from typing import List, Dict, Optional
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator, ConfigDict
 from uuid import UUID, uuid4
 from datetime import datetime, timezone
 from enum import Enum
@@ -83,8 +83,8 @@ class Stats(BaseModel):
         stat_value = getattr(self, stat_name.lower())
         return (stat_value - 10) // 2
     
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "strength": 14,
                 "constitution": 16,
@@ -94,6 +94,7 @@ class Stats(BaseModel):
                 "charisma": 10
             }
         }
+    )
 
 
 class Skills(BaseModel):
@@ -164,8 +165,8 @@ class Skills(BaseModel):
                 return group[skill_name]
         return 0
     
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "combat": {"sword_combat": 5, "archery": 3},
                 "general": {"athletics": 4, "perception": 3},
@@ -175,6 +176,7 @@ class Skills(BaseModel):
                 "crafting": {"blacksmithing": 5, "alchemy": 4}
             }
         }
+    )
 
 
 class Equipment(BaseModel):
@@ -205,8 +207,8 @@ class Equipment(BaseModel):
                 total_weight += item.get('weight', 0)
         return total_weight
     
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "weapons": [
                     {"name": "longsword", "damage": "1d8", "weight": 5}
@@ -223,6 +225,7 @@ class Equipment(BaseModel):
                 "gold": 100
             }
         }
+    )
 
 
 class CombatStats(BaseModel):
@@ -269,8 +272,8 @@ class CombatStats(BaseModel):
         self.current_hit_points = max(0, self.current_hit_points - amount)
         return old_hp - self.current_hit_points
     
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "max_hit_points": 50,
                 "current_hit_points": 50,
@@ -280,6 +283,7 @@ class CombatStats(BaseModel):
                 "attack_bonus": 3
             }
         }
+    )
 
 
 class Spells(BaseModel):
@@ -308,14 +312,15 @@ class Spells(BaseModel):
             return True
         return False
     
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "known_spells": ["fireball", "heal", "lightning_bolt", "shield"],
                 "spell_slots": {1: 4, 2: 3, 3: 2},
                 "spell_bonus": 4
             }
         }
+    )
 
 
 class CharacterV2(BaseModel):
@@ -415,8 +420,8 @@ class CharacterV2(BaseModel):
         stat_modifier = self.stats.get_modifier(stat_name)
         return skill_rank + stat_modifier
     
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "id": "123e4567-e89b-12d3-a456-426614174000",
                 "name": "Aragorn",
@@ -451,6 +456,7 @@ class CharacterV2(BaseModel):
                 "experience_points": 4500
             }
         }
+    )
 
 
 # Export main classes
