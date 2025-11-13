@@ -250,14 +250,21 @@ The new system uses **6 core attributes** with **400 total points**:
 │   ├── vitest.config.ts        # Configuration des tests
 │   ├── tailwind.config.js      # Configuration TailwindCSS
 │   └── README.md               # Documentation frontend détaillée
-├── back/gamedata/               # Game data (YAML files) ⭐ NEW
-│   ├── stats.yaml              # Character statistics (6 attributes, 400 points)
-│   ├── skills_for_llm.yaml     # Skills organized in 6 groups
-│   ├── races_and_cultures.yaml # Available races and cultures
-│   ├── equipment.yaml          # Weapons, armor, items
-│   ├── spells.yaml             # Magic spells
-│   └── combat_system.yaml      # Combat mechanics
-├── data/                        # Runtime persistent data
+├── back/gamedata/               # Game data source (YAML files - synced to data/)
+│   ├── stats.yaml
+│   ├── skills_for_llm.yaml
+│   ├── races_and_cultures.yaml
+│   ├── equipment.yaml
+│   ├── spells.yaml
+│   └── combat_system.yaml
+├── data/                        # Runtime data directory
+│   ├── *.yaml                  # Game data (YAML files) ⭐ LOADED FROM HERE
+│   │   ├── stats.yaml              # Character statistics (6 attributes, 400 points)
+│   │   ├── skills_for_llm.yaml     # Skills organized in 6 groups
+│   │   ├── races_and_cultures.yaml # Available races and cultures
+│   │   ├── equipment.yaml          # Weapons, armor, items
+│   │   ├── spells.yaml             # Magic spells
+│   │   └── combat_system.yaml      # Combat mechanics
 │   ├── characters/             # Character sheets (JSON files)
 │   ├── combat/                 # Active combat states
 │   ├── scenarios/              # Scenario Markdown files
@@ -299,13 +306,16 @@ All game data has been migrated from JSON to YAML format:
 - Easier manual editing
 
 **Migrated Files**:
-- `stats.json` → `stats.yaml`
-- `skills_for_llm.json` → `skills_for_llm.yaml`
-- `races_and_cultures.json` → `races_and_cultures.yaml`
-- `equipment.json` → `equipment.yaml`
-- `spells.json` → `spells.yaml`
+- `stats.json` → `data/stats.yaml`
+- `skills_for_llm.json` → `data/skills_for_llm.yaml`
+- `races_and_cultures.json` → `data/races_and_cultures.yaml`
+- `equipment.json` → `data/equipment.yaml`
+- `spells.json` → `data/spells.yaml`
+- Plus: `combat_system.yaml`, `skill_groups.yaml`, `skills_affinities.yaml`
 
-Original JSON files preserved in `data/json_backup/` for reference.
+**Location**: YAML files are loaded from `data/` directory (configured in `back/config.yaml`)
+**Source**: Development versions maintained in `back/gamedata/`
+**Backup**: Original JSON files preserved in `data/json_backup/` for reference
 
 #### 2. Language Translation (French → English)
 

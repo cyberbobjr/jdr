@@ -1,0 +1,91 @@
+Artistic:
+- name: Comedy
+  description: Ability to play a role and imitate the actions of others. Does not
+    modify physical appearance.
+- name: Dance
+  description: Art of mastering rhythmic movements and reproducing or creating dances.
+- name: Imitation
+  description: Talent for convincingly reproducing voices and sounds.
+- name: Music - Singing
+  description: Mastery of voice for singing and musical interpretation.
+- name: Music - Instrument
+  description: Ability to play a specific musical instrument.
+- name: Storytelling
+  description: Art of telling stories in a captivating and memorable way.
+Magic Arts:
+- name: Attunement
+  description: Allows attunement to magical objects and use of their powers.
+- name: Alchemy
+  description: Art of creating magical potions and substances from special ingredients.
+- name: Charm Crafting
+  description: Creation of minor and temporary magical objects.
+- name: Esoteric Knowledge
+  description: Deep knowledge of specific mystical and magical subjects.
+- name: Runic Crystals
+  description: Use and creation of magical runes on precious stones.
+- name: PP Development
+  description: Measures the ability to accumulate and manage magical energy.
+- name: Divination
+  description: Art of predicting the future through various mystical methods.
+- name: Spell Incantation
+  description: Ability to cast specific spells.
+- name: Power Projection
+  description: Allows transferring magical energy into objects.
+- name: Runes
+  description: Reading and creation of magical inscriptions.
+- name: Magic Tricks
+  description: Mastery of minor magic and basic spells.
+Athletic:
+- name: Acrobatics
+  description: Ability to perform complex and acrobatic movements, including fall
+    management.
+- name: Contortion
+  description: Art of contorting oneself to pass through narrow spaces or free oneself
+    from bonds.
+- name: Climbing
+  description: Ability to climb various vertical surfaces.
+Combat:
+- name: Martial Arts - Sweeps
+  description: Combat techniques based on throws and imbalances.
+- name: Martial Arts - Strikes
+  description: Unarmed combat focused on direct and impactful strikes.
+- name: Martial Arts - Style
+  description: Mastery of specific and advanced forms of martial arts.
+- name: Brawl
+  description: Ruleless street fighting using whatever is available.
+- name: Weapon Handling
+  description: Ability to effectively use a specific type of weapon.
+- name: Combat Style
+  description: Advanced combat techniques with weapons.
+Concentration:
+- name: Ki Concentration
+  description: Channeling internal energy to enhance physical abilities.
+- name: Mental Concentration
+  description: Mental focus to improve a specific action.
+- name: Ki Defense
+  description: Using internal energy to improve defenses without armor.
+- name: Ki Strength
+  description: Temporary increase in physical strength through internal energy.
+- name: Ki Speed
+  description: Acceleration of movements allowing additional actions.
+General:
+- name: Crafting
+  description: Ability to create and repair objects in a specific domain.
+- name: General Knowledge
+  description: Theoretical and practical knowledge in a specific domain.
+- name: Signal Communication
+  description: Ability to transmit messages via non-verbal means.
+- name: Estimation
+  description: Assessment of the market value of objects and goods.
+- name: Herbalism
+  description: Knowledge of plants and their uses.
+- name: Language
+  description: Mastery of a specific language, spoken and/or written.
+- name: Rope Mastery
+  description: Expertise in manipulating ropes and creating knots.
+- name: Perception
+  description: Ability to notice details and detect hidden things.
+- name: Body Resistance
+  description: Ability to resist physical effects and poisons.
+- name: Mind Resistance
+  description: Protection against mental and psychic effects.

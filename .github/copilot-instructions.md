@@ -29,16 +29,18 @@ The architecture is organized around:
 
 **Status**: ✅ Complete
 
-All game data has been migrated from JSON to YAML format and moved to `back/gamedata/`:
+All game data has been migrated from JSON to YAML format and is now stored in the `data/` directory:
 
-- `stats.yaml` - Character statistics (6 attributes: Strength, Constitution, Agility, Intelligence, Wisdom, Charisma)
-- `skills_for_llm.yaml` - Skills organized in 6 groups (Combat, General, Stealth, Social, Magic, Knowledge)
-- `races_and_cultures.yaml` - Available races and cultures
-- `equipment.yaml` - Weapons, armor, and items
-- `spells.yaml` - Magic spells
-- `combat_system.yaml` - Combat mechanics
-- `skills_affinities.yaml` - Culture-skill affinities
+- `data/stats.yaml` - Character statistics (6 attributes: Strength, Constitution, Agility, Intelligence, Wisdom, Charisma)
+- `data/skills_for_llm.yaml` - Skills organized in 6 groups (Combat, General, Stealth, Social, Magic, Knowledge)
+- `data/races_and_cultures.yaml` - Available races and cultures
+- `data/equipment.yaml` - Weapons, armor, and items
+- `data/spells.yaml` - Magic spells
+- `data/combat_system.yaml` - Combat mechanics
+- `data/skills_affinities.yaml` - Culture-skill affinities
+- `data/skill_groups.yaml` - Skill group definitions
 
+**Source**: YAML files are also maintained in `back/gamedata/` for development
 **Backup**: Original JSON files preserved in `data/json_backup/`
 
 ### 2. French to English Translation
@@ -197,32 +199,32 @@ front/
 All game data is loaded through manager classes that read YAML files:
 
 ### StatsManager (`back/models/domain/stats_manager.py`)
-- Loads `gamedata/stats.yaml`
+- Loads `data/stats.yaml`
 - Provides: stat info, bonus table, cost table, starting points (400)
 - Methods: `get_description()`, `get_bonus()`, `calculate_cost()`
 
 ### SkillsManager (`back/models/domain/skills_manager.py`)
-- Loads `gamedata/skills_for_llm.yaml`
+- Loads `data/skills_for_llm.yaml`
 - Provides: 6 skill groups with skills
 - Methods: `get_all_skills()`, `get_skill_by_name()`, `get_skills_by_group()`
 
 ### RacesManager (`back/models/domain/races_manager.py`)
-- Loads `gamedata/races_and_cultures.yaml`
+- Loads `data/races_and_cultures.yaml`
 - Provides: available races, cultures, bonuses
 - Methods: `get_all_races()`, `get_race_by_name()`, `get_cultures_for_race()`
 
 ### EquipmentManager (`back/models/domain/equipment_manager.py`)
-- Loads `gamedata/equipment.yaml`
+- Loads `data/equipment.yaml`
 - Provides: weapons, armor, items
 - Methods: `get_all_equipment()`, `get_equipment_by_name()`, `get_weapons()`, `get_armor()`
 
 ### SpellsManager (`back/models/domain/spells_manager.py`)
-- Loads `gamedata/spells.yaml`
+- Loads `data/spells.yaml`
 - Provides: available spells, organized by sphere
 - Methods: `get_all_spells()`, `get_spell_by_name()`, `get_spells_by_sphere()`
 
 ### CombatSystemManager (`back/models/domain/combat_system_manager.py`)
-- Loads `gamedata/combat_system.yaml`
+- Loads `data/combat_system.yaml`
 - Provides: combat rules, actions, damage calculations
 - Methods: Combat-related rule lookups
 
@@ -383,7 +385,7 @@ Key config sections:
 ## Important Notes
 
 1. **Always use English**: All new code, comments, and data should be in English
-2. **Load data from YAML**: Never use JSON fallback; all game data is in `back/gamedata/*.yaml`
+2. **Load data from YAML**: Never use JSON fallback; all game data is in `data/*.yaml` (loaded via managers)
 3. **Use PydanticAI, not LangChain**: The project migrated from LangChain to PydanticAI
 4. **Respect SRP**: Each service should have a single, well-defined responsibility
 5. **Type everything**: Use Pydantic models and type hints extensively
