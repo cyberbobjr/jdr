@@ -1,0 +1,55 @@
+skills_for_llm:
+  skill_groups:
+    Combat:
+    - name: Melee Weapons
+      description: Proficiency with close-quarters weapons like swords, axes, and
+        spears.
+    - name: Ranged Weapons
+      description: Proficiency with projectile weapons like bows, crossbows, and thrown
+        knives.
+    - name: Unarmed Combat
+      description: Skill in fighting without weapons, using fists, kicks, and grappling.
+    - name: Armor Proficiency
+      description: Ability to effectively wear and move in various types of armor.
+    General:
+    - name: Athletics
+      description: Physical prowess, including running, jumping, climbing, and swimming.
+    - name: Perception
+      description: Awareness of surroundings, ability to notice details and detect
+        hidden things.
+    - name: Survival
+      description: Knowledge and skills for surviving in the wilderness, tracking,
+        and foraging.
+    - name: Crafting
+      description: Ability to create and repair items in a specific trade (e.g., Blacksmithing,
+        Carpentry).
+    Stealth:
+    - name: Stealth
+      description: Ability to move silently and remain unseen.
+    - name: Lockpicking
+      description: Skill in opening locks and disarming traps.
+    - name: Sleight of Hand
+      description: Dexterity for performing subtle manipulations, like pickpocketing
+        or planting items.
+    Social:
+    - name: Persuasion
+      description: Ability to influence others through charm, negotiation, and diplomacy.
+    - name: Intimidation
+      description: Ability to influence others through threats, fear, and force of
+        personality.
+    - name: Deception
+      description: Skill in misleading others through lies, disguise, and trickery.
+    Magic:
+    - name: Arcane Lore
+      description: Knowledge of magical theories, rituals, and ancient spells.
+    - name: Spellcasting
+      description: Ability to cast spells effectively and control magical energies.
+    - name: Alchemy
+      description: Skill in brewing potions, creating elixirs, and transmuting materials.
+    Knowledge:
+    - name: History
+      description: Knowledge of past events, cultures, and civilizations.
+    - name: Nature
+      description: Knowledge of flora, fauna, geography, and natural phenomena.
+    - name: Medicine
+      description: Knowledge of healing, anatomy, and treating injuries and diseases.

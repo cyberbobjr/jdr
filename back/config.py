@@ -55,7 +55,7 @@ class Config:
         # Priorité : variable d'environnement > config YAML > valeur par défaut
         data_dir = os.environ.get("JDR_DATA_DIR")
         if not data_dir:
-            data_dir = self._config.get("data", {}).get("directory", "../data")
+            data_dir = self._config.get("data", {}).get("directory", "gamedata")
 
         return os.path.abspath(os.path.join(os.path.dirname(__file__), data_dir))
 

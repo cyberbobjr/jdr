@@ -81,13 +81,11 @@ def skill_check_with_character(ctx: RunContext[SessionService], skill_name: str,
                 skill_value = 50
                 source_used = f"Valeur par défaut (compétence {skill_name} non trouvée)"
         
-        # Conversion des noms de difficulté en modificateurs
+        # Simplified difficulty modifiers for modern gameplay
         difficulty_modifiers = {
-            "Facile": -20,
-            "Moyenne": 0, 
-            "Difficile": 20,
-            "Très Difficile": 40,
-            "Impossible": 60
+            "favorable": -20,
+            "normal": 0,
+            "unfavorable": 20
         }
         
         base_difficulty = difficulty_modifiers.get(difficulty_name, 0)

@@ -1,85 +1,48 @@
 """
-Gestionnaire des équipements pour le système de jeu de rôle.
-Charge et expose les données des équipements depuis le fichier JSON.
+Equipment manager for the role-playing game system.
+Loads and exposes equipment data from YAML file.
 """
 
-import json
+import yaml
 import os
 from typing import Dict, List, Optional, Any
 from back.config import get_data_dir
 
 class EquipmentManager:
     """
-    Gestionnaire pour les équipements du jeu.
+    Equipment manager for the game.
     """
     
     def __init__(self):
         """
         ### __init__
-        **Description:** Initialise le gestionnaire des équipements et charge les données depuis le JSON.
-        **Paramètres:** Aucun
-        **Retour:** Aucun
+        **Description:** Initialize equipment manager and load data from YAML.
+        **Parameters:** None
+        **Returns:** None
         """
         self._equipment_data = self._load_equipment_data()
     
     def _load_equipment_data(self) -> Dict[str, Any]:
         """
         ### _load_equipment_data
-        **Description:** Charge les données des équipements depuis le fichier JSON.
-        **Paramètres:** Aucun
-        **Retour:** Dictionnaire des équipements.
+        **Description:** Load equipment data from YAML file.
+        **Parameters:** None
+        **Returns:** Equipment data dictionary.
         """
         try:
-            data_path = os.path.join(get_data_dir(), 'equipment.json')
+            data_path = os.path.join(get_data_dir(), 'equipment.yaml')
             with open(data_path, 'r', encoding='utf-8') as file:
-                return json.load(file)
-        except (FileNotFoundError, json.JSONDecodeError):
-            # Données de fallback minimales
-            return {
-                "weapons": {
-                    "Épée longue": {
-                        "type": "arme",
-                        "category": "mêlée",
-                        "damage": "1d8+4",
-                        "weight": 1.5,
-                        "cost": 50
-                    },
-                    "Arc long": {
-                        "type": "arme",
-                        "category": "distance",
-                        "damage": "1d8+2",
-                        "range": 150,
-                        "weight": 1.0,
-                        "cost": 30
-                    }
-                },
-                "armor": {
-                    "Armure de cuir": {
-                        "type": "armure",
-                        "protection": 3,
-                        "weight": 5.0,
-                        "cost": 25
-                    },
-                    "Cotte de mailles": {
-                        "type": "armure",
-                        "protection": 6,
-                        "weight": 15.0,
-                        "cost": 100
-                    }
-                },
-                "items": {
-                    "Corde (10m)": {
-                        "type": "équipement",
-                        "weight": 2.0,
-                        "cost": 5
-                    },
-                    "Rations (1 jour)": {
-                        "type": "consommable",
-                        "weight": 0.5,
-                        "cost": 2
-                    }
-                }
-            }
+                return yaml.safe_load(file)
+        except FileNotFoundError:
+            raise FileNotFoundError(
+                f"Equipment data file not found: {data_path}. "
+                f"Please ensure that file exists and contains valid YAML data with equipment definitions."
+            )
+        except yaml.YAMLError as e:
+            raise yaml.YAMLError(
+                f"Invalid YAML in equipment file {data_path}: {str(e)}. "
+                f"Please check the file format and syntax."
+            )
     
     def get_all_equipment(self) -> Dict[str, Any]:
         """

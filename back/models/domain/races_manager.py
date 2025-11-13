@@ -1,33 +1,31 @@
-import json
+import yaml
 import os
 from typing import Dict, List, Any, Optional
 from ...config import get_data_dir
 from ..schema import RaceData, CultureData
 
 class RacesManager:
-    """Manages races and cultures using the new simplified JSON system"""
+    """Manages races and cultures using the new simplified YAML system"""
 
     def __init__(self):
         self._load_races_data()
 
     def _load_races_data(self):
-        """Loads data from the JSON file"""
-        data_path = os.path.join(get_data_dir(), "races_and_cultures.json")
+        """Loads data from the YAML file"""
+        data_path = os.path.join(get_data_dir(), "races_and_cultures.yaml")
         try:
             with open(data_path, 'r', encoding='utf-8') as f:
-                self.races_data = [RaceData(**race) for race in json.load(f)]
+                self.races_data = [RaceData(**race) for race in yaml.safe_load(f)]
         except FileNotFoundError:
-            # Fallback to minimal data
-            self.races_data = [
-                RaceData(
-                    id="humans",
-                    name="Humans",
-                    characteristic_bonuses={"Willpower": 1},
-                    base_languages=["Westron"],
-                    optional_languages=[],
-                    cultures=[]
-                )
-            ]
+            raise FileNotFoundError(
+                f"Races data file not found: {data_path}. "
+                f"Please ensure that file exists and contains valid YAML data with race definitions."
+            )
+        except yaml.YAMLError as e:
+            raise yaml.YAMLError(
+                f"Invalid YAML in races file {data_path}: {str(e)}. "
+                f"Please check the file format and syntax."
+            )
 
     def get_all_races(self) -> List[RaceData]:
         """Returns the complete list of races"""
@@ -62,7 +60,7 @@ class RacesManager:
                 return culture
         return None
 
-    def get_characteristic_bonuses(self, race_id: str, culture_id: str = None) -> Dict[str, int]:
+    def get_characteristic_bonuses(self, race_id: str, culture_id: Optional[str] = None) -> Dict[str, int]:
         """Returns all characteristic bonuses (race + culture)"""
         bonuses = {}
 

@@ -1,64 +1,48 @@
 """
-Gestionnaire du système de combat pour le jeu de rôle.
-Charge et expose les règles de combat depuis le fichier JSON.
+Combat system manager for the role-playing game.
+Loads and exposes combat rules from YAML file.
 """
 
-import json
+import yaml
 import os
 from typing import Dict, Optional, Any
 from back.config import get_data_dir
 
 class CombatSystemManager:
     """
-    Gestionnaire pour les règles et données du système de combat.
+    Manager for combat system rules and data.
     """
     
     def __init__(self):
         """
         ### __init__
-        **Description:** Initialise le gestionnaire du système de combat et charge les données depuis le JSON.
-        **Paramètres:** Aucun
-        **Retour:** Aucun
+        **Description:** Initialize combat system manager and load data from YAML.
+        **Parameters:** None
+        **Returns:** None
         """
         self._combat_data = self._load_combat_data()
     
     def _load_combat_data(self) -> Dict[str, Any]:
         """
         ### _load_combat_data
-        **Description:** Charge les données du système de combat depuis le fichier JSON.
-        **Paramètres:** Aucun
-        **Retour:** Dictionnaire des données de combat.
+        **Description:** Load combat system data from YAML file.
+        **Parameters:** None
+        **Returns:** Combat data dictionary.
         """
         try:
-            data_path = os.path.join(get_data_dir(), 'combat_system.json')
+            data_path = os.path.join(get_data_dir(), 'combat_system.yaml')
             with open(data_path, 'r', encoding='utf-8') as file:
-                return json.load(file)
-        except (FileNotFoundError, json.JSONDecodeError):
-            # Données de fallback minimales
-            return {
-                "initiative": {
-                    "base_formula": "Agilité + 1d20",
-                    "tie_breaker": "Agilité",
-                    "description": "L'initiative détermine l'ordre d'action"
-                },
-                "turn_structure": {
-                    "action_points": 1,
-                    "phases": ["Mouvement", "Action", "Fin de tour"]
-                },
-                "actions": {
-                    "attaque_melee": {
-                        "name": "Attaque au corps à corps",
-                        "cost": 1,
-                        "description": "Attaque avec une arme de mêlée"
-                    }
-                },
-                "difficulty_modifiers": {
-                    "facile": -20,
-                    "moyenne": 0,
-                    "difficile": 20,
-                    "tres_difficile": 40
-                }
-            }
+                return yaml.safe_load(file)
+        except FileNotFoundError:
+            raise FileNotFoundError(
+                f"Combat system data file not found: {data_path}. "
+                f"Please ensure that file exists and contains valid YAML data with combat system rules."
+            )
+        except yaml.YAMLError as e:
+            raise yaml.YAMLError(
+                f"Invalid YAML in combat system file {data_path}: {str(e)}. "
+                f"Please check the file format and syntax."
+            )
     
     def get_initiative_rules(self) -> Dict[str, Any]:
         """
@@ -134,7 +118,7 @@ class CombatSystemManager:
         """
         return self._combat_data.get("armor_types", {})
     
-    def calculate_initiative(self, agility_value: int, dice_roll: int = None) -> int:
+    def calculate_initiative(self, agility_value: int, dice_roll: Optional[int] = None) -> int:
         """
         ### calculate_initiative
         **Description:** Calcule l'initiative selon les règles définies.

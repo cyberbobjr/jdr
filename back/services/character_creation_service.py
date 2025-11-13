@@ -39,10 +39,10 @@ class CharacterCreationService:
         remaining_budget = starting_points - sum(values.values())
         
         # 3. Equal distribution
-        while remaining_budget > 0 and any(values[name] < 90 for name in char_names):
+        while remaining_budget > 0 and any(values[name] < 70 for name in char_names):
             improved = False
             for char_name in char_names:
-                if remaining_budget > 0 and values[char_name] < 90:
+                if remaining_budget > 0 and values[char_name] < 70:
                     values[char_name] += 1
                     remaining_budget -= 1
                     improved = True
@@ -74,9 +74,9 @@ class CharacterCreationService:
 
         if total_cost > stats_manager.starting_points:
             return False
-        # Check the bounds (1-105)
+        # Check the bounds (1-100)
         for v in attributes.values():
-            if v < 1 or v > 105:
+            if v < 1 or v > 100:
                 return False
         return True
     
@@ -159,6 +159,6 @@ class CharacterCreationService:
         """
         spells_manager = SpellsManager()
         all_spells = []
-        for sphere_data in spells_manager.get_all_spells().values():
-            all_spells.extend([spell["name"] for spell in sphere_data])
+        for spell_data in spells_manager.get_all_spells():
+            all_spells.append(spell_data["name"])
         return all_spells

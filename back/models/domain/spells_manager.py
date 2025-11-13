@@ -1,43 +1,34 @@
-import json
+import yaml
 import os
 from typing import Dict, List, Optional
 from ...config import get_data_dir
 
 class SpellsManager:
-    """Gestionnaire des sorts utilisant le nouveau système JSON simplifié pour l'agent LLM"""
+    """Spells manager using the new simplified YAML system for the LLM agent"""
     
     def __init__(self):
         self._load_spells_data()
     
     def _load_spells_data(self):
-        """Charge les données depuis le fichier JSON"""
-        data_path = os.path.join(get_data_dir(), "spells.json")
+        """Load data from YAML file"""
+        data_path = os.path.join(get_data_dir(), "spells.yaml")
         try:
             with open(data_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
+                data = yaml.safe_load(f)
                 
             self.magic_system = data["magic_system"]
             self.spheres = self.magic_system["spheres"]
             
         except FileNotFoundError:
-            # Fallback vers des données minimales
-            self._load_fallback_data()
-    
-    def _load_fallback_data(self):
-        """Données de fallback si le fichier JSON n'est pas trouvé"""
-        self.spheres = [
-            {
-                "name": "Universelle",
-                "description": "Sorts de base",
-                "spells": [
-                    {
-                        "name": "Lumière",
-                        "power_cost": 2,
-                        "description": "Crée une source de lumière"
-                    }
-                ]
-            }
-        ]
+            raise FileNotFoundError(
+                f"Spells data file not found: {data_path}. "
+                f"Please ensure that file exists and contains valid YAML data with 'magic_system' and 'spheres' keys."
+            )
+        except yaml.YAMLError as e:
+            raise yaml.YAMLError(
+                f"Invalid YAML in spells file {data_path}: {str(e)}. "
+                f"Please check the file format and syntax."
+            )
 
     def get_all_spheres(self) -> List[str]:
         """Retourne la liste de toutes les sphères de magie"""

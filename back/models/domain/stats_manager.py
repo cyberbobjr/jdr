@@ -1,6 +1,6 @@
-import json
+import yaml
 import os
-from typing import Dict, List
+from typing import Dict, List, Optional
 from ...config import get_data_dir
 
 class StatsManager:
@@ -30,9 +30,9 @@ class StatsManager:
         **Parameters:** None
         **Returns:** None
         """
-        data_path = os.path.join(get_data_dir(), "stats.json")
+        data_path = os.path.join(get_data_dir(), "stats.yaml")
         with open(data_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+            data = yaml.safe_load(f)
 
         self.stats_info = data["stats"]
         self.names = list(self.stats_info.keys())
@@ -66,15 +66,19 @@ class StatsManager:
         return base_bonus + racial_bonus
 
     def _get_base_bonus(self, value: int) -> int:
-        """Calculate the base bonus from a stat value.
+        """Calculate the base bonus from a stat value using the bonus_table.
 
         **Description:** Converts a stat value (0-100) to its corresponding
-        bonus (-10 to +10) using the game's conversion formula.
+        bonus using the game's bonus table.
         **Parameters:**
         - `value` (int): The stat value (0-100).
         **Returns:** An integer representing the base bonus derived from the value.
         """
-        return value // 5 - 10
+        for bonus_range, bonus_value in self.bonus_table.items():
+            min_val, max_val = map(int, bonus_range.split('-'))
+            if min_val <= value <= max_val:
+                return bonus_value
+        return 0 # Default to 0 if no range matches
 
     def calculate_cost(self, value: int) -> int:
         """Calculate the cost in points to increase a stat to a specific value.
@@ -96,7 +100,7 @@ class StatsManager:
         return total_cost
 
     def _get_cost_for_value(self, value: int) -> int:
-        """Calculate the cost for a single point increase at a specific value.
+        """Calculate the cost for a single point increase at a specific value using the cost_table.
 
         **Description:** Returns the point cost to increase a stat by
         one point at the given value level. Higher values cost more points.
@@ -104,14 +108,11 @@ class StatsManager:
         - `value` (int): The stat value to calculate cost for.
         **Returns:** An integer representing the cost for one point increase.
         """
-        if value <= 70:
-            return 1
-        elif value <= 80:
-            return 2
-        elif value <= 90:
-            return 3
-        else:
-            return 4
+        for cost_range, cost_value in self.cost_table.items():
+            min_val, max_val = map(int, cost_range.split('-'))
+            if min_val <= value <= max_val:
+                return cost_value
+        return 0 # Default to 0 if no range matches
 
     def set_racial_bonus(self, stat: str, bonus: int) -> None:
         """Set the racial bonus for a specific stat.
@@ -163,7 +164,7 @@ class StatsManager:
             "starting_points": self.starting_points
         }
 
-    def get_all_stats_with_values(self, stats: Dict[str, int] = None) -> Dict:
+    def get_all_stats_with_values(self, stats: Optional[Dict[str, int]] = None) -> Dict:
         """Get all stats with their current values and bonuses.
 
         **Description:** Returns comprehensive stats information including

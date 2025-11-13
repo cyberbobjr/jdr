@@ -1,43 +1,87 @@
 # Règles Cline pour le projet JdR "Terres du Milieu"
 
 ## 🎯 **PROJET : JdR orchestré par LLM**
-**Stack :** FastAPI + PydanticAI + Vue.js + TypeScript
+**Stack :** FastAPI + PydanticAI
 **Objectif :** Système de jeu de rôle avec Maître du Jeu LLM
 
 ---
 
 ## 🏗️ **ARCHITECTURE ET STRUCTURE**
 
-### Organisation des fichiers
+### Organisation des fichiers (Backend uniquement)
 ```
-back/           # Backend FastAPI + PydanticAI
-├── agents/     # Agents LLM PydanticAI
-├── services/   # Logique métier (SRP strict)
-├── routers/    # Endpoints REST FastAPI
-├── tools/      # Outils PydanticAI
-├── models/     # Schémas Pydantic
-└── storage/    # Persistance JSONL
-
-front/          # Frontend Vue.js + TypeScript
-├── src/
-│   ├── components/ # Composants réutilisables
-│   ├── views/      # Pages de l'application
-│   └── core/       # Services et interfaces
+back/                           # Backend FastAPI + PydanticAI
+├── app.py                      # Point d'entrée FastAPI
+├── main.py                     # Target uvicorn – démarre l'app + l'agent
+├── config.py                   # Variables d'environnement
+├── models/                     # Schémas Pydantic & objets métier
+│   ├── domain/                 # Domain models (1 concept = 1 fichier)
+│   │   ├── character.py        # Character domain model
+│   │   ├── combat_state.py     # Combat state model
+│   │   ├── stats_manager.py    # Stats management
+│   │   ├── skills_manager.py   # Skills management
+│   │   ├── equipment_manager.py # Equipment management
+│   │   ├── races_manager.py    # Races/cultures management
+│   │   └── spells_manager.py   # Spells management
+│   └── schema.py               # DTO exposés par l'API
+├── services/                   # Logique métier unitaire (SRP)
+│   ├── character_service.py    # Gestion des personnages
+│   ├── character_creation_service.py # Création de personnages
+│   ├── character_persistence_service.py # Persistance
+│   ├── character_business_service.py # Logique métier
+│   ├── character_data_service.py # Données personnage
+│   ├── combat_service.py       # Système de combat
+│   ├── combat_state_service.py # État combat
+│   ├── equipment_service.py    # Équipement
+│   ├── inventory_service.py    # Inventaire
+│   ├── item_service.py         # Objets
+│   ├── skill_service.py        # Compétences
+│   ├── scenario_service.py     # Scénarios
+│   └── session_service.py      # Sessions de jeu
+├── tools/                      # Outils PydanticAI
+│   ├── character_tools.py      # Outils personnages
+│   ├── combat_tools.py         # Système de combat
+│   ├── inventory_tools.py      # Gestion inventaire
+│   ├── skill_tools.py          # Tests de compétences
+│   └── schema_tools.py         # Outils schéma
+├── agents/                     # Agents LLM PydanticAI
+│   └── gm_agent_pydantic.py    # Game Master Agent
+├── routers/                    # Endpoints REST FastAPI
+│   ├── characters.py           # Routes personnages
+│   ├── creation.py             # Routes création
+│   └── scenarios.py            # Routes scénarios
+├── storage/                    # Persistance
+│   ├── __init__.py
+│   └── pydantic_jsonl_store.py # Store JSONL
+├── utils/                      # Utilitaires
+│   ├── dependency_injector.py  # Injection de dépendances
+│   ├── dice.py                 # Jets de dés
+│   ├── exceptions.py           # Exceptions métier
+│   ├── logger.py               # Logger
+│   ├── logging_tool.py         # Outils de log
+│   ├── message_adapter.py      # Adaptateur de messages
+│   └── model_converter.py      # Conversion de modèles
+└── tests/                      # Tests pytest
+    ├── agents/                 # Tests agents
+    ├── domain/                 # Tests domain
+    ├── routers/                # Tests API
+    ├── services/               # Tests services
+    ├── storage/                # Tests persistance
+    ├── tools/                  # Tests outils
+    └── utils/                  # Tests utilitaires
 ```
 
 ### Principes architecturaux
 - **SRP strict** : Un service = une responsabilité
 - **Séparation des couches** : Routers → Services → Agents → Tools
-- **Typage fort** : Pydantic pour le backend, TypeScript pour le frontend
-- **Mémoire découplée** : Stockage JSONL via PydanticAI
+- **Typage fort** : Pydantic pour tous les modèles
+- **Persistance** : JSONL via `pydantic_jsonl_store.py`
 
 ---
 
 ## 🔧 **CONVENTIONS DE DÉVELOPPEMENT**
 
-### Backend (Python/FastAPI/PydanticAI)
-
-#### Agents PydanticAI
+### Agents PydanticAI
 ```python
 # ✅ CORRECT
 from pydantic_ai import Agent, RunContext
@@ -58,29 +102,22 @@ def create_agent(model: str) -> Agent:
     return agent
 ```
 
-#### Services
+### Services
 - **Nommage** : `{domain}_service.py` (ex: `character_service.py`)
 - **Instance-based** : Services instanciés avec contexte
 - **Pas de logique HTTP** dans les services
 - **Validation Pydantic** pour tous les inputs/outputs
 
-#### Routers FastAPI
+### Routers FastAPI
 - **Responsabilité unique** : Gestion HTTP uniquement
 - **Délégation** : Toute logique métier déléguée aux services
 - **Documentation** : Docstrings complètes avec exemples
 
-### Frontend (Vue.js/TypeScript)
-
-#### Composants
-- **Composition API** : Utiliser `<script setup>`
-- **Typage strict** : Interfaces TypeScript pour toutes les props
-- **Props** : Validation avec `defineProps<T>()`
-- **Événements** : `defineEmits<T>()`
-
-#### Services API
-- **Interfaces centralisées** : `front/src/core/interfaces.ts`
-- **Validation UUID** : Toujours valider les IDs
-- **Gestion d'erreurs** : Typée avec `ApiErrorResponse`
+### Modèles Domain
+- **Localisation** : `back/models/domain/` uniquement
+- **Nommage** : Un fichier par concept métier
+- **Validation** : Pydantic pour tous les modèles
+- **Language** : Anglais pour les nouveaux modèles V2
 
 ---
 
@@ -106,6 +143,7 @@ agent = Agent(model)  # ❌ (sans structured output)
 - **Personnages** : Format JSON racine (pas de clé `state`)
 - **Historique** : JSONL via `pydantic_jsonl_store.py`
 - **Scénarios** : Markdown dans `data/scenarios/`
+- **Configuration** : Format YAML pour tous les fichiers de règles
 
 ---
 
@@ -152,10 +190,12 @@ async def my_tool(
 ```
 back/tests/
 ├── agents/     # Tests PydanticAI
-├── services/   # Tests métier
+├── domain/     # Tests modèles domain
 ├── routers/    # Tests API
+├── services/   # Tests métier
+├── storage/    # Tests persistance
 ├── tools/      # Tests outils
-└── integration/# Tests d'intégration
+└── utils/      # Tests utilitaires
 ```
 
 ### Règles de test
@@ -163,33 +203,29 @@ back/tests/
 - **Tests asynchrones** : `pytest-asyncio` pour async/await
 - **Couverture** : ≥80% pour les services critiques
 - **Nettoyage** : Sessions de test automatiquement nettoyées
-
-### Frontend tests
-- **Vitest** : Framework de test
-- **Composants** : Tests unitaires pour tous les composants
-- **Services API** : Tests avec mocks
+- **Counverture** : Toujours tester les cas aux limites
 
 ---
 
 ## 🔄 **WORKFLOWS DE DÉVELOPPEMENT**
 
 ### Ajout d'un nouvel endpoint
-1. Modèle Pydantic dans `models/schema.py`
+1. Modèle Pydantic dans `models/domain/{concept}.py`
 2. Service dans `services/{domain}_service.py`
 3. Route dans `routers/{domain}.py`
-4. Tests dans `tests/routers/` et `tests/services/`
+4. Tests dans `tests/services/` et `tests/routers/`
 
 ### Ajout d'un nouvel agent PydanticAI
-1. Modèles de réponse dans `models/schema.py`
+1. Modèles de réponse dans `models/domain/{concept}.py`
 2. Agent dans `agents/{agent_name}.py`
 3. Outils dans `tools/{domain}_tools.py`
 4. Registration dans `services/llm_service.py`
 5. Tests complets
 
 ### Modification des données de jeu
-- **Compétences** : `data/skills_for_llm.json`
-- **Races/cultures** : `data/races_and_cultures.json`
-- **Équipement** : `data/equipment.json`
+- **Compétences** : `data/skills_for_llm.yaml`
+- **Races/cultures** : `data/races_and_cultures.yaml`
+- **Équipement** : `data/equipment.yaml`
 - **Scripts** : `tools/` pour la génération automatique
 
 ---
@@ -219,19 +255,12 @@ cd back && python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 uvicorn main:app --reload
-
-# Frontend  
-cd front && npm install
-npm run dev
 ```
 
 ### Tests
 ```bash
 # Backend
 cd back && pytest tests/ -v
-
-# Frontend
-cd front && npm test
 ```
 
 ### Qualité de code
@@ -239,9 +268,6 @@ cd front && npm test
 # Backend
 ruff check back/
 black back/
-
-# Frontend
-npm run lint
 ```
 
 ---
@@ -256,11 +282,9 @@ npm run lint
 ### Références
 - **FastAPI** : https://fastapi.tiangolo.com/
 - **PydanticAI** : https://ai.pydantic.dev/
-- **Vue.js** : https://vuejs.org/
-- **TypeScript** : https://www.typescriptlang.org/
 
 ---
 
-**Version** : 1.0  
-**Dernière mise à jour** : 2025-01-24  
+**Version** : 2.0
+**Dernière mise à jour** : 2025-11-12
 **Mainteneur** : Équipe de développement JdR
