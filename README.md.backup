@@ -1,134 +1,48 @@
-# JdR "Terres du Milieu" - Middle-earth RPG
+# JdR "Terres du Milieu" orchestré par LLM
 
-> **A Role-Playing Game orchestrated by Large Language Models**
+Ce projet est un jeu de rôle (JdR) se déroulant dans les Terres du Milieu, où la narration et les mécaniques de jeu sont orchestrées par un Large Language Model (LLM) agissant comme Maître du Jeu (MJ).
 
-This is a tabletop RPG set in Middle-earth (Tolkien's world), where the narration and game mechanics are orchestrated by a Large Language Model (LLM) acting as the Game Master (GM). The project combines traditional RPG rules with modern AI capabilities to create an immersive, dynamic gameplay experience.
+## Architecture Générale
 
-## 🎯 Project Status
+L'architecture s'articule autour d'un backend FastAPI et **PydanticAI**, avec une infrastructure DevOps complète. Les détails de la spécification technique se trouvent dans [instructions/openai-instructions.md](instructions/openai-instructions.md).
 
-**Current Version**: 2.0 (Major Refactoring Complete)
+### Principes architecturaux
+- **Services** (`back/services/`) : chaque service encapsule une responsabilité métier unique (SRP strict)
+- **Agents** (`back/agents/`) : assemblent les outils et la mémoire, orchestrent la narration via le LLM avec PydanticAI
+- **Routers** (`back/routers/`) : exposent les endpoints REST, délèguent toute la logique métier aux services
+- **Mémoire** : découplée de l'agent, persistée via un store JSONL custom PydanticAI
+- **Conventions** : SRP strict, aucune logique d'E/S dans les services, aucune règle de jeu dans les routers
 
-### Recent Achievements ✅
+### Documentation PydanticAI
+- [PydanticAI Documentation](./pydanticai.md)
+- [Gestion de la mémoire (mémoire persistante, stores, etc.)](./pydanticai.md)
 
-- **Data Migration**: Complete migration from JSON to YAML format
-- **Language Translation**: Full translation from French to English (characteristics, skills, models)
-- **Simplified System**: New CharacterV2 with 400 stat points (down from 550) and 40 skill points (down from 84)
-- **Modern Framework**: Migration from LangChain to PydanticAI for better type safety and validation
-- **Clean Architecture**: Strict separation of concerns with dedicated services
+## Architecture des Services
 
-### Technology Stack
+Le backend utilise une architecture modulaire avec séparation stricte des responsabilités (SRP) :
 
-- **Backend**: FastAPI + PydanticAI + Pydantic V2
-- **Frontend**: Vue.js 3 + TypeScript + TailwindCSS
-- **Data**: YAML configuration files
-- **LLM**: OpenAI-compatible API (DeepSeek by default)
-- **Storage**: JSONL for conversation history, JSON for character sheets
+### Services Spécialisés
 
-## 🏗️ Architecture Overview
+- **CharacterDataService** : Service spécialisé pour le chargement et la sauvegarde des données de personnage
+- **CharacterBusinessService** : Service spécialisé pour la logique métier (XP, or, dégâts, soins)
+- **InventoryService** : Service spécialisé pour la gestion d'inventaire (ajout, retrait, équipement)
+- **EquipmentService** : Service spécialisé pour l'achat/vente d'équipement et gestion de l'argent
 
-### Core Principles
+### Services de Support
 
-The architecture follows strict **SOLID principles** with clear separation of responsibilities:
+- **CharacterPersistenceService** : Service centralisé pour la persistance des personnages (JSON)
+- **SessionService** : Gestion des sessions de jeu (historique, personnage, scénario)
+- **CombatService** : Gestion des mécaniques de combat
+- **ScenarioService** : Gestion du déroulement des scénarios
+- **CharacterCreationService** : Service dédié à la création de personnage
 
-- **Services** (`back/services/`): Each service encapsulates a unique business responsibility (Single Responsibility Principle)
-- **Agents** (`back/agents/`): Assemble tools and memory, orchestrate narration via LLM with PydanticAI
-- **Routers** (`back/routers/`): Expose REST endpoints, delegate all business logic to services
-- **Models** (`back/models/domain/`): Pydantic models with strict validation
-- **Tools** (`back/tools/`): PydanticAI tools for LLM interaction
-- **Memory**: Decoupled from agent, persisted via custom JSONL store
+### Agents et Outils
 
-### Key Architectural Decisions
+- **Agent MJ** : Utilise `pydantic_ai.Agent` avec le modèle `openai:gpt-4o` et une mémoire persistante (JSONL)
+- **Outils PydanticAI** : Tous les outils utilisent la signature `RunContext[SessionService]` pour accéder aux services
+- **Mémoire** : Historique des conversations stocké en JSONL via `back/storage/pydantic_jsonl_store.py`
 
-1. **No I/O in Services**: Services handle business logic, not file operations
-2. **No Game Rules in Routers**: Routers only manage HTTP logic
-3. **Strict Type Safety**: Pydantic models everywhere with comprehensive validation
-4. **English Only**: All code, documentation, and data use English (post-migration)
-5. **YAML for Game Data**: All game configuration in YAML format for better readability
-
-### Documentation References
-
-- [PydanticAI Framework](./pydanticai.md) - Agent framework documentation
-- [GitHub Copilot Instructions](.github/copilot-instructions.md) - Development guidelines
-- [Technical Specification](#technical-specification) - Detailed architecture below
-
-## 📦 Service Architecture
-
-The backend uses a modular architecture with strict separation of responsibilities (SRP):
-
-### Character Management Services
-
-- **CharacterDataService**: Specialized for loading and saving character data (I/O operations)
-- **CharacterBusinessService**: Business logic (XP, gold, damage, healing)
-- **CharacterPersistenceService**: Centralized character persistence (JSON files)
-- **CharacterCreationService**: Dedicated character creation service
-- **InventoryService**: Inventory management (add, remove, equip items)
-- **EquipmentService**: Equipment buy/sell and money management
-
-### Game Services
-
-- **SessionService**: Game session management (history, character, scenario)
-- **ScenarioService**: Scenario flow management
-- **CombatService**: Combat mechanics
-- **CombatStateService**: Combat state persistence
-- **SkillService**: Skill checks and rolls
-- **ItemService**: Item management
-
-### PydanticAI Integration
-
-- **GM Agent**: Uses `pydantic_ai.Agent` with OpenAI-compatible model and persistent memory (JSONL)
-- **Tools**: All tools use `RunContext[SessionService]` signature to access services
-- **Memory**: Conversation history stored in JSONL via `back/storage/pydantic_jsonl_store.py`
-- **System Prompt**: Modular prompt built dynamically from scenario and rules
-
-## 🎮 Game System
-
-### Character Statistics (Simplified V2)
-
-The new system uses **6 core attributes** with **400 total points**:
-
-| Stat | Abbreviation | Category | Description |
-|------|--------------|----------|-------------|
-| **Strength** | STR | Physical | Melee damage, carrying capacity |
-| **Constitution** | CON | Physical | HP, endurance, disease resistance |
-| **Agility** | AGI | Physical | Initiative, defense, reflexes |
-| **Intelligence** | INT | Mental | Spellcasting, problem-solving |
-| **Wisdom** | WIS | Mental | Perception, willpower, intuition |
-| **Charisma** | CHA | Social | Leadership, persuasion, influence |
-
-**Point Allocation**:
-- Each stat: 3-20 range
-- Total points: ≤ 400
-- Cost scaling: 1 point for 1-50, 2 points for 51-70, 3 points for 71-100
-
-### Skills System
-
-**6 skill groups** with **40 development points**:
-
-1. **Combat**: Melee Weapons, Ranged Weapons, Unarmed Combat, Armor Proficiency
-2. **General**: Athletics, Perception, Survival, Crafting
-3. **Stealth**: Stealth, Lockpicking, Sleight of Hand
-4. **Social**: Persuasion, Intimidation, Deception
-5. **Magic**: Arcane Lore, Spellcasting, Alchemy
-6. **Knowledge**: History, Nature, Religion, Investigation
-
-**Uniform Cost**: 1 development point = 1 skill rank (ranks 0-10)
-
-### Combat System
-
-**Simplified combat mechanics**:
-- **Initiative**: 1d100 + Agility modifier
-- **Actions per turn**: 1 major + 1 minor + 1 reaction
-- **Turn duration**: 6 seconds
-- **Attack resolution**: Attack roll vs Defense roll
-- **Damage**: Base weapon damage + (roll delta / 10) - armor
-
-**Combat State Tracking**:
-- Managed by `CombatState` Pydantic model
-- Persistent storage in `data/combat/`
-- Automatic initiative ordering
-- HP tracking per participant
-
-## 🗂️ Project Structure
+## Structure du Projet
 
 ```
 .
@@ -250,132 +164,28 @@ The new system uses **6 core attributes** with **400 total points**:
 │   ├── vitest.config.ts        # Configuration des tests
 │   ├── tailwind.config.js      # Configuration TailwindCSS
 │   └── README.md               # Documentation frontend détaillée
-├── back/gamedata/               # Game data (YAML files) ⭐ NEW
-│   ├── stats.yaml              # Character statistics (6 attributes, 400 points)
-│   ├── skills_for_llm.yaml     # Skills organized in 6 groups
-│   ├── races_and_cultures.yaml # Available races and cultures
-│   ├── equipment.yaml          # Weapons, armor, items
-│   ├── spells.yaml             # Magic spells
-│   └── combat_system.yaml      # Combat mechanics
-├── data/                        # Runtime persistent data
-│   ├── characters/             # Character sheets (JSON files)
-│   ├── combat/                 # Active combat states
-│   ├── scenarios/              # Scenario Markdown files
-│   ├── sessions/               # Conversation history (JSONL files)
-│   ├── game/                   # Legacy CSV data
-│   └── json_backup/            # Backup of original JSON game data
-├── docs/                        # Game system documentation (French)
-│   ├── 00 - introduction.md
+├── data/                        # Données persistantes du jeu
+│   ├── characters/             # Fiches des personnages joueurs et non-joueurs
+│   ├── combat/                 # États des combats en cours
+│   ├── scenarios/              # Fichiers Markdown décrivant les scénarios
+│   ├── sessions/               # Historique des conversations et états des sessions de jeu
+│   └── game/                   # Données de jeu (CSV)
+├── docs/                        # Documentation du système de jeu
+│   ├── 00 - introduction.md    # Introduction générale au système de jeu
 │   ├── 01 - Caractéristiques.md
 │   ├── 02 - Guide Complet des Compétences.md
 │   ├── 02 - Races et cultures.md
 │   ├── 04 - Equipement, armes et armures.md
 │   ├── 05 - Styles de combat.md
-│   ├── 06 - Magie.md
-│   ├── 07 - Sorts.md
-│   └── section-6-combat.md
-├── .github/
-│   ├── copilot-instructions.md  # GitHub Copilot development guidelines ⭐ NEW
-│   └── instructions/            # Code generation instructions
-│       ├── python.instructions.md
-│       ├── vuejs.instructions.md
-│       └── generalcoding.instructions.md
-├── pydanticai.md                # PydanticAI framework documentation
-└── README.md                    # This file (comprehensive project documentation)
+│   ├── 06 - Magie.md           # Système de magie et sorts
+│   ├── 07 - Sorts.md           # Liste détaillée des sorts
+│   └── section-6-combat.md     # Règles de combat détaillées
+├── instructions/                # Spécifications et instructions pour le développement
+│   └── openai-instructions.md  # Document principal des spécifications techniques
+└── README.md                    # Ce fichier
 ```
 
-## 🔄 Migration and Modernization
-
-### Completed Migrations ✅
-
-#### 1. Data Format Migration (JSON → YAML)
-
-All game data has been migrated from JSON to YAML format:
-
-**Benefits**:
-- Better readability and maintainability
-- Built-in comments support
-- Cleaner diffs in version control
-- Easier manual editing
-
-**Migrated Files**:
-- `stats.json` → `stats.yaml`
-- `skills_for_llm.json` → `skills_for_llm.yaml`
-- `races_and_cultures.json` → `races_and_cultures.yaml`
-- `equipment.json` → `equipment.yaml`
-- `spells.json` → `spells.yaml`
-
-Original JSON files preserved in `data/json_backup/` for reference.
-
-#### 2. Language Translation (French → English)
-
-Complete translation of all game elements to English for international accessibility:
-
-**Statistics (Caractéristiques)**:
-- Force → Strength
-- Constitution → Constitution (unchanged)
-- Agilité → Agility
-- Intelligence → Intelligence (unchanged)
-- Sagesse/Volonté → Wisdom
-- Charisme/Présence → Charisma
-
-**Code and Models**:
-- All Pydantic model field names translated
-- All service methods and function names in English
-- All docstrings and comments in English
-- Database field names: `caracteristiques` → `stats`, `competences` → `skills`
-
-#### 3. Character System Simplification (V2)
-
-**Old System** (V1):
-- 8 characteristics with 550 points
-- 9 skill groups with 84 development points
-- Complex cost scaling
-- Mixed French/English naming
-
-**New System** (V2):
-- 6 core stats with 400 points (27% reduction)
-- 6 skill groups with 40 development points (52% reduction)
-- Simplified uniform cost: 1 point = 1 rank
-- Pure English naming
-- Strict Pydantic V2 validation
-
-**Migration Path**:
-- `character.py` - Legacy model (deprecated)
-- `character_v2.py` - New simplified model ✅
-- Both models coexist during transition period
-- Automatic migration tool planned
-
-#### 4. Framework Migration (LangChain → PydanticAI)
-
-**Why PydanticAI**:
-- Better type safety with Pydantic V2
-- Simpler agent definition
-- Native async support
-- Cleaner tool registration
-- More maintainable code
-
-**Changes**:
-- Agent creation using `pydantic_ai.Agent`
-- Tools using `@agent.tool` decorator
-- `RunContext[DepsType]` for dependency injection
-- Custom JSONL store for message history
-
-### In Progress 🔄
-
-1. **Complete CharacterV2 Migration**: Migrate all services to use CharacterV2
-2. **NPC Generation System**: Automated NPC creation with archetypes
-3. **Combat Manager Service**: Centralized combat state management
-4. **API Versioning**: Support `/api/v1` and `/api/v2` endpoints
-
-### Planned Improvements ⏳
-
-1. **Remove Fallback Data**: Eliminate hardcoded fallback data in managers (fail fast on missing config)
-2. **Enhanced Testing**: Increase test coverage to 90%+
-3. **Performance Optimization**: Caching for frequently accessed game data
-4. **Frontend Refactoring**: Update Vue components for CharacterV2
-
-## 📊 Architecture Diagrams
+## Diagrams
 
 ### Architecture Diagram
 
@@ -498,9 +308,7 @@ sequenceDiagram
     Router->>User: Response with LLM output
 ```
 
-## 🌐 REST API Reference
-
-### API Routes Summary
+## Tableau synthétique des routes API
 
 | Méthode | Endpoint                                   | Arguments d'entrée                                                        | Retour principal / Description                                      |
 |---------|--------------------------------------------|--------------------------------------------------------------------------|---------------------------------------------------------------------|
@@ -797,114 +605,7 @@ sequenceDiagram
 **Codes d'erreur :**
 - `404` : Personnage introuvable
 
-## 🧪 Technical Specification
-
-### Data Loading and Managers
-
-All game data is loaded through manager classes that read YAML files from `back/gamedata/`:
-
-#### StatsManager
-- **File**: `stats.yaml`
-- **Provides**: Stat info, bonus table, cost table, starting points (400)
-- **Methods**: `get_description()`, `get_bonus()`, `calculate_cost()`, `get_all_stats()`
-
-#### SkillsManager
-- **File**: `skills_for_llm.yaml`
-- **Provides**: 6 skill groups with detailed skills
-- **Methods**: `get_all_skills()`, `get_skill_by_name()`, `get_skills_by_group()`
-
-#### RacesManager
-- **File**: `races_and_cultures.yaml`
-- **Provides**: Available races, cultures, stat bonuses
-- **Methods**: `get_all_races()`, `get_race_by_name()`, `get_cultures_for_race()`
-
-#### EquipmentManager
-- **File**: `equipment.yaml`
-- **Provides**: Weapons, armor, items with stats
-- **Methods**: `get_all_equipment()`, `get_equipment_by_name()`, `get_weapons()`, `get_armor()`
-
-#### SpellsManager
-- **File**: `spells.yaml`
-- **Provides**: Available spells, organized by sphere
-- **Methods**: `get_all_spells()`, `get_spell_by_name()`, `get_spells_by_sphere()`
-
-#### CombatSystemManager
-- **File**: `combat_system.yaml`
-- **Provides**: Combat rules, actions, damage calculations
-- **Methods**: Combat-related rule lookups
-
-### PydanticAI Tools
-
-All tools follow the PydanticAI pattern with `RunContext`:
-
-```python
-from pydantic_ai import Agent, RunContext
-from back.services.session_service import SessionService
-
-agent = Agent('openai:gpt-4o', deps_type=SessionService)
-
-@agent.tool
-async def skill_check_with_character(
-    ctx: RunContext[SessionService],
-    skill_name: str,
-    difficulty: int = 50
-) -> str:
-    """Perform a skill check for the session's character"""
-    session = ctx.deps
-    character = session.character_data
-    # Implementation
-    return json.dumps(result)
-```
-
-#### Available Tools
-
-1. **skill_tools.py**
-   - `skill_check_with_character` - Perform skill checks with character's bonuses
-
-2. **combat_tools.py**
-   - `roll_initiative_tool` - Calculate initiative order
-   - `perform_attack_tool` - Execute attack roll
-   - `resolve_attack_tool` - Resolve attack vs defense
-   - `calculate_damage_tool` - Calculate damage with modifiers
-   - `end_combat_tool` - End combat and distribute rewards
-
-3. **inventory_tools.py**
-   - `inventory_add_item` - Add item to character inventory
-   - `inventory_remove_item` - Remove item from inventory
-
-4. **character_tools.py**
-   - `character_apply_xp` - Apply experience points
-   - `character_add_gold` - Add gold to character
-   - `character_take_damage` - Apply damage to character
-   - `character_heal` - Heal character HP
-
-### Memory and Session Management
-
-**Conversation History**:
-- **Format**: JSONL (one message per line)
-- **Location**: `data/sessions/{session_id}.jsonl`
-- **Content**: User messages, assistant responses, tool calls/returns
-- **Exclusion**: System prompts (not persisted, reconstructed each run)
-
-**Serialization**:
-```python
-# Saving messages
-messages_json = [msg.to_jsonable_python() for msg in messages]
-# Each message written as one line in JSONL
-
-# Loading messages
-from pydantic_ai import ModelMessagesTypeAdapter
-messages = ModelMessagesTypeAdapter.validate_python(messages_json)
-```
-
-**Session Structure**:
-- Session ID: UUID
-- Character ID: UUID
-- Scenario name: string
-- Message history: JSONL file
-- Session metadata: JSON file
-
-## 🎨 Character Creation Service (2025)
+## Service de création de personnage (2025)
 
 - **character_creation_service.py** : Service dédié à la création de personnage, gérant l'allocation automatique des caractéristiques selon la race, la validation des points, et la fourniture des listes (races, compétences, cultures, équipements, sorts).
 - **creation.py** : Routeur FastAPI spécialisé pour la création de personnage, exposant les routes pour chaque étape, l'enregistrement et le suivi du statut de création.
@@ -1053,44 +754,7 @@ Le système empêche automatiquement la création de sessions dupliquées en dé
 
 - **Frontend** : Tests Vitest pour les composants Vue.js avec 100% de réussite
 
-## 💻 Development
-
-### Prerequisites
-
-- Python 3.11+
-- Node.js 18+
-- OpenAI-compatible API key (DeepSeek, OpenAI, or compatible)
-
-### Environment Setup
-
-1. **Clone the repository**
-```bash
-git clone https://github.com/cyberbobjr/jdr.git
-cd jdr
-```
-
-2. **Backend setup**
-```bash
-cd back
-python3.11 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-3. **Configure environment**
-Create `.env` file in `back/` directory:
-```bash
-DEEPSEEK_API_KEY=your_api_key_here
-JDR_DATA_DIR=../data  # Optional: override data directory
-```
-
-4. **Frontend setup**
-```bash
-cd front
-npm install
-```
-
-### Running the Application
+## Développement
 
 ### Installation
 ```bash
@@ -1100,240 +764,38 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-#### Development Mode
-
-**Backend** (FastAPI with hot reload):
+### Lancement
 ```bash
+# Backend
 cd back
-source venv/bin/activate
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
-```
+uvicorn main:app --reload
 
-API will be available at: `http://localhost:8000`
-API documentation: `http://localhost:8000/docs`
-
-**Frontend** (Vite dev server):
-```bash
+# Frontend
 cd front
+npm install
 npm run dev
 ```
 
-Application will be available at: `http://localhost:5173`
-
-#### Production Build
-
-**Backend**:
+### Tests
 ```bash
+# Backend
 cd back
-uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
-```
-
-**Frontend**:
-```bash
-cd front
-npm run build
-# Outputs to front/dist/
-```
-
-### Testing
-
-#### Backend Tests
-```bash
-cd back
-source venv/bin/activate
-
-# Run all tests
 pytest tests/ -v
 
-# Run with coverage
-pytest tests/ -v --cov=back --cov-report=html
-
-# Run specific test file
-pytest tests/services/test_character_service.py -v
-
-# Run tests matching pattern
-pytest tests/ -k "test_character" -v
-```
-
-#### Frontend Tests
-```bash
+# Frontend
 cd front
-
-# Run unit tests
 npm test
-
-# Run tests in watch mode
-npm test -- --watch
-
-# Run with coverage
-npm test -- --coverage
 ```
 
-## 📋 Coding Standards and Best Practices
+## Architecture Technique
 
-### Python (Backend)
+### Backend (FastAPI + PydanticAI)
+- **FastAPI** : Framework web moderne pour les API REST
+- **PydanticAI** : Framework d'agents LLM avec outils structurés
+- **Pydantic** : Validation des données et modèles
+- **Uvicorn** : Serveur ASGI pour le déploiement
 
-#### 1. Type Hints
-Always use type hints for function parameters and return values:
-```python
-from typing import Optional, List, Dict
-from uuid import UUID
-
-def get_character(character_id: UUID) -> Optional[Character]:
-    """Load a character by ID"""
-    return character_data
-```
-
-#### 2. Pydantic Models
-Use Pydantic V2 for all data structures:
-```python
-from pydantic import BaseModel, Field, field_validator
-
-class Character(BaseModel):
-    name: str = Field(..., min_length=1, max_length=100)
-    hp: int = Field(..., ge=0)
-    
-    @field_validator('name')
-    @classmethod
-    def validate_name(cls, v: str) -> str:
-        if not v.strip():
-            raise ValueError("Name cannot be empty")
-        return v.strip()
-```
-
-#### 3. Async/Await
-Use async/await for I/O operations:
-```python
-async def load_character(character_id: UUID) -> Character:
-    async with aiofiles.open(filepath, 'r') as f:
-        data = await f.read()
-        return Character.model_validate_json(data)
-```
-
-#### 4. Error Handling
-Use custom exceptions and proper error logging:
-```python
-from back.utils.exceptions import CharacterNotFoundError
-from back.utils.logger import log_error
-
-try:
-    character = await load_character(character_id)
-except FileNotFoundError:
-    log_error("Character not found", character_id=str(character_id))
-    raise CharacterNotFoundError(f"Character {character_id} not found")
-```
-
-#### 5. Service Pattern
-Separate concerns with dedicated services:
-```python
-# DON'T: Mix I/O and business logic
-class CharacterService:
-    def apply_damage(self, character_id: UUID, damage: int):
-        character = self._load_from_file(character_id)  # ❌ I/O in business logic
-        character.hp -= damage
-        self._save_to_file(character)  # ❌ I/O in business logic
-
-# DO: Separate I/O and business logic
-class CharacterDataService:
-    def load_character(self, character_id: UUID) -> Character:
-        """Handle I/O only"""
-        return Character.from_file(character_id)
-    
-    def save_character(self, character: Character) -> None:
-        """Handle I/O only"""
-        character.to_file()
-
-class CharacterBusinessService:
-    def apply_damage(self, character: Character, damage: int) -> Character:
-        """Handle business logic only"""
-        character.hp = max(0, character.hp - damage)
-        return character
-```
-
-#### 6. Docstrings
-Use structured docstrings:
-```python
-def calculate_bonus(stat_value: int) -> int:
-    """
-    Calculate the modifier bonus for a stat value.
-    
-    **Description:** Applies the simplified bonus calculation: (value - 10) // 2
-    **Parameters:**
-    - `stat_value` (int): The stat value (3-20)
-    **Returns:**
-    - int: The calculated bonus modifier (-3 to +5)
-    **Raises:**
-    - ValueError: If stat_value is out of valid range
-    """
-    if not (3 <= stat_value <= 20):
-        raise ValueError(f"Stat value must be 3-20, got {stat_value}")
-    return (stat_value - 10) // 2
-```
-
-### TypeScript (Frontend)
-
-#### 1. Interface Definition
-Define interfaces for all data structures:
-```typescript
-interface Character {
-  id: string;
-  name: string;
-  stats: Stats;
-  skills: Skills;
-  hp: number;
-  maxHp: number;
-}
-
-interface Stats {
-  strength: number;
-  constitution: number;
-  agility: number;
-  intelligence: number;
-  wisdom: number;
-  charisma: number;
-}
-```
-
-#### 2. Vue 3 Composition API
-Use Composition API for components:
-```typescript
-<script setup lang="ts">
-import { ref, computed } from 'vue';
-import type { Character } from '@/core/interfaces';
-
-const props = defineProps<{
-  character: Character;
-}>();
-
-const currentHp = ref(props.character.hp);
-const hpPercentage = computed(() => 
-  (currentHp.value / props.character.maxHp) * 100
-);
-</script>
-```
-
-### General Guidelines
-
-1. **English Only**: All code, comments, and documentation in English
-2. **YAML for Config**: Use YAML for all configuration and game data
-3. **No Hardcoded Data**: Load all data through manager classes
-4. **Strict SRP**: One responsibility per class/file
-5. **Type Safety**: Leverage Pydantic and TypeScript for type safety
-6. **Test Coverage**: Aim for 80%+ test coverage
-7. **Git Commits**: Use conventional commits (feat:, fix:, docs:, refactor:, test:)
-
-## 🔧 Technical Architecture
-
-### Backend Technology Stack
-
-- **FastAPI 0.111+**: Modern web framework for building APIs
-- **PydanticAI**: Agent framework for LLM integration with type safety
-- **Pydantic V2**: Data validation and settings management
-- **Uvicorn**: ASGI server for production deployment
-- **PyYAML**: YAML file parsing for game data
-- **aiofiles**: Async file I/O operations
-
-### Logging System
+### Système de Logging
 Le projet utilise un système de logging centralisé et configurable pour tracer les erreurs, informations de débogage et événements métier.
 
 #### Configuration
@@ -1382,178 +844,13 @@ log_error("Échec de sauvegarde", error=str(e))
 - **JSON** : Fiches de personnage et données de jeu
 - **Markdown** : Scénarios et documentation
 
-## 🤝 Contributing
+## Contribution
 
-### Development Workflow
+Le projet suit une architecture modulaire avec séparation stricte des responsabilités :
+- Les **routers** ne contiennent que la logique HTTP
+- Les **services** encapsulent la logique métier
+- Les **agents** orchestrent les interactions LLM
+- Les **outils** fournissent des fonctionnalités spécifiques aux agents
+- Les **modèles** définissent la structure des données
 
-1. **Fork and Clone**
-```bash
-git clone https://github.com/your-username/jdr.git
-cd jdr
-```
-
-2. **Create Feature Branch**
-```bash
-git checkout -b feature/your-feature-name
-# or
-git checkout -b fix/bug-description
-```
-
-3. **Make Changes**
-- Follow coding standards
-- Add tests for new features
-- Update documentation
-- Run linting and tests
-
-4. **Commit with Conventional Commits**
-```bash
-git commit -m "feat: add NPC generation system"
-git commit -m "fix: correct HP calculation in combat"
-git commit -m "docs: update API documentation"
-git commit -m "refactor: simplify character service"
-git commit -m "test: add tests for skill checks"
-```
-
-5. **Push and Create Pull Request**
-```bash
-git push origin feature/your-feature-name
-```
-
-### Architectural Principles to Follow
-
-The project follows a **strict modular architecture** with separation of concerns:
-
-- **Routers** (`back/routers/`): Only HTTP logic, no business rules
-- **Services** (`back/services/`): Business logic, no I/O or HTTP concerns
-- **Agents** (`back/agents/`): LLM orchestration with PydanticAI
-- **Tools** (`back/tools/`): Specific functionalities for agents
-- **Models** (`back/models/domain/`): Data structures with Pydantic validation
-- **Managers** (`back/models/domain/*_manager.py`): Game data loading from YAML
-
-**Key Rules**:
-1. Services must not handle HTTP requests directly
-2. Routers must not contain game logic
-3. All game data must be loaded through managers (no hardcoding)
-4. Use dependency injection for service composition
-5. Follow Single Responsibility Principle (SRP)
-
-### Before Submitting
-
-- [ ] Code follows style guidelines (English, type hints, docstrings)
-- [ ] Tests added for new features
-- [ ] All tests pass (`pytest tests/`)
-- [ ] Documentation updated (README, docstrings, API docs)
-- [ ] No breaking changes to existing API (or properly documented)
-- [ ] Commit messages follow conventional commits format
-
-## 🚀 Roadmap and Known Issues
-
-### Completed (2024-2025)
-
-- ✅ Migration from JSON to YAML for game data
-- ✅ Complete translation from French to English
-- ✅ Simplified character system (CharacterV2)
-- ✅ Migration from LangChain to PydanticAI
-- ✅ Service layer refactoring with strict SRP
-- ✅ YAML-based data managers
-- ✅ Custom JSONL store for conversation history
-- ✅ Combat system implementation
-- ✅ Character creation workflow
-
-### In Progress
-
-- 🔄 Complete migration to CharacterV2 across all services
-- 🔄 NPC generation system with archetypes
-- 🔄 Combat manager service for state management
-- 🔄 Remove fallback data from managers (fail-fast approach)
-- 🔄 Increase test coverage to 90%+
-
-### Planned Features
-
-#### Short Term (1-2 months)
-- ⏳ API versioning (`/api/v1`, `/api/v2`)
-- ⏳ Frontend migration to CharacterV2
-- ⏳ Enhanced error handling and validation
-- ⏳ Performance optimization (caching)
-- ⏳ Database integration (replace JSON files)
-
-#### Medium Term (3-6 months)
-- ⏳ Multi-player session support
-- ⏳ Real-time WebSocket communication
-- ⏳ Advanced NPC AI behaviors
-- ⏳ Dynamic scenario generation
-- ⏳ Combat visualization improvements
-
-#### Long Term (6+ months)
-- ⏳ Campaign management system
-- ⏳ Character progression tracking
-- ⏳ Custom rule system support
-- ⏳ Mobile app (React Native)
-- ⏳ Community scenario sharing
-
-### Known Issues and Limitations
-
-1. **Character V1/V2 Coexistence**: Both character models exist during migration, causing potential confusion
-2. **Fallback Data**: Managers still have hardcoded fallback data instead of failing fast
-3. **Limited Test Coverage**: Current coverage ~70%, target is 90%+
-4. **No Database**: Character and session data stored in JSON/JSONL files (not scalable)
-5. **Single Player Only**: No multi-player session support yet
-6. **French Documentation**: Game rules in `docs/` still in French (needs translation)
-
-### Architecture Improvements (from TODO.md)
-
-#### 1. Dependency Injection Container
-**Status**: Planned
-
-Replace direct service instantiation with a DI container:
-```python
-# Current (tight coupling)
-item_service = ItemService()
-
-# Planned (loose coupling)
-item_service = get_service('item_service')
-```
-
-**Benefits**: Better testability, easier mocking, cleaner code
-
-#### 2. Model Converter Utility
-**Status**: Completed ✅
-
-Centralized conversion between Pydantic models and dictionaries:
-```python
-from back.utils.model_converter import ModelConverter
-
-# Replaces scattered model_dump() calls
-character_dict = ModelConverter.to_dict(character)
-```
-
-#### 3. Enhanced Error Handling
-**Status**: Planned
-
-Standardize error responses across the API:
-- Custom exception hierarchy
-- Consistent error response format
-- Better error messages for debugging
-- HTTP status code mapping
-
-#### 4. Logging Improvements
-**Status**: Partially completed
-
-Current state:
-- ✅ JSON logging for Grafana/Loki
-- ✅ Structured logs with context
-- ⏳ Distributed tracing (OpenTelemetry)
-- ⏳ Performance metrics
-- ⏳ Request/response logging middleware
-
-## 🙏 Acknowledgments
-
-This project uses several excellent open-source libraries and frameworks:
-
-- **PydanticAI** - Type-safe AI agent framework
-- **FastAPI** - Modern web framework for Python
-- **Vue.js** - Progressive JavaScript framework
-- **TailwindCSS** - Utility-first CSS framework
-- **Pydantic** - Data validation using Python type hints
-
-Special thanks to the contributors and the open-source community!
+Toute modification doit respecter ces principes architecturaux et être accompagnée de tests appropriés.
