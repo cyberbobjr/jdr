@@ -40,8 +40,8 @@ class UpdateCharacterV2Request(BaseModel):
     """Request model for updating a V2 character"""
     character_id: str = Field(..., description="Character ID")
     name: str = Field(default="", description="Character name")
-    stats: Dict[str, int] = Field(default={}, description="Character stats")
-    skills: Dict[str, int] = Field(default={}, description="Character skills")
+    stats: Dict[str, int] = Field(default_factory=dict, description="Character stats")
+    skills: Dict[str, Dict[str, int]] = Field(default_factory=dict, description="Character skills by group")
     background: str = Field(default="", description="Character background")
 
 class UpdateCharacterV2Response(BaseModel):
@@ -274,6 +274,9 @@ def get_character_v2(character_id: str):
         
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except HTTPException as e:
+        # Re-raise HTTP exceptions without altering the status code
+        raise e
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
@@ -292,11 +295,16 @@ def delete_character_v2(character_id: str):
     - **Output**: 204 No Content if successful
     """
     try:
-        CharacterPersistenceService.load_character_data(character_id)  # Verify character exists
+        data = CharacterPersistenceService.load_character_data(character_id)  # Verify character exists
+        if not data:
+            raise HTTPException(status_code=404, detail=f"Character with id '{character_id}' not found")
         CharacterPersistenceService.delete_character_data(character_id)
         
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail=f"Character with id '{character_id}' not found")
+    except HTTPException as e:
+        # Preserve intended HTTP status codes
+        raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Character deletion failed: {str(e)}")
 
