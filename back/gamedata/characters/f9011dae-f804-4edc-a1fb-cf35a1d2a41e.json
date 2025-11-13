@@ -1,0 +1,49 @@
+{
+  "id": "f9011dae-f804-4edc-a1fb-cf35a1d2a41e",
+  "name": "Éothain",
+  "race": "humans",
+  "culture": "rohirrim",
+  "level": 1,
+  "stats": {
+    "strength": 13,
+    "constitution": 11,
+    "agility": 12,
+    "intelligence": 10,
+    "wisdom": 14,
+    "charisma": 13
+  },
+  "skills": {
+    "combat": {},
+    "general": {},
+    "stealth": {},
+    "social": {},
+    "magic": {},
+    "crafting": {}
+  },
+  "status": "draft",
+  "experience_points": 0,
+  "equipment": {
+    "weapons": [],
+    "armor": [],
+    "accessories": [],
+    "consumables": [],
+    "gold": 0
+  },
+  "combat_stats": {
+    "max_hit_points": 115,
+    "current_hit_points": 115,
+    "max_mana_points": 92,
+    "current_mana_points": 92,
+    "armor_class": 11,
+    "attack_bonus": 1
+  },
+  "spells": {
+    "known_spells": [],
+    "spell_slots": {},
+    "spell_bonus": 0
+  },
+  "physical_description": "Broad-shouldered and wind-tanned, with sun-bleached hair the color of ripe wheat and keen, weather-wise eyes of grey or blue. Their faces are lean and strong, etched by the plains' sun and wind, with a warrior's poise in every movement.",
+  "created_at": "2025-11-13T18:49:00.112100",
+  "updated_at": "2025-11-13T18:49:00.112100",
+  "description": "I am Éothain, son of a lesser lord of the Eastfold. My father's hall was burned by Dunlending raiders when I was but a boy. I watched our horses driven off, their whinnies of fear haunting my dreams. Now I ride with the King's Riders, my spear and my bay mare, Windfola, my only possessions. I seek no hall of my own, only to guard the borders so no other child suffers as I did. The memory of those stolen horses drives me; I will reclaim for the Mark what was taken, or die in the attempt."
+}

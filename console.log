@@ -1,0 +1,1188 @@
+{"timestamp": "2025-11-13T18:48:04.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T18:48:04.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T18:48:04.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T18:48:04.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T18:48:04.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T18:48:04.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T18:48:04.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T18:48:04.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/ca141ae7-6128-48b7-8d90-51cc017cb840 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T18:48:04.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T18:48:04.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T18:48:04.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T18:48:04.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/c883bdde-e1b5-4928-bd2e-2f09246c2667 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T18:48:04.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/6d5b85dd-731b-437d-ad2c-3aa7a2992e59 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T18:48:04.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/8ffd3b56-50d6-49a2-bed2-1845b467e055 "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-13T18:48:04.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/0924210f-2616-4f84-bb5d-e3e92f7e1744 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T18:48:04.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T18:48:04.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T18:48:04.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T18:48:04.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T18:48:04.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T18:48:04.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T18:48:04.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 77, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-13T18:48:04.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T18:48:04.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 81, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-13T18:48:04.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T19:36:11.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T19:36:11.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T19:36:11.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T19:36:11.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T19:36:11.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T19:36:11.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T19:36:11.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/1205d107-89dd-4849-b2d8-941f161d0f0b "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T19:36:11.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T19:36:11.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T19:36:11.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T19:36:11.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/995e33a6-946c-44ed-b218-2854e980645a "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T19:36:11.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/87879027-f76e-48af-9a85-a0db35545ac4 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T19:36:11.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/7d1e544a-c855-4c95-b1ed-73916d811306 "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-13T19:36:11.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/39ddf3fa-164b-45a3-81fa-273ddb1c64e9 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T19:36:11.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T19:36:11.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T19:36:11.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T19:36:11.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T19:36:11.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T19:36:11.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T19:36:11.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 77, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-13T19:36:11.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T19:36:11.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 81, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-13T19:36:11.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T19:42:29.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T19:42:29.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T19:42:29.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T19:42:29.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T19:42:29.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T19:42:29.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T19:42:29.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T19:42:29.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/c413d4a7-c167-43e6-9758-e83a2ef6ad21 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T19:42:30.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T19:42:30.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T19:42:30.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T19:42:30.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/b249104d-3faf-45f8-858b-778d3ff573bb "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T19:42:30.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/079446a1-f38b-4a62-bc5c-df0cee937064 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T19:42:30.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/5b36a373-b060-4281-8adc-0bc0aab76fe3 "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-13T19:42:30.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/a2560031-a474-4322-b612-fb3aeab0aa9a "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T19:42:30.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T19:42:30.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T19:42:30.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T19:42:30.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T19:42:30.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T19:42:30.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T19:42:30.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 78, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-13T19:42:30.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T19:42:30.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 82, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-13T19:42:30.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T20:01:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T20:01:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T20:01:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T20:01:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T20:01:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T20:01:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T20:01:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T20:01:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/9def92cb-fe4c-4e6e-8a11-c96aca662813 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T20:01:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T20:01:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T20:01:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T20:01:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/036e6257-4c64-421a-8607-c2efcf05c1a7 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T20:01:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/24e07d4f-9e55-41b3-8c67-668b6c5f90fb "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T20:01:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/876cc881-418d-4cb7-8e8b-435dced4e4dc "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-13T20:01:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/7f56269e-eba6-4b8f-b7ec-e7d1d90de256 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T20:01:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T20:01:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T20:01:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T20:01:44.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T20:01:44.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T20:01:44.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T20:01:44.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 78, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-13T20:01:44.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T20:01:44.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 82, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-13T20:01:44.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T22:55:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:55:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:55:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:55:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:55:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:55:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:55:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:55:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/b38815cd-b6db-4cf6-87c6-399d01af2806 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:55:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T22:55:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:55:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T22:55:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/56840aea-94f0-4364-a388-d826c9f6fda2 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:55:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/e142db1c-b5a1-4595-978f-e156e01225d5 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T22:55:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/0704f24d-2e51-46fc-a8e4-a75047cdff5c "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-13T22:55:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/452f22b1-dca3-4a48-8ace-6477f0b203d4 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T22:55:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:55:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:55:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:55:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T22:55:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T22:55:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:55:19.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 142, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-13T22:55:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T22:55:19.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 146, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-13T22:55:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T22:57:20.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:20.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:20.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:20.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:20.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:20.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:20.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:20.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/45be00c2-523c-476a-8fee-8975dbb52d7b "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:20.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T22:57:20.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:20.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T22:57:20.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/2cdad0d4-52c0-4698-8475-9ea99294ed12 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:20.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/42bc286a-cff0-422b-aaaf-039af1dd0ce0 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T22:57:20.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/2bc62abd-acec-4d5c-b94b-43b1f043a7a3 "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-13T22:57:20.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/a481b91b-b181-4352-bc89-cfbaf2208365 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T22:57:20.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:20.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:20.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:20.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T22:57:20.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T22:57:20.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:20.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 142, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-13T22:57:20.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T22:57:20.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 146, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-13T22:57:20.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T22:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/57ad9687-3e4c-4832-b5ed-7df15198c98c "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T22:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T22:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/bc7cb059-6192-4a86-932e-313faf42637e "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/16d43433-c958-4f14-9828-5f6a689375ba "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T22:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/fb7c822b-8019-45e5-af0c-1588036784a9 "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-13T22:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/30c7f1b8-6375-48f7-ae5b-ad3dab9318de "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T22:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T22:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T22:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:57:54.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 142, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-13T22:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T22:57:54.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 146, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-13T22:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T22:58:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:58:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:58:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:58:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:58:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:58:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:58:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:58:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/e870e741-00ca-4420-abb2-bbfb74c7c97c "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:58:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T22:58:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:58:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T22:58:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/bf6e91e5-3616-4025-99ea-509142773ba0 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:58:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/ce79cd07-6fdd-4bbf-a8e1-5215c599f326 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T22:58:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/eb39de93-0902-460e-a075-7a4ea3ee6e96 "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-13T22:58:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/ad322830-87d7-4628-aa18-624d91bcd994 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T22:58:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:58:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:58:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:58:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T22:58:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T22:58:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T22:58:10.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 142, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-13T22:58:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T22:58:10.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 146, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-13T22:58:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:14:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:14:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:14:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:14:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:14:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/bc347e2b-e2e8-455d-b49b-7bdb830c9ce8 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:14:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:14:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:14:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:14:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/1a9d9e5d-c75a-4230-aeb2-57bde1ce083c "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:14:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/5bf88ce7-c7fb-471f-ae49-8126c6857a20 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:14:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/3a52b24b-bb6f-488a-9e31-d3cf7e4cfe13 "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-13T23:14:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/8db55cdb-04a7-4abe-b5be-79886d69e1b9 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:14:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:14:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:14:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:14:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:14:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:14:39.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 142, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-13T23:14:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:14:39.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 146, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-13T23:14:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:15:35.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:15:35.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:15:35.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:15:35.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:15:35.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/655bd97c-4552-4da9-a506-8437c6b63303 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:15:35.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:15:35.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:15:35.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:15:35.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/59fef0f2-1945-4d7f-af7a-aad4b62320e0 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:15:35.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/de0d25cd-5537-4e46-8d16-878b4aeaa562 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:15:35.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/8dd69a1f-dbc4-41fe-81b6-b9393a236840 "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-13T23:15:35.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/56ab9dde-71e6-4834-9338-6a62b6440889 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:15:35.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:15:35.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:15:35.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:15:35.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:15:35.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:15:35.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 142, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-13T23:15:35.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:15:35.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 146, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-13T23:15:35.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:16:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:16:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:16:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:16:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:16:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/dfeb4136-cb4a-4643-89e3-7562f0a59583 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:16:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:16:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:16:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:16:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/f8bf368f-00a1-45cc-bfab-5bddcec0a3e4 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:16:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/0ac582be-9d5a-4e73-a789-92f1eabb2141 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:16:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/d0839682-bba8-4d61-a998-09371e00fa59 "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-13T23:16:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/99f4e344-bfbb-48a2-98ec-4cd6edf1ab63 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:16:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:16:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:16:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:16:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:16:41.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:16:41.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 142, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-13T23:16:41.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:16:41.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 146, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-13T23:16:41.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:18:08.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:18:08.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:18:08.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:18:08.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:18:08.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:18:08.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/1fc4ea58-9e74-4b10-ad35-aa30d9419382 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:18:08.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:18:08.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:18:08.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:18:08.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/1c54684e-9eba-441e-83ad-9e7ab07d20e9 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:18:08.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/58946b4e-bbe2-4237-b9ad-e637ff8da451 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:18:08.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/34719c72-c8c4-4d6c-a03d-f4f9a6757e1c "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-13T23:18:08.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/21ec55c2-5ce4-48e0-bb50-d8d90a6fb557 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:18:08.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:18:08.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:18:08.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:18:08.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:18:08.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:18:08.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:18:08.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 142, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-13T23:18:08.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:18:08.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 146, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-13T23:18:08.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:19:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:19:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:19:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:19:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:19:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:19:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:19:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:19:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/092e78ec-3ef4-4f91-b665-c5e8fb17f6e0 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:19:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:19:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:19:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:19:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/0f4f31fa-b7e4-4e49-9d58-3b6d861fc356 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:19:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/438d4025-b5c6-4e7d-998f-6a2fb1080d42 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:19:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/e95d7a6d-61a2-4882-8de4-ffa828fb7104 "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-13T23:19:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/1993fd07-ffbf-4b3d-80a1-612e8e91255e "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:19:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:19:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:19:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:19:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:19:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:19:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:19:19.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 142, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-13T23:19:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:19:19.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 146, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-13T23:19:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:20:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/e940910e-ad47-43c1-befb-eb3e4049968b "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:20:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:20:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/6bdc9529-6229-403e-aea7-94bbdf1e30d9 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/dbf4f86a-dc27-4f64-8d72-e9403d966148 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:20:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/a3cae343-33bd-455b-987e-ddda8acdbb7e "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-13T23:20:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/80cc2736-623d-45b7-9c7a-05e563fa03f8 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:20:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:20:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:20:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:39.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 142, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-13T23:20:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:20:39.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 146, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-13T23:20:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:20:46.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:46.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:46.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:46.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:46.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:46.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:46.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:46.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/81049112-0ff8-4997-ac38-5055ef66fc7e "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:46.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:20:46.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:46.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:20:46.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/2a8b3e6d-86bf-4fb5-ad9d-3c1bc8254379 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:46.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/00728404-c809-47c8-9e36-92c4eaf494eb "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:20:46.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/3600e6ce-cb37-4113-9b30-6e1b87b8d95b "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-13T23:20:46.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/d9196e50-575b-4efe-8ed6-f18b6ea403fc "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:20:46.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:46.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:46.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:46.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:20:46.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:20:46.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:46.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 142, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-13T23:20:46.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:20:46.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 146, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-13T23:20:46.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:20:55.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:55.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:55.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:55.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:55.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:55.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:55.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:55.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/8ce24178-4d0c-46a6-998b-16f3f867c62f "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:55.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:20:55.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:55.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:20:55.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/397f22cb-3932-43e4-af65-e9dd59c6a392 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:55.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/279a6a22-02a9-4d42-b8ff-98effd5c45ba "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:20:55.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/4153ecf6-b899-4804-b635-0b77ec171d81 "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-13T23:20:55.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/2c795675-ada0-45e4-b29f-f499956bf274 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:20:55.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:55.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:55.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:55.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:20:55.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:20:55.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:20:55.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 142, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-13T23:20:55.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:20:55.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 146, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-13T23:20:55.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:21:18.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:18.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:18.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:18.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:18.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:18.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:18.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:18.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/7eef4281-d7f4-4aa4-b480-36cdd34ef4fa "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:18.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:21:18.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:18.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:21:18.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/01b854b3-e73e-4a48-8c46-d5c293d298fd "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:18.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/9787fdd0-e6ea-48a1-a828-f15b132b1625 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:21:18.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/fa15c2ec-79c5-4bd6-82bc-41ab91ddd585 "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-13T23:21:18.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/529fca7c-861d-4d31-af40-fae4b9c62a55 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:21:18.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:18.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:18.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:18.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:21:18.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:21:18.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:18.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 142, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-13T23:21:18.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:21:18.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 146, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-13T23:21:18.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:21:53.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:53.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:53.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:53.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:53.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:53.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:53.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:53.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/d25dcd16-9400-4b9c-9622-2d814c7609a6 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:53.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:21:53.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:53.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:21:53.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/5176358d-b9a8-450f-a20c-5ce33c45659b "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:53.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/f73629f0-a43c-4210-b86e-d630eb94a60b "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:21:53.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/784072e4-7ade-4d00-9897-bbc7cec72e0a "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-13T23:21:53.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/230046a3-5bd5-4ac7-9e2d-29871959dbb8 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:21:53.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:53.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:53.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:53.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:21:53.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:21:53.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:21:53.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 142, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-13T23:21:53.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:21:53.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 146, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-13T23:21:53.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/bbb45870-f046-49a8-a6f8-a14dcaf53594 "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/49131c8e-9307-4004-b71d-b7cdd8cdc3c4 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/9ee619aa-71e4-40a9-b831-a411adf31fe9 "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/not-a-uuid "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/bbb45870-f046-49a8-a6f8-a14dcaf53594 "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/bbb45870-f046-49a8-a6f8-a14dcaf53594 "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/bbb45870-f046-49a8-a6f8-a14dcaf53594 "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/bbb45870-f046-49a8-a6f8-a14dcaf53594 "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/8350ca07-23c7-4055-ae9b-04e2d6970d4b "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/12447e1b-ba2c-4fec-a8cd-ff9f257f98aa "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/ece2a42f-6823-411e-b8d9-ee323a510c0a "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/05b6faa7-591e-4031-92c7-fbc759703f98 "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/6b61fd9a-2569-4e7b-a905-6ad0d3e665e4 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 422 Unprocessable Entity""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 161, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 165, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-13T23:29:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:29:58.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:29:58.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:29:58.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:29:58.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/46ba20d1-e339-4dcc-8326-e1aeb7309435 "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:29:58.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/70c90202-3899-4f6d-b364-61a0d56896b0 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:29:58.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/eafb663d-9990-4656-9b17-3b796a0a9c8a "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:29:58.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/not-a-uuid "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:29:58.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:29:58.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/46ba20d1-e339-4dcc-8326-e1aeb7309435 "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:29:58.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/46ba20d1-e339-4dcc-8326-e1aeb7309435 "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:29:58.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/46ba20d1-e339-4dcc-8326-e1aeb7309435 "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:29:58.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:29:58.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/46ba20d1-e339-4dcc-8326-e1aeb7309435 "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:29:58.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:35:56.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:35:56.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:35:56.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:35:56.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/5b957b1e-7ccf-40b9-b52f-52ca11789985 "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:35:56.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/68064ec3-7eb2-4400-8d11-6d74cf97ea34 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:35:56.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/4a74970a-404c-42e6-92be-78095923faad "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:35:56.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/not-a-uuid "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:35:56.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:35:56.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/5b957b1e-7ccf-40b9-b52f-52ca11789985 "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:35:56.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/5b957b1e-7ccf-40b9-b52f-52ca11789985 "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:35:56.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/5b957b1e-7ccf-40b9-b52f-52ca11789985 "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:35:56.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:35:56.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/5b957b1e-7ccf-40b9-b52f-52ca11789985 "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:35:56.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:43:12.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:43:12.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:43:12.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:43:12.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/c0981f8c-7a37-44ae-b34c-e21f5a08b580 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:43:12.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/2b1c2bb4-ab46-4444-b90c-1d1915a2c6b1 "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:43:12.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/not-a-uuid "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:43:12.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:43:12.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:43:12.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:43:12.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:43:12.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:43:12.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:43:12.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:43:12.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:43:12.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:43:12.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:43:12.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/82def392-cdaa-42f9-a4ed-1450035ef763 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:43:12.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:43:12.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:43:12.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:43:12.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/a2909bcd-6137-41a8-b22c-2ac0ceb590f4 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:43:12.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/d67f6283-d875-471d-81e1-eef37f179fec "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:43:12.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/807f5ede-50d7-4949-be3c-d0910c65f89c "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-13T23:43:13.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/0ddc0191-c9a9-4cea-b8d3-8dce3b0700aa "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:43:13.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:43:13.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 422 Unprocessable Entity""}
+{"timestamp": "2025-11-13T23:43:13.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:43:13.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:43:13.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:43:13.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:43:13.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 161, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-13T23:43:13.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:43:13.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 165, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-13T23:43:13.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:43:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:43:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:43:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:43:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/9727e75e-9ef1-410d-9f54-dfbe3c8e549a "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:43:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/37926044-39d8-419e-96c0-8a89a2e985fa "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:43:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/not-a-uuid "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:43:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:43:16.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:43:16.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:46:25.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:46:25.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:46:25.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:46:25.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/67ce7004-8ada-4129-9110-63e464636466 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:46:25.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/e016b933-ef97-434c-9a53-f0b69487e983 "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:46:25.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/not-a-uuid "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:46:25.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:46:25.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:46:25.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:46:25.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:46:25.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:46:25.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:46:25.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:46:26.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:46:26.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:46:26.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:46:26.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/98c5fb02-a118-435d-ba0a-7314736d66b4 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:46:26.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:46:26.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:46:26.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:46:26.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/bb8cd6cb-529f-476f-b52a-132194f65087 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:46:26.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/c09c4eb8-94a3-4b48-8280-148ba1aae1b9 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:46:26.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/928a24a2-b72c-47c2-96fc-a6a122475a0b "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-13T23:46:26.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/e4a27b59-b969-42b7-99b4-82670787b9be "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:46:26.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:46:26.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 422 Unprocessable Entity""}
+{"timestamp": "2025-11-13T23:46:26.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:46:26.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:46:26.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:46:26.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:46:26.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 161, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-13T23:46:26.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:46:26.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 165, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-13T23:46:26.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:49:00.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:49:00.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:49:00.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:49:00.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/4281602a-71e3-4b98-b910-50696acbd7c0 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:49:00.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/d7584427-8cbb-42e4-8cc6-729398dca4bc "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:49:00.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/not-a-uuid "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:49:00.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:49:01.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:49:01.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:49:01.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:49:01.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:49:01.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:49:01.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:49:01.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:49:01.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:49:01.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:49:01.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/f325258d-3712-468b-9a6c-4cdc7a99ce25 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:49:01.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:49:01.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:49:01.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:49:01.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/914a62b4-094d-46f7-86fe-afaf4ca6aea5 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:49:01.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/71ed5c8c-2f5c-41bc-92ac-216ea7b8655f "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:49:01.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/8326c5ef-6fa7-48c5-9a05-298c29827351 "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-13T23:49:01.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/d8cee902-f7cf-4e98-b871-83632f1cf5db "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:49:01.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:49:01.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 422 Unprocessable Entity""}
+{"timestamp": "2025-11-13T23:49:01.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:49:01.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:49:01.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:49:01.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:49:01.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 161, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-13T23:49:01.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:49:01.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 165, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-13T23:49:01.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:52:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:52:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:52:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:52:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/c889b2a9-0a9d-4208-b48c-a8c97f5a522c "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:52:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/c1f8ef2b-8543-4424-9ef1-504379dbf422 "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:52:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/not-a-uuid "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:52:19.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:52:20.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:52:20.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:53:59.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:54:56.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:55:26.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/d51c84ab-5faf-46f1-921d-3fb034095230 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/d324b692-6204-4e50-96fb-7b3a02b94e77 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/8308ca55-558f-4c10-ab43-223b5297eace "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/not-a-uuid "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/d51c84ab-5faf-46f1-921d-3fb034095230 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/d51c84ab-5faf-46f1-921d-3fb034095230 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/d51c84ab-5faf-46f1-921d-3fb034095230 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/d51c84ab-5faf-46f1-921d-3fb034095230 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/e3b72a5d-b991-4d55-98db-fa269dbad510 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/4b320740-8d5a-4ba4-9028-0953a638eacb "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/d1e0ef50-906b-4575-9454-740fc2e0995c "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/40d0fb39-e8aa-4275-9f90-139d465e41ee "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/66b0896a-6589-49f6-9a6c-ab347e7556ac "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 422 Unprocessable Entity""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 161, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 165, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-13T23:55:31.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/4b1b5cb7-9d78-4f55-a78c-7ec709328044 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/b198a5b4-123a-4a1b-b15b-82cf0510df34 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/e4b4425a-e4e7-414b-9538-70458d8a331d "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/not-a-uuid "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/4b1b5cb7-9d78-4f55-a78c-7ec709328044 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/4b1b5cb7-9d78-4f55-a78c-7ec709328044 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/4b1b5cb7-9d78-4f55-a78c-7ec709328044 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/4b1b5cb7-9d78-4f55-a78c-7ec709328044 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/cd037633-c80f-4107-b7e2-a8ee70c73d7b "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/ed442a67-56e3-4cb8-8fad-0602b6ae2f72 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/d3f45438-acee-4fc2-bda7-0fd259f3a952 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/263553ef-865f-4c81-80ab-a7a9b06406c4 "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/05167c72-2565-4148-b0e7-1fa7e2ea664e "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 422 Unprocessable Entity""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 161, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 165, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-13T23:57:40.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:57:45.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/0ef4ce1a-f2b6-4a4e-849c-a287c52fa5ba "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/e3a4df78-a343-4654-a065-72af73645d43 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/0138e9e3-aed2-45d8-b80b-2c8e3505660b "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-13T23:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/not-a-uuid "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-13T23:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/0ef4ce1a-f2b6-4a4e-849c-a287c52fa5ba "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/0ef4ce1a-f2b6-4a4e-849c-a287c52fa5ba "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/0ef4ce1a-f2b6-4a4e-849c-a287c52fa5ba "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/0ef4ce1a-f2b6-4a4e-849c-a287c52fa5ba "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-13T23:57:54.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/0cfe61dc-da38-4c7c-b21e-16bc4f00a666 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/0aac086a-dafb-4162-9052-fbeedc2fcd86 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/8621a210-b963-43bc-9d66-a9c1a37bd305 "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/not-a-uuid "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/0cfe61dc-da38-4c7c-b21e-16bc4f00a666 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/0cfe61dc-da38-4c7c-b21e-16bc4f00a666 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/0cfe61dc-da38-4c7c-b21e-16bc4f00a666 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/0cfe61dc-da38-4c7c-b21e-16bc4f00a666 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/77f4a31d-849e-4eac-82d3-d52d8ba9d57b "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/9ee259ee-0fae-44bb-b264-4069f6a88554 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/26e2a57a-9f0b-4693-a98e-6de256c04103 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/ff777ea7-83b1-4ba4-9674-fde05c674794 "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/6fc5c30e-d606-4b80-9e50-5bc800f51bf8 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 422 Unprocessable Entity""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 161, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 165, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-14T00:00:14.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-14T00:00:37.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:37.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:37.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-14T00:00:37.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/d431bfb5-3e3f-4d1d-bb64-50328327b647 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:37.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ae68b19b-1712-4aeb-a63c-8384fa8ef01d "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:00:37.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/f1d61de9-cac1-4730-80a2-a551a3828be8 "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-14T00:00:37.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/not-a-uuid "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/d431bfb5-3e3f-4d1d-bb64-50328327b647 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/d431bfb5-3e3f-4d1d-bb64-50328327b647 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/d431bfb5-3e3f-4d1d-bb64-50328327b647 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/d431bfb5-3e3f-4d1d-bb64-50328327b647 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/486196f8-8522-48c5-8433-b39ce12cca9c "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/c49225a4-78e4-4f9e-a064-d78bad7b48c8 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/1c73e903-8b39-4ee8-a931-ab34c32750a5 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/2ad59ec3-e4b8-42f6-a392-2ea7e923440e "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/1798ce3b-f463-42e4-ba5d-fcf86a36e10a "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 422 Unprocessable Entity""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 161, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 165, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-14T00:00:38.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-14T00:00:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-14T00:00:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/f862f69a-2f03-4822-a864-fb4c5de5e28d "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/34c919e6-1577-4b03-8050-6ef2ac4067ba "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:00:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/19f47de5-ab9a-409e-b34e-1422eb97cccb "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-14T00:00:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/not-a-uuid "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:00:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/f862f69a-2f03-4822-a864-fb4c5de5e28d "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/f862f69a-2f03-4822-a864-fb4c5de5e28d "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/f862f69a-2f03-4822-a864-fb4c5de5e28d "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/f862f69a-2f03-4822-a864-fb4c5de5e28d "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:00:43.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:02.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:02.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:02.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-14T00:01:02.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/3a2518fe-327b-4ea4-a4a0-666d44029fae "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:02.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/390732a4-57e2-424f-90f9-b675ab631d3d "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:01:02.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/234f64cc-3878-4f03-8667-91c60a3fb900 "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-14T00:01:02.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/not-a-uuid "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:01:02.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:02.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/3a2518fe-327b-4ea4-a4a0-666d44029fae "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:02.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/3a2518fe-327b-4ea4-a4a0-666d44029fae "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:02.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/3a2518fe-327b-4ea4-a4a0-666d44029fae "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:02.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:02.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/3a2518fe-327b-4ea4-a4a0-666d44029fae "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:02.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/3c539687-1183-4aeb-862c-69f0e54bf38f "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/8b078df4-dbf3-45c9-b149-d67d89904613 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/090c0f04-0682-4704-8904-07f7ba9a2157 "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/not-a-uuid "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/3c539687-1183-4aeb-862c-69f0e54bf38f "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/3c539687-1183-4aeb-862c-69f0e54bf38f "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/3c539687-1183-4aeb-862c-69f0e54bf38f "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/3c539687-1183-4aeb-862c-69f0e54bf38f "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/db7251e1-6a17-4a0e-8bec-107657f32ab9 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/23015114-2cea-4591-a198-fa465e83ffbd "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/57ece5b6-a4d8-4e5d-917b-acd5b713cc85 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/f2c696d2-eb30-4698-ac03-ece63b9107e6 "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/70f9af1a-2f8b-4819-b883-97e7e7ac068a "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 422 Unprocessable Entity""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 161, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 165, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-14T00:01:15.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-14T00:01:22.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:22.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:22.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-14T00:01:22.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/50ecfaf1-6257-48ca-92dc-71aeb5c42f39 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:22.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/27de5651-b0f6-4143-b67f-5c2bb4811728 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:01:22.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/1794d5a3-961c-4984-b4df-71491bef1312 "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-14T00:01:22.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/not-a-uuid "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:01:22.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:22.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/50ecfaf1-6257-48ca-92dc-71aeb5c42f39 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:22.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/50ecfaf1-6257-48ca-92dc-71aeb5c42f39 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:22.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/50ecfaf1-6257-48ca-92dc-71aeb5c42f39 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:22.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:22.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/50ecfaf1-6257-48ca-92dc-71aeb5c42f39 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:01:22.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ad0fb354-d7ae-4698-a265-580641cd6ea9 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/04d57d1e-9ec0-4dc6-bef7-87473bcc4e65 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/b3af3af0-5aca-426b-8cb9-82ad57d00f26 "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/not-a-uuid "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ad0fb354-d7ae-4698-a265-580641cd6ea9 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ad0fb354-d7ae-4698-a265-580641cd6ea9 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ad0fb354-d7ae-4698-a265-580641cd6ea9 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ad0fb354-d7ae-4698-a265-580641cd6ea9 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/d4307d73-43a1-425b-84fe-97432331d85c "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/d4372b37-2739-4e33-a7d3-8b9e826dc4da "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/44e42353-8221-4eea-8892-66e844b24114 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/e0750200-5475-44a3-852c-eadf6877a948 "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/79a6044b-5030-4d36-86c5-1fc413b3ade0 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 422 Unprocessable Entity""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 161, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 165, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-14T00:02:10.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-14T00:03:56.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 422 Unprocessable Entity""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/eb10174c-bb76-4a6c-9440-f8a6c466576e "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/e860e449-8c56-40c6-a492-5307da321547 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/e5f03346-63e8-408d-ae51-79ec52d901c9 "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/not-a-uuid "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/eb10174c-bb76-4a6c-9440-f8a6c466576e "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/eb10174c-bb76-4a6c-9440-f8a6c466576e "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/eb10174c-bb76-4a6c-9440-f8a6c466576e "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/eb10174c-bb76-4a6c-9440-f8a6c466576e "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/characters/ "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/races "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/skills "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/equipment "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/5e4e396a-b1f4-4149-894d-78d4eb4321f6 "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/update "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/768400c3-0c07-4995-8822-5574107b0afb "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/character/97bab6bd-594f-48f7-86ab-b9d9bd7faee6 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/120c58d9-d54c-464f-80cd-4b6799d9062b "HTTP/1.1 204 No Content""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE http://testserver/api/creation/character/cd619c2a-c4ea-4007-927e-1c95ae720f39 "HTTP/1.1 404 Not Found""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/validate-character "HTTP/1.1 422 Unprocessable Entity""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET http://testserver/api/creation/stats "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/create "HTTP/1.1 400 Bad Request""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 200 OK""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: No races available to create a random character."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 161, in create_random_character
+    raise HTTPException(status_code=500, detail="No races available to create a random character.")
+fastapi.exceptions.HTTPException: 500: No races available to create a random character.
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "ERROR", "logger": "back.routers.creation", "message": "Random character creation failed: 500: Race 'Lonely Race' has no cultures."}
+Traceback (most recent call last):
+  File "/home/cyberbobjr/projects/jdr/back/routers/creation.py", line 165, in create_random_character
+    raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
+fastapi.exceptions.HTTPException: 500: Race 'Lonely Race' has no cultures.
+{"timestamp": "2025-11-14T00:04:39.%fZ", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST http://testserver/api/creation/random "HTTP/1.1 500 Internal Server Error""}

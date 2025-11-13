@@ -1,71 +1,73 @@
+from __future__ import annotations
+
 from fastapi import APIRouter
-from back.models.api_dto import CharacterListResponse, CharacterDetailResponse
+from typing import List
+from back.models.domain.character_v2 import CharacterV2
 from back.services.character_data_service import CharacterDataService
 from back.utils.exceptions import CharacterNotFoundError, InternalServerError
 from back.utils.logger import log_debug
 
-router = APIRouter()
+router = APIRouter(tags=["characters"])
 
 
-@router.get("/", response_model=CharacterListResponse)
-def list_characters():
+@router.get("/", response_model=List[CharacterV2])
+async def list_characters():
     """
-    Récupère la liste de tous les personnages disponibles dans le système.
+    Retrieve the list of all available characters in the system.
 
-    Cet endpoint permet d'obtenir tous les personnages créés, qu'ils soient complets ou en cours de création.
-    Les personnages incomplets (status="en_cours") sont retournés avec uniquement les champs présents.
+    This endpoint allows obtaining all created characters, whether complete or in progress.
+    Incomplete characters (status="draft") are returned with only the available fields.
 
     Returns:
-        CharacterListResponse: Une liste contenant tous les personnages disponibles (complets ou partiels)
-        
+        CharacterListResponse: A list containing all available characters (complete or partial)
+
     Example Response:
-    
+
     ```json
         {
             "characters": [
-                {                    
+                {
                     "id": "d7763165-4c03-4c8d-9bc6-6a2568b79eb3",
                     "name": "Aragorn",
-                    "race": "Humain",
+                    "race": "Human",
                     "culture": "Gondor",
-                    "caracteristiques": {
-                        "Force": 85,
-                        "Constitution": 80,
-                        "Agilité": 70,
-                        "Rapidité": 75,
-                        "Volonté": 80,
-                        "Raisonnement": 65,
-                        "Intuition": 75,
-                        "Présence": 70
+                    "stats": {
+                        "strength": 16,
+                        "constitution": 14,
+                        "agility": 15,
+                        "intelligence": 12,
+                        "wisdom": 14,
+                        "charisma": 16
                     },
-                    "competences": {
-                        "Perception": 60,
-                        "Combat": 75,
-                        "Survie": 55,
-                        "Nature": 65
+                    "skills": {
+                        "combat": {"sword_combat": 7, "archery": 5}
                     },
-                    "hp": 85,
-                    "inventory": [
-                        {
-                            "id": "sword_001",
-                            "name": "Épée longue",
-                            "weight": 1.5,
-                            "base_value": 150.0
-                        }
-                    ],                    
-                    "spells": [],
-                    "gold": 200,
-                    "culture_bonuses": {
-                        "Combat": 5,
-                        "Influence": 3                    
-                    }
+                    "combat_stats": {
+                        "max_hit_points": 60,
+                        "current_hit_points": 60,
+                        "max_mana_points": 15,
+                        "current_mana_points": 15,
+                        "armor_class": 17,
+                        "attack_bonus": 5
+                    },
+                    "equipment": {
+                        "gold": 100
+                    },
+                    "spells": {
+                        "known_spells": [],
+                        "spell_slots": {}
+                    },
+                    "level": 5,
+                    "status": "active",
+                    "experience_points": 4500,
+                    "physical_description": "Tall, weathered, dark-haired, with keen grey eyes."
                 }
             ]
         }
         ```
 
     Raises:
-        500: Erreur interne du serveur lors de la récupération des personnages
+        500: Internal server error when retrieving characters
     """
     log_debug("Appel endpoint characters/list_characters")
     
@@ -73,14 +75,11 @@ def list_characters():
         data_service = CharacterDataService()
         characters = data_service.get_all_characters()
         
-        # Convertir les objets Character en dictionnaires pour la réponse
-        characters_data = [char.model_dump() for char in characters]
-        
-        log_debug("Liste des personnages récupérée", 
-                 action="list_characters_success", 
-                 count=len(characters_data))
-        
-        return CharacterListResponse(characters=characters_data)
+        log_debug("Liste des personnages récupérée",
+                  action="list_characters_success",
+                  count=len(characters))
+
+        return characters
         
     except Exception as e:
         log_debug("Erreur lors de la récupération des personnages", 
@@ -89,40 +88,40 @@ def list_characters():
         raise InternalServerError(f"Erreur lors de la récupération des personnages: {str(e)}")
 
 
-@router.get("/{character_id}", response_model=CharacterDetailResponse)
-def get_character_detail(character_id: str):
+@router.get("/{character_id}", response_model=CharacterV2)
+async def get_character_detail(character_id: str):
     """
-    Récupère le détail d'un personnage à partir de son identifiant unique.
+    Retrieve detailed information of a character by their unique identifier.
 
-    Cet endpoint permet d'obtenir toutes les informations détaillées d'un personnage spécifique.
+    This endpoint allows obtaining all detailed information of a specific character.
 
-    Paramètres:
-        character_id (str): L'identifiant unique du personnage à récupérer
-    Retourne:
-        CharacterDetailResponse: Les informations détaillées du personnage
+    Parameters:
+        character_id (str): The unique identifier of the character to retrieve
+    Returns:
+        CharacterV2: The detailed information of the character
     """
-    log_debug("Appel endpoint characters/get_character_detail", character_id=str(character_id))
-    
+    log_debug("Endpoint call characters/get_character_detail", character_id=str(character_id))
+
     try:
         data_service = CharacterDataService()
         character = data_service.get_character_by_id(character_id)
-        
-        log_debug("Personnage récupéré avec succès", 
-                 action="get_character_detail_success", 
-                 character_id=character_id)
-        
-        return CharacterDetailResponse(**character.model_dump())
-        
+
+        log_debug("Character retrieved successfully",
+                  action="get_character_detail_success",
+                  character_id=character_id)
+
+        return character
+
     except FileNotFoundError as e:
-        log_debug("Personnage non trouvé", 
-                 action="get_character_detail_not_found", 
-                 character_id=character_id,
-                 error=str(e))
+        log_debug("Character not found",
+                  action="get_character_detail_not_found",
+                  character_id=character_id,
+                  error=str(e))
         raise CharacterNotFoundError(character_id)
-        
+
     except Exception as e:
-        log_debug("Erreur lors de la récupération du personnage", 
-                 action="get_character_detail_error", 
-                 character_id=character_id,
-                 error=str(e))
-        raise InternalServerError(f"Erreur lors de la récupération du personnage: {str(e)}")
+        log_debug("Error retrieving character",
+                  action="get_character_detail_error",
+                  character_id=character_id,
+                  error=str(e))
+        raise InternalServerError(f"Error retrieving character: {str(e)}")

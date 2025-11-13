@@ -33,7 +33,7 @@ async def debug_tools():
         """
         
         result = await agent.run(list_tools_message, deps=session)
-        print(f"Réponse: {result.data}")
+        print(f"Réponse: {result.output}")
         
         # 3. Test explicite : démarrer un combat avec un message très clair
         print("\n3. Test: Démarrage explicite d'un combat...")
@@ -50,7 +50,7 @@ async def debug_tools():
         """
         
         result = await agent.run(start_message, deps=session)
-        print(f"Réponse: {result.data}")
+        print(f"Réponse: {result.output}")
         
         # 4. Vérifier si un combat a été créé
         print("\n4. Vérification de l'état du combat...")
@@ -77,7 +77,7 @@ async def debug_tools():
             """
             
             result = await agent.run(end_message, deps=session)
-            print(f"Réponse: {result.data}")
+            print(f"Réponse: {result.output}")
             
             # Vérifier si le combat est terminé
             final_has_combat = combat_state_service.has_active_combat(session_id)

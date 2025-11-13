@@ -6,13 +6,14 @@ Standardise les formats de réponse pour tous les endpoints.
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from datetime import datetime
+from back.models.domain.character_v2 import CharacterV2
 
 
 class CharacterListResponse(BaseModel):
     """
     Réponse standardisée pour la liste des personnages.
     """
-    characters: List[Dict[str, Any]]
+    characters: List["CharacterV2"]
 
 
 class CharacterDetailResponse(BaseModel):

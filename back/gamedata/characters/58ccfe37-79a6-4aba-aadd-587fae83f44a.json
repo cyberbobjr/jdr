@@ -1,0 +1,84 @@
+{
+  "id": "58ccfe37-79a6-4aba-aadd-587fae83f44a",
+  "name": "Thorgar Stonehand",
+  "race": "dwarves",
+  "culture": "longbeards",
+  "level": 1,
+  "stats": {
+    "strength": 14,
+    "constitution": 9,
+    "agility": 8,
+    "intelligence": 12,
+    "wisdom": 11,
+    "charisma": 11
+  },
+  "skills": {
+    "artistic": {
+      "comedy": 1,
+      "storytelling": 1,
+      "music_instrument": 1,
+      "dance": 2
+    },
+    "magic_arts": {
+      "pp_development": 1,
+      "magic_tricks": 1,
+      "divination": 1,
+      "charm_crafting": 1,
+      "power_projection": 1,
+      "esoteric_knowledge": 1,
+      "alchemy": 2
+    },
+    "athletic": {
+      "climbing": 1,
+      "contortion": 1
+    },
+    "combat": {
+      "martial_arts_strikes": 2,
+      "martial_arts_style": 1,
+      "weapon_handling": 2,
+      "martial_arts_sweeps": 2,
+      "combat_style": 1
+    },
+    "concentration": {
+      "mental_concentration": 2,
+      "ki_defense": 3,
+      "ki_speed": 1,
+      "ki_strength": 1
+    },
+    "general": {
+      "crafting": 1,
+      "estimation": 3,
+      "rope_mastery": 1,
+      "general_knowledge": 1,
+      "mind_resistance": 1,
+      "perception": 2,
+      "signal_communication": 1
+    }
+  },
+  "status": "draft",
+  "experience_points": 0,
+  "equipment": {
+    "weapons": [],
+    "armor": [],
+    "accessories": [],
+    "consumables": [],
+    "gold": 0
+  },
+  "combat_stats": {
+    "max_hit_points": 95,
+    "current_hit_points": 95,
+    "max_mana_points": 93,
+    "current_mana_points": 93,
+    "armor_class": 9,
+    "attack_bonus": 2
+  },
+  "spells": {
+    "known_spells": [],
+    "spell_slots": {},
+    "spell_bonus": 0
+  },
+  "physical_description": "A stout figure with a granite-like frame, his chest broad as a barrel. A magnificent, braided beard of iron-grey cascades to his belt, woven with silver clasps that echo the scars earned in deep delves. His eyes, set deep beneath a craggy brow, hold the glint of ancient stone and unyielding resolve.",
+  "created_at": "2025-11-13T23:22:24.713042",
+  "updated_at": "2025-11-13T23:22:24.713042",
+  "description": "Thrain Ironhand was a master smith of the Longbeards, his beard braided with rings of his own forging. For three centuries he honed his craft in the halls of Karak Azgaraz. But when grobi scum overran the eastern mines, it was Thrain who rallied the throng, his warhammer ringing louder than any anvil. Though victorious, he lost his right eye in the battle - now replaced with a polished moonstone that glows in the dark. He wanders now, seeking rare metals and worthy causes, his legendary temper matched only by his loyalty."
+}

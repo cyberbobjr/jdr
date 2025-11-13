@@ -218,3 +218,76 @@ class UpdateMoneyRequest(BaseModel):
 class UpdateMoneyResponse(BaseModel):
     status: str
     gold: float
+
+# === Schémas pour les compétences ===
+
+class SkillStatBonus(BaseModel):
+    """Modèle pour les bonus de statistiques sur une compétence"""
+    min_value: int
+    bonus_points: int
+
+class SkillInfo(BaseModel):
+    """Modèle pour les informations d'une compétence individuelle"""
+    id: str
+    name: str
+    description: str
+    stat_bonuses: Optional[Dict[str, SkillStatBonus]] = None
+
+class SkillGroup(BaseModel):
+    """Modèle pour un groupe de compétences"""
+    name: str
+    skills: Dict[str, SkillInfo]
+
+class RacialAffinity(BaseModel):
+    """Modèle pour une affinité raciale"""
+    skill: str
+    base_points: int
+
+class SkillsResponse(BaseModel):
+    """Modèle de réponse pour l'endpoint /api/creation/skills"""
+    skill_groups: Dict[str, SkillGroup]
+    racial_affinities: Dict[str, List[RacialAffinity]]
+
+class EquipmentItem(BaseModel):
+    """Modèle pour un élément d'équipement standardisé"""
+    id: str
+    name: str
+    category: str
+    cost: float
+    weight: float
+    quantity: int
+    equipped: bool
+    description: Optional[str] = None
+    damage: Optional[str] = None
+    range: Optional[str] = None
+    protection: Optional[int] = None
+    type: Optional[str] = None
+
+class EquipmentResponse(BaseModel):
+    """Modèle de réponse pour l'endpoint /api/creation/equipment"""
+    weapons: List[EquipmentItem]
+    armor: List[EquipmentItem]
+    accessories: List[EquipmentItem]
+    consumables: List[EquipmentItem]
+
+class StatInfo(BaseModel):
+    """Modèle pour les informations d'une statistique"""
+    id: str
+    name: str
+    description: str
+    min_value: int
+    max_value: int
+
+class ValueRange(BaseModel):
+    """Modèle pour la plage de valeurs des statistiques"""
+    min: int
+    max: int
+
+class StatsResponse(BaseModel):
+    """Modèle de réponse pour l'endpoint /api/creation/stats"""
+    stats: Dict[str, StatInfo]
+    value_range: ValueRange
+    bonus_formula: str
+    bonus_table: Dict[str, int]
+    cost_table: Dict[str, int]
+    starting_points: Optional[int] = None

@@ -5,9 +5,7 @@ This directory contains the YAML configuration files that define the game rules,
 ## File Descriptions
 
 - **stats.yaml** - Character statistics (Strength, Constitution, Agility, Intelligence, Wisdom, Charisma) with cost tables and bonuses
-- **skills_for_llm.yaml** - Complete skills organized in 6 groups (Combat, General, Stealth, Social, Magic, Knowledge)
-- **skill_groups.yaml** - Skill group definitions
-- **skills_affinities.yaml** - Culture-skill affinities mapping
+- **skills.yaml** - Unified skills data with groups, racial affinities, and stat bonuses
 - **races_and_cultures.yaml** - Available races and cultures with bonuses
 - **equipment.yaml** - Weapons, armor, and items with stats and costs
 - **spells.yaml** - Magic spells organized by sphere
@@ -18,7 +16,7 @@ This directory contains the YAML configuration files that define the game rules,
 These files are loaded by manager classes in `back/models/domain/*_manager.py`:
 
 - `StatsManager` → `stats.yaml`
-- `SkillsManager` → `skills_for_llm.yaml`
+- `UnifiedSkillsManager` → `skills.yaml`
 - `RacesManager` → `races_and_cultures.yaml`
 - `EquipmentManager` → `equipment.yaml`
 - `SpellsManager` → `spells.yaml`

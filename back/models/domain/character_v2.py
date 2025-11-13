@@ -87,40 +87,40 @@ class Stats(BaseModel):
 
 class Skills(BaseModel):
     """
-    Simplified skills system
+    Simplified skills system aligned with skill_groups.yaml
     6 main groups with 40 total development points
-    
+
     Skill rules:
     - Each skill rank costs 1 development point
     - Skills range from 0 (untrained) to 10 (master)
     - Total development points: 40
     """
+    artistic: Dict[str, int] = Field(
+        default_factory=dict,
+        description="Artistic skills (storytelling, music, dance, etc.)"
+    )
+    magic_arts: Dict[str, int] = Field(
+        default_factory=dict,
+        description="Magic arts skills (alchemy, runes, divination, etc.)"
+    )
+    athletic: Dict[str, int] = Field(
+        default_factory=dict,
+        description="Athletic skills (acrobatics, climbing, etc.)"
+    )
     combat: Dict[str, int] = Field(
         default_factory=dict,
         description="Combat skills (melee, ranged, defense)"
     )
+    concentration: Dict[str, int] = Field(
+        default_factory=dict,
+        description="Concentration skills (mental focus, ki techniques)"
+    )
     general: Dict[str, int] = Field(
         default_factory=dict,
-        description="General skills (athletics, perception, survival)"
+        description="General skills (crafting, knowledge, perception, etc.)"
     )
-    stealth: Dict[str, int] = Field(
-        default_factory=dict,
-        description="Stealth and subterfuge (stealth, lockpicking, disguise)"
-    )
-    social: Dict[str, int] = Field(
-        default_factory=dict,
-        description="Social interaction (persuasion, intimidation, deception)"
-    )
-    magic: Dict[str, int] = Field(
-        default_factory=dict,
-        description="Magic abilities (spellcasting, ritual, enchantment)"
-    )
-    crafting: Dict[str, int] = Field(
-        default_factory=dict,
-        description="Craft and creation (smithing, alchemy, engineering)"
-    )
-    
-    @field_validator('combat', 'general', 'stealth', 'social', 'magic', 'crafting')
+
+    @field_validator('artistic', 'magic_arts', 'athletic', 'combat', 'concentration', 'general')
     @classmethod
     def validate_skill_ranks(cls, v: Dict[str, int]) -> Dict[str, int]:
         """Ensure all skill ranks are between 0 and 10"""
@@ -128,7 +128,7 @@ class Skills(BaseModel):
             if not (0 <= rank <= 10):
                 raise ValueError(f"Skill rank for {skill_name} must be between 0 and 10, got {rank}")
         return v
-    
+
     @model_validator(mode='after')
     def validate_total_development_points(self) -> 'Skills':
         """Ensure total development points don't exceed 40"""
@@ -136,32 +136,32 @@ class Skills(BaseModel):
         if total > 40:
             raise ValueError(f"Total development points ({total}) exceed maximum of 40")
         return self
-    
+
     def get_total_development_points(self) -> int:
         """Calculate total development points used"""
         total = 0
-        for skill_group in [self.combat, self.general, self.stealth, 
-                           self.social, self.magic, self.crafting]:
+        for skill_group in [self.artistic, self.magic_arts, self.athletic,
+                           self.combat, self.concentration, self.general]:
             total += sum(skill_group.values())
         return total
-    
+
     def get_skill_rank(self, skill_name: str) -> int:
         """Get rank for a specific skill across all groups"""
-        for group in [self.combat, self.general, self.stealth, 
-                     self.social, self.magic, self.crafting]:
+        for group in [self.artistic, self.magic_arts, self.athletic,
+                     self.combat, self.concentration, self.general]:
             if skill_name in group:
                 return group[skill_name]
         return 0
-    
+
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
-                "combat": {"sword_combat": 5, "archery": 3},
-                "general": {"athletics": 4, "perception": 3},
-                "stealth": {"stealth": 3, "lockpicking": 2},
-                "social": {"persuasion": 4, "intimidation": 2},
-                "magic": {"fire_magic": 3, "healing": 2},
-                "crafting": {"blacksmithing": 5, "alchemy": 4}
+                "artistic": {"storytelling": 5, "music_singing": 3},
+                "magic_arts": {"alchemy": 4, "runes": 2},
+                "athletic": {"acrobatics": 3, "climbing": 4},
+                "combat": {"weapon_handling": 5, "combat_style": 3},
+                "concentration": {"mental_concentration": 4, "ki_concentration": 2},
+                "general": {"crafting": 5, "perception": 4, "general_knowledge": 3}
             }
         }
     )
@@ -415,6 +415,28 @@ class CharacterV2(BaseModel):
         stat_modifier = self.stats.get_modifier(stat_name)
         return skill_rank + stat_modifier
 
+    @staticmethod
+    def calculate_combat_stats(stats: Stats, level: int = 1) -> CombatStats:
+        """
+        Calculate combat stats based on core attributes and level.
+        """
+        strength_modifier = stats.get_modifier('strength')
+        agility_modifier = stats.get_modifier('agility')
+        
+        max_hp = stats.constitution * 10 + level * 5
+        max_mp = stats.intelligence * 5 + stats.wisdom * 3
+        ac = 10 + agility_modifier
+        attack_bonus = strength_modifier
+
+        return CombatStats(
+            max_hit_points=max_hp,
+            current_hit_points=max_hp,
+            max_mana_points=max_mp,
+            current_mana_points=max_mp,
+            armor_class=ac,
+            attack_bonus=attack_bonus
+        )
+
     # --- Compatibility properties for legacy services ---
     @property
     def xp(self) -> int:
@@ -495,3 +517,4 @@ __all__ = [
     'CombatStats',
     'Spells'
 ]
+CharacterV2.model_rebuild()

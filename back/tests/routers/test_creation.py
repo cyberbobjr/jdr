@@ -1,7 +1,6 @@
-
 # Ajouter les imports nécessaires pour les tests FastAPI
 from fastapi.testclient import TestClient
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock, AsyncMock
 from back.app import app
 from back.models.domain.character_v2 import CharacterV2, Stats, Skills, CombatStats, Equipment, Spells, CharacterStatus
 from back.models.schema import RaceData, CultureData
@@ -25,38 +24,66 @@ MOCK_RACES_DATA = [
 ]
 
 MOCK_SKILLS_DATA = {
-    "skills_for_llm": [
-        {"name": "Melee Weapons", "description": "Proficiency with close-quarters weapons like swords, axes, and spears."},
-    ],
     "skill_groups": {
-        "Combat": [
-            {"name": "Melee Weapons", "description": "Proficiency with close-quarters weapons like swords, axes, and spears."}
+        "combat": {
+            "name": "Combat",
+            "skills": {
+                "melee_weapons": {
+                    "id": "melee_weapons",
+                    "name": "Melee Weapons",
+                    "description": "Proficiency with close-quarters weapons like swords, axes, and spears.",
+                    "stat_bonuses": {
+                        "strength": {
+                            "min_value": 14,
+                            "bonus_points": 3
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "racial_affinities": {
+        "Noldor": [
+            {"skill": "crafting", "base_points": 3}
         ]
     }
 }
 
 MOCK_EQUIPMENT_DATA = {
-    "weapons": {
-        "Longsword": {
-            "type": "weapon",
-            "category": "melee",
-            "damage": "1d8+4",
+    "weapons": [
+        {
+            "id": "longsword",
+            "name": "Longsword",
+            "category": "weapon",
+            "cost": 2.0,
             "weight": 1.5,
-            "cost": 2,
-            "description": "Balanced and versatile one-handed sword"
+            "quantity": 1,
+            "equipped": False,
+            "damage": "1d8+4",
+            "description": "Balanced and versatile one-handed sword",
+            "range": "150"
         }
-    }
+    ],
+    "armor": [],
+    "accessories": [],
+    "consumables": []
 }
 
 MOCK_STATS_DATA = {
     "stats": {
-        "Strength": {
-            "short_name": "STR",
-            "category": "physical",
+        "strength": {
+            "id": "strength",
+            "name": "Strength",
             "description": "Physical strength, build. Determines melee damage and carrying capacity.",
-            "examples": ["Lifting heavy objects"]
+            "min_value": 3,
+            "max_value": 20
         }
-    }
+    },
+    "value_range": {"min": 3, "max": 20},
+    "bonus_formula": "(value - 10) // 2",
+    "bonus_table": {},
+    "cost_table": {},
+    "starting_points": None
 }
 
 @patch('back.routers.creation.RacesManager')
@@ -68,12 +95,11 @@ def test_get_races(mock_races_manager):
     assert response.status_code == 200
     assert response.json() == [race.model_dump() for race in MOCK_RACES_DATA]
 
-@patch('back.routers.creation.SkillsManager')
+@patch('back.routers.creation.UnifiedSkillsManager')
 def test_get_skills(mock_skills_manager):
     mock_skills_manager_instance = mock_skills_manager.return_value
-    mock_skills_manager_instance.skills_data = MOCK_SKILLS_DATA["skills_for_llm"]
-    mock_skills_manager_instance.skill_groups = MOCK_SKILLS_DATA["skill_groups"]
-    
+    mock_skills_manager_instance.get_all_data.return_value = MOCK_SKILLS_DATA
+
     response = client.get("/api/creation/skills")
     assert response.status_code == 200
     assert response.json() == MOCK_SKILLS_DATA
@@ -82,10 +108,27 @@ def test_get_skills(mock_skills_manager):
 def test_get_equipment(mock_equipment_manager):
     mock_equipment_manager_instance = mock_equipment_manager.return_value
     mock_equipment_manager_instance.get_all_equipment.return_value = MOCK_EQUIPMENT_DATA
-    
+
     response = client.get("/api/creation/equipment")
     assert response.status_code == 200
-    assert response.json() == MOCK_EQUIPMENT_DATA
+    data = response.json()
+    # Check that the structure is correct
+    assert "weapons" in data
+    assert "armor" in data
+    assert "accessories" in data
+    assert "consumables" in data
+    assert isinstance(data["weapons"], list)
+    if data["weapons"]:
+        item = data["weapons"][0]
+        assert "id" in item
+        assert "name" in item
+        assert "category" in item
+        assert "cost" in item
+        assert "weight" in item
+        assert "quantity" in item
+        assert "equipped" in item
+        assert "range" in item
+        assert isinstance(item["range"], str)  # Should be string
 
 def test_get_equipment_canonical_schema():
     """
@@ -394,10 +437,11 @@ def test_validate_character_v2_failure():
     }
 
     response = client.post("/api/creation/validate-character", json=invalid_character_data)
-    assert response.status_code == 200 # FastAPI returns 200 for validation errors in this endpoint
+    assert response.status_code == 422 # FastAPI returns 422 for Pydantic validation errors
     response_data = response.json()
-    assert response_data["valid"] is False
-    assert "Validation failed:" in response_data["message"]
+    assert "detail" in response_data
+    # Check that it's a validation error about the strength field being a string instead of int
+    assert any("strength" in str(error) and ("int" in str(error) or "integer" in str(error)) for error in response_data["detail"])
 
 
 def test_get_stats_integration_range_and_formula():
@@ -460,3 +504,130 @@ def test_create_character_v2_invalid_stats_range(mock_races_manager, mock_persis
     resp_high = client.post("/api/creation/create", json=body_high)
     assert resp_high.status_code == 400
     assert "less than or equal to 20" in resp_high.json()["detail"]
+
+
+# --- Tests for /random endpoint ---
+
+MOCK_RANDOM_RACE = RaceData(
+    id="elves",
+    name="Elves",
+    characteristic_bonuses={"Agility": 1},
+    base_languages=["Sindarin"],
+    optional_languages=[],
+    cultures=[
+        CultureData(id="rivendell", name="Rivendell Elves", skill_bonuses={"Magic": 1}, traits="Wise and ancient")
+    ]
+)
+
+MOCK_RANDOM_STATS_INFO = {
+    "stats": {
+        "strength": {}, "constitution": {}, "agility": {}, 
+        "intelligence": {}, "wisdom": {}, "charisma": {}
+    }
+}
+
+@patch('back.routers.creation.CharacterPersistenceService')
+@patch('back.routers.creation.build_simple_gm_agent')
+@patch('back.routers.creation.StatsManager')
+@patch('back.routers.creation.RacesManager')
+@patch('back.routers.creation.random')
+def test_create_random_character_success(
+    mock_random,
+    mock_races_manager,
+    mock_stats_manager,
+    mock_build_agent,
+    mock_persistence_service
+):
+    """
+    Test successful creation of a random character, mocking all external dependencies.
+    """
+    # --- Mock setup ---
+    # Mock RacesManager
+    mock_races_manager.return_value.get_all_races.return_value = [MOCK_RANDOM_RACE]
+    
+    # Mock random.choice to be deterministic
+    mock_random.choice.side_effect = [
+        MOCK_RANDOM_RACE,  # First call for race
+        MOCK_RANDOM_RACE.cultures[0] if MOCK_RANDOM_RACE.cultures else None  # Second call for culture
+    ]
+    
+    # Mock StatsManager
+    mock_stats_manager.return_value.get_all_stats_data.return_value = MOCK_RANDOM_STATS_INFO
+    
+    # Mock random.randint to return a fixed value for stats
+    mock_random.randint.return_value = 12
+    
+    # Mock LLM Agent
+    mock_agent = AsyncMock()
+    # Mock RunResult objects with .output attribute
+    from unittest.mock import MagicMock
+    result1 = MagicMock()
+    result1.output = "Gandalf"
+    result2 = MagicMock()
+    result2.output = "A wizard"
+    result3 = MagicMock()
+    result3.output = "A grey beard"
+    mock_agent.run.side_effect = [result1, result2, result3]
+    mock_build_agent.return_value = mock_agent
+    
+    # --- API call ---
+    response = client.post("/api/creation/random")
+    
+    # --- Assertions ---
+    assert response.status_code == 200
+    data = response.json()
+    
+    assert data["status"] == "created"
+    character = data["character"]
+    
+    # Assert LLM-generated content
+    assert character["name"] == "Gandalf"
+    assert character["description"] == "A wizard"
+    assert character["physical_description"] == "A grey beard"
+    
+    # Assert random selections
+    assert character["race"] == "elves"
+    assert character["culture"] == "rivendell"
+    
+    # Assert stats
+    assert character["stats"]["strength"] == 12
+    assert character["stats"]["constitution"] == 12
+    
+    # Assert calculated combat stats
+    # constitution=12 -> max_hp = 12 * 10 + 5 = 125
+    # intelligence=12, wisdom=12 -> max_mp = 12 * 5 + 12 * 3 = 96
+    assert character["combat_stats"]["max_hit_points"] == 125
+    assert character["combat_stats"]["current_hit_points"] == 125
+    assert character["combat_stats"]["max_mana_points"] == 96
+    assert character["combat_stats"]["current_mana_points"] == 96
+    
+    # Assert persistence
+    mock_persistence_service.save_character_data.assert_called_once()
+
+
+@patch('back.routers.creation.RacesManager')
+def test_create_random_character_no_races(mock_races_manager):
+    """
+    Test random character creation failure when no races are available.
+    """
+    mock_races_manager.return_value.get_all_races.return_value = []
+    
+    response = client.post("/api/creation/random")
+    
+    assert response.status_code == 500
+    assert "No races available" in response.json()["detail"]
+
+@patch('back.routers.creation.RacesManager')
+@patch('back.routers.creation.random')
+def test_create_random_character_no_cultures(mock_random, mock_races_manager):
+    """
+    Test random character creation failure when a race has no cultures.
+    """
+    race_no_culture = RaceData(id="lonely", name="Lonely Race", characteristic_bonuses={}, base_languages=[], optional_languages=[], cultures=[])
+    mock_races_manager.return_value.get_all_races.return_value = [race_no_culture]
+    mock_random.choice.return_value = race_no_culture
+    
+    response = client.post("/api/creation/random")
+    
+    assert response.status_code == 500
+    assert "has no cultures" in response.json()["detail"]

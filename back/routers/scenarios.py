@@ -214,7 +214,7 @@ async def start_scenario(request: StartScenarioRequest):
         # Retourner les informations de session + la réponse du LLM
         response_data = {
             **session_info,  # session_id, scenario_name, character_id, message
-            "llm_response": result.data
+            "llm_response": result.output
         }
         
         log_debug("Scénario démarré avec réponse LLM", action="start_scenario", session_id=session_id, character_id=request.character_id, scenario_name=request.scenario_name)

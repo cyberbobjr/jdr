@@ -153,8 +153,20 @@ class StatsManager:
         **Parameters:** None.
         **Returns:** Dict with `stats`, `value_range`, `bonus_formula`, and legacy placeholders.
         """
+        # Transform stats_info to match StatsResponse schema
+        transformed_stats = {}
+        for stat_name, stat_data in self.stats_info.items():
+            stat_id = stat_name.lower()
+            transformed_stats[stat_id] = {
+                "id": stat_id,
+                "name": stat_name,
+                "description": stat_data.get("description", ""),
+                "min_value": 3,
+                "max_value": 20,
+            }
+
         return {
-            "stats": self.stats_info,
+            "stats": transformed_stats,
             "value_range": {"min": 3, "max": 20},
             "bonus_formula": "(value - 10) // 2",
             # Legacy placeholders

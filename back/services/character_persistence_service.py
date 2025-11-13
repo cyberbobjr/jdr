@@ -10,6 +10,8 @@ from dataclasses import asdict, is_dataclass
 from back.utils.logger import log_debug
 from back.config import get_data_dir
 
+CHARACTERS_DIR = os.path.join(get_data_dir(), "characters")
+
 
 class CharacterPersistenceService:
     """
@@ -17,7 +19,21 @@ class CharacterPersistenceService:
     **Description :** Service centralisé pour la persistance des fichiers JSON des personnages.
     Factorise toutes les opérations CRUD sur les fichiers de personnages.
     """
-    
+
+    @staticmethod
+    def _validate_character_id(character_id) -> str:
+        """
+        ### _validate_character_id
+        **Description :** Valide l'identifiant du personnage.
+        **Paramètres :**
+        - `character_id` : Identifiant à valider.
+        **Retour :** L'identifiant validé (str).
+        **Raises :** ValueError si l'identifiant est invalide.
+        """
+        if character_id is None or not isinstance(character_id, str) or not character_id.strip():
+            raise ValueError("Character ID must be a non-empty string")
+        return character_id
+
     @staticmethod
     def _get_character_file_path(character_id: str) -> str:
         """
@@ -27,9 +43,9 @@ class CharacterPersistenceService:
         - `character_id` (str) : Identifiant du personnage (UUID).
         **Retour :** Chemin complet vers le fichier JSON (str).
         """
-        characters_dir = os.path.join(get_data_dir(), "characters")
-        path = os.path.join(characters_dir, f"{character_id}.json")
-        print(f"[DEBUG BACKEND] get_data_dir()={get_data_dir()} | character_id={character_id} | path={path}")
+        CharacterPersistenceService._validate_character_id(character_id)
+        path = os.path.join(CHARACTERS_DIR, f"{character_id}.json")
+        print(f"[DEBUG BACKEND] CHARACTERS_DIR={CHARACTERS_DIR} | character_id={character_id} | path={path}")
         return path
     
     @staticmethod
