@@ -15,7 +15,7 @@ llm:
 # Configuration des données
 data:
   # Répertoire des données (peut être surchargé par JDR_DATA_DIR)
-  directory: "../data"
+  directory: "./gamedata"
 
 # Configuration de l'application
 app:

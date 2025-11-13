@@ -11,7 +11,7 @@ import json
 
 from back.services.session_service import SessionService
 from back.storage.pydantic_jsonl_store import PydanticJsonlStore
-from back.models.domain.character import Character
+from back.models.domain.character_v2 import CharacterV2 as Character
 from back.agents.PROMPT import build_system_prompt
 from back.config import get_data_dir
 
@@ -74,14 +74,14 @@ def build_gm_agent_pydantic(session_id: str, scenario_name: str = "Les_Pierres_d
     system_prompt = build_system_prompt(scenario_name)
     
     # Créer l'agent avec la configuration DeepSeek
-    from pydantic_ai.models.openai import OpenAIModel
+    from pydantic_ai.models.openai import OpenAIChatModel
     from pydantic_ai.providers.openai import OpenAIProvider
     provider = OpenAIProvider(
         base_url=api_base_url,
         api_key=api_key
     )
     
-    model = OpenAIModel(
+    model = OpenAIChatModel(
         model_name=api_model,
         provider=provider
     )
@@ -91,7 +91,7 @@ def build_gm_agent_pydantic(session_id: str, scenario_name: str = "Les_Pierres_d
         end_combat_tool, end_turn_tool, check_combat_end_tool, apply_damage_tool, 
         get_combat_status_tool, start_combat_tool
     )
-    from back.tools.inventory_tools import inventory_add_item, inventory_remove_item
+    from back.tools.equipment_tools import inventory_add_item, inventory_remove_item
     from back.tools.skill_tools import skill_check_with_character
     
     agent = Agent(
@@ -231,14 +231,14 @@ Tu aides à créer des personnages cohérents et immersifs.
 Réponds toujours de manière concise et appropriée au contexte fourni."""
     
     # Créer l'agent avec la configuration DeepSeek
-    from pydantic_ai.models.openai import OpenAIModel
+    from pydantic_ai.models.openai import OpenAIChatModel
     from pydantic_ai.providers.openai import OpenAIProvider
     provider = OpenAIProvider(
         base_url=api_base_url,
         api_key=api_key
     )
     
-    model = OpenAIModel(
+    model = OpenAIChatModel(
         model_name=api_model,
         provider=provider
     )

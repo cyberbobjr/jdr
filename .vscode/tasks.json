@@ -1,30 +1,4 @@
 {
 	"version": "2.0.0",
-	"tasks": [
-		{
-			"args": [
-				"run",
-				"test",
-				"--",
-				"--run"
-			],
-			"command": "npm",
-			"group": "test",
-			"isBackground": false,
-			"label": "Frontend - Tests unitaires",
-			"options": {
-				"cwd": "${workspaceFolder}/front"
-			},
-			"presentation": {
-				"clear": true,
-				"echo": true,
-				"focus": true,
-				"panel": "shared",
-				"reveal": "always",
-				"showReuseMessage": false
-			},
-			"problemMatcher": [],
-			"type": "shell"
-		}
-	]
+	"tasks": []
 }

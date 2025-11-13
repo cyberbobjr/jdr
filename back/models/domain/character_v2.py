@@ -14,6 +14,7 @@ from pydantic import BaseModel, Field, field_validator, model_validator, ConfigD
 from uuid import UUID, uuid4
 from datetime import datetime, timezone
 from enum import Enum
+ 
 
 
 class CharacterStatus(str, Enum):
@@ -49,20 +50,7 @@ class Stats(BaseModel):
             raise ValueError(f"Stat must be between 3 and 20, got {v}")
         return v
     
-    @model_validator(mode='after')
-    def validate_total_points(self) -> 'Stats':
-        """Ensure total allocated points don't exceed 400"""
-        total = sum([
-            self.strength,
-            self.constitution,
-            self.agility,
-            self.intelligence,
-            self.wisdom,
-            self.charisma
-        ])
-        if total > 400:
-            raise ValueError(f"Total stat points ({total}) exceed maximum of 400")
-        return self
+    # Removed total points validator: simplified rule is per-stat cap only
     
     def calculate_total_points(self) -> int:
         """Calculate total allocated points"""
@@ -364,6 +352,13 @@ class CharacterV2(BaseModel):
         default_factory=Spells,
         description="Known spells and magic abilities"
     )
+
+    # Descriptions
+    physical_description: Optional[str] = Field(
+        default=None,
+        max_length=1000,
+        description="Physical appearance description (height, build, features)"
+    )
     
     # Metadata
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), description="Creation timestamp")
@@ -419,6 +414,35 @@ class CharacterV2(BaseModel):
         skill_rank = self.skills.get_skill_rank(skill_name)
         stat_modifier = self.stats.get_modifier(stat_name)
         return skill_rank + stat_modifier
+
+    # --- Compatibility properties for legacy services ---
+    @property
+    def xp(self) -> int:
+        """Compat: maps legacy xp to experience_points"""
+        return self.experience_points
+
+    @xp.setter
+    def xp(self, value: int) -> None:
+        self.experience_points = max(0, int(value))
+
+    @property
+    def gold(self) -> int:
+        """Compat: expose gold at character root (maps to equipment.gold)"""
+        return self.equipment.gold
+
+    @gold.setter
+    def gold(self, value: int) -> None:
+        self.equipment.gold = max(0, int(value))
+
+    @property
+    def hp(self) -> int:
+        """Compat: expose current HP at character root (maps to combat_stats.current_hit_points)"""
+        return self.combat_stats.current_hit_points
+
+    @hp.setter
+    def hp(self, value: int) -> None:
+        value_int = max(0, int(value))
+        self.combat_stats.current_hit_points = min(value_int, self.combat_stats.max_hit_points)
     
     model_config = ConfigDict(
         json_schema_extra={
@@ -453,7 +477,9 @@ class CharacterV2(BaseModel):
                     "attack_bonus": 5
                 },
                 "status": "active",
-                "experience_points": 4500
+                "experience_points": 4500,
+                "description": "A ranger of the North, heir to Isildur.",
+                "physical_description": "Tall, weathered, dark-haired, with keen grey eyes."
             }
         }
     )

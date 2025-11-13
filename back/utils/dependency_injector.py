@@ -8,7 +8,6 @@ from back.config import Config
 from back.services.character_persistence_service import CharacterPersistenceService
 from back.services.character_data_service import CharacterDataService
 from back.services.item_service import ItemService
-from back.services.inventory_service import InventoryService
 from back.services.equipment_service import EquipmentService
 from back.services.character_service import CharacterService
 
@@ -34,7 +33,6 @@ class DependencyContainer:
         self._services['equipment_service'] = EquipmentService(self._services['character_data_service'])
 
         # Services avec dépendances
-        self._services['inventory_service'] = InventoryService(self._services['character_data_service'])
         self._services['character_service'] = CharacterService
 
     def get(self, service_name: str) -> Any:

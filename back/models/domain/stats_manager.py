@@ -4,41 +4,52 @@ from typing import Dict, List, Optional
 from ...config import get_data_dir
 
 class StatsManager:
-    """Stats manager using the new JSON system"""
+    """Stats manager for the simplified V2 system (3–20).
+
+    This manager loads stat metadata from YAML and provides helpers to:
+    - Retrieve stat descriptions and names
+    - Compute stat modifiers using the simplified formula (value - 10) // 2
+    - Manage simple racial bonuses per stat
+
+    Note: Legacy concepts like 0–100 scales, 400 starting points, and cost tables
+    are no longer used. Any related methods now behave as no-ops for compatibility.
+    """
 
     def __init__(self):
-        """Initialize the stats manager with default values.
+        """Initialize the stats manager with default values (3–20 scale).
 
-        **Description:** Creates a new stats manager instance, loads stats
-        data from JSON file and initializes all stats with default values.
+        **Description:** Loads stats data from YAML and initializes each stat
+        value to 10 by default with zero racial bonuses.
         **Parameters:** None
         **Returns:** None
         """
-        self.values = {}
-        self.racial_bonuses = {}
+        self.values: Dict[str, int] = {}
+        self.racial_bonuses: Dict[str, int] = {}
         self._load_stats_data()
-        # Initialize default values
+        # Initialize default values on the 3–20 scale
         for name in self.names:
-            self.values[name] = 50
+            self.values[name] = 10
             self.racial_bonuses[name] = 0
 
-    def _load_stats_data(self):
-        """Load data from the JSON file.
+    def _load_stats_data(self) -> None:
+        """Load stats metadata from the YAML file.
 
-        **Description:** Loads stats data from the stats.json file
-        including stats info, bonus table, cost table and starting points.
+        **Description:** Loads `stats.yaml` from the configured data directory.
+        Only the `stats` section is required. Legacy fields (`bonus_table`,
+        `cost_table`, `starting_points`) are optional and ignored by logic.
         **Parameters:** None
         **Returns:** None
         """
         data_path = os.path.join(get_data_dir(), "stats.yaml")
         with open(data_path, 'r', encoding='utf-8') as f:
-            data = yaml.safe_load(f)
+            data = yaml.safe_load(f) or {}
 
-        self.stats_info = data["stats"]
-        self.names = list(self.stats_info.keys())
-        self.bonus_table = data["bonus_table"]
-        self.cost_table = data["cost_table"]
-        self.starting_points = data["starting_points"]
+        self.stats_info: Dict = data.get("stats", {})
+        self.names: List[str] = list(self.stats_info.keys())
+        # Legacy/optional fields retained for backward-compatible payloads
+        self.bonus_table: Dict = data.get("bonus_table", {})
+        self.cost_table: Dict = data.get("cost_table", {})
+        self.starting_points: Optional[int] = data.get("starting_points")
 
     def get_description(self, stat: str) -> str:
         """Return the description of a stat.
@@ -52,67 +63,49 @@ class StatsManager:
         return stat_info.get("description", "")
 
     def get_bonus(self, stat: str) -> int:
-        """Calculate the final bonus of a stat (value + racial bonus).
+        """Calculate the final modifier for a stat.
 
-        **Description:** Computes the total bonus for a stat by combining
-        the base bonus from the stat value and the racial bonus.
+        **Description:** Computes the total modifier as the sum of the base
+        modifier derived from the stat value using the simplified formula and
+        the racial bonus.
         **Parameters:**
-        - `stat` (str): Name of the stat to calculate bonus for.
-        **Returns:** An integer representing the total bonus for the stat.
+        - `stat` (str): Name of the stat to calculate the modifier for.
+        **Returns:** An integer representing the total modifier for the stat.
         """
-        base_value = self.values.get(stat, 50)
+        base_value = self.values.get(stat, 10)
         base_bonus = self._get_base_bonus(base_value)
         racial_bonus = self.racial_bonuses.get(stat, 0)
         return base_bonus + racial_bonus
 
     def _get_base_bonus(self, value: int) -> int:
-        """Calculate the base bonus from a stat value using the bonus_table.
+        """Calculate the base modifier from a stat value (3–20).
 
-        **Description:** Converts a stat value (0-100) to its corresponding
-        bonus using the game's bonus table.
+        **Description:** Applies the simplified rule: (value - 10) // 2.
         **Parameters:**
-        - `value` (int): The stat value (0-100).
-        **Returns:** An integer representing the base bonus derived from the value.
+        - `value` (int): The stat value (expected range 3–20).
+        **Returns:** The calculated modifier as an integer.
         """
-        for bonus_range, bonus_value in self.bonus_table.items():
-            min_val, max_val = map(int, bonus_range.split('-'))
-            if min_val <= value <= max_val:
-                return bonus_value
-        return 0 # Default to 0 if no range matches
+        if not (3 <= value <= 20):
+            # Clamp silently to keep manager resilient; validation happens elsewhere
+            value = max(3, min(20, value))
+        return (value - 10) // 2
 
     def calculate_cost(self, value: int) -> int:
-        """Calculate the cost in points to increase a stat to a specific value.
+        """Legacy no-op: stat cost calculation is no longer used.
 
-        **Description:** Computes the total point cost required to increase a
-        stat from its base value (50) to the target value, using the
-        game's cost progression system.
+        **Description:** Always returns 0 under the simplified 3–20 rules.
         **Parameters:**
-        - `stat` (str): Name of the stat to calculate cost for.
-        - `value` (int): Target value for the stat.
-        **Returns:** An integer representing the total point cost.
+        - `value` (int): Ignored.
+        **Returns:** 0
         """
-        if value <= 50:
-            return 0  # No cost for reducing below base value
-
-        total_cost = 0
-        for val in range(51, value + 1):
-            total_cost += self._get_cost_for_value(val)
-        return total_cost
+        return 0
 
     def _get_cost_for_value(self, value: int) -> int:
-        """Calculate the cost for a single point increase at a specific value using the cost_table.
+        """Legacy no-op: per-point cost is not applicable anymore.
 
-        **Description:** Returns the point cost to increase a stat by
-        one point at the given value level. Higher values cost more points.
-        **Parameters:**
-        - `value` (int): The stat value to calculate cost for.
-        **Returns:** An integer representing the cost for one point increase.
+        **Returns:** 0
         """
-        for cost_range, cost_value in self.cost_table.items():
-            min_val, max_val = map(int, cost_range.split('-'))
-            if min_val <= value <= max_val:
-                return cost_value
-        return 0 # Default to 0 if no range matches
+        return 0
 
     def set_racial_bonus(self, stat: str, bonus: int) -> None:
         """Set the racial bonus for a specific stat.
@@ -127,16 +120,20 @@ class StatsManager:
         self.racial_bonuses[stat] = bonus
 
     def set_value(self, stat: str, value: int) -> None:
-        """Set the value of a specific stat.
+        """Set the value of a specific stat (3–20).
 
-        **Description:** Assigns a new value to the specified stat.
-        The value should typically be between 0 and 100.
+        **Description:** Assigns a new value to the specified stat and validates
+        it falls within the allowed range.
         **Parameters:**
         - `stat` (str): Name of the stat to set value for.
-        - `value` (int): The new value to assign to the stat.
+        - `value` (int): The new value (3–20).
         **Returns:** None.
+        **Raises:**
+        - ValueError: If value is out of the 3–20 range
         """
-        self.values[stat] = value
+        if not (3 <= int(value) <= 20):
+            raise ValueError(f"Stat '{stat}' must be between 3 and 20, got {value}")
+        self.values[stat] = int(value)
 
     def get_all_stats_names(self) -> List[str]:
         """Get all available stat names.
@@ -149,19 +146,21 @@ class StatsManager:
         return list(self.names)
 
     def get_all_stats_data(self) -> Dict:
-        """Get all stats data from the JSON file.
+        """Get all stats metadata for the V2 system.
 
-        **Description:** Returns the complete stats JSON file structure
-        containing stats information, bonus tables, cost tables, and starting points.
+        **Description:** Returns stat definitions and simplified rule hints. Legacy
+        fields are included as empty/None for backward compatibility.
         **Parameters:** None.
-        **Returns:** Dict - A dictionary containing the complete stats data
-        structure with stats, bonus_table, cost_table, and starting_points.
+        **Returns:** Dict with `stats`, `value_range`, `bonus_formula`, and legacy placeholders.
         """
         return {
             "stats": self.stats_info,
-            "bonus_table": self.bonus_table,
-            "cost_table": self.cost_table,
-            "starting_points": self.starting_points
+            "value_range": {"min": 3, "max": 20},
+            "bonus_formula": "(value - 10) // 2",
+            # Legacy placeholders
+            "bonus_table": {},
+            "cost_table": {},
+            "starting_points": None,
         }
 
     def get_all_stats_with_values(self, stats: Optional[Dict[str, int]] = None) -> Dict:
@@ -181,8 +180,13 @@ class StatsManager:
         result = self.get_all_stats_data()
 
         for name, stat_info in result["stats"].items():
-            current_value = stats.get(name, 50) # Default to 50 if not provided
-            self.set_value(name, current_value) # Set the value in the manager
+            current_value = stats.get(name, 10)  # Default to 10 if not provided
+            # Validate and set value
+            try:
+                self.set_value(name, current_value)
+            except ValueError:
+                # Clamp gracefully for output in case of invalid external data
+                self.values[name] = max(3, min(20, int(current_value)))
             current_bonus = self.get_bonus(name)
 
             stat_info['current_value'] = current_value

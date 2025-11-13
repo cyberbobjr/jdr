@@ -19,7 +19,7 @@ Simplifier les règles du jeu et moderniser la création des personnages avec de
 - [x] Simplifier le tableau de bonus (valeurs plus simples)
 - [x] Conserver 6 caractéristiques principales : Strength, Constitution, Agility, Intelligence, Wisdom, Charisma
 - [x] Modifier `back/models/domain/stats_manager.py`
-- [x] Mettre à jour `back/services/character_creation_service.py:59-81`
+- [x] (Supprimé) `back/services/character_creation_service.py` retiré du projet
 
 ### ⚔️ **1.2 Système de Compétences Simplifié**
 - [x] Analyser les 9 groupes actuels (`data/skills_for_llm.json`)
@@ -91,7 +91,7 @@ Simplifier les règles du jeu et moderniser la création des personnages avec de
 
 ### 🛠️ **2.3 Mise à Jour Services**
 - [ ] Adapter `back/services/character_service.py`
-- [ ] Modifier `back/services/character_creation_service.py`
+- [ ] (Obsolète) `back/services/character_creation_service.py` supprimé
 - [ ] Créer `back/services/character_v2_service.py`
 - [ ] Mettre à jour `back/services/character_persistence_service.py`
 

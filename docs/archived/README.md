@@ -16,7 +16,7 @@ For up-to-date documentation, please refer to:
 
 - **[README.md](../../README.md)** - Comprehensive project documentation (main file)
 - **[.github/copilot-instructions.md](../../.github/copilot-instructions.md)** - Development guidelines for GitHub Copilot
-- **[pydanticai.md](../../pydanticai.md)** - PydanticAI framework documentation
+- **Context7 tools PydanticAI** - PydanticAI framework documentation
 
 ---
 

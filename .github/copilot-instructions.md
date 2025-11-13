@@ -39,10 +39,7 @@ The architecture is organized around:
 
 ### Frontend
 
-- **Framework**: Vue.js 3
-- **Language**: TypeScript
-- **Styling**: TailwindCSS
-- **Build Tool**: Vite
+Frontend has been removed for now and will be recreated later.
 
 ## Directory Structure
 
@@ -73,12 +70,11 @@ back/
 │   ├── character_service.py           # Legacy character service
 │   ├── character_data_service.py      # Character I/O operations
 │   ├── character_business_service.py  # Character business logic
-│   ├── character_creation_service.py  # Character creation
+│   
 │   ├── character_persistence_service.py # Character persistence
 │   ├── combat_service.py             # Combat mechanics
 │   ├── combat_state_service.py       # Combat state persistence
-│   ├── equipment_service.py          # Equipment buy/sell
-│   ├── inventory_service.py          # Inventory management
+│   ├── equipment_service.py          # Equipment buy/sell + inventory management
 │   ├── item_service.py               # Item management
 │   ├── scenario_service.py           # Scenario flow
 │   ├── session_service.py            # Session management
@@ -88,7 +84,7 @@ back/
 ├── tools/                     # PydanticAI tools
 │   ├── character_tools.py    # Character manipulation tools
 │   ├── combat_tools.py       # Combat tools
-│   ├── inventory_tools.py    # Inventory tools
+│   ├── equipment_tools.py    # Inventory tools (add/remove via EquipmentService)
 │   └── skill_tools.py        # Skill check tools
 ├── utils/
 │   ├── dice.py              # Dice rolling functions
@@ -114,17 +110,7 @@ data/                        # Runtime data
 ├── sessions/              # Session history (JSONL)
 └── json_backup/           # Backup of original JSON game data
 
-front/
-├── src/
-│   ├── components/        # Vue components
-│   │   ├── ChatMessage.vue      # Generic LLM message display
-│   │   ├── CharacterSheet.vue   # Character sheet
-│   │   └── JdrDemo.vue         # Demo component
-│   ├── views/            # Application views
-│   ├── core/
-│   │   ├── interfaces.ts # TypeScript interfaces (OpenAPI-based)
-│   │   └── api.ts       # API service
-│   └── router/          # Vue Router config
+front/ (removed – to be recreated)
 ```
 
 ## Data Loading and Managers
@@ -133,8 +119,8 @@ All game data is loaded through manager classes that read YAML files:
 
 ### StatsManager (`back/models/domain/stats_manager.py`)
 - Loads `gamedata/stats.yaml`
-- Provides: stat info, bonus table, cost table, starting points (400)
-- Methods: `get_description()`, `get_bonus()`, `calculate_cost()`
+- Provides: stat info, value range (3–20), bonus formula `(value - 10) // 2`
+- Methods: `get_description()`, `get_bonus()`; no point budget or cost table
 
 ### SkillsManager (`back/models/domain/skills_manager.py`)
 - Loads `gamedata/skills_for_llm.yaml`
@@ -202,7 +188,7 @@ async def skill_check_with_character(
 
 1. **skill_tools.py**: `skill_check_with_character` - Perform skill checks
 2. **combat_tools.py**: Initiative, attacks, damage calculation, combat end
-3. **inventory_tools.py**: Add/remove items from inventory
+3. **equipment_tools.py**: Add/remove items from inventory
 4. **character_tools.py**: Apply XP, add gold, take damage
 
 ## API Endpoints
@@ -346,6 +332,7 @@ async def create_character(character: CharacterCreate) -> CharacterResponse:
 ## Testing
 
 - Test directory: `back/tests/`
+- **always** Use Python Environment in `back/venv` (`cd /home/cyberbobjr/projects/jdr && source back/venv/bin/activate && export PYTHONPATH="$PWD" && pytest -q back`)
 - Framework: pytest with pytest-asyncio
 - Structure mirrors source code
 - Test organization: `agents/`, `services/`, `domain/`, `tools/`, `routers/`
@@ -433,11 +420,7 @@ uvicorn main:app --reload
 
 ### Frontend
 
-```bash
-cd front
-npm install
-npm run dev
-```
+Frontend setup is currently not applicable (frontend removed).
 
 ### Testing
 
@@ -448,7 +431,7 @@ pytest tests/ -v
 
 ## Resources
 
-- [PydanticAI Documentation](./pydanticai.md)
+- Context7 tools for PydanticAI documentation
 - [README.md](../README.md) - Main project documentation
 - [REFACTO.md](../REFACTO.md) - Refactoring plan
 - [TODO.md](../TODO.md) - Improvement roadmap

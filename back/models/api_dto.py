@@ -33,6 +33,7 @@ class CharacterDetailResponse(BaseModel):
     equipment: Optional[List[str]] = None
     spells: Optional[List[str]] = None
     culture_bonuses: Optional[Dict[str, int]] = None
+    physical_description: Optional[str] = None
 
 
 class ErrorResponse(BaseModel):

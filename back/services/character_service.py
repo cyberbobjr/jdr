@@ -4,13 +4,13 @@
 import os
 from typing import List, Dict
 from back.models.schema import Item, CharacterStatus
-from back.models.domain.character import Character
+from back.models.domain.character_v2 import CharacterV2 as Character
 from back.utils.logger import log_debug
 from back.utils.model_converter import ModelConverter
 from back.services.character_persistence_service import CharacterPersistenceService
 from back.services.character_data_service import CharacterDataService
 from back.services.item_service import ItemService
-from back.services.inventory_service import InventoryService
+from back.services.equipment_service import EquipmentService
 from back.models.domain.equipment_manager import EquipmentManager
 from back.config import get_data_dir
 
@@ -204,11 +204,11 @@ class CharacterService:
         - `item` (Item): L'objet à ajouter à l'inventaire.
         **Retour:** dict - Résumé de l'inventaire mis à jour
         """
-        # Utiliser InventoryService pour déléguer la logique
-        data_service = CharacterDataService()
-        inventory_service = InventoryService(data_service)
+        # Utiliser EquipmentService pour déléguer la logique
+        data_service = CharacterDataService(self.character_id)
+        equipment_service = EquipmentService(data_service)
         character = data_service.load_character(self.character_id)
-        inventory_service.add_item_object(character, item)
+        equipment_service.add_item_object(character, item)
         # Recharger les données
         self.character_data = self._load_character()
         return {"inventory": [ModelConverter.to_dict(i) for i in self.character_data.inventory]}

@@ -29,6 +29,7 @@ class CreateCharacterV2Request(BaseModel):
     stats: Dict[str, int] = Field(default={}, description="Character stats")
     skills: Dict[str, Dict[str, int]] = Field(default_factory=dict, description="Character skills by group")
     background: str = Field(default="", description="Character background")
+    physical_description: str | None = Field(default=None, description="Physical appearance description")
 
 class CreateCharacterV2Response(BaseModel):
     """Response model for character creation"""
@@ -43,6 +44,7 @@ class UpdateCharacterV2Request(BaseModel):
     stats: Dict[str, int] = Field(default_factory=dict, description="Character stats")
     skills: Dict[str, Dict[str, int]] = Field(default_factory=dict, description="Character skills by group")
     background: str = Field(default="", description="Character background")
+    physical_description: str | None = Field(default=None, description="Physical appearance description")
 
 class UpdateCharacterV2Response(BaseModel):
     """Response model for character update"""
@@ -171,7 +173,8 @@ def create_character_v2(request: CreateCharacterV2Request):
             "experience_points": 0,
             "created_at": now,
             "updated_at": now,
-            "description": None
+            "description": request.background or None,
+            "physical_description": request.physical_description
         }
         
         # Validate using CharacterV2 model
@@ -225,6 +228,10 @@ def update_character_v2(request: UpdateCharacterV2Request):
             existing_data['stats'] = Stats(**request.stats).model_dump()
         if request.skills:
             existing_data['skills'] = Skills(**request.skills).model_dump()
+        if request.background:
+            existing_data['description'] = request.background
+        if request.physical_description is not None:
+            existing_data['physical_description'] = request.physical_description
             
         existing_data['updated_at'] = datetime.now().isoformat()
         

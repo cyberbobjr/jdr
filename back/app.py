@@ -6,13 +6,13 @@ from fastapi.openapi.utils import get_openapi
 
 app = FastAPI(title="JdR – Terres du Milieu")
 
-# Configuration CORS pour permettre les requêtes du frontend
+# CORS configuration (kept for potential future frontend/dev tools)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173", "http://localhost:8080"],  # Ports communs pour dev frontend
+    allow_origins=["http://localhost:3000", "http://localhost:5173", "http://localhost:8080"],  # Common dev ports
     allow_credentials=True,
-    allow_methods=["*"],  # Permet toutes les méthodes HTTP (GET, POST, PUT, DELETE, OPTIONS, etc.)
-    allow_headers=["*"],  # Permet tous les headers
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
 )
 
 # Routers REST

@@ -5,7 +5,7 @@ from enum import Enum
 
 # Import conditionnel pour éviter les imports circulaires
 if TYPE_CHECKING:
-    from back.models.domain.character import Character
+    from back.models.domain.character_v2 import CharacterV2 as Character
 
 class ItemType(str, Enum):
     """Types d'objets possibles"""

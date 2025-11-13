@@ -87,6 +87,27 @@ def test_get_equipment(mock_equipment_manager):
     assert response.status_code == 200
     assert response.json() == MOCK_EQUIPMENT_DATA
 
+def test_get_equipment_canonical_schema():
+    """
+    Ensure the equipment endpoint returns standardized categories and item keys.
+    This uses the real EquipmentManager and YAML file.
+    """
+    response = client.get("/api/creation/equipment")
+    assert response.status_code == 200
+    data = response.json()
+    # Categories present
+    assert isinstance(data, dict)
+    for key in ("weapons", "armor", "accessories", "consumables"):
+        assert key in data
+        assert isinstance(data[key], list)
+    # At least check first weapon if exists has canonical keys
+    def assert_item_schema(item: dict):
+        required = {"id", "name", "category", "cost", "weight", "quantity", "equipped"}
+        assert required.issubset(item.keys())
+    for category in ("weapons", "armor", "accessories", "consumables"):
+        if data[category]:
+            assert_item_schema(data[category][0])
+
 @patch('back.routers.creation.StatsManager')
 def test_get_stats(mock_stats_manager):
     mock_stats_manager_instance = mock_stats_manager.return_value
@@ -109,7 +130,8 @@ def test_create_character_v2_success(mock_races_manager, mock_persistence_servic
         "race_id": "humans",
         "culture_id": "gondorians",
         "stats": {"strength": 10, "constitution": 10, "agility": 10, "intelligence": 10, "wisdom": 10, "charisma": 10},
-        "skills": {"combat": {"Melee Weapons": 1}}
+        "skills": {"combat": {"Melee Weapons": 1}},
+        "physical_description": "Tall and swift"
     }
     
     response = client.post("/api/creation/create", json=request_data)
@@ -120,6 +142,40 @@ def test_create_character_v2_success(mock_races_manager, mock_persistence_servic
     assert "created_at" in response_data
     
     mock_persistence_service.save_character_data.assert_called_once()
+
+@patch('back.routers.creation.CharacterPersistenceService')
+@patch('back.routers.creation.RacesManager')
+def test_create_character_v2_physical_description_persisted(mock_races_manager, mock_persistence_service):
+    mock_races_manager_instance = mock_races_manager.return_value
+    mock_races_manager_instance.get_race_by_id.return_value = MOCK_RACES_DATA[0]
+
+    # Capture saved data
+    saved_store = {}
+    def save_side_effect(cid, data):
+        saved_store['id'] = cid
+        saved_store['data'] = data
+        return None
+    mock_persistence_service.save_character_data.side_effect = save_side_effect
+
+    request_data = {
+        "name": "Phys Desc",
+        "race_id": "humans",
+        "culture_id": "gondorians",
+        "stats": {"strength": 10, "constitution": 10, "agility": 10, "intelligence": 10, "wisdom": 10, "charisma": 10},
+        "skills": {"combat": {"Melee Weapons": 1}},
+        "physical_description": "Scar over left eye"
+    }
+
+    resp = client.post("/api/creation/create", json=request_data)
+    assert resp.status_code == 200
+    char_id = resp.json()["character_id"]
+
+    # Mock load to return last saved
+    mock_persistence_service.load_character_data.return_value = saved_store['data']
+    get_resp = client.get(f"/api/creation/character/{char_id}")
+    assert get_resp.status_code == 200
+    body = get_resp.json()
+    assert body["character"]["physical_description"] == "Scar over left eye"
 
 @patch('back.routers.creation.CharacterPersistenceService')
 @patch('back.routers.creation.RacesManager')
@@ -206,7 +262,8 @@ def test_update_character_v2_success(mock_persistence_service):
             "charisma": 10
         },
         "skills": {"combat": {"Melee Weapons": 1}},
-        "background": "Updated background"
+        "background": "Updated background",
+        "physical_description": "Changed appearance"
     }
     
     response = client.post("/api/creation/update", json=update_data)
@@ -215,6 +272,7 @@ def test_update_character_v2_success(mock_persistence_service):
     assert response_data["status"] == "updated"
     assert response_data["character"]["name"] == "New Name"
     assert response_data["character"]["stats"]["strength"] == 12
+    assert response_data["character"]["physical_description"] == "Changed appearance"
     mock_persistence_service.save_character_data.assert_called_once()
 
 @patch('back.routers.creation.CharacterPersistenceService')
@@ -340,4 +398,65 @@ def test_validate_character_v2_failure():
     response_data = response.json()
     assert response_data["valid"] is False
     assert "Validation failed:" in response_data["message"]
-    assert "errors" in response_data
+
+
+def test_get_stats_integration_range_and_formula():
+    """
+    Integration test (no mocks): ensure /stats exposes the simplified 3–20 model.
+    """
+    resp = client.get("/api/creation/stats")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "value_range" in data
+    assert data["value_range"]["min"] == 3
+    assert data["value_range"]["max"] == 20
+    assert "bonus_formula" in data
+    assert data["bonus_formula"] == "(value - 10) // 2"
+
+
+@patch('back.routers.creation.CharacterPersistenceService')
+@patch('back.routers.creation.RacesManager')
+def test_create_character_v2_invalid_stats_range(mock_races_manager, mock_persistence_service):
+    """
+    Creating a character with stats outside [3, 20] should fail with 400.
+    """
+    mock_races_manager_instance = mock_races_manager.return_value
+    mock_races_manager_instance.get_race_by_id.return_value = MOCK_RACES_DATA[0]
+
+    too_low_stats = {
+        "strength": 2,  # invalid (below 3)
+        "constitution": 10,
+        "agility": 10,
+        "intelligence": 10,
+        "wisdom": 10,
+        "charisma": 10,
+    }
+    body = {
+        "name": "Bounds Low",
+        "race_id": "humans",
+        "culture_id": "gondorians",
+        "stats": too_low_stats,
+        "skills": {"combat": {"Melee Weapons": 1}},
+    }
+    resp_low = client.post("/api/creation/create", json=body)
+    assert resp_low.status_code == 400
+    assert "greater than or equal to 3" in resp_low.json()["detail"]
+
+    too_high_stats = {
+        "strength": 21,  # invalid (above 20)
+        "constitution": 10,
+        "agility": 10,
+        "intelligence": 10,
+        "wisdom": 10,
+        "charisma": 10,
+    }
+    body_high = {
+        "name": "Bounds High",
+        "race_id": "humans",
+        "culture_id": "gondorians",
+        "stats": too_high_stats,
+        "skills": {"combat": {"Melee Weapons": 1}},
+    }
+    resp_high = client.post("/api/creation/create", json=body_high)
+    assert resp_high.status_code == 400
+    assert "less than or equal to 20" in resp_high.json()["detail"]

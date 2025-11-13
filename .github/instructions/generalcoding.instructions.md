@@ -5,9 +5,6 @@ applyTo: "**"
 # Instructions for Code Documentation
 
 [README.md](../../README.md) contain the information about the Project
-
-For Haystack, the code documentation are:
-[PydanticAi documentation](../../pydanticai.md) (for PydanticAi documentation)
 Description and documentation should be written in English.
 Methods name, class names, and variable names should be in English.
 

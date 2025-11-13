@@ -3,7 +3,7 @@ Service spécialisé pour la logique métier des personnages.
 Respect du SRP - Responsabilité unique : logique métier (XP, or, dégâts).
 """
 
-from back.models.domain.character import Character
+from back.models.domain.character_v2 import CharacterV2 as Character
 from back.services.character_data_service import CharacterDataService
 from back.config import get_logger
 
@@ -55,7 +55,7 @@ class CharacterBusinessService:
         - `gold` (float): Montant d'or à ajouter (peut avoir des décimales)
         **Retour:** Personnage modifié
         """
-        character.gold += gold
+        character.gold += int(gold)
         self.data_service.save_character(character)
         
         logger.info("Or ajouté au personnage",
@@ -76,7 +76,8 @@ class CharacterBusinessService:
         - `source` (str): Source des dégâts (optionnel)
         **Retour:** Personnage modifié
         """
-        character.hp = max(0, character.hp - amount)
+        # Delegate to combat stats to ensure consistency
+        character.combat_stats.take_damage(int(amount))
         self.data_service.save_character(character)
         
         logger.warning("Dégâts appliqués au personnage",
@@ -98,9 +99,8 @@ class CharacterBusinessService:
         - `source` (str): Source du soin (optionnel)
         **Retour:** Personnage modifié
         """
-        # TODO: Définir les PV maximums selon la constitution
-        max_hp = 100  # Valeur temporaire
-        character.hp = min(max_hp, character.hp + amount)
+        max_hp = character.combat_stats.max_hit_points
+        character.hp = min(max_hp, character.hp + int(amount))
         self.data_service.save_character(character)
         
         logger.info("Soins appliqués au personnage",
@@ -120,12 +120,10 @@ class CharacterBusinessService:
         - `character` (Character): Personnage à analyser
         **Retour:** PV maximums calculés
         """
-        # TODO: Implémenter la formule de calcul des PV basée sur la constitution
-        constitution = character.stats.get("Constitution", 50)
-        base_hp = 50  # PV de base
-        constitution_bonus = (constitution - 50) // 10  # +1 PV tous les 10 points de constitution
-        
-        return base_hp + constitution_bonus
+        # Simplified v2 formula based on character stats and level
+        constitution = character.stats.constitution
+        level = character.level
+        return constitution * 10 + level * 5
     
     def is_alive(self, character: Character) -> bool:
         """
@@ -135,7 +133,7 @@ class CharacterBusinessService:
         - `character` (Character): Personnage à vérifier
         **Retour:** True si le personnage est en vie, False sinon
         """
-        return character.hp > 0
+        return character.combat_stats.is_alive()
     
     def get_level(self, character: Character) -> int:
         """
@@ -145,18 +143,5 @@ class CharacterBusinessService:
         - `character` (Character): Personnage à analyser
         **Retour:** Niveau calculé
         """
-        # TODO: Implémenter la table de progression par niveau
-        xp = character.xp
-        
-        if xp < 1000:
-            return 1
-        elif xp < 3000:
-            return 2
-        elif xp < 6000:
-            return 3
-        elif xp < 10000:
-            return 4
-        elif xp < 15000:
-            return 5
-        else:
-            return 6 + (xp - 15000) // 5000  # +1 niveau tous les 5000 XP après niveau 5
+        # In v2, level is tracked directly on the character
+        return character.level

@@ -27,7 +27,7 @@
 │   │   ├── skill_service.py
 │   │   └── scenario_service.py
 │   ├── tools/                  # Déclarations @tool LangChain
-│   │   ├── inventory_tools.py
+│   │   ├── equipment_tools.py
 │   │   ├── combat_tools.py
 │   │   ├── skill_tools.py
 │   │   └── scenario_tools.py

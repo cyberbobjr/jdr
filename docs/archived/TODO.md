@@ -9,7 +9,7 @@ Ce document détaille les pistes d'améliorations pour le backend du projet JDR 
 Le code présente plusieurs violations des principes SOLID, impactant la maintenabilité et l'extensibilité.
 
 #### Single Responsibility Principle (SRP) - Violation
-- **Problème** : `CharacterService` gère trop de responsabilités (chargement/sauvegarde, inventaire, équipement, achat/vente, XP, gold, HP), violant SRP. Bien que des services spécialisés comme `InventoryService` et `EquipmentService` existent, ils ne sont pas utilisés de manière cohérente.
+- **Problème** : `CharacterService` gère trop de responsabilités (chargement/sauvegarde, inventaire, équipement, achat/vente, XP, gold, HP), violant SRP. Désormais, l'inventaire est géré par `EquipmentService` (fusion de l'ancien `InventoryService`).
 - **Exemple de Code Actuel** (dans `back/services/character_service.py`) :
   ```python
   def add_item(self, item_id: str, qty: int = 1) -> Dict:
@@ -24,7 +24,7 @@ Le code présente plusieurs violations des principes SOLID, impactant la mainten
 - **Amélioration Proposée** : Décomposer `CharacterService` en services spécialisés via composition et injection de dépendances. Exemple refactorisé :
   ```python
   class CharacterService:
-      def __init__(self, character_id: str, inventory_service: InventoryService, persistence_service: CharacterPersistenceService):
+      def __init__(self, character_id: str, equipment_service: EquipmentService, persistence_service: CharacterPersistenceService):
           self.inventory_service = inventory_service
           self.persistence_service = persistence_service
           # ...
@@ -100,7 +100,7 @@ Le code présente plusieurs violations des principes SOLID, impactant la mainten
   from back.services.character_service import CharacterService
 
   def test_add_item_uses_inventory_service():
-      mock_inventory = Mock(spec=InventoryService)
+      mock_inventory = Mock(spec=EquipmentService)
       service = CharacterService("test-id", inventory_service=mock_inventory)
       
       service.add_item("sword", 1)
@@ -154,7 +154,7 @@ Le code présente plusieurs violations des principes SOLID, impactant la mainten
 - **Impact** : Respecte DIP, facilite les tests avec mocks, évite les couplages forts.
 
 ### 3. Refactorisation de CharacterService (SRP)
-- **Modifications** : Décomposition des responsabilités, utilisation de `ModelConverter`, délégation à `InventoryService` et `EquipmentService`.
+- **Modifications** : Décomposition des responsabilités, utilisation de `ModelConverter`, délégation à `EquipmentService` (incluant l'inventaire) et `CharacterBusinessService`.
 - **Exemple** :
   ```python
   # Avant : Logique d'inventaire dans CharacterService

@@ -8,10 +8,9 @@ import os
 import pathlib
 from typing import Dict, Any, Optional, List
 
-from back.models.domain.character import Character
+from back.models.domain.character_v2 import CharacterV2 as Character
 from back.services.character_data_service import CharacterDataService
 from back.services.character_business_service import CharacterBusinessService
-from back.services.inventory_service import InventoryService
 from back.services.equipment_service import EquipmentService
 from back.storage.pydantic_jsonl_store import PydanticJsonlStore
 from back.config import get_data_dir
@@ -29,7 +28,6 @@ class SessionService:
     - `store` (PydanticJsonlStore) : Store pour l'historique des messages
     - `data_service` (CharacterDataService) : Service de données pour le personnage
     - `business_service` (CharacterBusinessService) : Service de logique métier
-    - `inventory_service` (InventoryService) : Service d'inventaire
     - `equipment_service` (EquipmentService) : Service d'équipement
     """
     
@@ -50,7 +48,6 @@ class SessionService:
         # Services spécialisés
         self.data_service: Optional[CharacterDataService] = None
         self.business_service: Optional[CharacterBusinessService] = None
-        self.inventory_service: Optional[InventoryService] = None
         self.equipment_service: Optional[EquipmentService] = None
         
         # Initialiser le store pour l'historique
@@ -153,9 +150,6 @@ class SessionService:
         # Service de logique métier (dépend du service de données)
         self.business_service = CharacterBusinessService(self.data_service)
         
-        # Service d'inventaire (dépend du service de données)
-        self.inventory_service = InventoryService(self.data_service)
-        
         # Service d'équipement (dépend du service de données)
         self.equipment_service = EquipmentService(self.data_service)
     
@@ -217,8 +211,8 @@ class SessionService:
         - `quantity` (int) : Quantité à ajouter (défaut: 1)
         **Retour :** Personnage modifié
         """
-        if self.character_data and self.inventory_service:
-            self.character_data = self.inventory_service.add_item(self.character_data, item_id, quantity)
+        if self.character_data and self.equipment_service:
+            self.character_data = self.equipment_service.add_item(self.character_data, item_id, quantity)
             return self.character_data
         raise ValueError("Services non initialisés")
     
@@ -231,8 +225,8 @@ class SessionService:
         - `quantity` (int) : Quantité à retirer (défaut: 1)
         **Retour :** Personnage modifié
         """
-        if self.character_data and self.inventory_service:
-            self.character_data = self.inventory_service.remove_item(self.character_data, item_id, quantity)
+        if self.character_data and self.equipment_service:
+            self.character_data = self.equipment_service.remove_item(self.character_data, item_id, quantity)
             return self.character_data
         raise ValueError("Services non initialisés")
     

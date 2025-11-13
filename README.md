@@ -12,17 +12,17 @@ This is a tabletop RPG set in Middle-earth (Tolkien's world), where the narratio
 
 - **Data Migration**: Complete migration from JSON to YAML format
 - **Language Translation**: Full translation from French to English (characteristics, skills, models)
-- **Simplified System**: New CharacterV2 with 400 stat points (down from 550) and 40 skill points (down from 84)
+- **Simplified System**: New CharacterV2 with six attributes (3–20) and 40 skill points (down from 84)
 - **Modern Framework**: Migration from LangChain to PydanticAI for better type safety and validation
 - **Clean Architecture**: Strict separation of concerns with dedicated services
 
 ### Technology Stack
 
 - **Backend**: FastAPI + PydanticAI + Pydantic V2
-- **Frontend**: Vue.js 3 + TypeScript + TailwindCSS
 - **Data**: YAML configuration files
 - **LLM**: OpenAI-compatible API (DeepSeek by default)
 - **Storage**: JSONL for conversation history, JSON for character sheets
+- **Frontend**: (to be recreated)
 
 ## 🏗️ Architecture Overview
 
@@ -47,7 +47,7 @@ The architecture follows strict **SOLID principles** with clear separation of re
 
 ### Documentation References
 
-- [PydanticAI Framework](./pydanticai.md) - Agent framework documentation
+- PydanticAI Framework - Agent framework documentation check Context7 tool for documentation
 - [GitHub Copilot Instructions](.github/copilot-instructions.md) - Development guidelines
 - [Technical Specification](#technical-specification) - Detailed architecture below
 
@@ -60,9 +60,8 @@ The backend uses a modular architecture with strict separation of responsibiliti
 - **CharacterDataService**: Specialized for loading and saving character data (I/O operations)
 - **CharacterBusinessService**: Business logic (XP, gold, damage, healing)
 - **CharacterPersistenceService**: Centralized character persistence (JSON files)
-- **CharacterCreationService**: Dedicated character creation service
-- **InventoryService**: Inventory management (add, remove, equip items)
-- **EquipmentService**: Equipment buy/sell and money management
+ 
+- **EquipmentService**: Equipment buy/sell, inventory (add/remove/equip), and money management
 
 ### Game Services
 
@@ -84,7 +83,7 @@ The backend uses a modular architecture with strict separation of responsibiliti
 
 ### Character Statistics (Simplified V2)
 
-The new system uses **6 core attributes** with **400 total points**:
+The new system uses **6 core attributes** with a per‑stat cap:
 
 | Stat | Abbreviation | Category | Description |
 |------|--------------|----------|-------------|
@@ -96,9 +95,8 @@ The new system uses **6 core attributes** with **400 total points**:
 | **Charisma** | CHA | Social | Leadership, persuasion, influence |
 
 **Point Allocation**:
-- Each stat: 3-20 range
-- Total points: ≤ 400
-- Cost scaling: 1 point for 1-50, 2 points for 51-70, 3 points for 71-100
+- Each stat: 3–20 range (player-assigned)
+- Modifier: (value - 10) // 2
 
 ### Skills System
 
@@ -169,14 +167,14 @@ The new system uses **6 core attributes** with **400 total points**:
 │   ├── services/
 │   │   ├── __init__.py
 │   │   ├── character_business_service.py # Service spécialisé pour la logique métier (XP, or, dégâts)
-│   │   ├── character_creation_service.py # Service dédié à la création de personnage
+│   │   ├── inventory_service.py # Service spécialisé pour la gestion d'équipement (V2)
 │   │   ├── character_data_service.py # Service spécialisé pour le chargement/sauvegarde des données
 │   │   ├── character_persistence_service.py # Service centralisé pour la persistance des personnages (JSON)
 │   │   ├── character_service.py # Service legacy en cours de refactoring
 │   │   ├── combat_service.py    # Gestion des mécaniques de combat
 │   │   ├── combat_state_service.py # Persistance de l'état des combats actifs
 │   │   ├── equipment_service.py # Service spécialisé pour l'achat/vente d'équipement
-│   │   ├── inventory_service.py # Service spécialisé pour la gestion d'inventaire
+│   │   ├── inventory_service.py # Service spécialisé pour la gestion d'équipement (V2)
 │   │   ├── item_service.py      # Gestion des objets
 │   │   ├── scenario_service.py  # Gestion du déroulement des scénarios
 │   │   ├── session_service.py   # Gestion des sessions de jeu (historique, personnage, scénario)
@@ -208,7 +206,7 @@ The new system uses **6 core attributes** with **400 total points**:
 │   │   ├── __init__.py
 │   │   ├── character_tools.py  # Outils pour la gestion des personnages
 │   │   ├── combat_tools.py     # Outils de combat
-│   │   ├── inventory_tools.py  # Outils pour l'inventaire (ajout, retrait, gestion d'objets)
+│   │   ├── equipment_tools.py  # Outils d'inventaire (ajout/retrait via EquipmentService)
 │   │   └── skill_tools.py      # Outils pour les compétences
 │   └── utils/
 │       ├── __init__.py
@@ -217,39 +215,7 @@ The new system uses **6 core attributes** with **400 total points**:
 │       ├── logger.py           # Logger JSON (Grafana/Loki‑friendly)
 │       ├── logging_tool.py     # Outil de logging pour l'agent
 │       └── message_adapter.py  # Adaptateur de messages
-├── front/                       # Front‑end Vue.js + TypeScript + TailwindCSS ✅
-│   ├── src/                    # Code source de l'interface utilisateur
-│   │   ├── components/         # Composants Vue réutilisables
-│   │   │   ├── JdrDemo.vue     # Composant de démonstration avec lanceur de dés
-│   │   │   ├── ChatMessage.vue # Composant générique d'affichage des messages LLM
-│   │   │   ├── CharacterSheet.vue # Fiche de personnage
-│   │   │   └── README-ChatMessage.md # Documentation du composant ChatMessage
-│   │   ├── views/              # Pages/vues de l'application
-│   │   │   ├── HomeView.vue    # Page d'accueil avec présentation des fonctionnalités
-│   │   │   ├── Create.vue      # Création de personnage
-│   │   │   ├── JeuView.vue     # Interface de jeu
-│   │   │   ├── PersonnagesView.vue # Gestion des personnages
-│   │   │   ├── ScenariosView.vue # Gestion des scénarios
-│   │   │   ├── SessionsView.vue # Gestion des sessions
-│   │   │   └── NouveauScenarioView.vue # Création de scénario
-│   │   ├── core/               # Services et interfaces TypeScript ✅
-│   │   │   ├── interfaces.ts   # Interfaces TypeScript basées sur OpenAPI JSON (strictement typées)
-│   │   │   ├── api.ts          # Service API refactorisé avec nouvelles interfaces
-│   │   │   └── api.test.ts     # Tests unitaires pour les interfaces et service API
-│   │   ├── router/             # Configuration du routage Vue Router
-│   │   ├── assets/             # Ressources CSS avec TailwindCSS configuré
-│   │   ├── App.vue             # Composant racine avec navigation et thème JDR
-│   │   └── main.ts             # Point d'entrée avec configuration FontAwesome
-│   ├── tests/                  # Tests unitaires Vitest
-│   │   ├── setup.ts            # Configuration des tests avec mocks
-│   │   ├── App.test.ts         # Tests du composant principal
-│   │   ├── components/         # Tests des composants
-│   │   └── views/              # Tests des vues
-│   ├── package.json            # Dépendances npm et scripts
-│   ├── vite.config.ts          # Configuration Vite
-│   ├── vitest.config.ts        # Configuration des tests
-│   ├── tailwind.config.js      # Configuration TailwindCSS
-│   └── README.md               # Documentation frontend détaillée
+├── (frontend removed – to be recreated)
 ├── back/gamedata/               # Game data source (YAML files)
 │   ├── stats.yaml
 │   ├── skills_for_llm.yaml
@@ -280,7 +246,6 @@ The new system uses **6 core attributes** with **400 total points**:
 │       ├── python.instructions.md
 │       ├── vuejs.instructions.md
 │       └── generalcoding.instructions.md
-├── pydanticai.md                # PydanticAI framework documentation
 └── README.md                    # This file (comprehensive project documentation)
 ```
 
@@ -322,7 +287,7 @@ classDiagram
         +int hp
         +int xp
         +float gold
-        +List[Item] inventory
+        +Dict equipment
         +List[str] spells
         +Dict[str, int] culture_bonuses
         +str background
@@ -657,14 +622,7 @@ sequenceDiagram
             },
             "hp": 85,
             "gold": 200,
-            "inventory": [
-                {
-                    "id": "sword_001",
-                    "name": "Épée longue",
-                    "weight": 1.5,
-                    "base_value": 150.0
-                }
-            ],
+            "equipment": {"weapons": [], "armor": [], "accessories": [], "consumables": [], "gold": 0},
             "spells": [],
             "culture_bonuses": {
                 "Combat": 5,
@@ -697,7 +655,7 @@ sequenceDiagram
   "hp": 85,
   "xp": 0,
   "gold": 0,
-  "inventory": [ ... ],
+    "equipment": { ... },
   "spells": [],
   "culture_bonuses": { ... }
 }
@@ -714,8 +672,8 @@ All game data is loaded through manager classes that read YAML files from `back/
 
 #### StatsManager
 - **File**: `stats.yaml`
-- **Provides**: Stat info, bonus table, cost table, starting points (400)
-- **Methods**: `get_description()`, `get_bonus()`, `calculate_cost()`, `get_all_stats()`
+- **Provides**: Stat info, value range (3–20), bonus formula `(value - 10) // 2`
+- **Methods**: `get_description()`, `get_bonus()`, `get_all_stats_data()`
 
 #### SkillsManager
 - **File**: `skills_for_llm.yaml`
@@ -777,7 +735,7 @@ async def skill_check_with_character(
    - `calculate_damage_tool` - Calculate damage with modifiers
    - `end_combat_tool` - End combat and distribute rewards
 
-3. **inventory_tools.py**
+3. **equipment_tools.py**
    - `inventory_add_item` - Add item to character inventory
    - `inventory_remove_item` - Remove item from inventory
 
@@ -815,7 +773,7 @@ messages = ModelMessagesTypeAdapter.validate_python(messages_json)
 
 ## 🎨 Character Creation Service (2025)
 
-- **character_creation_service.py** : Service dédié à la création de personnage, gérant l'allocation automatique des caractéristiques selon la race, la validation des points, et la fourniture des listes (races, compétences, cultures, équipements, sorts).
+ 
 - **creation.py** : Routeur FastAPI spécialisé pour la création de personnage, exposant les routes pour chaque étape, l'enregistrement et le suivi du statut de création.
 
 Ce module permet de découper la création de personnage en étapes validées côté backend, pour un front progressif et interactif.
@@ -825,7 +783,7 @@ Ce module permet de découper la création de personnage en étapes validées c�
 - L'historique des messages (sessions de jeu) est stocké en JSONL via `back/storage/pydantic_jsonl_store.py`.
 - La sérialisation utilise `to_jsonable_python` (PydanticAI) ; la désérialisation utilise `ModelMessagesTypeAdapter.validate_python`.
 - Seuls les messages utilisateur, assistant et outils sont persistés : le prompt système n'est jamais dupliqué.
-- La structure de chaque message respecte strictement le schéma PydanticAI (voir [pydanticai.md](./pydanticai.md)).
+- La structure de chaque message respecte strictement le schéma PydanticAI (voir la documentation Context7 sur PydanticAI).
 
 ## Outils PydanticAI
 
@@ -839,7 +797,7 @@ Ce module permet de découper la création de personnage en étapes validées c�
 - **`calculate_damage_tool`** : Calcule les dégâts infligés en tenant compte des modificateurs
 - **`end_combat_tool`** : Termine un combat
 
-### Inventaire (`back/tools/inventory_tools.py`)
+### Inventaire (`back/tools/equipment_tools.py`)
 - **`inventory_add_item`** : Ajoute un objet à l'inventaire du personnage
 - **`inventory_remove_item`** : Retire un objet de l'inventaire du personnage
 
@@ -851,40 +809,14 @@ Ce module permet de découper la création de personnage en étapes validées c�
 ### Utilitaires
 - **`logging_tool`** : Outil de logging pour l'agent
 
-## 💬 Interface de Chat LLM Généralisée (2025) ✅
-
-### Composant ChatMessage
-Un composant Vue.js générique pour afficher les messages de conversation basé sur l'interface `ConversationMessage` :
-
-#### Fonctionnalités
-- **Messages typés** : Support complet de l'interface TypeScript `ConversationMessage[]`
-- **Affichage hiérarchique** : Chaque message contient des parties (`MessagePart[]`) avec types distincts
-- **Types de messages** : Différenciation visuelle pour `request`, `response`, `system`, `error`
-- **Types de parties** : Support des `system-prompt`, `user-prompt`, `text`, `tool-call`, `tool-return`
-- **Formatage intelligent** : Contenu code pour les outils, markdown basique pour le texte
-- **Informations de debug** : Affichage optionnel des détails d'usage des tokens
-- **Timestamps** : Formatage automatique en français pour messages et parties
-
-#### Structure supportée
-- **Interface stricte** : `ConversationMessage` avec `MessagePart[]` typés
-- **Usage des tokens** : `MessageUsage` avec détails de consommation LLM
-- **Métadonnées** : `model_name`, `vendor_details`, `vendor_id` optionnels
-- **Références dynamiques** : Support des `dynamic_ref` dans les parties
-
-#### Props du composant
-```typescript
-interface Props {
-  messages: ConversationMessage[]  // Tableau de messages à afficher
-  showDebugInfo?: boolean         // Affichage des détails techniques
-}
-```
+<!-- Frontend UI section removed; frontend will be recreated later -->
 
 ## Tests
 
 - Les tests unitaires et d'intégration sont dans `back/tests/`.
 - Tous les tests ont été migrés et validés pour PydanticAI.
 - Organisation par responsabilité : `agents/`, `tools/`, `services/`, `domain/`, etc.
-- **Frontend** : Tests Vitest pour les composants Vue.js, dont ChatMessage
+<!-- Frontend tests removed -->
 
 ## Tests
 
@@ -897,14 +829,13 @@ interface Props {
   - `tools/` : Tests des outils PydanticAI
   - `utils/` : Tests des utilitaires
 
-- **Frontend** : Tests Vitest pour les composants Vue.js avec 100% de réussite
+<!-- Frontend test results removed -->
 
 ## 💻 Development
 
 ### Prerequisites
 
 - Python 3.11+
-- Node.js 18+
 - OpenAI-compatible API key (DeepSeek, OpenAI, or compatible)
 
 ### Environment Setup
@@ -930,11 +861,7 @@ DEEPSEEK_API_KEY=your_api_key_here
 JDR_DATA_DIR=../data  # Optional: override data directory
 ```
 
-4. **Frontend setup**
-```bash
-cd front
-npm install
-```
+<!-- Frontend setup removed -->
 
 ### Running the Application
 
@@ -958,13 +885,7 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 API will be available at: `http://localhost:8000`
 API documentation: `http://localhost:8000/docs`
 
-**Frontend** (Vite dev server):
-```bash
-cd front
-npm run dev
-```
-
-Application will be available at: `http://localhost:5173`
+<!-- Frontend dev server removed -->
 
 #### Production Build
 
@@ -974,12 +895,7 @@ cd back
 uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
 ```
 
-**Frontend**:
-```bash
-cd front
-npm run build
-# Outputs to front/dist/
-```
+<!-- Frontend build removed -->
 
 ### Testing
 
@@ -1001,19 +917,7 @@ pytest tests/services/test_character_service.py -v
 pytest tests/ -k "test_character" -v
 ```
 
-#### Frontend Tests
-```bash
-cd front
-
-# Run unit tests
-npm test
-
-# Run tests in watch mode
-npm test -- --watch
-
-# Run with coverage
-npm test -- --coverage
-```
+<!-- Frontend tests removed -->
 
 ## 📋 Coding Standards and Best Practices
 
@@ -1116,47 +1020,9 @@ def calculate_bonus(stat_value: int) -> int:
     return (stat_value - 10) // 2
 ```
 
-### TypeScript (Frontend)
+### (Frontend)
 
-#### 1. Interface Definition
-Define interfaces for all data structures:
-```typescript
-interface Character {
-  id: string;
-  name: string;
-  stats: Stats;
-  skills: Skills;
-  hp: number;
-  maxHp: number;
-}
-
-interface Stats {
-  strength: number;
-  constitution: number;
-  agility: number;
-  intelligence: number;
-  wisdom: number;
-  charisma: number;
-}
-```
-
-#### 2. Vue 3 Composition API
-Use Composition API for components:
-```typescript
-<script setup lang="ts">
-import { ref, computed } from 'vue';
-import type { Character } from '@/core/interfaces';
-
-const props = defineProps<{
-  character: Character;
-}>();
-
-const currentHp = ref(props.character.hp);
-const hpPercentage = computed(() => 
-  (currentHp.value / props.character.maxHp) * 100
-);
-</script>
-```
+The frontend has been removed for now and will be recreated later. All examples and guidance here focus on the backend.
 
 ### General Guidelines
 
@@ -1217,11 +1083,8 @@ log_error("Échec de sauvegarde", error=str(e))
 - ✅ Routers : `scenarios.py`, `characters.py`
 - ✅ Stockage : `pydantic_jsonl_store.py`
 
-### Frontend (Vue.js + TypeScript)
-- **Vue.js 3** : Framework JavaScript progressif
-- **TypeScript** : Typage statique pour la robustesse
-- **TailwindCSS** : Framework CSS utilitaire
-- **Vite** : Outil de build rapide
+### Frontend (Status)
+- Frontend removed for now; planned to be recreated later.
 
 ### Stockage
 - **JSONL** : Historique des conversations PydanticAI

@@ -26,7 +26,6 @@ back/                           # Backend FastAPI + PydanticAI
 │   └── schema.py               # DTO exposés par l'API
 ├── services/                   # Logique métier unitaire (SRP)
 │   ├── character_service.py    # Gestion des personnages
-│   ├── character_creation_service.py # Création de personnages
 │   ├── character_persistence_service.py # Persistance
 │   ├── character_business_service.py # Logique métier
 │   ├── character_data_service.py # Données personnage
@@ -41,7 +40,7 @@ back/                           # Backend FastAPI + PydanticAI
 ├── tools/                      # Outils PydanticAI
 │   ├── character_tools.py      # Outils personnages
 │   ├── combat_tools.py         # Système de combat
-│   ├── inventory_tools.py      # Gestion inventaire
+│   ├── equipment_tools.py      # Gestion inventaire
 │   ├── skill_tools.py          # Tests de compétences
 │   └── schema_tools.py         # Outils schéma
 ├── agents/                     # Agents LLM PydanticAI
@@ -152,7 +151,7 @@ agent = Agent(model)  # ❌ (sans structured output)
 ### Outils PydanticAI existants
 - `skill_tools.py` : Tests de compétences
 - `combat_tools.py` : Système de combat complet
-- `inventory_tools.py` : Gestion d'inventaire
+- `equipment_tools.py` : Gestion d'inventaire
 - `character_tools.py` : Gestion des personnages
 
 ### Patterns de création d'outils
@@ -276,8 +275,6 @@ black back/
 
 ### Fichiers importants
 - `README.md` : Documentation générale
-- `pydanticai.md` : Documentation PydanticAI
-- `instructions/openai-instructions.md` : Spécifications techniques
 
 ### Références
 - **FastAPI** : https://fastapi.tiangolo.com/
