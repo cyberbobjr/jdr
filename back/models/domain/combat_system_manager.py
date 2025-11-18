@@ -20,7 +20,10 @@ class CombatSystemManager:
         **Parameters:** None
         **Returns:** None
         """
-        self._combat_data = self._load_combat_data()
+        raw_data = self._load_combat_data()
+        # Some YAML files wrap combat data under a top-level "combat_system" key.
+        # Normalize so the rest of the manager can always work on a flat dict.
+        self._combat_data = raw_data.get("combat_system", raw_data)
     
     def _load_combat_data(self) -> Dict[str, Any]:
         """
@@ -29,8 +32,8 @@ class CombatSystemManager:
         **Parameters:** None
         **Returns:** Combat data dictionary.
         """
+        data_path = os.path.join(get_data_dir(), 'combat_system.yaml')
         try:
-            data_path = os.path.join(get_data_dir(), 'combat_system.yaml')
             with open(data_path, 'r', encoding='utf-8') as file:
                 return yaml.safe_load(file)
         except FileNotFoundError:
@@ -117,18 +120,14 @@ class CombatSystemManager:
         **Retour:** Dictionnaire des types d'armure.
         """
         return self._combat_data.get("armor_types", {})
+
+    def get_basic_mechanics(self) -> Dict[str, Any]:
+        """Expose attack, damage, and defense formulas."""
+        return self._combat_data.get("basic_mechanics", {})
+
+    def get_combat_modifiers(self) -> Dict[str, Any]:
+        """Return situational modifiers (flanking, cover, etc.)."""
+        return self._combat_data.get("combat_modifiers", {})
     
-    def calculate_initiative(self, agility_value: int, dice_roll: Optional[int] = None) -> int:
-        """
-        ### calculate_initiative
-        **Description:** Calcule l'initiative selon les règles définies.
-        **Paramètres:**
-        - `agility_value` (int): Valeur d'Agilité du personnage.
-        - `dice_roll` (int): Résultat du dé (optionnel, généré automatiquement si None).
-        **Retour:** Valeur d'initiative calculée.
-        """
-        if dice_roll is None:
-            import random
-            dice_roll = random.randint(1, 20)
-        
-        return agility_value + dice_roll
+    # Combat-specific calculations are handled by CombatSystemService to keep
+    # this manager focused on YAML data access only.

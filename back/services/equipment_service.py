@@ -6,7 +6,7 @@ Responsabilité unique :
 """
 
 from typing import List, Dict, Any
-from back.models.domain.character_v2 import CharacterV2 as Character
+from back.models.domain.character import Character
 from back.models.domain.equipment_manager import EquipmentManager
 from back.services.character_data_service import CharacterDataService
 from back.utils.logger import log_debug

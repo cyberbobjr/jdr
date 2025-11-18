@@ -5,7 +5,7 @@ from enum import Enum
 
 # Import conditionnel pour éviter les imports circulaires
 if TYPE_CHECKING:
-    from back.models.domain.character_v2 import CharacterV2 as Character
+    from back.models.domain.character import Character
 
 class ItemType(str, Enum):
     """Types d'objets possibles"""
@@ -130,6 +130,20 @@ class StartScenarioResponse(BaseModel):
     character_id: str
     message: str
     llm_response: str
+
+class PlayScenarioResponse(BaseModel):
+    """Modèle de réponse pour l'endpoint /scenarios/play"""
+    response: List[Dict[str, Any]]
+
+class ScenarioHistoryResponse(BaseModel):
+    """Modèle de réponse pour l'endpoint /scenarios/history/{session_id}"""
+    history: List[Dict[str, Any]]
+
+class DeleteMessageResponse(BaseModel):
+    """Modèle de réponse pour l'endpoint DELETE /scenarios/history/{session_id}/{message_index}"""
+    message: str
+    deleted_message_info: Dict[str, Any]
+    remaining_messages_count: int
 
 class AllocateAttributesRequest(BaseModel):
     race: str

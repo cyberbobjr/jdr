@@ -5,8 +5,9 @@ Factorisation du code de lecture/écriture utilisé par CharacterService et autr
 
 import os
 import json
-from typing import Dict, Any
+from typing import Optional
 from dataclasses import asdict, is_dataclass
+from back.models.domain.character import Character
 from back.utils.logger import log_debug
 from back.config import get_data_dir
 
@@ -61,58 +62,58 @@ class CharacterPersistenceService:
         return os.path.exists(filepath)
     
     @staticmethod
-    def load_character_data(character_id: str) -> Dict[str, Any]:
+    def load_character_data(character_id: str) -> Character:
         """
         ### load_character_data
         **Description :** Charge les données complètes d'un personnage depuis son fichier JSON.
         **Paramètres :**
         - `character_id` (str) : Identifiant du personnage (UUID).
-        **Retour :** Données complètes du personnage (dict).
+        **Retour :** Données complètes du personnage (CharacterV2).
         **Raises :** FileNotFoundError si le personnage n'existe pas.
         """
         filepath = CharacterPersistenceService._get_character_file_path(character_id)
-        
+
         if not os.path.exists(filepath):
             raise FileNotFoundError(f"Le personnage {character_id} n'existe pas.")
-        
+
         try:
             with open(filepath, "r", encoding="utf-8") as file:
                 character_data = json.load(file)
-            
-            log_debug("Données personnage chargées", 
-                     action="load_character_data", 
-                     character_id=character_id, 
+
+            log_debug("Données personnage chargées",
+                     action="load_character_data",
+                     character_id=character_id,
                      filepath=os.path.abspath(filepath))
-            
-            return character_data
-        
+
+            return Character(**character_data)
+
         except json.JSONDecodeError as e:
-            log_debug("Erreur de décodage JSON", 
-                     action="load_character_data_error", 
-                     character_id=character_id, 
+            log_debug("Erreur de décodage JSON",
+                     action="load_character_data_error",
+                     character_id=character_id,
                      error=str(e))
             raise ValueError(f"Fichier JSON corrompu pour le personnage {character_id}: {str(e)}")
-        
+
         except Exception as e:
-            log_debug("Erreur lors du chargement", 
-                     action="load_character_data_error", 
-                     character_id=character_id, 
+            log_debug("Erreur lors du chargement",
+                     action="load_character_data_error",
+                     character_id=character_id,
                      error=str(e))
             raise
     
     @staticmethod
-    def save_character_data(character_id: str, character_data: Dict[str, Any]) -> Dict[str, Any]:
+    def save_character_data(character_id: str, character: Character | dict) -> Optional[Character]:
         """
         ### save_character_data
         **Description :** Sauvegarde les données complètes d'un personnage dans son fichier JSON.
         Effectue un merge avec les données existantes pour éviter l'écrasement.
         **Paramètres :**
         - `character_id` (str) : Identifiant du personnage (UUID).
-        - `character_data` (dict) : Données à sauvegarder.
-        **Retour :** Les données complètes fusionnées du personnage (dict).
+        - `character` (Character or dict) : Données à sauvegarder.
+        **Retour :** Les données complètes fusionnées du personnage (Character).
         """
         filepath = CharacterPersistenceService._get_character_file_path(character_id)
-        
+
         try:
             # Charger les données existantes si le fichier existe
             existing_data = {}
@@ -121,31 +122,48 @@ class CharacterPersistenceService:
                     with open(filepath, "r", encoding="utf-8") as file:
                         existing_data = json.load(file)
                 except (json.JSONDecodeError, Exception) as e:
-                    log_debug("Erreur lors de la lecture du fichier existant, recréation", 
-                             action="save_character_data_warning", 
-                             character_id=character_id, 
+                    log_debug("Erreur lors de la lecture du fichier existant, recréation",
+                             action="save_character_data_warning",
+                             character_id=character_id,
                              error=str(e))
                     existing_data = {}
-            
+
+            # Convertir le character en dict pour le merge
+            if isinstance(character, dict):
+                character_dict = character
+            else:
+                character_dict = character.model_dump()
+
             # Merger les données (les nouvelles données ont priorité)
-            merged_data = {**existing_data, **character_data}
-            
+            merged_data = {**existing_data, **character_dict}
+
             # Créer le répertoire si nécessaire
             os.makedirs(os.path.dirname(filepath), exist_ok=True)
-            
+
             with open(filepath, "w", encoding="utf-8") as file:
                 json.dump(merged_data, file, ensure_ascii=False, indent=2)
-            
-            log_debug("Données personnage sauvegardées (merge)", 
-                     action="save_character_data", 
-                     character_id=character_id, 
+
+            log_debug("Données personnage sauvegardées (merge)",
+                     action="save_character_data",
+                     character_id=character_id,
                      filepath=os.path.abspath(filepath),
-                     keys_updated=list(character_data.keys()))
-            return merged_data
+                     keys_updated=list(character_dict.keys()))
+
+            # Try to return a CharacterV2 with the merged data
+            try:
+                return Character(**merged_data)
+            except Exception as e:
+                # If merged data is not valid for CharacterV2, log and return None
+                # This can happen with partial data during character creation
+                log_debug("Merged data not valid for CharacterV2, returning None",
+                         action="save_character_data_partial",
+                         character_id=character_id,
+                         error=str(e))
+                return None
         except Exception as e:
-            log_debug("Erreur lors de la sauvegarde", 
-                     action="save_character_data_error", 
-                     character_id=character_id, 
+            log_debug("Erreur lors de la sauvegarde",
+                     action="save_character_data_error",
+                     character_id=character_id,
                      error=str(e))
             raise
     

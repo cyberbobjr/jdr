@@ -8,12 +8,13 @@ from typing import Optional, Dict, Any
 from dotenv import load_dotenv
 from pydantic_ai import Agent
 import json
+from fastapi.encoders import jsonable_encoder
 
-from back.services.session_service import SessionService
 from back.storage.pydantic_jsonl_store import PydanticJsonlStore
-from back.models.domain.character_v2 import CharacterV2 as Character
+from back.models.domain.character import Character
 from back.agents.PROMPT import build_system_prompt
 from back.config import get_data_dir
+from back.services.game_session_service import GameSessionService
 
 # Charger les variables d'environnement depuis le fichier .env
 load_dotenv()
@@ -47,31 +48,31 @@ class GMAgentDependencies:
             history_path = session_id + ".jsonl"
         self.store = PydanticJsonlStore(history_path)
 
-def build_gm_agent_pydantic(session_id: str, scenario_name: str = "Les_Pierres_du_Passe.md", character_id: Optional[str] = None):
+def build_gm_agent_pydantic(session_id: str, scenario_id: str = "123456", character_id: Optional[str] = None):
     """
     ### build_gm_agent_pydantic
     **Description :** Construit l'agent GM avec PydanticAI et retourne l'agent et ses dépendances.
     **Paramètres :**
     - `session_id` (str) : Identifiant de la session de jeu
-    - `scenario_name` (str) : Nom du fichier scénario (utilisé uniquement lors de la création d'une nouvelle session)
+    - `scenario_id` (str) : ID du scénario (utilisé uniquement lors de la création d'une nouvelle session)
     - `character_id` (Optional[str]) : ID du personnage pour créer une nouvelle session
-    **Retour :** Tuple (Agent PydanticAI configuré, SessionService).
+    **Retour :** Tuple (Agent PydanticAI configuré, GameSessionService).
     """
     # Créer le service de session
     try:
         # Essayer de charger une session existante
-        session = SessionService(session_id)
+        session = GameSessionService(session_id)
     except ValueError:
         # Si la session n'existe pas et qu'on a fourni un character_id, créer une nouvelle session
         if character_id:
-            session = SessionService(session_id, character_id=character_id, scenario_name=scenario_name)
+            session = GameSessionService(session_id, character_id=character_id, scenario_id=scenario_id)
         else:
             raise ValueError(f"Session {session_id} n'existe pas et aucun character_id fourni pour la créer")
       # Utiliser le scénario de la session (on ne peut pas le changer)
-    scenario_name = session.scenario_name
+    scenario_id = session.scenario_id
     
     # Construire le prompt système avec scénario et règles
-    system_prompt = build_system_prompt(scenario_name)
+    system_prompt = build_system_prompt(scenario_id)
     
     # Créer l'agent avec la configuration DeepSeek
     from pydantic_ai.models.openai import OpenAIChatModel
@@ -97,7 +98,7 @@ def build_gm_agent_pydantic(session_id: str, scenario_name: str = "Les_Pierres_d
     agent = Agent(
         model=model,
         system_prompt=system_prompt,
-        deps_type=SessionService,
+        deps_type=GameSessionService,
         tools=[
             character_apply_xp,
             character_add_gold,
@@ -132,11 +133,8 @@ def enrich_user_message_with_character(user_message: str, character_data: Dict[s
     """
     if not character_data:
         return user_message
-    
-    # Créer une copie des données pour la sérialisation JSON en convertissant l'UUID en string
-    character_data_serializable = character_data.copy()
-    if 'id' in character_data_serializable and hasattr(character_data_serializable['id'], '__str__'):
-        character_data_serializable['id'] = str(character_data_serializable['id'])
+
+    character_data_serializable = jsonable_encoder(character_data)
     
     character_context = f"""<PERSONNAGE JOUEUR>
 {json.dumps(character_data_serializable, indent=2, ensure_ascii=False)}

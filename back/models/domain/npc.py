@@ -1,16 +1,12 @@
-"""
-Pydantic Model for NPCs (v2)
-"""
+"""NPC domain model."""
 from typing import Optional
 from pydantic import BaseModel, Field
 from uuid import UUID, uuid4
-from .character_v2 import Stats, Skills, Equipment, CombatStats, Spells
+from .character import Stats, Skills, Equipment, CombatStats, Spells
 
-class NPCV2(BaseModel):
-    """
-    Simplified NPC model, inspired by CharacterV2.
-    Represents a non-player character with combat-relevant statistics.
-    """
+
+class NPC(BaseModel):
+    """Simplified NPC model mirroring the Character data contract."""
     id: UUID = Field(default_factory=uuid4, description="Unique NPC identifier")
     name: str = Field(..., min_length=1, max_length=100, description="NPC name")
     description: Optional[str] = Field(default=None, max_length=1000, description="NPC description")
@@ -68,6 +64,4 @@ class NPCV2(BaseModel):
             }
         }
 
-__all__ = [
-    'NPCV2'
-]
+__all__ = ['NPC']

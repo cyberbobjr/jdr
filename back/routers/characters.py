@@ -1,16 +1,24 @@
 from __future__ import annotations
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, status
 from typing import List
-from back.models.domain.character_v2 import CharacterV2
+from pydantic import BaseModel
+
+from back.models.domain.character import Character
 from back.services.character_data_service import CharacterDataService
-from back.utils.exceptions import CharacterNotFoundError, InternalServerError
+from back.services.character_persistence_service import CharacterPersistenceService
+from back.utils.exceptions import InternalServerError
 from back.utils.logger import log_debug
+
+class CharacterV2Response(BaseModel):
+    """Response model for character data"""
+    character: Character
+    status: str
 
 router = APIRouter(tags=["characters"])
 
 
-@router.get("/", response_model=List[CharacterV2])
+@router.get("/", response_model=List[Character])
 async def list_characters():
     """
     Retrieve the list of all available characters in the system.
@@ -88,40 +96,119 @@ async def list_characters():
         raise InternalServerError(f"Erreur lors de la récupération des personnages: {str(e)}")
 
 
-@router.get("/{character_id}", response_model=CharacterV2)
-async def get_character_detail(character_id: str):
+@router.get(
+    "/{character_id}",
+    response_model=CharacterV2Response,
+    summary="Get character",
+    description="Retrieves a character by ID"
+)
+async def get_character_detail(character_id: str) -> CharacterV2Response:
     """
-    Retrieve detailed information of a character by their unique identifier.
+    Retrieves a character by ID.
 
-    This endpoint allows obtaining all detailed information of a specific character.
+    **Parameters:**
+    - `character_id`: UUID string of the character to retrieve
 
-    Parameters:
-        character_id (str): The unique identifier of the character to retrieve
-    Returns:
-        CharacterV2: The detailed information of the character
+    **Response:**
+    ```json
+    {
+        "character": {
+            "id": "d7763165-4c03-4c8d-9bc6-6a2568b79eb3",
+            "name": "Aragorn",
+            "race": "humans",
+            "culture": "gondorians",
+            "stats": {
+                "strength": 15,
+                "constitution": 14,
+                "agility": 13,
+                "intelligence": 12,
+                "wisdom": 16,
+                "charisma": 15
+            },
+            "skills": {
+                "combat": {
+                    "melee_weapons": 3,
+                    "weapon_handling": 2
+                },
+                "general": {
+                    "perception": 4
+                }
+            },
+            "combat_stats": {
+                "max_hit_points": 140,
+                "current_hit_points": 140,
+                "max_mana_points": 112,
+                "current_mana_points": 112,
+                "armor_class": 11,
+                "attack_bonus": 2
+            },
+            "equipment": {
+                "weapons": [],
+                "armor": [],
+                "accessories": [],
+                "consumables": [],
+                "gold": 0
+            },
+            "spells": {
+                "known_spells": [],
+                "spell_slots": {},
+                "spell_bonus": 0
+            },
+            "level": 1,
+            "status": "draft",
+            "experience_points": 0,
+            "created_at": "2025-11-13T21:30:00Z",
+            "updated_at": "2025-11-13T21:30:00Z",
+            "description": "Son of Arathorn, heir to the throne of Gondor",
+            "physical_description": "Tall and swift"
+        },
+        "status": "loaded"
+    }
+    ```
     """
-    log_debug("Endpoint call characters/get_character_detail", character_id=str(character_id))
-
     try:
-        data_service = CharacterDataService()
-        character = data_service.get_character_by_id(character_id)
+        character = CharacterPersistenceService.load_character_data(character_id)
+        if character is None:
+            raise HTTPException(status_code=404, detail=f"Character with id '{character_id}' not found")
 
-        log_debug("Character retrieved successfully",
-                  action="get_character_detail_success",
-                  character_id=character_id)
-
-        return character
+        return CharacterV2Response(
+            character=character,
+            status="loaded"
+        )
 
     except FileNotFoundError as e:
-        log_debug("Character not found",
-                  action="get_character_detail_not_found",
-                  character_id=character_id,
-                  error=str(e))
-        raise CharacterNotFoundError(character_id)
-
+        raise HTTPException(status_code=404, detail=str(e))
+    except HTTPException as e:
+        # Re-raise HTTP exceptions without altering the status code
+        raise e
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        log_debug("Error retrieving character",
-                  action="get_character_detail_error",
-                  character_id=character_id,
-                  error=str(e))
-        raise InternalServerError(f"Error retrieving character: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Character retrieval failed: {str(e)}")
+
+
+@router.delete(
+    "/character/{character_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete V2 character",
+    description="Deletes a V2 character by ID"
+)
+async def delete_character_v2(character_id: str) -> None:
+    """
+    Deletes a V2 character by ID.
+    - **Input**: character_id
+    - **Output**: 204 No Content if successful
+    """
+    try:
+        data = CharacterPersistenceService.load_character_data(character_id)  # Verify character exists
+        if not data:
+            raise HTTPException(status_code=404, detail=f"Character with id '{character_id}' not found")
+        CharacterPersistenceService.delete_character_data(character_id)
+
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail=f"Character with id '{character_id}' not found")
+    except HTTPException as e:
+        # Preserve intended HTTP status codes
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Character deletion failed: {str(e)}")

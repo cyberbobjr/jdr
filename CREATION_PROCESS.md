@@ -3,8 +3,13 @@
 A guided wizard where the AI proposes curated options at each step (with concise rationales) and the player edits inline. Every change is validated server-side using V2 Pydantic models and persisted to a draft. This flow uses `back/routers/creation.py` and read-only managers (`RacesManager`, `SkillsManager`, `EquipmentManager`, `StatsManager`) to stay consistent with the project’s architecture.
 
 - Data model: `CharacterV2` with `Stats` (each 3–20, total ≤ 400) and `Skills` (ranks 0–10, total ≤ 40).
-- Validation: `POST /creation/validate-character` must pass before finalization.
+- Validation: Use `POST /creation/validate-character` (full payload) or `/creation/validate-character/by-id` (stored draft) before finalization.
 - Persistence: `CharacterPersistenceService` to `data/characters/{id}.json`; `status` transitions from `draft` to `active`.
+
+| Validation Endpoint | Body | Primary use case |
+| --- | --- | --- |
+| `POST /creation/validate-character` | Full character payload (stats, skills, combat, equipment, spells) | Frontend already has the latest JSON (pre-save preview, inline editing) |
+| `POST /creation/validate-character/by-id` | `{ "character_id": "uuid" }` | Server-side validation of a persisted draft (after `/creation/save` or `/creation/update`) |
 
 ## Architecture Alignment
 
@@ -28,6 +33,7 @@ A guided wizard where the AI proposes curated options at each step (with concise
 ## Step‑By‑Step Flow
 
 ### 1) Concept & Identity
+
 - Capture: Player concept (role, combat vs social, magic, tone).
 - Suggest: 5 names, 3 short backgrounds, 3 physical descriptions with 1–2 line rationales.
 - Edit: Player tweaks any suggestion inline.
@@ -35,12 +41,14 @@ A guided wizard where the AI proposes curated options at each step (with concise
 - Validate: Structural (lengths) only; full validation deferred to final checks.
 
 ### 2) Race & Culture
+
 - Fetch: `GET /creation/races`.
 - Explain: Show `get_complete_character_bonuses(race_id, culture_id)` (characteristic bonuses, skill bonuses, languages, free skill points, special traits, culture description).
 - Suggest: Top 3 race+culture fits for the concept with short “why this choice”.
 - Select/Edit: Player chooses or overrides; persist via `POST /creation/update`.
 
 ### 3) Attributes (Stats)
+
 - Rules: V2 `Stats` — each 3–20; total ≤ 400.
 - Fetch: `GET /creation/stats` (labels/descriptions only; ignore legacy 0–100 cost tables for V2).
 - Suggest: Three allocations (offensive/defensive/balanced) with derived modifiers for clarity.
@@ -48,6 +56,7 @@ A guided wizard where the AI proposes curated options at each step (with concise
 - Validate: Build full character payload and call `POST /creation/validate-character`; show precise field errors and actionable hints.
 
 ### 4) Skills Distribution
+
 - Rules: V2 `Skills` — each rank 0–10; total development points ≤ 40.
 - Fetch: `GET /creation/skills`; display groups, descriptions; enable keyword search.
 - Suggest: Three layouts (combat/social/hybrid) aligned to concept and racial/cultural bonuses.
@@ -55,6 +64,7 @@ A guided wizard where the AI proposes curated options at each step (with concise
 - Validate: Reuse `POST /creation/validate-character` with the updated character payload.
 
 ### 5) Starter Gear (and Spells if exposed)
+
 - Fetch: `GET /creation/equipment` (and later `GET /creation/spells` if exposing `SpellsManager`).
 - Suggest: 2–3 starter kits tailored to concept (e.g., melee scout, archer, healer) with gold cost and light encumbrance notes.
 - Edit: Replace kit items; track `equipment.gold` in character.
@@ -62,6 +72,7 @@ A guided wizard where the AI proposes curated options at each step (with concise
 - Validate: Ensure non-negative `equipment.gold` and consistent equipment shape.
 
 ### 6) Summary, Final Checks, Activation
+
 - Summary: Identity, race/culture and traits, stats with modifiers, skills with totals, gear (and spells if any).
 - Explainability: For each accepted AI suggestion, keep a short rationale; allow “reroll similar” with deterministic seeds.
 - Validate: Final `POST /creation/validate-character` must pass; map errors to fields.

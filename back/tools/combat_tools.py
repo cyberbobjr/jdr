@@ -3,13 +3,13 @@ from back.utils.dice import roll_attack
 from back.utils.logger import log_debug
 from back.services.combat_service import CombatService
 from back.services.combat_state_service import CombatStateService
-from back.services.session_service import SessionService
+from back.services.game_session_service import GameSessionService
 import uuid
 
 combat_service = CombatService()
 combat_state_service = CombatStateService()
 
-def roll_initiative_tool(ctx: RunContext[SessionService], characters: list[dict]) -> list:
+def roll_initiative_tool(ctx: RunContext[GameSessionService], characters: list[dict]) -> list:
     """
     Calcule l'ordre d'initiative des personnages.
 
@@ -32,7 +32,7 @@ def roll_initiative_tool(ctx: RunContext[SessionService], characters: list[dict]
 
 # Tool definition removed - now handled directly by PydanticAI agent
 
-def perform_attack_tool(ctx: RunContext[SessionService], dice: str) -> int:
+def perform_attack_tool(ctx: RunContext[GameSessionService], dice: str) -> int:
     """
     Effectue un jet d'attaque.
 
@@ -47,7 +47,7 @@ def perform_attack_tool(ctx: RunContext[SessionService], dice: str) -> int:
 
 # Tool definition removed - now handled directly by PydanticAI agent
 
-def resolve_attack_tool(ctx: RunContext[SessionService], attack_roll: int, defense_roll: int) -> bool:
+def resolve_attack_tool(ctx: RunContext[GameSessionService], attack_roll: int, defense_roll: int) -> bool:
     """
     Résout une attaque en comparant les jets d'attaque et de défense.
 
@@ -63,7 +63,7 @@ def resolve_attack_tool(ctx: RunContext[SessionService], attack_roll: int, defen
 
 # Tool definition removed - now handled directly by PydanticAI agent
 
-def calculate_damage_tool(ctx: RunContext[SessionService], base_damage: int, bonus: int = 0) -> int:
+def calculate_damage_tool(ctx: RunContext[GameSessionService], base_damage: int, bonus: int = 0) -> int:
     """
     Calcule les dégâts infligés en tenant compte des modificateurs.
 
@@ -80,7 +80,7 @@ def calculate_damage_tool(ctx: RunContext[SessionService], base_damage: int, bon
 
 # Tool definition removed - now handled directly by PydanticAI agent
 
-def end_combat_tool(ctx: RunContext[SessionService], combat_id: str, reason: str) -> dict:
+def end_combat_tool(ctx: RunContext[GameSessionService], combat_id: str, reason: str) -> dict:
     """
     Termine explicitement un combat en précisant la raison.
 
@@ -110,7 +110,7 @@ def end_combat_tool(ctx: RunContext[SessionService], combat_id: str, reason: str
         return {"combat_id": combat_id, "status": "termine", "end_reason": reason, "error": str(e)}
 
 
-def end_turn_tool(ctx: RunContext[SessionService], combat_id: str) -> dict:
+def end_turn_tool(ctx: RunContext[GameSessionService], combat_id: str) -> dict:
     """
     Termine explicitement le tour courant et passe au suivant.
     
@@ -155,7 +155,7 @@ def end_turn_tool(ctx: RunContext[SessionService], combat_id: str) -> dict:
         return {"error": str(e), "combat_id": combat_id}
 
 
-def check_combat_end_tool(ctx: RunContext[SessionService], combat_id: str) -> dict:
+def check_combat_end_tool(ctx: RunContext[GameSessionService], combat_id: str) -> dict:
     """
     Vérifie automatiquement si le combat est terminé.
     
@@ -218,7 +218,7 @@ def check_combat_end_tool(ctx: RunContext[SessionService], combat_id: str) -> di
         return {"error": str(e), "combat_id": combat_id}
 
 
-def apply_damage_tool(ctx: RunContext[SessionService], combat_id: str, target_id: str, amount: int) -> dict:
+def apply_damage_tool(ctx: RunContext[GameSessionService], combat_id: str, target_id: str, amount: int) -> dict:
     """
     Applique des dégâts à un participant et vérifie l'état du combat.
     
@@ -289,7 +289,7 @@ def apply_damage_tool(ctx: RunContext[SessionService], combat_id: str, target_id
         return {"error": str(e), "combat_id": combat_id}
 
 
-def get_combat_status_tool(ctx: RunContext[SessionService], combat_id: str) -> dict:
+def get_combat_status_tool(ctx: RunContext[GameSessionService], combat_id: str) -> dict:
     """
     Retourne l'état complet du combat pour injection dans le prompt.
     
@@ -327,7 +327,7 @@ def get_combat_status_tool(ctx: RunContext[SessionService], combat_id: str) -> d
         return {"error": str(e), "combat_id": combat_id}
 
 
-def start_combat_tool(ctx: RunContext[SessionService], participants: list[dict]) -> dict:
+def start_combat_tool(ctx: RunContext[GameSessionService], participants: list[dict]) -> dict:
     """
     Démarre un nouveau combat avec les participants donnés.
     

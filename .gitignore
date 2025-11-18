@@ -4,3 +4,5 @@ venv
 __pycache__
 data/sessions
 back/data/sessions
+back/gamedata/sessions/
+back/gamedata/characters

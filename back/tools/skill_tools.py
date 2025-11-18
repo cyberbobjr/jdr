@@ -1,18 +1,16 @@
 import random
 from pydantic_ai import RunContext
 from back.utils.logger import log_debug
-from back.services.session_service import SessionService
 from back.services.character_service import CharacterService
 
 import random
 from pydantic_ai import RunContext
 from back.utils.logger import log_debug
-from back.services.session_service import SessionService
 from back.services.character_service import CharacterService
 from back.models.domain.unified_skills_manager import UnifiedSkillsManager
 from back.models.domain.stats_manager import StatsManager
 
-def skill_check_with_character(ctx: RunContext[SessionService], skill_name: str, difficulty_name: str = "Moyenne", difficulty_modifier: int = 0) -> str:
+def skill_check_with_character(ctx: RunContext[GameSessionService], skill_name: str, difficulty_name: str = "Moyenne", difficulty_modifier: int = 0) -> str:
     """
     Effectue un test de compétence en utilisant les données du personnage de la session.
 

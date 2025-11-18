@@ -16,5 +16,6 @@ source back/venv/bin/activate
 export PYTHONPATH="$PWD"
 
 echo "Running all tests from back/tests/..."
+echo "------------------------"
 pytest back/tests/
 

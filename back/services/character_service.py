@@ -4,7 +4,7 @@
 import os
 from typing import List, Dict
 from back.models.schema import Item, CharacterStatus
-from back.models.domain.character_v2 import CharacterV2 as Character
+from back.models.domain.character import Character
 from back.utils.logger import log_debug
 from back.utils.model_converter import ModelConverter
 from back.services.character_persistence_service import CharacterPersistenceService
@@ -27,49 +27,32 @@ class CharacterService:
         self.strict_validation = strict_validation       
         self.character_data = self._load_character()
         
-    def _load_character(self):
+    def _load_character(self) -> Character:
         """
         ### _load_character
         **Description:** Charge les données du personnage depuis le stockage persistant
-        **Retour:** Objet Character chargé ou dict pour personnages incomplets
+        **Retour:** Objet CharacterV2 chargé
         """
-        state_data = CharacterPersistenceService.load_character_data(self.character_id)
-        # Ajouter les champs manquants avec des valeurs par défaut
-        state_data.setdefault("xp", 0)
-        state_data.setdefault("gold", 0.0)
-        state_data.setdefault("hp", 100)
-        # L'ID est le nom du fichier (sans .json)
-        state_data["id"] = self.character_id
-          # Vérifier si le personnage est complet
+        character: Character = CharacterPersistenceService.load_character_data(self.character_id)
+
+        # Vérifier si le personnage est complet
         is_incomplete = (
-            state_data.get("name") is None or 
-            state_data.get("status") == CharacterStatus.IN_PROGRESS or
-            state_data.get("status") is None
+            character.name is None or
+            character.status == CharacterStatus.IN_PROGRESS or
+            character.status is None
         )
-                    
+
         log_debug("Chargement du personnage", action="_load_character", character_id=self.character_id, is_incomplete=is_incomplete)
-        
-        # Si validation stricte et personnage complet, retourner un objet Character
-        if self.strict_validation and not is_incomplete:
-            try:
-                return Character(**state_data)
-            except Exception as e:
-                log_debug("Erreur validation stricte, retour en mode dict", error=str(e))
-                return state_data
-        else:
-            # Sinon, retourner le dictionnaire brut
-            return state_data
+
+        # Retourner l'objet CharacterV2 (Pydantic gère les valeurs par défaut)
+        return character
     def save_character(self) -> None:
         """
         ### save_character
         **Description:** Sauvegarde les données du personnage vers le stockage persistant
         **Retour:** Aucun
         """
-        # Utiliser ModelConverter pour une conversion cohérente
-        character_dict = ModelConverter.to_dict(self.character_data)
-        # Retirer l'ID car il ne doit pas être dans le fichier
-        character_dict.pop('id', None)
-        CharacterPersistenceService.save_character_data(self.character_id, character_dict)
+        CharacterPersistenceService.save_character_data(self.character_id, self.character_data)
         log_debug("Sauvegarde du personnage", action="save_character", character_id=self.character_id)
     
     def get_character(self) -> Character:
@@ -89,52 +72,46 @@ class CharacterService:
         return ModelConverter.to_json(self.character_data)
     
     @staticmethod
-    def get_all_characters() -> List[object]:
+    def get_all_characters() -> List[Character]:
         """
         ### get_all_characters
         **Description:** Récupère la liste de tous les personnages disponibles à partir des fichiers JSON.
-        **Retour:** Liste d'objets Character ou de dicts bruts pour les personnages incomplets.
+        **Retour:** Liste d'objets CharacterV2.
         """
         characters = []
         characters_dir = os.path.join(get_data_dir(), "characters")
-        
+
         for filename in os.listdir(characters_dir):
             if filename.endswith(".json"):
                 character_id = filename[:-5]  # Retire l'extension .json
                 try:
-                    character_data = CharacterPersistenceService.load_character_data(character_id)
-                    processed_character = CharacterService._process_character_data(
-                        character_id, character_data, "get_all_characters"
-                    )
-                    characters.append(processed_character)
-                        
+                    character: Character = CharacterPersistenceService.load_character_data(character_id)
+                    characters.append(character)
+
                 except (FileNotFoundError, ValueError) as e:
-                    log_debug("Erreur lors du chargement du personnage", 
-                             action="get_all_characters_error", 
-                             filename=filename, 
-                             error=str(e))
-                    continue                    
-        
+                    log_debug("Erreur lors du chargement du personnage",
+                              action="get_all_characters_error",
+                              filename=filename,
+                              error=str(e))
+                    continue
+
         log_debug("Chargement de tous les personnages", action="get_all_characters", count=len(characters))
         return characters
     
     @staticmethod
-    def get_character_by_id(character_id: str) -> dict:
+    def get_character_by_id(character_id: str) -> Character:
         """
         ### get_character_by_id
         **Description:** Récupère un personnage à partir de son identifiant (UUID) depuis le dossier data/characters.
         **Paramètres:**
         - `character_id` (str): Identifiant du personnage (UUID).
-        **Retour:** Dictionnaire des données du personnage.
-        """       
+        **Retour:** Objet CharacterV2 du personnage.
+        """
         try:
-            character_data = CharacterPersistenceService.load_character_data(character_id)
-            processed_character = CharacterService._process_character_data(
-                character_id, character_data, "get_character_by_id"
-            )
-            
+            character: Character = CharacterPersistenceService.load_character_data(character_id)
+
             log_debug("Chargement du personnage", action="get_character_by_id", character_id=character_id)
-            return processed_character
+            return character
         except Exception as e:
             raise e
 

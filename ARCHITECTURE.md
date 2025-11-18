@@ -51,7 +51,7 @@ Services encapsulate unique business responsibilities:
 - `EquipmentService` - Equipment buy/sell and money management
 
 **Game Services:**
-- `SessionService` - Game session management (history, character, scenario)
+- `GameSessionService` - Game session management (history, character, scenario)
 - `ScenarioService` - Scenario flow orchestration
 - `CombatService` - Combat mechanics calculations
 - `CombatStateService` - Combat state persistence
@@ -115,7 +115,7 @@ User (Frontend) → Creation Router → Managers (races/skills/stats/equipment)
 ### Gameplay Flow
 
 ```text
-User prompt → Scenarios Router → SessionService → GM Agent (PydanticAI)
+User prompt → Scenarios Router → GameSessionService → GM Agent (PydanticAI)
                                                       ↓
                                               Tools (character, combat, inventory, skills)
                                                       ↓

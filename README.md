@@ -1,5 +1,7 @@
 # JdR "Terres du Milieu" - Middle-earth RPG
 
+<!-- markdownlint-disable-file -->
+
 > **A Role-Playing Game orchestrated by Large Language Models**
 
 This is a tabletop RPG set in Middle-earth (Tolkien's world), where the narration and game mechanics are orchestrated by a Large Language Model (LLM) acting as the Game Master (GM). The project combines traditional RPG rules with modern AI capabilities to create an immersive, dynamic gameplay experience.
@@ -50,6 +52,8 @@ The architecture follows strict **SOLID principles** with clear separation of re
 - PydanticAI Framework - Agent framework documentation check Context7 tool for documentation
 - [GitHub Copilot Instructions](.github/copilot-instructions.md) - Development guidelines
 - [Technical Specification](#technical-specification) - Detailed architecture below
+- [REFACTO_COMBAT.md](REFACTO_COMBAT.md) - Authoritative combat refactor plan (English).
+- [REFACTO_COMBAT_FR.md](REFACTO_COMBAT_FR.md) - French translation of the combat refactor plan for francophone contributors.
 
 ## 📦 Service Architecture
 
@@ -60,12 +64,11 @@ The backend uses a modular architecture with strict separation of responsibiliti
 - **CharacterDataService**: Specialized for loading and saving character data (I/O operations)
 - **CharacterBusinessService**: Business logic (XP, gold, damage, healing)
 - **CharacterPersistenceService**: Centralized character persistence (JSON files)
- 
 - **EquipmentService**: Equipment buy/sell, inventory (add/remove/equip), and money management
 
 ### Game Services
 
-- **SessionService**: Game session management (history, character, scenario)
+- **GameSessionService**: Game session management (history, character, scenario)
 - **ScenarioService**: Scenario flow management
 - **CombatService**: Combat mechanics
 - **CombatStateService**: Combat state persistence
@@ -75,7 +78,7 @@ The backend uses a modular architecture with strict separation of responsibiliti
 ### PydanticAI Integration
 
 - **GM Agent**: Uses `pydantic_ai.Agent` with OpenAI-compatible model and persistent memory (JSONL)
-- **Tools**: All tools use `RunContext[SessionService]` signature to access services
+- **Tools**: All tools use `RunContext[GameSessionService]` signature to access services
 - **Memory**: Conversation history stored in JSONL via `back/storage/pydantic_jsonl_store.py`
 - **System Prompt**: Modular prompt built dynamically from scenario and rules
 
@@ -130,70 +133,71 @@ The new system uses **6 core attributes** with a per‑stat cap:
 
 ```
 .
-├── back/                        # Back‑end FastAPI + PydanticAI
+├── back/                        # FastAPI + PydanticAI backend
 │   ├── __init__.py
 │   ├── .coverage
-│   ├── app.py                  # Point d'entrée FastAPI
-│   ├── config.py               # Configuration centralisée
-│   ├── config.yaml             # Fichier de configuration YAML
-│   ├── main.py                 # Target uvicorn – démarre l'app + l'agent
-│   ├── requirements.txt        # Dépendances Python
+│   ├── app.py                  # FastAPI application entry point
+│   ├── config.py               # Centralized configuration loader
+│   ├── config.yaml             # YAML configuration file
+│   ├── main.py                 # Uvicorn target that launches the API and GM agent
+│   ├── requirements.txt        # Backend Python dependencies
 │   ├── agents/
 │   │   ├── __init__.py
-│   │   ├── gm_agent_pydantic.py # Agent LLM Maître du Jeu (PydanticAI - production)
-│   │   └── PROMPT.py           # Prompt système modulaire
+│   │   ├── gm_agent_pydantic.py # Production GM agent powered by PydanticAI
+│   │   └── PROMPT.py           # Modular system prompt builder
 │   ├── docs/
-│   │   └── LOGGING_GUIDE.md    # Guide de logging
+│   │   └── LOGGING_GUIDE.md    # Logging guide
 │   ├── models/
 │   │   ├── __init__.py
-│   │   ├── api_dto.py          # DTO pour l'API
-│   │   ├── schema.py           # DTO exposés par l'API
+│   │   ├── api_dto.py          # API DTO definitions
+│   │   ├── schema.py           # API response/request schemas
 │   │   └── domain/
 │   │       ├── __init__.py
-│   │       ├── base.py         # Classes de base
-│   │       ├── character.py    # Modèle de personnage
-│   │       ├── combat_state.py # État de combat
-│   │       ├── combat_system_manager.py # Gestionnaire du système de combat
-│   │       ├── equipment_manager.py # Gestionnaire d'équipement
-│   │       ├── races_manager.py # Gestionnaire des races
-│   │       ├── skills_manager.py # Gestionnaire des compétences
-│   │       ├── spells_manager.py # Gestionnaire des sorts
-│   │       └── stats_manager.py # Gestionnaire des statistiques
+│   │       ├── base.py         # Shared domain base classes
+│   │       ├── character.py    # CharacterV2 domain model
+│   │       ├── combat_state.py # Combat state model
+│   │       ├── combat_system_manager.py # Combat rules loader
+│   │       ├── equipment_manager.py # Equipment data manager
+│   │       ├── races_manager.py # Race and culture data manager
+│   │       ├── skills_manager.py # Legacy skills manager
+│   │       ├── spells_manager.py # Spell data manager
+│   │       ├── stats_manager.py # Stat metadata manager
+│   │       └── unified_skills_manager.py # Aggregated skills interface for the LLM
 │   ├── routers/
 │   │   ├── __init__.py
-│   │   ├── characters.py       # Endpoints pour la gestion des personnages
-│   │   ├── creation.py         # Endpoints spécialisés pour la création de personnage
-│   │   └── scenarios.py        # Endpoints pour la gestion des scénarios
+│   │   ├── characters.py       # Character listing, detail, deletion
+│   │   ├── creation.py         # Character creation workflow
+│   │   ├── gamesession.py      # Scenario play, history, and streaming
+│   │   └── scenarios.py        # Scenario metadata endpoints
 │   ├── services/
 │   │   ├── __init__.py
-│   │   ├── character_business_service.py # Service spécialisé pour la logique métier (XP, or, dégâts)
-│   │   ├── inventory_service.py # Service spécialisé pour la gestion d'équipement (V2)
-│   │   ├── character_data_service.py # Service spécialisé pour le chargement/sauvegarde des données
-│   │   ├── character_persistence_service.py # Service centralisé pour la persistance des personnages (JSON)
-│   │   ├── character_service.py # Service legacy en cours de refactoring
-│   │   ├── combat_service.py    # Gestion des mécaniques de combat
-│   │   ├── combat_state_service.py # Persistance de l'état des combats actifs
-│   │   ├── equipment_service.py # Service spécialisé pour l'achat/vente d'équipement
-│   │   ├── inventory_service.py # Service spécialisé pour la gestion d'équipement (V2)
-│   │   ├── item_service.py      # Gestion des objets
-│   │   ├── scenario_service.py  # Gestion du déroulement des scénarios
-│   │   ├── session_service.py   # Gestion des sessions de jeu (historique, personnage, scénario)
-│   │   └── skill_service.py     # Gestion des compétences et de leurs jets
+│   │   ├── character_business_service.py # Business logic (XP, gold, damage)
+│   │   ├── character_data_service.py # Aggregates persistence + validation
+│   │   ├── character_persistence_service.py # JSON persistence utilities
+│   │   ├── character_service.py # Legacy service kept for backward compatibility
+│   │   ├── combat_service.py    # Combat mechanics
+│   │   ├── combat_state_service.py # Combat state persistence
+│   │   ├── equipment_service.py # Buy/sell/equip gear flows
+│   │   ├── game_session_service.py # Session orchestration and storage
+│   │   ├── item_service.py      # Generic item helpers
+│   │   ├── scenario_service.py  # Scenario management helpers
+│   │   ├── skill_allocation_service.py # Automated skill distribution logic
+│   │   └── skill_service.py     # Skill check helpers
 │   ├── storage/
 │   │   ├── __init__.py
-│   │   └── pydantic_jsonl_store.py # Store JSONL pour l'historique des messages PydanticAI
+│   │   └── pydantic_jsonl_store.py # JSONL conversation history backend
 │   ├── tests/
 │   │   ├── __init__.py
-│   │   ├── test_character_service_refactored.py # Test spécifique du service personnage
-│   │   ├── test_logging.py     # Tests de logging
+│   │   ├── test_character_service_refactored.py # Character service unit tests
+│   │   ├── test_logging.py     # Logging tests
 │   │   ├── agents/
 │   │   │   ├── __init__.py
-│   │   │   └── test_gm_agent_dependency_injection.py # Tests d'injection de dépendances pour l'agent
+│   │   │   └── test_gm_agent_dependency_injection.py # Dependency injection coverage
 │   │   ├── domain/
 │   │   │   └── __init__.py
 │   │   ├── routers/
 │   │   │   ├── __init__.py
-│   │   │   └── test_characters_refactored.py # Tests refactorés pour les personnages
+│   │   │   └── test_characters_refactored.py # Router regression tests
 │   │   ├── services/
 │   │   │   └── __init__.py
 │   │   ├── storage/
@@ -204,19 +208,21 @@ The new system uses **6 core attributes** with a per‑stat cap:
 │   │       └── __init__.py
 │   ├── tools/
 │   │   ├── __init__.py
-│   │   ├── character_tools.py  # Outils pour la gestion des personnages
-│   │   ├── combat_tools.py     # Outils de combat
-│   │   ├── equipment_tools.py  # Outils d'inventaire (ajout/retrait via EquipmentService)
-│   │   └── skill_tools.py      # Outils pour les compétences
+│   │   ├── character_tools.py  # Character adjustments (XP, gold, HP)
+│   │   ├── combat_tools.py     # Combat rolls and resolution helpers
+│   │   ├── equipment_tools.py  # Inventory operations exposed to the agent
+│   │   └── skill_tools.py      # Skill checks from the agent
 │   └── utils/
 │       ├── __init__.py
-│       ├── dice.py             # Fonctions pour les jets de dés
-│       ├── exceptions.py       # Exceptions personnalisées
-│       ├── logger.py           # Logger JSON (Grafana/Loki‑friendly)
-│       ├── logging_tool.py     # Outil de logging pour l'agent
-│       └── message_adapter.py  # Adaptateur de messages
+│       ├── dependency_injector.py # Lightweight DI helpers
+│       ├── dice.py             # Dice juggling utilities
+│       ├── exceptions.py       # Project specific exceptions
+│       ├── logger.py           # Structured JSON logger
+│       ├── logging_tool.py     # Logging bridge for the agent
+│       ├── message_adapter.py  # Message format adapters
+│       └── model_converter.py  # Helpers to convert between models and dicts
 ├── (frontend removed – to be recreated)
-├── back/gamedata/               # Game data source (YAML files)
+├── back/gamedata/               # YAML game data sources
 │   ├── stats.yaml
 │   ├── skills_for_llm.yaml
 │   ├── races_and_cultures.yaml
@@ -224,13 +230,13 @@ The new system uses **6 core attributes** with a per‑stat cap:
 │   ├── spells.yaml
 │   └── combat_system.yaml
 ├── data/                        # Runtime data directory
-│   ├── characters/             # Character sheets (JSON files)
+│   ├── characters/             # Persisted character sheets (JSON)
 │   ├── combat/                 # Active combat states
 │   ├── scenarios/              # Scenario Markdown files
-│   ├── sessions/               # Conversation history (JSONL files)
+│   ├── sessions/               # Conversation history (JSONL)
 │   ├── game/                   # Legacy CSV data
-│   └── json_backup/            # Backup of original JSON game data
-├── docs/                        # Game system documentation (French)
+│   └── json_backup/            # Backup of original JSON inputs
+├── docs/                        # Game system documentation (currently in French)
 │   ├── 00 - introduction.md
 │   ├── 01 - Caractéristiques.md
 │   ├── 02 - Guide Complet des Compétences.md
@@ -241,12 +247,12 @@ The new system uses **6 core attributes** with a per‑stat cap:
 │   ├── 07 - Sorts.md
 │   └── section-6-combat.md
 ├── .github/
-│   ├── copilot-instructions.md  # GitHub Copilot development guidelines ⭐ NEW
+│   ├── copilot-instructions.md  # GitHub Copilot development guidelines
 │   └── instructions/            # Code generation instructions
 │       ├── python.instructions.md
 │       ├── vuejs.instructions.md
 │       └── generalcoding.instructions.md
-└── README.md                    # This file (comprehensive project documentation)
+└── README.md                    # Project documentation (this file)
 ```
 
 ## 📊 Architecture Diagrams
@@ -374,51 +380,51 @@ sequenceDiagram
 
 ## 🌐 REST API Reference
 
+The FastAPI backend exposes four router groups: `scenarios` for metadata, `gamesession` for interactive play, `characters` for roster management, and `creation` for the CharacterV2 workflow.
+
 ### API Routes Summary
 
-| Méthode | Endpoint                                   | Arguments d'entrée                                                        | Retour principal / Description                                      |
-|---------|--------------------------------------------|--------------------------------------------------------------------------|---------------------------------------------------------------------|
-| GET     | /api/scenarios/                           | Aucun                                                                   | Liste des scénarios (`ScenarioList`)                                |
-| GET     | /api/scenarios/sessions                   | Aucun                                                                   | Sessions actives (`ActiveSessionsResponse`)                         |
-| GET     | /api/scenarios/{scenario_file}            | scenario_file (str, path)                                               | Contenu du fichier Markdown du scénario                             |
-| POST    | /api/scenarios/start                      | scenario_name (str), character_id (str) (body JSON)                     | session_id, scenario_name, character_id, message, llm_response      |
-| POST    | /api/scenarios/play                       | session_id (UUID, query), message (str, body JSON)                      | responses (list de messages générés par l'agent)                    |
-| GET     | /api/scenarios/history/{session_id}       | session_id (UUID, path)                                                 | history (list de tous les messages de la session)                   |
-| DELETE  | /api/scenarios/history/{session_id}/{message_index} | session_id (UUID, path), message_index (int, path) | Confirmation de suppression avec infos du message supprimé          |
-| GET     | /api/characters/                          | Aucun                                                                   | Liste complète des personnages avec leurs fiches détaillées         |
-| GET     | /api/characters/{character_id}            | character_id (UUID, path)                                              | Détail du personnage (`Character`)                                  |
-| GET     | /creation/races                           | Aucun                                                                   | Liste des races disponibles                                         |
-| GET     | /creation/skills                          | Aucun                                                                   | Structure complète des compétences                                  |
-| GET     | /creation/equipments                      | Aucun                                                                   | Liste des équipements disponibles                                   |
-| GET     | /creation/equipments-detailed             | Aucun                                                                   | Équipements avec détails complets                                   |
-| GET     | /creation/spells                          | Aucun                                                                   | Liste des sorts disponibles                                         |
-| POST    | /creation/allocate-attributes             | race_id (str, body JSON)                                                | Attributs alloués automatiquement                                   |
-| POST    | /creation/check-attributes                | attributes (dict, body JSON)                                            | Validation de la distribution des points d'attributs                |
-| POST    | /creation/new                             | Aucun                                                                   | Création d'un nouveau personnage avec ID                            |
-| POST    | /creation/save                            | character_id (str), character (dict, body JSON) | Statut de sauvegarde du personnage |
-| GET     | /creation/status/{character_id}           | character_id (str, path)                        | Statut de création du personnage |
-| POST    | /creation/check-skills                    | skills (dict, body JSON)                        | Validation de la distribution des points de compétences |
-| POST    | /creation/generate-name                   | character (dict, body JSON)                     | 5 noms générés par LLM |
-| POST    | /creation/generate-background             | character (dict, body JSON)                     | 5 backgrounds générés par LLM |
-| POST    | /creation/generate-physical-description   | character (dict, body JSON)                     | 5 descriptions physiques générées par LLM |
-| GET     | /creation/stats                           | Aucun                                           | Données complètes des statistiques |
-| DELETE  | /creation/delete/{character_id}           | character_id (str, path)                        | Suppression d'un personnage |
-| POST    | /creation/update-skills                   | character_id (str), skills (dict, body JSON)    | Mise à jour des compétences |
-| POST    | /creation/add-equipment                   | character_id (str), equipment_name (str, body JSON) | Ajout d'équipement avec déduction d'argent |
-| POST    | /creation/remove-equipment                | character_id (str), equipment_name (str, body JSON) | Retrait d'équipement avec remboursement |
-| POST    | /creation/update-money                    | character_id (str), amount (int, body JSON)     | Mise à jour de l'argent du personnage |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/scenarios/` | List available scenarios and their current status. |
+| GET | `/api/scenarios/{scenario_file}` | Return the Markdown content of the specified scenario file. |
+| GET | `/api/gamesession/sessions` | List all active sessions with scenario and character metadata. |
+| POST | `/api/gamesession/start` | Start a scenario for a character and trigger the first LLM response. |
+| POST | `/api/gamesession/play` | Send a message to the GM and receive the complete JSON transcript. |
+| POST | `/api/gamesession/play-stream` | Same as `/play` but streams the response via Server-Sent Events. |
+| GET | `/api/gamesession/history/{session_id}` | Retrieve the stored JSON history for a session. |
+| DELETE | `/api/gamesession/history/{session_id}/{message_index}` | Remove a specific entry from a session history. |
+| GET | `/api/characters/` | Return every stored character (draft or active). |
+| GET | `/api/characters/{character_id}` | Retrieve a single character plus its load status. |
+| DELETE | `/api/characters/character/{character_id}` | Remove a stored CharacterV2 sheet. |
+| POST | `/api/creation/random` | Generate a fully random CharacterV2 using YAML data and the GM agent. |
+| GET | `/api/creation/races` | Fetch every race and culture available in YAML. |
+| GET | `/api/creation/skills` | Return the unified skills payload for the UI/LLM. |
+| GET | `/api/creation/equipment` | Expose equipment definitions (weapons, armor, accessories, consumables). |
+| GET | `/api/creation/stats` | Provide stat ranges, descriptions, and bonus formulas. |
+| POST | `/api/creation/create` | Persist a CharacterV2 payload after validation. |
+| POST | `/api/creation/update` | Update an existing character (name, stats, skills, story). |
+| POST | `/api/creation/validate-character` | Validate an in-memory character payload. |
+| POST | `/api/creation/validate-character/by-id` | Load and validate a persisted character without resending it. |
 
-> Toutes les routes sont documentées dans le code source et la [documentation technique](instructions/openai-instructions.md).
+**Character Validation Routes**
 
-## Documentation détaillée des API Scénarios
+| Endpoint | Body | When to use |
+| --- | --- | --- |
+| `POST /api/creation/validate-character` | Full character payload (stats, skills, equipment, etc.) | Use when the frontend holds the entire JSON and wants immediate feedback before saving. |
+| `POST /api/creation/validate-character/by-id` | `{ "character_id": "uuid" }` | Use after `/api/creation/create` or `/api/creation/update` to validate what already lives on disk. |
 
-### 1. `GET /api/scenarios/` - Liste des Scénarios
+> Every route above is documented in the codebase and the [technical instructions](instructions/openai-instructions.md).
 
-**Description :** Récupère la liste de tous les scénarios disponibles et en cours.
+### Scenario Metadata (`/api/scenarios`)
 
-**Paramètres :** Aucun
+#### 1. `GET /api/scenarios/` – Scenario List
 
-**Format de réponse :**
+**Description:** Returns the complete list of scenarios along with their availability.
+
+**Parameters:** None
+
+**Response:**
 ```json
 {
     "scenarios": [
@@ -431,7 +437,7 @@ sequenceDiagram
         },
         {
             "name": "Les_Pierres_du_Passe.md - Galadhwen",
-            "status": "in_progress", 
+            "status": "in_progress",
             "session_id": "12345678-1234-5678-9012-123456789abc",
             "scenario_name": "Les_Pierres_du_Passe.md",
             "character_name": "Galadhwen"
@@ -440,13 +446,26 @@ sequenceDiagram
 }
 ```
 
-### 2. `GET /api/scenarios/sessions` - Sessions Actives
+#### 2. `GET /api/scenarios/{scenario_file}` – Scenario Content
 
-**Description :** Récupère la liste de toutes les sessions de jeu en cours.
+**Description:** Returns the Markdown content of a scenario file so the UI or tooling can display it.
 
-**Paramètres :** Aucun
+**Parameters:**
+- `scenario_file` (path): Scenario filename, for example `Les_Pierres_du_Passe.md`.
 
-**Format de réponse :**
+**Response:** Plain Markdown string.
+
+**Errors:** `404` when the file cannot be found.
+
+### Game Session Routes (`/api/gamesession`)
+
+#### 1. `GET /api/gamesession/sessions` – Active Sessions
+
+**Description:** Lists all active sessions with scenario id and character metadata.
+
+**Parameters:** None
+
+**Response:**
 ```json
 {
     "sessions": [
@@ -460,22 +479,11 @@ sequenceDiagram
 }
 ```
 
-### 3. `GET /api/scenarios/{scenario_file}` - Contenu de Scénario
+#### 2. `POST /api/gamesession/start` – Start Scenario
 
-**Description :** Récupère le contenu complet d'un scénario au format Markdown.
+**Description:** Starts a session for the provided `scenario_name` and `character_id`, then triggers the opening narration with the GM agent.
 
-**Paramètres :**
-- `scenario_file` (path) : Nom du fichier de scénario (ex: `Les_Pierres_du_Passe.md`)
-
-**Format de réponse :** Chaîne de caractères contenant le Markdown
-
-**Codes d'erreur :** `404` - Scénario introuvable
-
-### 4. `POST /api/scenarios/start` - Démarrer un Scénario
-
-**Description :** Démarre un nouveau scénario avec un personnage spécifique.
-
-**Paramètres (body JSON) :**
+**Request Body:**
 ```json
 {
     "scenario_name": "Les_Pierres_du_Passe.md",
@@ -483,37 +491,41 @@ sequenceDiagram
 }
 ```
 
-**Format de réponse :**
+**Response:**
 ```json
 {
     "session_id": "12345678-1234-5678-9012-123456789abc",
     "scenario_name": "Les_Pierres_du_Passe.md",
     "character_id": "87654321-4321-8765-2109-987654321def",
-    "message": "Scénario 'Les_Pierres_du_Passe.md' démarré avec succès...",
-    "llm_response": "**Esgalbar, place centrale du village**..."
+    "message": "Scenario 'Les_Pierres_du_Passe.md' started successfully for character 87654321-4321-8765-2109-987654321def.",
+    "llm_response": "**Esgalbar, central square of the village**..."
 }
 ```
 
-**Codes d'erreur :**
-- `409` : Session déjà existante pour ce scénario et ce personnage
-- `404` : Scénario ou personnage introuvable
+**Errors:**
+- `409`: Session already exists for the same scenario and character.
+- `404`: Scenario or character not found.
 
-### 5. `POST /api/scenarios/play` - Jouer un Tour
+#### 3. `POST /api/gamesession/play` – Play a Turn
 
-**Description :** Envoie un message au Maître du Jeu pour continuer le scénario.
+**Description:** Sends a message to the GM agent and returns the full JSON transcript (requests, responses, tool calls).
 
-**Paramètres :**
-- `session_id` (query) : UUID de la session
-- Body JSON : `{"message": "j'examine la fontaine"}`
+**Parameters:**
+- `session_id` (query): UUID of the game session.
 
-**Format de réponse :**
+**Body:**
+```json
+{"message": "I inspect the fountain"}
+```
+
+**Response:**
 ```json
 {
     "response": [
         {
             "parts": [
                 {
-                    "content": "j'examine la fontaine",
+                    "content": "I inspect the fountain",
                     "timestamp": "2025-06-09T17:50:53.234253Z",
                     "part_kind": "user-prompt"
                 }
@@ -523,7 +535,7 @@ sequenceDiagram
         {
             "parts": [
                 {
-                    "content": "**Examen des inscriptions sur la fontaine**...",
+                    "content": "**Examining the runes carved into the stone**...",
                     "part_kind": "text"
                 }
             ],
@@ -541,42 +553,33 @@ sequenceDiagram
 }
 ```
 
-**Types de `part_kind` :**
-- `"system-prompt"` : Instructions système envoyées au LLM
-- `"user-prompt"` : Message du joueur 
-- `"text"` : Réponse textuelle du LLM
-- `"tool-call"` : Appel d'un outil par le LLM
-- `"tool-return"` : Résultat de l'appel d'outil
+**`part_kind` values:**
+- `system-prompt`: System instructions sent to the LLM.
+- `user-prompt`: Player message.
+- `text`: Assistant response chunk.
+- `tool-call`: Invocation metadata for a tool.
+- `tool-return`: Result payload provided by a tool.
 
-**Codes d'erreur :**
-- `404` : Session introuvable
-- `500` : Erreur lors de la génération de la réponse
+**Errors:** `404` when the session does not exist, `500` for unexpected failures.
 
-### 6. `GET /api/scenarios/history/{session_id}` - Historique de Session
+#### 4. `POST /api/gamesession/play-stream` – Streamed Turn
 
-**Description :** Récupère l'historique complet des messages d'une session.
+**Description:** Same contract as `/play` but streams incremental text via SSE. When the stream completes, the history is persisted automatically.
 
-**Paramètres :**
-- `session_id` (path) : UUID de la session
+#### 5. `GET /api/gamesession/history/{session_id}` – Session History
 
-**Format de réponse :** Identique à `/scenarios/play` mais contient tous les messages depuis le début de la session.
+**Description:** Returns the entire stored JSON history for the session. The shape matches `/api/gamesession/play` but contains every message since the session started.
 
-**Codes d'erreur :**
-- `404` : Session introuvable
-- `500` : Erreur lors de la récupération de l'historique
+**Errors:** `404` when the session is unknown, `500` when reading from disk fails.
 
-### 7. `DELETE /api/scenarios/history/{session_id}/{message_index}` - Supprimer un Message
+#### 6. `DELETE /api/gamesession/history/{session_id}/{message_index}` – Delete a Message
 
-**Description :** Supprime un message spécifique de l'historique d'une session.
+**Description:** Removes a specific entry (0-based index) from the history file and re-persists the remainder.
 
-**Paramètres :**
-- `session_id` (path) : UUID de la session
-- `message_index` (path) : Index du message à supprimer (base 0)
-
-**Format de réponse :**
+**Response:**
 ```json
 {
-    "message": "Message à l'index 2 supprimé avec succès...",
+    "message": "Message at index 2 deleted successfully from session 83d68867-a944-4f33-be82-2365904c3c43.",
     "deleted_message_info": {
         "kind": "response",
         "timestamp": "2025-06-21T12:05:05.000000Z",
@@ -587,82 +590,63 @@ sequenceDiagram
 }
 ```
 
-## Documentation détaillée des API Personnages
+**Errors:** `400` for negative indices, `404` for invalid indices or missing sessions, `500` for persistence errors.
 
-### 1. `GET /api/characters/` - Liste des Personnages
+### Character Routes (`/api/characters`)
 
-**Description :** Récupère la liste de tous les personnages disponibles dans le système avec leurs informations complètes.
+#### 1. `GET /api/characters/` – Character List
 
-**Paramètres :** Aucun
+**Description:** Returns every stored character, including drafts. Each entry is a full `Character` Pydantic model.
 
-**Format de réponse :**
+**Response (truncated):**
 ```json
-{
-    "characters": [
-        {
-            "id": "d7763165-4c03-4c8d-9bc6-6a2568b79eb3",
-            "name": "Aragorn",
-            "race": "Humain",
-            "culture": "Gondor",
-            "caracteristiques": {
-                "Force": 85,
-                "Constitution": 80,
-                "Agilité": 70,
-                "Rapidité": 75,
-                "Volonté": 80,
-                "Raisonnement": 65,
-                "Intuition": 75,
-                "Présence": 70
-            },
-            "competences": {
-                "Perception": 60,
-                "Combat": 75,
-                "Survie": 55,
-                "Nature": 65
-            },
-            "hp": 85,
-            "gold": 200,
-            "equipment": {"weapons": [], "armor": [], "accessories": [], "consumables": [], "gold": 0},
-            "spells": [],
-            "culture_bonuses": {
-                "Combat": 5,
-                "Influence": 3
-            }
+[
+    {
+        "id": "d7763165-4c03-4c8d-9bc6-6a2568b79eb3",
+        "name": "Aragorn",
+        "race": "humans",
+        "culture": "gondorians",
+        "stats": {
+            "strength": 16,
+            "constitution": 14,
+            "agility": 15,
+            "intelligence": 12,
+            "wisdom": 14,
+            "charisma": 16
+        },
+        "skills": {
+            "combat": {"melee_weapons": 7, "archery": 5}
+        },
+        "equipment": {
+            "gold": 100
         }
-    ]
-}
+    }
+]
 ```
 
-**Codes d'erreur :**
-- `500` : Erreur interne du serveur lors de la récupération des personnages
+#### 2. `GET /api/characters/{character_id}` – Character Detail
 
-### 2. `GET /api/characters/{character_id}` - Détail d'un Personnage
+**Description:** Loads a character by id and returns both the `character` payload and a `status` field describing the outcome of the load operation.
 
-**Description :** Récupère le détail d'un personnage à partir de son identifiant unique (UUID).
+**Errors:** `404` if the character is missing, `400` for malformed ids.
 
-**Paramètres :**
-- `character_id` (UUID) : Identifiant unique du personnage
+#### 3. `DELETE /api/characters/character/{character_id}` – Delete Character
 
-**Format de réponse :**
-```json
-{
-  "id": "d7763165-4c03-4c8d-9bc6-6a2568b79eb3",
-  "name": "Aragorn",
-  "race": "Humain",
-  "culture": "Gondor",
-  "caracteristiques": { ... },
-  "competences": { ... },
-  "hp": 85,
-  "xp": 0,
-  "gold": 0,
-    "equipment": { ... },
-  "spells": [],
-  "culture_bonuses": { ... }
-}
-```
+**Description:** Removes the stored JSON file for the given character id. Returns `204 No Content` on success.
 
-**Codes d'erreur :**
-- `404` : Personnage introuvable
+### Character Creation Routes (`/api/creation`)
+
+1. **`POST /api/creation/random`** – Builds a random CharacterV2 using YAML data, auto-assigned stats/skills, and LLM-generated narrative fields.
+2. **`GET /api/creation/races`** – Fetches every race plus nested cultures, their stat bonuses, and descriptions.
+3. **`GET /api/creation/skills`** – Returns the unified skills payload (groups, skills, racial affinities) used by both UI and GM agent.
+4. **`GET /api/creation/equipment`** – Lists weapons, armor, accessories, and consumables ready for the builder.
+5. **`GET /api/creation/stats`** – Provides stat metadata, ranges, and bonus/cost tables.
+6. **`POST /api/creation/create`** – Persists a validated CharacterV2 payload (initial creation).
+7. **`POST /api/creation/update`** – Applies incremental updates (stats, skills, biography) to a stored character.
+8. **`POST /api/creation/validate-character`** – Validates an in-memory payload before persisting it.
+9. **`POST /api/creation/validate-character/by-id`** – Loads an existing character from disk and validates it without sending the full payload.
+
+These routes cover the entire CharacterV2 builder: YAML lookup, stat allocation, persistence, and validation.
 
 ## 🧪 Technical Specification
 
@@ -675,15 +659,10 @@ All game data is loaded through manager classes that read YAML files from `back/
 - **Provides**: Stat info, value range (3–20), bonus formula `(value - 10) // 2`
 - **Methods**: `get_description()`, `get_bonus()`, `get_all_stats_data()`
 
-#### SkillsManager
-- **File**: `skills_for_llm.yaml`
-- **Provides**: 6 skill groups with detailed skills
-- **Methods**: `get_all_skills()`, `get_skill_by_name()`, `get_skills_by_group()`
-
-#### RacesManager
-- **File**: `races_and_cultures.yaml`
-- **Provides**: Available races, cultures, stat bonuses
-- **Methods**: `get_all_races()`, `get_race_by_name()`, `get_cultures_for_race()`
+#### RacesDataService
+- **Files**: wraps `races_and_cultures.yaml` via `RacesManager`
+- **Provides**: Available races, cultures, combined bonuses, random selection helpers
+- **Methods**: `get_all_races()`, `get_race_by_id()`, `get_cultures_for_race()`, `get_complete_character_bonuses()`
 
 #### EquipmentManager
 - **File**: `equipment.yaml`
@@ -695,10 +674,10 @@ All game data is loaded through manager classes that read YAML files from `back/
 - **Provides**: Available spells, organized by sphere
 - **Methods**: `get_all_spells()`, `get_spell_by_name()`, `get_spells_by_sphere()`
 
-#### CombatSystemManager
-- **File**: `combat_system.yaml`
-- **Provides**: Combat rules, actions, damage calculations
-- **Methods**: Combat-related rule lookups
+#### CombatSystemService
+- **Files**: wraps `combat_system.yaml` via `CombatSystemManager`
+- **Provides**: Initiative rules, actions, difficulty modifiers, damage/armor definitions
+- **Methods**: `calculate_initiative()`, `get_all_actions()`, `get_basic_mechanics()`, `get_combat_modifiers()`
 
 ### PydanticAI Tools
 
@@ -706,13 +685,13 @@ All tools follow the PydanticAI pattern with `RunContext`:
 
 ```python
 from pydantic_ai import Agent, RunContext
-from back.services.session_service import SessionService
+from back.services.game_session_service import GameSessionService
 
-agent = Agent('openai:gpt-4o', deps_type=SessionService)
+agent = Agent('openai:gpt-4o', deps_type=GameSessionService)
 
 @agent.tool
 async def skill_check_with_character(
-    ctx: RunContext[SessionService],
+    ctx: RunContext[GameSessionService],
     skill_name: str,
     difficulty: int = 50
 ) -> str:
@@ -773,61 +752,22 @@ messages = ModelMessagesTypeAdapter.validate_python(messages_json)
 
 ## 🎨 Character Creation Service (2025)
 
- 
-- **creation.py** : Routeur FastAPI spécialisé pour la création de personnage, exposant les routes pour chaque étape, l'enregistrement et le suivi du statut de création.
+- **creation.py**: FastAPI router dedicated to the CharacterV2 workflow. It exposes routes for each creation step, persistence, and creation status tracking.
 
-Ce module permet de découper la création de personnage en étapes validées côté backend, pour un front progressif et interactif.
+This module breaks character creation into backend-validated steps so the future frontend can guide players through a progressive, interactive builder.
 
-## Gestion de l'historique et mémoire (PydanticAI)
+### Draft vs Active status
 
-- L'historique des messages (sessions de jeu) est stocké en JSONL via `back/storage/pydantic_jsonl_store.py`.
-- La sérialisation utilise `to_jsonable_python` (PydanticAI) ; la désérialisation utilise `ModelMessagesTypeAdapter.validate_python`.
-- Seuls les messages utilisateur, assistant et outils sont persistés : le prompt système n'est jamais dupliqué.
-- La structure de chaque message respecte strictement le schéma PydanticAI (voir la documentation Context7 sur PydanticAI).
-
-## Outils PydanticAI
-
-### Compétences (`back/tools/skill_tools.py`)
-- **`skill_check_with_character`** : Effectue un test de compétence pour le personnage de la session courante en récupérant ses données via CharacterService.
-
-### Combat (`back/tools/combat_tools.py`)
-- **`roll_initiative_tool`** : Calcule l'ordre d'initiative des personnages
-- **`perform_attack_tool`** : Effectue un jet d'attaque
-- **`resolve_attack_tool`** : Résout une attaque (attaque > défense)
-- **`calculate_damage_tool`** : Calcule les dégâts infligés en tenant compte des modificateurs
-- **`end_combat_tool`** : Termine un combat
-
-### Inventaire (`back/tools/equipment_tools.py`)
-- **`inventory_add_item`** : Ajoute un objet à l'inventaire du personnage
-- **`inventory_remove_item`** : Retire un objet de l'inventaire du personnage
-
-### Personnage (`back/tools/character_tools.py`)
-- **`character_apply_xp`** : Applique les points d'expérience au personnage
-- **`character_add_gold`** : Ajoute de l'or au portefeuille du personnage
-- **`character_take_damage`** : Applique des dégâts au personnage (réduit ses PV)
-
-### Utilitaires
-- **`logging_tool`** : Outil de logging pour l'agent
+- The creation router automatically flips `CharacterStatus` to `active` as soon as the payload is complete (non-default stats, the full 40 skill points allocated, and both the narrative background plus the physical description provided).
+- As long as one of those sections is missing, the backend persists the character as `draft`, preventing characters that are still being edited from entering game sessions.
 
 <!-- Frontend UI section removed; frontend will be recreated later -->
 
 ## Tests
 
-- Les tests unitaires et d'intégration sont dans `back/tests/`.
-- Tous les tests ont été migrés et validés pour PydanticAI.
-- Organisation par responsabilité : `agents/`, `tools/`, `services/`, `domain/`, etc.
-<!-- Frontend tests removed -->
-
-## Tests
-
-- Les tests unitaires et d'intégration sont organisés dans `back/tests/` avec la structure suivante :
-  - `agents/` : Tests des agents PydanticAI
-  - `domain/` : Tests des modèles du domaine
-  - `routers/` : Tests des endpoints REST
-  - `services/` : Tests des services métier
-  - `storage/` : Tests de la persistance
-  - `tools/` : Tests des outils PydanticAI
-  - `utils/` : Tests des utilitaires
+- Unit and integration tests live in `back/tests/` and have already been migrated to the PydanticAI stack.
+- The suite is organized by responsibility (`agents/`, `domain/`, `routers/`, `services/`, `storage/`, `tools/`, `utils/`) to mirror the production layout.
+- Run `back/run_tests.sh` (or `pytest` inside the `back` folder) to execute the entire suite.
 
 <!-- Frontend test results removed -->
 
@@ -1046,50 +986,50 @@ The frontend has been removed for now and will be recreated later. All examples 
 - **aiofiles**: Async file I/O operations
 
 ### Logging System
-Le projet utilise un système de logging centralisé et configurable pour tracer les erreurs, informations de débogage et événements métier.
+The project uses a centralized, configurable logging system to trace errors, debugging information, and business events.
 
 #### Configuration
-- **Fichier** : `back/config.yaml` (section `logging`)
-- **Format** : JSON structuré compatible Grafana/Loki
-- **Niveaux** : DEBUG, INFO, WARNING, ERROR, CRITICAL
-- **Rotation** : Fichiers avec taille maximale et archivage automatique
+- **File**: `back/config.yaml` (section `logging`)
+- **Format**: Structured JSON compatible with Grafana/Loki
+- **Levels**: DEBUG, INFO, WARNING, ERROR, CRITICAL
+- **Rotation**: Size-based rotation with automatic archival
 
-#### Utilisation
+#### Usage
 ```python
 from back.config import get_logger
 
-# Obtenir un logger pour le module
+# Retrieve a module-specific logger
 logger = get_logger(__name__)
 
-# Utilisation standard
-logger.info("Opération réussie", action="create_character", character_id="123")
-logger.error("Erreur de validation", error=str(e), character_id="123")
-logger.debug("Détails de débogage", variable=value)
+# Standard usage
+logger.info("Operation succeeded", action="create_character", character_id="123")
+logger.error("Validation failed", error=str(e), character_id="123")
+logger.debug("Debug details", variable=value)
 ```
 
-#### Fonctions spécialisées
+#### Specialized helpers
 ```python
 from back.utils.logger import log_debug, log_info, log_error, log_warning
 
-# Logging avec contexte métier
-log_debug("Chargement du personnage", character_id="123", action="load")
-log_info("Personnage créé avec succès", character_name="Aragorn")
-log_error("Échec de sauvegarde", error=str(e))
+# Logging with business context
+log_debug("Loading character", character_id="123", action="load")
+log_info("Character created successfully", character_name="Aragorn")
+log_error("Save failed", error=str(e))
 ```
 
-#### Modules avec logging complet
-- ✅ Services : `character_service.py`, `character_data_service.py`, etc.
-- ✅ Outils : Tous les fichiers `tools/*.py`
-- ✅ Routers : `scenarios.py`, `characters.py`
-- ✅ Stockage : `pydantic_jsonl_store.py`
+#### Modules with full logging coverage
+- ✅ Services: `character_service.py`, `character_data_service.py`, etc.
+- ✅ Tools: Every file under `tools/`
+- ✅ Routers: `scenarios.py`, `characters.py`
+- ✅ Storage: `pydantic_jsonl_store.py`
 
 ### Frontend (Status)
 - Frontend removed for now; planned to be recreated later.
 
-### Stockage
-- **JSONL** : Historique des conversations PydanticAI
-- **JSON** : Fiches de personnage et données de jeu
-- **Markdown** : Scénarios et documentation
+### Storage
+- **JSONL**: PydanticAI conversation history
+- **JSON**: Character sheets and game data
+- **Markdown**: Scenarios and documentation
 
 ## 🤝 Contributing
 

@@ -3,15 +3,15 @@ FastAPI router for character creation V2.
 Exposes the necessary routes for the new simplified character system using CharacterV2 models.
 """
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException
 from uuid import uuid4
 from datetime import datetime
 from typing import List, Dict, Any
 
-from back.models.domain.character_v2 import CharacterV2, Stats, Skills
+from back.models.domain.character import Character, Stats, Skills
 from back.services.character_persistence_service import CharacterPersistenceService
 from back.services.skill_allocation_service import SkillAllocationService
-from back.models.domain.races_manager import RacesManager
+from back.services.races_data_service import RacesDataService
 from back.models.domain.stats_manager import StatsManager
 from back.models.domain.equipment_manager import EquipmentManager
 from back.models.domain.unified_skills_manager import UnifiedSkillsManager
@@ -56,7 +56,7 @@ class UpdateCharacterV2Response(BaseModel):
 
 class CharacterV2Response(BaseModel):
     """Response model for character data"""
-    character: CharacterV2 = Field(..., description="Character data")
+    character: Character = Field(..., description="Character data")
     status: str = Field(..., description="Operation status")
 
 class ValidateCharacterV2Request(BaseModel):
@@ -84,6 +84,29 @@ class ValidateCharacterV2Response(BaseModel):
     character: Dict[str, Any] = Field(default_factory=dict, description="Validated character data (if valid)")
     errors: List[str] = Field(default_factory=list, description="Validation errors (if invalid)")
     message: str = Field(..., description="Validation message")
+
+
+def _validate_character_payload(character_payload: Dict[str, Any]) -> ValidateCharacterV2Response:
+    """Run CharacterV2 validation and build a standardized response."""
+    try:
+        validated_character = Character(**character_payload)
+        validated_character.sync_status_from_completion()
+        return ValidateCharacterV2Response(
+            valid=True,
+            character=validated_character.model_dump(),
+            message="Character is valid",
+        )
+    except ValueError as validation_error:
+        return ValidateCharacterV2Response(
+            valid=False,
+            errors=[str(validation_error)],
+            message=f"Validation failed: {str(validation_error)}",
+        )
+
+
+class ValidateCharacterByIdRequest(BaseModel):
+    """Request model for validating a character stored on disk."""
+    character_id: str = Field(..., description="Identifier of the character to validate")
 
 @router.post(
     "/random",
@@ -155,16 +178,11 @@ async def create_random_character() -> CharacterV2Response:
     """
     try:
         # 1. Get random race and culture
-        races_manager = RacesManager()
-        all_races = races_manager.get_all_races()
-        if not all_races:
-            raise HTTPException(status_code=500, detail="No races available to create a random character.")
-        
-        random_race_data = random.choice(all_races)
-        if not random_race_data.cultures:
-            raise HTTPException(status_code=500, detail=f"Race '{random_race_data.name}' has no cultures.")
-            
-        random_culture_data = random.choice(random_race_data.cultures)
+        races_service = RacesDataService()
+        try:
+            random_race_data, random_culture_data = races_service.get_random_race_and_culture()
+        except ValueError as error:
+            raise HTTPException(status_code=500, detail=str(error))
 
         # 2. Generate random stats
         stats_manager = StatsManager()
@@ -222,13 +240,12 @@ async def create_random_character() -> CharacterV2Response:
             "physical_description": physical_description
         }
         
-        character = CharacterV2(**character_dict)
-        character_dict_to_save = character.model_dump(mode='json')
-        
-        CharacterPersistenceService.save_character_data(character_id, character_dict_to_save)
+        character = Character(**character_dict)
+        character.sync_status_from_completion()
+        CharacterPersistenceService.save_character_data(character_id, character)
         
         return CharacterV2Response(
-            character=CharacterV2(**character_dict_to_save),
+            character=character,
             status="created"
         )
 
@@ -266,8 +283,8 @@ def get_races() -> List[RaceData]:
     ]
     ```
     """
-    races_manager = RacesManager()
-    races_data = races_manager.get_all_races()
+    races_service = RacesDataService()
+    races_data = races_service.get_all_races()
 
     # FastAPI will automatically serialize RaceData Pydantic objects to JSON
     return races_data
@@ -419,7 +436,7 @@ def get_stats() -> StatsResponse:
     summary="Create a new V2 character",
     description="Creates a new character using the simplified V2 system"
 )
-def create_character_v2(request: CreateCharacterV2Request) -> CreateCharacterV2Response:
+def create_character(request: CreateCharacterV2Request) -> CreateCharacterV2Response:
     """
     Creates a new character using the V2 system with validation.
 
@@ -470,8 +487,8 @@ def create_character_v2(request: CreateCharacterV2Request) -> CreateCharacterV2R
         now = datetime.now().isoformat()
         
         # Validate race and culture
-        races_manager = RacesManager()
-        race_data = races_manager.get_race_by_id(request.race_id)
+        races_service = RacesDataService()
+        race_data = races_service.get_race_by_id(request.race_id)
         if not race_data:
             raise RaceNotFoundError(f"Race with id '{request.race_id}' not found")
         
@@ -525,14 +542,12 @@ def create_character_v2(request: CreateCharacterV2Request) -> CreateCharacterV2R
             "physical_description": request.physical_description
         }
         
-        # Validate using CharacterV2 model
-        character = CharacterV2(**character_dict)
-        
-        # Validate character using Pydantic
-        character_dict = character.model_dump()
-        
+        # Validate using Character model and align status with completion state
+        character = Character(**character_dict)
+        character.sync_status_from_completion()
+
         # Save character data
-        CharacterPersistenceService.save_character_data(character_id, character_dict)
+        CharacterPersistenceService.save_character_data(character_id, character.model_dump())
         
         return CreateCharacterV2Response(
             character_id=character_id,
@@ -553,7 +568,7 @@ def create_character_v2(request: CreateCharacterV2Request) -> CreateCharacterV2R
     summary="Update V2 character",
     description="Updates an existing V2 character"
 )
-def update_character_v2(request: UpdateCharacterV2Request) -> UpdateCharacterV2Response:
+def update_character(request: UpdateCharacterV2Request) -> UpdateCharacterV2Response:
     """
     Updates an existing V2 character with validation.
 
@@ -641,33 +656,30 @@ def update_character_v2(request: UpdateCharacterV2Request) -> UpdateCharacterV2R
     
     try:
         # Load existing character
-        existing_data = CharacterPersistenceService.load_character_data(request.character_id)
-        if not existing_data:
+        existing_character = CharacterPersistenceService.load_character_data(request.character_id)
+        if existing_character is None:
             raise CharacterNotFoundError(f"Character with id '{request.character_id}' not found")
-        
+
         # Update fields
         if request.name:
-            existing_data['name'] = request.name
+            existing_character.name = request.name
         if request.stats:
-            existing_data['stats'] = Stats(**request.stats).model_dump()
+            existing_character.stats = Stats(**request.stats)
         if request.skills:
-            existing_data['skills'] = Skills(**request.skills).model_dump()
+            existing_character.skills = Skills(**request.skills)
         if request.background:
-            existing_data['description'] = request.background
+            existing_character.description = request.background
         if request.physical_description is not None:
-            existing_data['physical_description'] = request.physical_description
-            
-        existing_data['updated_at'] = datetime.now().isoformat()
-        
-        # Validate updated character using V2 model
-        updated_character = CharacterV2(**existing_data)
-        updated_dict = updated_character.model_dump()
-        
+            existing_character.physical_description = request.physical_description
+
+        existing_character.sync_status_from_completion()
+        existing_character.update_timestamp()
+
         # Save updated character
-        CharacterPersistenceService.save_character_data(request.character_id, updated_dict)
+        CharacterPersistenceService.save_character_data(request.character_id, existing_character)
         
         return UpdateCharacterV2Response(
-            character=updated_dict,
+            character=existing_character.model_dump(),
             status="updated"
         )
         
@@ -678,134 +690,17 @@ def update_character_v2(request: UpdateCharacterV2Request) -> UpdateCharacterV2R
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Character update failed: {str(e)}")
 
-@router.get(
-    "/character/{character_id}",
-    response_model=CharacterV2Response,
-    summary="Get V2 character",
-    description="Retrieves a V2 character by ID"
-)
-def get_character_v2(character_id: str) -> CharacterV2Response:
-    """
-    Retrieves a V2 character by ID.
 
-    **Parameters:**
-    - `character_id`: UUID string of the character to retrieve
-
-    **Response:**
-    ```json
-    {
-        "character": {
-            "id": "d7763165-4c03-4c8d-9bc6-6a2568b79eb3",
-            "name": "Aragorn",
-            "race": "humans",
-            "culture": "gondorians",
-            "stats": {
-                "strength": 15,
-                "constitution": 14,
-                "agility": 13,
-                "intelligence": 12,
-                "wisdom": 16,
-                "charisma": 15
-            },
-            "skills": {
-                "combat": {
-                    "melee_weapons": 3,
-                    "weapon_handling": 2
-                },
-                "general": {
-                    "perception": 4
-                }
-            },
-            "combat_stats": {
-                "max_hit_points": 140,
-                "current_hit_points": 140,
-                "max_mana_points": 112,
-                "current_mana_points": 112,
-                "armor_class": 11,
-                "attack_bonus": 2
-            },
-            "equipment": {
-                "weapons": [],
-                "armor": [],
-                "accessories": [],
-                "consumables": [],
-                "gold": 0
-            },
-            "spells": {
-                "known_spells": [],
-                "spell_slots": {},
-                "spell_bonus": 0
-            },
-            "level": 1,
-            "status": "draft",
-            "experience_points": 0,
-            "created_at": "2025-11-13T21:30:00Z",
-            "updated_at": "2025-11-13T21:30:00Z",
-            "description": "Son of Arathorn, heir to the throne of Gondor",
-            "physical_description": "Tall and swift"
-        },
-        "status": "loaded"
-    }
-    ```
-    """
-    try:
-        character_data = CharacterPersistenceService.load_character_data(character_id)
-        if not character_data:
-            raise HTTPException(status_code=404, detail=f"Character with id '{character_id}' not found")
-        
-        # Validate character using V2 model
-        character = CharacterV2(**character_data)
-        
-        return CharacterV2Response(
-            character=character,
-            status="loaded"
-        )
-        
-    except FileNotFoundError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except HTTPException as e:
-        # Re-raise HTTP exceptions without altering the status code
-        raise e
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Character retrieval failed: {str(e)}")
-
-@router.delete(
-    "/character/{character_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-    summary="Delete V2 character",
-    description="Deletes a V2 character by ID"
-)
-def delete_character_v2(character_id: str) -> None:
-    """
-    Deletes a V2 character by ID.
-    - **Input**: character_id
-    - **Output**: 204 No Content if successful
-    """
-    try:
-        data = CharacterPersistenceService.load_character_data(character_id)  # Verify character exists
-        if not data:
-            raise HTTPException(status_code=404, detail=f"Character with id '{character_id}' not found")
-        CharacterPersistenceService.delete_character_data(character_id)
-        
-    except FileNotFoundError:
-        raise HTTPException(status_code=404, detail=f"Character with id '{character_id}' not found")
-    except HTTPException as e:
-        # Preserve intended HTTP status codes
-        raise e
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Character deletion failed: {str(e)}")
 
 @router.post(
     "/validate-character",
     response_model=ValidateCharacterV2Response,
-    summary="Validate V2 character",
-    description="Validates a V2 character against game rules"
+    summary="Validate character",
+    description="Validates a character against game rules"
 )
-async def validate_character_v2(character: ValidateCharacterV2Request) -> ValidateCharacterV2Response:
+async def validate_character(character: ValidateCharacterV2Request) -> ValidateCharacterV2Response:
     """
-    Validates a V2 character against game rules.
+    Validates a character against game rules.
 
     **Request Body:**
     ```json
@@ -921,20 +816,24 @@ async def validate_character_v2(character: ValidateCharacterV2Request) -> Valida
     ```
     """
     try:
-        # Validate character using V2 model
-        validated_character = CharacterV2(**character.model_dump())
+        return _validate_character_payload(character.model_dump())
+    except Exception as exc:  # pragma: no cover - defensive guard
+        raise HTTPException(status_code=500, detail=f"Validation failed: {str(exc)}") from exc
 
-        return ValidateCharacterV2Response(
-            valid=True,
-            character=validated_character.model_dump(),
-            message="Character is valid"
-        )
 
-    except ValueError as e:
-        return ValidateCharacterV2Response(
-            valid=False,
-            errors=[str(e)],
-            message=f"Validation failed: {str(e)}"
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Validation failed: {str(e)}")
+@router.post(
+    "/validate-character/by-id",
+    response_model=ValidateCharacterV2Response,
+    summary="Validate character by identifier",
+    description="Loads a stored character by ID and validates it using the same rules as /validate-character",
+)
+async def validate_character_by_id(request: ValidateCharacterByIdRequest) -> ValidateCharacterV2Response:
+    """Validate a persisted character without resending its entire payload."""
+    try:
+        character = CharacterPersistenceService.load_character_data(request.character_id)
+    except FileNotFoundError as not_found_error:
+        raise HTTPException(status_code=404, detail=str(not_found_error)) from not_found_error
+    except ValueError as value_error:
+        raise HTTPException(status_code=400, detail=str(value_error)) from value_error
+
+    return _validate_character_payload(character.model_dump())

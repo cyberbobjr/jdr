@@ -3,7 +3,7 @@ Service spécialisé pour la logique métier des personnages.
 Respect du SRP - Responsabilité unique : logique métier (XP, or, dégâts).
 """
 
-from back.models.domain.character_v2 import CharacterV2 as Character
+from back.models.domain.character import Character
 from back.services.character_data_service import CharacterDataService
 from back.config import get_logger
 

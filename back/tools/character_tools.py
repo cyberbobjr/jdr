@@ -1,9 +1,9 @@
 
 from pydantic_ai import RunContext
-from back.services.session_service import SessionService
+from back.services.game_session_service import GameSessionService
 from back.utils.logger import log_debug
 
-def character_apply_xp(ctx: RunContext[SessionService], xp: int) -> str:
+def character_apply_xp(ctx: RunContext[GameSessionService], xp: int) -> str:
     """
     Applique les XP au personnage.
 
@@ -19,7 +19,7 @@ def character_apply_xp(ctx: RunContext[SessionService], xp: int) -> str:
     character = ctx.deps.apply_xp(xp)
     return f"✅ {xp} XP appliqués au personnage. Total XP: {character.xp}"
 
-def character_add_gold(ctx: RunContext[SessionService], gold: int) -> str:
+def character_add_gold(ctx: RunContext[GameSessionService], gold: int) -> str:
     """
     Ajoute de l'or au portefeuille du personnage.
 
@@ -35,7 +35,7 @@ def character_add_gold(ctx: RunContext[SessionService], gold: int) -> str:
     character = ctx.deps.add_gold(float(gold))
     return f"💰 {gold} pièces d'or {'ajoutées' if gold > 0 else 'retirées'}. Total: {character.gold:.2f} po"
 
-def character_take_damage(ctx: RunContext[SessionService], amount: int, source: str = "combat") -> str:
+def character_take_damage(ctx: RunContext[GameSessionService], amount: int, source: str = "combat") -> str:
     """
     Applique des dégâts au personnage (réduit ses PV).
 

@@ -8,7 +8,7 @@ taking into account race affinities and character stats.
 from typing import Dict, List, Tuple
 import random
 from back.models.domain.unified_skills_manager import UnifiedSkillsManager
-from back.models.domain.character_v2 import Stats
+from back.models.domain.character import Stats
 
 
 class SkillAllocationService:

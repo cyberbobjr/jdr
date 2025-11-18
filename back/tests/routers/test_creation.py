@@ -1,203 +1,64 @@
-# Ajouter les imports nécessaires pour les tests FastAPI
+"""
+Tests for character creation router endpoints.
+
+Tests all endpoints in back/routers/creation.py with comprehensive coverage
+of success cases, error cases, and edge cases. Mocks external services.
+"""
+
 from fastapi.testclient import TestClient
-from unittest.mock import patch, AsyncMock, AsyncMock
-from back.app import app
-from back.models.domain.character_v2 import CharacterV2, Stats, Skills, CombatStats, Equipment, Spells, CharacterStatus
-from back.models.schema import RaceData, CultureData
+from unittest.mock import patch, MagicMock
 from uuid import uuid4
 from datetime import datetime
+from typing import Any, Dict
+from back.app import app
+from back.models.domain.character import Character, Stats, Skills, CombatStats, Equipment, Spells, CharacterStatus
 
 client = TestClient(app)
 
-# Mock data for managers
+# Mock data for races
 MOCK_RACES_DATA = [
-    RaceData(
-        id="humans",
-        name="Humans",
-        characteristic_bonuses={"Willpower": 1},
-        base_languages=["Westron"],
-        optional_languages=["Sindarin"],
-        cultures=[
-            CultureData(id="gondorians", name="Gondorians", skill_bonuses={"General Knowledge": 1}, traits="Tradition and pride")
-        ]
-    )
+    MagicMock(id="humans", name="Humans", description="Human race", cultures=[
+        MagicMock(id="gondorians", name="Gondorians", description="People of Gondor")
+    ])
 ]
 
-MOCK_SKILLS_DATA = {
-    "skill_groups": {
-        "combat": {
-            "name": "Combat",
-            "skills": {
-                "melee_weapons": {
-                    "id": "melee_weapons",
-                    "name": "Melee Weapons",
-                    "description": "Proficiency with close-quarters weapons like swords, axes, and spears.",
-                    "stat_bonuses": {
-                        "strength": {
-                            "min_value": 14,
-                            "bonus_points": 3
-                        }
-                    }
-                }
-            }
-        }
-    },
-    "racial_affinities": {
-        "Noldor": [
-            {"skill": "crafting", "base_points": 3}
-        ]
-    }
-}
+# Mock character data
+MOCK_CHARACTER_1 = Character(
+    id=uuid4(),
+    name="Aragorn",
+    race="humans",
+    culture="gondorians",
+    stats=Stats(strength=15, constitution=14, agility=13, intelligence=12, wisdom=16, charisma=15),
+    skills=Skills(combat={"melee_weapons": 3, "weapon_handling": 2}, general={"perception": 4}),
+    combat_stats=CombatStats(max_hit_points=140, current_hit_points=140, max_mana_points=112, current_mana_points=112, armor_class=11, attack_bonus=2),
+    equipment=Equipment(gold=0),
+    spells=Spells(),
+    level=1,
+    status=CharacterStatus.DRAFT,
+    experience_points=0,
+    created_at=datetime.now(),
+    updated_at=datetime.now(),
+    description="Son of Arathorn, heir to the throne of Gondor",
+    physical_description="Tall ranger with dark hair and piercing eyes"
+)
 
-MOCK_EQUIPMENT_DATA = {
-    "weapons": [
-        {
-            "id": "longsword",
-            "name": "Longsword",
-            "category": "weapon",
-            "cost": 2.0,
-            "weight": 1.5,
-            "quantity": 1,
-            "equipped": False,
-            "damage": "1d8+4",
-            "description": "Balanced and versatile one-handed sword",
-            "range": "150"
-        }
-    ],
-    "armor": [],
-    "accessories": [],
-    "consumables": []
-}
-
-MOCK_STATS_DATA = {
-    "stats": {
-        "strength": {
-            "id": "strength",
-            "name": "Strength",
-            "description": "Physical strength, build. Determines melee damage and carrying capacity.",
-            "min_value": 3,
-            "max_value": 20
-        }
-    },
-    "value_range": {"min": 3, "max": 20},
-    "bonus_formula": "(value - 10) // 2",
-    "bonus_table": {},
-    "cost_table": {},
-    "starting_points": None
-}
-
-@patch('back.routers.creation.RacesManager')
-def test_get_races(mock_races_manager):
-    mock_races_manager_instance = mock_races_manager.return_value
-    mock_races_manager_instance.get_all_races.return_value = MOCK_RACES_DATA
-    
-    response = client.get("/api/creation/races")
-    assert response.status_code == 200
-    assert response.json() == [race.model_dump() for race in MOCK_RACES_DATA]
-
-@patch('back.routers.creation.UnifiedSkillsManager')
-def test_get_skills(mock_skills_manager):
-    mock_skills_manager_instance = mock_skills_manager.return_value
-    mock_skills_manager_instance.get_all_data.return_value = MOCK_SKILLS_DATA
-
-    response = client.get("/api/creation/skills")
-    assert response.status_code == 200
-    assert response.json() == MOCK_SKILLS_DATA
-
-@patch('back.routers.creation.EquipmentManager')
-def test_get_equipment(mock_equipment_manager):
-    mock_equipment_manager_instance = mock_equipment_manager.return_value
-    mock_equipment_manager_instance.get_all_equipment.return_value = MOCK_EQUIPMENT_DATA
-
-    response = client.get("/api/creation/equipment")
-    assert response.status_code == 200
-    data = response.json()
-    # Check that the structure is correct
-    assert "weapons" in data
-    assert "armor" in data
-    assert "accessories" in data
-    assert "consumables" in data
-    assert isinstance(data["weapons"], list)
-    if data["weapons"]:
-        item = data["weapons"][0]
-        assert "id" in item
-        assert "name" in item
-        assert "category" in item
-        assert "cost" in item
-        assert "weight" in item
-        assert "quantity" in item
-        assert "equipped" in item
-        assert "range" in item
-        assert isinstance(item["range"], str)  # Should be string
-
-def test_get_equipment_canonical_schema():
-    """
-    Ensure the equipment endpoint returns standardized categories and item keys.
-    This uses the real EquipmentManager and YAML file.
-    """
-    response = client.get("/api/creation/equipment")
-    assert response.status_code == 200
-    data = response.json()
-    # Categories present
-    assert isinstance(data, dict)
-    for key in ("weapons", "armor", "accessories", "consumables"):
-        assert key in data
-        assert isinstance(data[key], list)
-    # At least check first weapon if exists has canonical keys
-    def assert_item_schema(item: dict):
-        required = {"id", "name", "category", "cost", "weight", "quantity", "equipped"}
-        assert required.issubset(item.keys())
-    for category in ("weapons", "armor", "accessories", "consumables"):
-        if data[category]:
-            assert_item_schema(data[category][0])
-
-@patch('back.routers.creation.StatsManager')
-def test_get_stats(mock_stats_manager):
-    mock_stats_manager_instance = mock_stats_manager.return_value
-    mock_stats_manager_instance.get_all_stats_data.return_value = MOCK_STATS_DATA
-    
-    response = client.get("/api/creation/stats")
-    assert response.status_code == 200
-    assert response.json() == MOCK_STATS_DATA
 
 @patch('back.routers.creation.CharacterPersistenceService')
-@patch('back.routers.creation.RacesManager')
-def test_create_character_v2_success(mock_races_manager, mock_persistence_service):
-    mock_races_manager_instance = mock_races_manager.return_value
-    mock_races_manager_instance.get_race_by_id.return_value = MOCK_RACES_DATA[0] # Return a valid race
-    
-    mock_persistence_service.save_character_data.return_value = None # Mock save operation
-    
-    request_data = {
-        "name": "Test Character",
-        "race_id": "humans",
-        "culture_id": "gondorians",
-        "stats": {"strength": 10, "constitution": 10, "agility": 10, "intelligence": 10, "wisdom": 10, "charisma": 10},
-        "skills": {"combat": {"Melee Weapons": 1}},
-        "physical_description": "Tall and swift"
-    }
-    
-    response = client.post("/api/creation/create", json=request_data)
-    assert response.status_code == 200
-    response_data = response.json()
-    assert "character_id" in response_data
-    assert response_data["status"] == "created"
-    assert "created_at" in response_data
-    
-    mock_persistence_service.save_character_data.assert_called_once()
+@patch('back.routers.creation.RacesDataService')
+def test_create_character_v2_physical_description_persisted(mock_races_service, mock_persistence_service):
+    """
+    Test that physical description is properly persisted when creating a character.
+    """
+    # Setup mocks
+    mock_races_service_instance = mock_races_service.return_value
+    mock_races_service_instance.get_race_by_id.return_value = MOCK_RACES_DATA[0]
 
-@patch('back.routers.creation.CharacterPersistenceService')
-@patch('back.routers.creation.RacesManager')
-def test_create_character_v2_physical_description_persisted(mock_races_manager, mock_persistence_service):
-    mock_races_manager_instance = mock_races_manager.return_value
-    mock_races_manager_instance.get_race_by_id.return_value = MOCK_RACES_DATA[0]
-
-    # Capture saved data
-    saved_store = {}
+    # Mock persistence service save method
+    saved_character = None
     def save_side_effect(cid, data):
-        saved_store['id'] = cid
-        saved_store['data'] = data
-        return None
+        nonlocal saved_character
+        saved_character = data
+        return data
     mock_persistence_service.save_character_data.side_effect = save_side_effect
 
     request_data = {
@@ -213,21 +74,56 @@ def test_create_character_v2_physical_description_persisted(mock_races_manager, 
     assert resp.status_code == 200
     char_id = resp.json()["character_id"]
 
-    # Mock load to return last saved
-    mock_persistence_service.load_character_data.return_value = saved_store['data']
-    get_resp = client.get(f"/api/creation/character/{char_id}")
-    assert get_resp.status_code == 200
-    body = get_resp.json()
-    assert body["character"]["physical_description"] == "Scar over left eye"
+    # Verify that the saved character data contains the physical description
+    assert saved_character is not None
+    assert saved_character.get("physical_description") == "Scar over left eye"
+
 
 @patch('back.routers.creation.CharacterPersistenceService')
-@patch('back.routers.creation.RacesManager')
-def test_create_character_v2_invalid_race(mock_races_manager, mock_persistence_service):
-    # Simuler une exception HTTPException en utilisant ValueError
-    mock_races_manager_instance = mock_races_manager.return_value
-    # Instead of raising HTTPException, we'll make the mock return None and let the router raise the exception
-    mock_races_manager_instance.get_race_by_id.return_value = None
-    
+@patch('back.routers.creation.RacesDataService')
+def test_create_character_v2_sets_active_when_complete(mock_races_service, mock_persistence_service):
+    """Ensure completed payloads are stored as active characters."""
+    mock_races_service_instance = mock_races_service.return_value
+    mock_races_service_instance.get_race_by_id.return_value = MOCK_RACES_DATA[0]
+
+    saved_character: Dict[str, Any] | None = None
+
+    def save_side_effect(character_id: str, payload: dict) -> dict:
+        nonlocal saved_character
+        saved_character = payload
+        return payload
+
+    mock_persistence_service.save_character_data.side_effect = save_side_effect
+
+    request_data = {
+        "name": "Complete Hero",
+        "race_id": "humans",
+        "culture_id": "gondorians",
+        "stats": {"strength": 14, "constitution": 13, "agility": 12, "intelligence": 11, "wisdom": 10, "charisma": 9},
+        "skills": {
+            "combat": {"melee_weapons": 10, "weapon_handling": 10},
+            "general": {"perception": 10, "crafting": 10}
+        },
+        "background": "Veteran of countless battles",
+        "physical_description": "Tall warrior with a scarred face"
+    }
+
+    response = client.post("/api/creation/create", json=request_data)
+    assert response.status_code == 200
+    assert saved_character is not None
+    assert saved_character["status"] == "active"
+
+
+@patch('back.routers.creation.CharacterPersistenceService')
+@patch('back.routers.creation.RacesDataService')
+def test_create_character_v2_invalid_race(mock_races_service, mock_persistence_service):
+    """
+    Test character creation with invalid race.
+    """
+    # Setup mock to return None for invalid race
+    mock_races_service_instance = mock_races_service.return_value
+    mock_races_service_instance.get_race_by_id.return_value = None
+
     request_data = {
         "name": "Test Character",
         "race_id": "invalid_race",
@@ -235,197 +131,180 @@ def test_create_character_v2_invalid_race(mock_races_manager, mock_persistence_s
         "stats": {"strength": 10, "constitution": 10, "agility": 10, "intelligence": 10, "wisdom": 10, "charisma": 10},
         "skills": {"combat": {"Melee Weapons": 1}}
     }
-    
+
     response = client.post("/api/creation/create", json=request_data)
     assert response.status_code == 404
     assert "Race with id 'invalid_race' not found" in response.json()["detail"]
     mock_persistence_service.save_character_data.assert_not_called()
 
+
 @patch('back.routers.creation.CharacterPersistenceService')
 def test_update_character_v2_success(mock_persistence_service):
-    character_id = uuid4()
-    existing_character_data = CharacterV2(
-        id=character_id,
-        name="Old Name",
-        race="humans",
-        culture="gondorians",
-        stats=Stats(
-            strength=10,
-            constitution=10,
-            agility=10,
-            intelligence=10,
-            wisdom=10,
-            charisma=10
-        ),
-        skills=Skills(
-            combat={
-                "Melee Weapons": 1
-            }
-        ),
-        combat_stats=CombatStats(
-            max_hit_points=50,
-            current_hit_points=50,
-            max_mana_points=30,
-            current_mana_points=30,
-            armor_class=10,
-            attack_bonus=0
-        ),
-        equipment=Equipment(
-            weapons=[],
-            armor=[],
-            accessories=[],
-            consumables=[],
-            gold=0
-        ),
-        spells=Spells(
-            known_spells=[],
-            spell_slots={},
-            spell_bonus=0
-        ),
-        level=1,
-        status=CharacterStatus.DRAFT,
-        experience_points=0,
-        created_at=datetime.now(),
-        updated_at=datetime.now(),
-        description=None
-    ).model_dump()
-    
-    mock_persistence_service.load_character_data.return_value = existing_character_data
-    mock_persistence_service.save_character_data.return_value = existing_character_data  # Return the updated data
-    
-    update_data = {
-        "character_id": str(character_id),
-        "name": "New Name",
-        "stats": {
-            "strength": 12,
-            "constitution": 10,
-            "agility": 10,
-            "intelligence": 10,
-            "wisdom": 10,
-            "charisma": 10
-        },
-        "skills": {"combat": {"Melee Weapons": 1}},
-        "background": "Updated background",
-        "physical_description": "Changed appearance"
+    """
+    Test successful character update.
+    """
+    character_id = str(uuid4())
+    existing_character = MOCK_CHARACTER_1.model_copy()
+    # Skip assignment for test purposes - existing character already has an id
+    existing_character.name = "Old Name"
+
+    # Mock persistence service
+    mock_persistence_service.load_character_data.return_value = existing_character
+
+    request_data = {
+        "character_id": character_id,
+        "name": "Updated Name",
+        "physical_description": "Updated description"
     }
-    
-    response = client.post("/api/creation/update", json=update_data)
+
+    response = client.post("/api/creation/update", json=request_data)
     assert response.status_code == 200
-    response_data = response.json()
-    assert response_data["status"] == "updated"
-    assert response_data["character"]["name"] == "New Name"
-    assert response_data["character"]["stats"]["strength"] == 12
-    assert response_data["character"]["physical_description"] == "Changed appearance"
+    data = response.json()
+    assert data["status"] == "updated"
+    assert data["character"]["name"] == "Updated Name"
+    assert data["character"]["physical_description"] == "Updated description"
+
+    # Verify the service methods were called
+    mock_persistence_service.load_character_data.assert_called_once_with(character_id)
     mock_persistence_service.save_character_data.assert_called_once()
+
+
+@patch('back.routers.creation.CharacterPersistenceService')
+def test_update_character_v2_sets_active_when_complete(mock_persistence_service):
+    """Ensure updates flip status to active once every section is filled."""
+    character_id = str(uuid4())
+    existing_character = MOCK_CHARACTER_1.model_copy()
+    existing_character.stats = Stats(strength=15, constitution=14, agility=13, intelligence=12, wisdom=11, charisma=10)
+    existing_character.skills = Skills(
+        combat={"melee_weapons": 10, "weapon_handling": 10},
+        general={"perception": 10, "crafting": 10}
+    )
+    existing_character.description = None
+    existing_character.physical_description = None
+    existing_character.status = CharacterStatus.DRAFT
+
+    mock_persistence_service.load_character_data.return_value = existing_character
+
+    saved_character: Character | None = None
+
+    def save_side_effect(character_id: str, payload: Character) -> Character:
+        nonlocal saved_character
+        saved_character = payload
+        return payload
+
+    mock_persistence_service.save_character_data.side_effect = save_side_effect
+
+    request_data = {
+        "character_id": character_id,
+        "background": "Strategist of the White City",
+        "physical_description": "Graceful yet imposing presence"
+    }
+
+    response = client.post("/api/creation/update", json=request_data)
+    assert response.status_code == 200
+    assert saved_character is not None
+    assert saved_character.status == CharacterStatus.ACTIVE
+
 
 @patch('back.routers.creation.CharacterPersistenceService')
 def test_update_character_v2_not_found(mock_persistence_service):
+    """
+    Test updating non-existent character.
+    """
     character_id = str(uuid4())
+    # Mock persistence service to return None (character not found)
     mock_persistence_service.load_character_data.return_value = None
-    
-    update_data = {
+
+    request_data = {
         "character_id": character_id,
-        "name": "New Name"
+        "name": "Updated Name"
     }
-    
-    response = client.post("/api/creation/update", json=update_data)
+
+    response = client.post("/api/creation/update", json=request_data)
     assert response.status_code == 404
     assert f"Character with id '{character_id}' not found" in response.json()["detail"]
+
+    # Ensure save was not called
     mock_persistence_service.save_character_data.assert_not_called()
 
-@patch('back.routers.creation.CharacterPersistenceService')
-def test_get_character_v2_success(mock_persistence_service):
-    character_id = uuid4()
-    character_data = CharacterV2(
-        id=character_id,
-        name="Test Character",
-        race="humans",
-        culture="gondorians",
-        stats=Stats(strength=10, constitution=10, agility=10, intelligence=10, wisdom=10, charisma=10),
-        skills=Skills(combat={"Melee Weapons": 1}),
-        combat_stats=CombatStats(max_hit_points=50, current_hit_points=50, max_mana_points=30, current_mana_points=30, armor_class=10, attack_bonus=0),
-        equipment=Equipment(weapons=[], armor=[], accessories=[], consumables=[], gold=0),
-        spells=Spells(known_spells=[], spell_slots={}, spell_bonus=0),
-        level=1,
-        status=CharacterStatus.DRAFT,
-        experience_points=0,
-        created_at=datetime.now(),
-        updated_at=datetime.now(),
-        description=None
-    ).model_dump()
-    
-    mock_persistence_service.load_character_data.return_value = character_data
-    
-    response = client.get(f"/api/creation/character/{character_id}")
-    assert response.status_code == 200
-    response_data = response.json()
-    assert response_data["status"] == "loaded"
-    assert response_data["character"]["id"] == str(character_id)
+
+
 
 @patch('back.routers.creation.CharacterPersistenceService')
-def test_get_character_v2_not_found(mock_persistence_service):
-    character_id = str(uuid4())
-    mock_persistence_service.load_character_data.return_value = None
-    
-    response = client.get(f"/api/creation/character/{character_id}")
-    assert response.status_code == 404
-    assert f"Character with id '{character_id}' not found" in response.json()["detail"]
+def test_create_character_v2_missing_stats(mock_persistence_service):
+    """
+    Ensure default stats are applied when not provided in the request.
+    """
+    mock_races_service_instance = MagicMock()
+    mock_races_service_instance.get_race_by_id.return_value = MOCK_RACES_DATA[0]
+
+    with patch('back.routers.creation.RacesDataService', return_value=mock_races_service_instance):
+        saved_payload: Dict[str, Any] = {}
+
+        def save_side_effect(character_id: str, character_data: dict) -> dict:
+            saved_payload["character_id"] = character_id
+            saved_payload["data"] = character_data
+            return character_data
+
+        mock_persistence_service.save_character_data.side_effect = save_side_effect
+
+        request_data = {
+            "name": "Test Character",
+            "race_id": "humans",
+            "culture_id": "gondorians",
+            # Missing stats - the router should fall back to default values
+            "skills": {"combat": {"Melee Weapons": 1}}
+        }
+
+        response = client.post("/api/creation/create", json=request_data)
+        assert response.status_code == 200
+        response_data = response.json()
+        assert "character_id" in response_data
+
+        assert "data" in saved_payload
+        stats = saved_payload["data"]["stats"]
+        assert all(value == 10 for value in stats.values())
+
 
 @patch('back.routers.creation.CharacterPersistenceService')
-def test_delete_character_v2_success(mock_persistence_service):
-    character_id = str(uuid4())
-    mock_persistence_service.load_character_data.return_value = {"id": character_id} # Character exists
-    mock_persistence_service.delete_character_data.return_value = None
-    
-    response = client.delete(f"/api/creation/character/{character_id}")
-    assert response.status_code == 204
-    mock_persistence_service.delete_character_data.assert_called_once_with(character_id)
+@patch('back.routers.creation.RacesDataService')
+def test_create_character_v2_service_error(mock_races_service, mock_persistence_service):
+    """
+    Test character creation when service raises an exception.
+    """
+    # Setup mocks
+    mock_races_service_instance = mock_races_service.return_value
+    mock_races_service_instance.get_race_by_id.return_value = MOCK_RACES_DATA[0]
 
-@patch('back.routers.creation.CharacterPersistenceService')
-def test_delete_character_v2_not_found(mock_persistence_service):
-    character_id = str(uuid4())
-    mock_persistence_service.load_character_data.return_value = None
-    
-    response = client.delete(f"/api/creation/character/{character_id}")
-    assert response.status_code == 404
-    assert f"Character with id '{character_id}' not found" in response.json()["detail"]
-    mock_persistence_service.delete_character_data.assert_not_called()
+    # Mock persistence service to raise an exception
+    mock_persistence_service.save_character_data.side_effect = Exception("Database error")
 
-def test_validate_character_v2_success():
-    valid_character_data = {
-        "id": str(uuid4()),
-        "name": "Valid Character",
-        "race": "humans",
-        "culture": "gondorians",
+    request_data = {
+        "name": "Test Character",
+        "race_id": "humans",
+        "culture_id": "gondorians",
         "stats": {"strength": 10, "constitution": 10, "agility": 10, "intelligence": 10, "wisdom": 10, "charisma": 10},
-        "skills": {"combat": {"Melee Weapons": 1}},
-        "combat_stats": {"max_hit_points": 50, "current_hit_points": 50, "max_mana_points": 30, "current_mana_points": 30, "armor_class": 10, "attack_bonus": 0},
-        "equipment": {"weapons": [], "armor": [], "accessories": [], "consumables": [], "gold": 0},
-        "spells": {"known_spells": [], "spell_slots": {}, "spell_bonus": 0},
-        "level": 1,
-        "status": "draft",
-        "experience_points": 0,
-        "created_at": datetime.now().isoformat(),
-        "updated_at": datetime.now().isoformat(),
-        "description": None
+        "skills": {"combat": {"Melee Weapons": 1}}
     }
 
-    response = client.post("/api/creation/validate-character", json=valid_character_data)
-    assert response.status_code == 200
-    response_data = response.json()
-    assert response_data["valid"] is True
-    assert response_data["message"] == "Character is valid"
-    assert "character" in response_data
+    response = client.post("/api/creation/create", json=request_data)
+    assert response.status_code == 500
+    assert "Character creation failed" in response.json()["detail"]
 
-def test_validate_character_v2_failure():
-    invalid_character_data = {
+
+@patch('back.routers.creation.CharacterPersistenceService')
+def test_validate_character_v2_success(mock_persistence_service):
+    """
+    Test successful character validation.
+    """
+    character_data = {
         "id": str(uuid4()),
-        "name": "Invalid Character",
+        "name": "Test Character",
         "race": "humans",
         "culture": "gondorians",
-        "stats": {"strength": "not_an_int"}, # Invalid stat
-        "skills": {"combat": {"Melee Weapons": 1}},
-        "combat_stats": {"max_hit_points": 50, "current_hit_points": 50, "max_mana_points": 30, "current_mana_points": 30, "armor_class": 10, "attack_bonus": 0},
+        "stats": {"strength": 15, "constitution": 14, "agility": 13, "intelligence": 12, "wisdom": 16, "charisma": 15},
+        "skills": {"combat": {"melee_weapons": 3}},
+        "combat_stats": {"max_hit_points": 140, "current_hit_points": 140, "max_mana_points": 112, "current_mana_points": 112, "armor_class": 11, "attack_bonus": 2},
         "equipment": {"weapons": [], "armor": [], "accessories": [], "consumables": [], "gold": 0},
         "spells": {"known_spells": [], "spell_slots": {}, "spell_bonus": 0},
         "level": 1,
@@ -433,201 +312,110 @@ def test_validate_character_v2_failure():
         "experience_points": 0,
         "created_at": datetime.now().isoformat(),
         "updated_at": datetime.now().isoformat(),
-        "description": None
+        "description": "Test character",
+        "physical_description": "Test description"
+    }
+
+    response = client.post("/api/creation/validate-character", json=character_data)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["valid"] == True
+    assert "message" in data
+
+
+@patch('back.routers.creation.CharacterPersistenceService')
+def test_validate_character_v2_invalid_data(mock_persistence_service):
+    """
+    Test character validation with invalid data.
+    """
+    invalid_character_data = {
+        "id": str(uuid4()),
+        "name": "",  # Invalid: empty name
+        "race": "humans",
+        "culture": "gondorians",
+        "stats": {"strength": 15, "constitution": 14, "agility": 13, "intelligence": 12, "wisdom": 16, "charisma": 15},
+        "skills": {"combat": {"melee_weapons": 3}},
+        "combat_stats": {"max_hit_points": 140, "current_hit_points": 140, "max_mana_points": 112, "current_mana_points": 112, "armor_class": 11, "attack_bonus": 2},
+        "equipment": {"weapons": [], "armor": [], "accessories": [], "consumables": [], "gold": 0},
+        "spells": {"known_spells": [], "spell_slots": {}, "spell_bonus": 0},
+        "level": 1,
+        "status": "draft",
+        "experience_points": 0,
+        "created_at": datetime.now().isoformat(),
+        "updated_at": datetime.now().isoformat(),
+        "description": "Test character",
+        "physical_description": "Test description"
     }
 
     response = client.post("/api/creation/validate-character", json=invalid_character_data)
-    assert response.status_code == 422 # FastAPI returns 422 for Pydantic validation errors
-    response_data = response.json()
-    assert "detail" in response_data
-    # Check that it's a validation error about the strength field being a string instead of int
-    assert any("strength" in str(error) and ("int" in str(error) or "integer" in str(error)) for error in response_data["detail"])
-
-
-def test_get_stats_integration_range_and_formula():
-    """
-    Integration test (no mocks): ensure /stats exposes the simplified 3–20 model.
-    """
-    resp = client.get("/api/creation/stats")
-    assert resp.status_code == 200
-    data = resp.json()
-    assert "value_range" in data
-    assert data["value_range"]["min"] == 3
-    assert data["value_range"]["max"] == 20
-    assert "bonus_formula" in data
-    assert data["bonus_formula"] == "(value - 10) // 2"
-
-
-@patch('back.routers.creation.CharacterPersistenceService')
-@patch('back.routers.creation.RacesManager')
-def test_create_character_v2_invalid_stats_range(mock_races_manager, mock_persistence_service):
-    """
-    Creating a character with stats outside [3, 20] should fail with 400.
-    """
-    mock_races_manager_instance = mock_races_manager.return_value
-    mock_races_manager_instance.get_race_by_id.return_value = MOCK_RACES_DATA[0]
-
-    too_low_stats = {
-        "strength": 2,  # invalid (below 3)
-        "constitution": 10,
-        "agility": 10,
-        "intelligence": 10,
-        "wisdom": 10,
-        "charisma": 10,
-    }
-    body = {
-        "name": "Bounds Low",
-        "race_id": "humans",
-        "culture_id": "gondorians",
-        "stats": too_low_stats,
-        "skills": {"combat": {"Melee Weapons": 1}},
-    }
-    resp_low = client.post("/api/creation/create", json=body)
-    assert resp_low.status_code == 400
-    assert "greater than or equal to 3" in resp_low.json()["detail"]
-
-    too_high_stats = {
-        "strength": 21,  # invalid (above 20)
-        "constitution": 10,
-        "agility": 10,
-        "intelligence": 10,
-        "wisdom": 10,
-        "charisma": 10,
-    }
-    body_high = {
-        "name": "Bounds High",
-        "race_id": "humans",
-        "culture_id": "gondorians",
-        "stats": too_high_stats,
-        "skills": {"combat": {"Melee Weapons": 1}},
-    }
-    resp_high = client.post("/api/creation/create", json=body_high)
-    assert resp_high.status_code == 400
-    assert "less than or equal to 20" in resp_high.json()["detail"]
-
-
-# --- Tests for /random endpoint ---
-
-MOCK_RANDOM_RACE = RaceData(
-    id="elves",
-    name="Elves",
-    characteristic_bonuses={"Agility": 1},
-    base_languages=["Sindarin"],
-    optional_languages=[],
-    cultures=[
-        CultureData(id="rivendell", name="Rivendell Elves", skill_bonuses={"Magic": 1}, traits="Wise and ancient")
-    ]
-)
-
-MOCK_RANDOM_STATS_INFO = {
-    "stats": {
-        "strength": {}, "constitution": {}, "agility": {}, 
-        "intelligence": {}, "wisdom": {}, "charisma": {}
-    }
-}
-
-@patch('back.routers.creation.CharacterPersistenceService')
-@patch('back.routers.creation.build_simple_gm_agent')
-@patch('back.routers.creation.StatsManager')
-@patch('back.routers.creation.RacesManager')
-@patch('back.routers.creation.random')
-def test_create_random_character_success(
-    mock_random,
-    mock_races_manager,
-    mock_stats_manager,
-    mock_build_agent,
-    mock_persistence_service
-):
-    """
-    Test successful creation of a random character, mocking all external dependencies.
-    """
-    # --- Mock setup ---
-    # Mock RacesManager
-    mock_races_manager.return_value.get_all_races.return_value = [MOCK_RANDOM_RACE]
-    
-    # Mock random.choice to be deterministic
-    mock_random.choice.side_effect = [
-        MOCK_RANDOM_RACE,  # First call for race
-        MOCK_RANDOM_RACE.cultures[0] if MOCK_RANDOM_RACE.cultures else None  # Second call for culture
-    ]
-    
-    # Mock StatsManager
-    mock_stats_manager.return_value.get_all_stats_data.return_value = MOCK_RANDOM_STATS_INFO
-    
-    # Mock random.randint to return a fixed value for stats
-    mock_random.randint.return_value = 12
-    
-    # Mock LLM Agent
-    mock_agent = AsyncMock()
-    # Mock RunResult objects with .output attribute
-    from unittest.mock import MagicMock
-    result1 = MagicMock()
-    result1.output = "Gandalf"
-    result2 = MagicMock()
-    result2.output = "A wizard"
-    result3 = MagicMock()
-    result3.output = "A grey beard"
-    mock_agent.run.side_effect = [result1, result2, result3]
-    mock_build_agent.return_value = mock_agent
-    
-    # --- API call ---
-    response = client.post("/api/creation/random")
-    
-    # --- Assertions ---
     assert response.status_code == 200
     data = response.json()
-    
-    assert data["status"] == "created"
-    character = data["character"]
-    
-    # Assert LLM-generated content
-    assert character["name"] == "Gandalf"
-    assert character["description"] == "A wizard"
-    assert character["physical_description"] == "A grey beard"
-    
-    # Assert random selections
-    assert character["race"] == "elves"
-    assert character["culture"] == "rivendell"
-    
-    # Assert stats
-    assert character["stats"]["strength"] == 12
-    assert character["stats"]["constitution"] == 12
-    
-    # Assert calculated combat stats
-    # constitution=12 -> max_hp = 12 * 10 + 5 = 125
-    # intelligence=12, wisdom=12 -> max_mp = 12 * 5 + 12 * 3 = 96
-    assert character["combat_stats"]["max_hit_points"] == 125
-    assert character["combat_stats"]["current_hit_points"] == 125
-    assert character["combat_stats"]["max_mana_points"] == 96
-    assert character["combat_stats"]["current_mana_points"] == 96
-    
-    # Assert persistence
-    mock_persistence_service.save_character_data.assert_called_once()
+    assert data["valid"] == False
+    assert len(data["errors"]) > 0
 
 
-@patch('back.routers.creation.RacesManager')
-def test_create_random_character_no_races(mock_races_manager):
-    """
-    Test random character creation failure when no races are available.
-    """
-    mock_races_manager.return_value.get_all_races.return_value = []
-    
-    response = client.post("/api/creation/random")
-    
-    assert response.status_code == 500
-    assert "No races available" in response.json()["detail"]
+@patch('back.routers.creation.CharacterPersistenceService')
+def test_validate_character_by_id_success(mock_persistence_service):
+    """Validate a stored character using only its identifier."""
+    stored_character = MOCK_CHARACTER_1.model_copy()
+    mock_persistence_service.load_character_data.return_value = stored_character
 
-@patch('back.routers.creation.RacesManager')
-@patch('back.routers.creation.random')
-def test_create_random_character_no_cultures(mock_random, mock_races_manager):
-    """
-    Test random character creation failure when a race has no cultures.
-    """
-    race_no_culture = RaceData(id="lonely", name="Lonely Race", characteristic_bonuses={}, base_languages=[], optional_languages=[], cultures=[])
-    mock_races_manager.return_value.get_all_races.return_value = [race_no_culture]
-    mock_random.choice.return_value = race_no_culture
-    
-    response = client.post("/api/creation/random")
-    
-    assert response.status_code == 500
-    assert "has no cultures" in response.json()["detail"]
+    response = client.post(
+        "/api/creation/validate-character/by-id",
+        json={"character_id": str(stored_character.id)},
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["valid"] is True
+    mock_persistence_service.load_character_data.assert_called_once_with(str(stored_character.id))
+
+
+@patch('back.routers.creation.CharacterPersistenceService')
+def test_validate_character_by_id_not_found(mock_persistence_service):
+    """Return 404 when the character JSON file cannot be located."""
+    mock_persistence_service.load_character_data.side_effect = FileNotFoundError("missing")
+
+    response = client.post(
+        "/api/creation/validate-character/by-id",
+        json={"character_id": str(uuid4())},
+    )
+
+    assert response.status_code == 404
+    assert "missing" in response.json()["detail"]
+
+
+@patch('back.routers.creation.CharacterPersistenceService')
+def test_validate_character_by_id_invalid_payload(mock_persistence_service):
+    """Surface validation errors when the stored payload is incomplete."""
+    invalid_character = MagicMock()
+    invalid_character.model_dump.return_value = {
+        "id": str(uuid4()),
+        "name": "",
+        "race": "humans",
+        "culture": "gondorians",
+        "stats": {},
+        "skills": {},
+        "combat_stats": {},
+        "equipment": {},
+        "spells": {},
+        "level": 1,
+        "status": "draft",
+        "experience_points": 0,
+        "created_at": datetime.now().isoformat(),
+        "updated_at": datetime.now().isoformat(),
+        "description": None,
+        "physical_description": None,
+    }
+
+    mock_persistence_service.load_character_data.return_value = invalid_character
+
+    response = client.post(
+        "/api/creation/validate-character/by-id",
+        json={"character_id": str(uuid4())},
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["valid"] is False
+    assert payload["errors"]

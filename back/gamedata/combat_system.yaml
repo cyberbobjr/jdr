@@ -80,3 +80,64 @@ combat_system:
     multiple_opponents:
       condition: facing_multiple_enemies
       penalty_per_additional_enemy: -2
+  actions:
+    standard_attack:
+      name: Standard Attack
+      description: Default melee or ranged attack.
+      action_type: major
+      resource_cost: 0
+    defensive_stance:
+      name: Defensive Stance
+      description: Focus on parrying incoming blows to gain defense bonus.
+      action_type: major
+      defense_bonus: 3
+    quick_item_use:
+      name: Quick Item Use
+      description: Use an equipped consumable without ending the turn.
+      action_type: minor
+      limitations:
+        - cannot_use_two_handed_weapon_this_turn
+  difficulty_modifiers:
+    routine: 60
+    very_easy: 40
+    easy: 20
+    average: 0
+    hard: -20
+    very_hard: -40
+    extremely_hard: -60
+    sheer_folly: -80
+    absurd: -100
+  damage_types:
+    slashing:
+      description: Bladed weapons; excels against unarmored foes.
+      typical_weapons:
+        - sword
+        - axe
+    piercing:
+      description: Penetrating attacks that ignore a portion of armor.
+      typical_weapons:
+        - spear
+        - arrow
+    bludgeoning:
+      description: Crushing force effective against skeletons and constructs.
+      typical_weapons:
+        - mace
+        - hammer
+    elemental:
+      description: Magical damage such as fire or lightning; bypasses physical armor.
+      typical_sources:
+        - spell
+        - enchanted_weapon
+  armor_types:
+    light:
+      description: Leather or padded armor.
+      base_bonus: 2
+      agility_cap: none
+    medium:
+      description: Chain or reinforced leather.
+      base_bonus: 4
+      agility_cap: +3
+    heavy:
+      description: Plate or reinforced mail.
+      base_bonus: 6
+      agility_cap: +1
