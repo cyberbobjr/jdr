@@ -4,21 +4,19 @@ Handles session creation, listing, playing, and history management.
 """
 
 from fastapi import APIRouter, HTTPException
-from fastapi.encoders import jsonable_encoder
-from pydantic import BaseModel, ValidationError
 from fastapi.responses import StreamingResponse
 from uuid import UUID
 from typing import List, Dict, Any, Optional
 import traceback
 import json
 
-from pydantic_ai import Agent
+from pydantic_ai import ModelMessage
 
-from back.services.game_session_service import GameSessionService
+
+from back.services.game_session_service import GameSessionService, HISTORY_NARRATIVE
 from back.models.schema import (
     PlayScenarioRequest,
     ActiveSessionsResponse,
-    StartScenarioResponse,
     StartScenarioRequest,
     PlayScenarioResponse,
     ScenarioHistoryResponse,
@@ -26,11 +24,16 @@ from back.models.schema import (
     SessionInfo,
 )
 from back.utils.logger import log_debug
-from back.agents.gm_agent_pydantic import build_gm_agent_pydantic, enrich_user_message_with_character
 from back.models.domain.character import Character, CharacterStatus
 from back.services.character_persistence_service import CharacterPersistenceService
-from pydantic_ai.messages import ModelMessage, ModelMessagesTypeAdapter
-from pydantic_ai import Agent
+from pydantic_ai.messages import ModelMessagesTypeAdapter
+
+# New imports for graph
+from pydantic_graph import Graph
+from back.graph.nodes.dispatcher_node import DispatcherNode
+from back.graph.nodes.narrative_node import NarrativeNode
+from back.graph.nodes.combat_node import CombatNode
+from back.graph.dto.session import SessionGraphState, PlayerMessagePayload, GameState
 
 router = APIRouter(tags=["gamesession"])
 
@@ -82,8 +85,8 @@ async def list_active_sessions() -> ActiveSessionsResponse:
         log_debug("Error retrieving active sessions", error=str(e), traceback=traceback.format_exc())
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
 
-@router.post("/start", response_model=StartScenarioResponse)
-async def start_scenario(request: StartScenarioRequest) -> StartScenarioResponse:
+@router.post("/start", response_model=PlayScenarioResponse)
+async def start_scenario(request: StartScenarioRequest) -> PlayScenarioResponse:
     """
     Start a scenario with a specific character, return session ID and trigger initial narration with LLM.
 
@@ -98,11 +101,37 @@ async def start_scenario(request: StartScenarioRequest) -> StartScenarioResponse
     **Response:**
     ```json
     {
-        "session_id": "12345678-1234-5678-9012-123456789abc",
-        "scenario_name": "Les_Pierres_du_Passe.md",
-        "character_id": "87654321-4321-8765-2109-987654321def",
-        "message": "Scenario 'Les_Pierres_du_Passe.md' started successfully for character 87654321-4321-8765-2109-987654321def.",
-        "llm_response": "**Esgalbar, central square of the village**\n\n*The sun slowly sets on the horizon, tinting the sky with orange hues. A light mist floats around the dry fountain...*"
+        "response": [
+            {
+                "parts": [
+                    {
+                        "content": "Start the scenario and present the initial situation.",
+                        "timestamp": "2025-06-21T12:00:00.000000Z",
+                        "part_kind": "user-prompt"
+                    }
+                ],
+                "kind": "request",
+                "timestamp": "2025-06-21T12:00:00.000000Z"
+            },
+            {
+                "parts": [
+                    {
+                        "content": "**Esgalbar, central square of the village**...",
+                        "timestamp": "2025-06-21T12:00:05.123456Z",
+                        "part_kind": "text"
+                    }
+                ],
+                "kind": "response",
+                "usage": {
+                    "requests": 1,
+                    "request_tokens": 1250,
+                    "response_tokens": 567,
+                    "total_tokens": 1817
+                },
+                "model_name": "deepseek-chat",
+                "timestamp": "2025-06-21T12:00:05.123456Z"
+            }
+        ]
     }
     ```
 
@@ -124,35 +153,43 @@ async def start_scenario(request: StartScenarioRequest) -> StartScenarioResponse
         raise HTTPException(status_code=409, detail=str(e))
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    
     try:
-        agent, deps = build_gm_agent_pydantic(session_id, request.scenario_name)
+        # Get session service
+        session_service = GameSessionService(session_id)
 
-        start_message: str = "Start the scenario and present the initial situation."
+        # Load or create game_state
+        game_state = await session_service.load_game_state()
+        if game_state is None:
+            # Create initial game_state
+            game_state = GameState(
+                session_mode="narrative",
+                narrative_history_id="default",
+                combat_history_id="default"
+            )
+            await session_service.update_game_state(game_state)
 
-        character_json: Optional[Dict[str, Any]] = deps.character_data.model_dump() if deps.character_data else None
-        if character_json:
-            enriched_message: str = enrich_user_message_with_character(start_message, character_json)
-        else:
-            enriched_message = start_message
+        # Create graph
+        session_graph = Graph(nodes=(DispatcherNode, NarrativeNode, CombatNode))
 
-        result = await agent.run(
-            enriched_message,
-            deps=deps
+        # Create graph state with start message
+        start_message = "Start the scenario and present the initial situation."
+        player_message = PlayerMessagePayload(message=start_message)
+        graph_state = SessionGraphState(
+            game_state=game_state,
+            pending_player_message=player_message
         )
 
-        deps.store.save_pydantic_history(result.all_messages())
+        # Run graph
+        result = await session_graph.run(DispatcherNode(), state=graph_state, deps=session_service)
 
-        response_data: Dict[str, Any] = {
-            **session_info,
-            "llm_response": result.output
-        }
-
-        log_debug("Scenario started with LLM response", action="start_scenario", session_id=session_id, character_id=request.character_id, scenario_name=request.scenario_name)
-        return StartScenarioResponse(**response_data)
+        # Use all_messages directly (already in the correct JSON format)
+        log_debug("Scenario started via graph", action="start_scenario", session_id=session_id, character_id=request.character_id, scenario_name=request.scenario_name)
+        return PlayScenarioResponse(response=result.output.all_messages)
 
     except Exception as e:
-        log_debug("Error starting scenario with LLM", error=str(e), traceback=traceback.format_exc(), session_id=session_id)
-        return StartScenarioResponse(**session_info, llm_response=f"Error starting scenario: {str(e)}")
+        log_debug("Error starting scenario with graph", error=str(e), traceback=traceback.format_exc(), session_id=session_id)
+        raise HTTPException(status_code=500, detail=f"Error starting scenario: {str(e)}")
 
 @router.post("/play", response_model=PlayScenarioResponse)
 async def play_scenario(session_id: UUID, request: PlayScenarioRequest) -> PlayScenarioResponse:
@@ -216,34 +253,36 @@ async def play_scenario(session_id: UUID, request: PlayScenarioRequest) -> PlayS
 
     log_debug("Endpoint call: gamesession/play_scenario", session_id=str(session_id))
     try:
-        session_info: Dict[str, Any] = GameSessionService.get_session_info(str(session_id))
-        character_id: str = session_info["character_id"]
-        character_data = CharacterPersistenceService.load_character_data(character_id)
-        if character_data.status == "in_progress":
-            raise HTTPException(status_code=400, detail="Cannot play with a character in creation.")
+        # Get session service
+        session_service = GameSessionService(str(session_id))
 
-        scenario_name: str = session_info["scenario_name"]
-        agent, deps = build_gm_agent_pydantic(str(session_id), scenario_name)
+        # Load or create game_state
+        game_state = await session_service.load_game_state()
+        if game_state is None:
+            # Create initial game_state
+            game_state = GameState(
+                session_mode="narrative",
+                narrative_history_id="default",
+                combat_history_id="default"
+            )
+            await session_service.update_game_state(game_state)
 
-        character_json: Optional[Dict[str, Any]] = deps.character_data.model_dump() if deps.character_data else None
-        if character_json:
-            enriched_message: str = enrich_user_message_with_character(request.message, character_json)
-        else:
-            enriched_message = request.message
+        # Create graph
+        session_graph = Graph(nodes=(DispatcherNode, NarrativeNode, CombatNode))
 
-        history = deps.store.load_pydantic_history()
-
-        result = await agent.run(
-            enriched_message,
-            deps=deps,
-            message_history=history
+        # Create graph state
+        player_message = PlayerMessagePayload(message=request.message)
+        graph_state = SessionGraphState(
+            game_state=game_state,
+            pending_player_message=player_message
         )
-        deps.store.save_pydantic_history(result.all_messages())
 
-        log_debug("Response generated", action="play_scenario", session_id=str(session_id), character_id=character_id, scenario_name=scenario_name, user_message=request.message)
+        # Run graph
+        result = await session_graph.run(DispatcherNode(), state=graph_state, deps=session_service)
 
-        response_json = json.loads(result.all_messages_json())
-        return PlayScenarioResponse(response=response_json)
+        # Use all_messages directly (already in the correct JSON format)
+        log_debug("Graph response generated", action="play_scenario", session_id=str(session_id))
+        return PlayScenarioResponse(response=result.output.all_messages)
 
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
@@ -260,20 +299,72 @@ async def play_scenario(session_id: UUID, request: PlayScenarioRequest) -> PlayS
 async def play_stream(session_id: UUID, message: PlayScenarioRequest):
     """
     Send a message to the GM (LLM) and stream the response using Server-Sent Events.
-    The full conversation history is saved after the stream is complete.
+    Uses the graph-based system for session management with real-time streaming.
     """
     log_debug("Endpoint call: gamesession/play_stream", session_id=str(session_id))
 
     try:
-        session_info = GameSessionService.get_session_info(str(session_id))
-        character_id = session_info["character_id"]
-        character_data = CharacterPersistenceService.load_character_data(character_id)
-        if character_data.status == CharacterStatus.DRAFT:
-            raise HTTPException(status_code=400, detail="Cannot play with a character in creation.")
+        # Get session service
+        session_service = GameSessionService(str(session_id))
 
-        scenario_name = session_info["scenario_name"]
-        agent, deps = build_gm_agent_pydantic(str(session_id), scenario_name)
-        history = deps.store.load_pydantic_history()
+        # Load or create game_state
+        game_state = await session_service.load_game_state()
+        if game_state is None:
+            # Create initial game_state
+            game_state = GameState(
+                session_mode="narrative",
+                narrative_history_id="default",
+                combat_history_id="default"
+            )
+            await session_service.update_game_state(game_state)
+
+        # Create graph
+        session_graph = Graph(nodes=(DispatcherNode, NarrativeNode, CombatNode))
+
+        # Create graph state
+        player_message = PlayerMessagePayload(message=message.message)
+        graph_state = SessionGraphState(
+            game_state=game_state,
+            pending_player_message=player_message
+        )
+
+        async def stream_generator():
+            """
+            Generator for emitting the graph results.
+            Note: This is not true real-time streaming - it waits for the full response
+            before emitting. For true streaming, agents inside nodes would need to use
+            agent.run_stream() and yield tokens as they arrive from the LLM.
+            """
+            try:
+                # Run the full graph to completion
+                result = await session_graph.run(DispatcherNode(), state=graph_state, deps=session_service)
+                
+                # Emit new messages (already serialized in DispatchResult)
+                for message_dict in result.output.new_messages:
+                    for part in message_dict.get("parts", []):
+                        yield f"data: {json.dumps(part, default=str)}\n\n"
+
+                log_debug("Stream finished", session_id=str(session_id))
+
+            except Exception as e:
+                log_debug(
+                    "Error during graph streaming",
+                    error=str(e),
+                    exc_info=True,
+                    session_id=str(session_id),
+                )
+                error_message = {
+                    "error": "An error occurred during the stream.",
+                    "details": str(e),
+                    "exception_type": e.__class__.__name__,
+                    "traceback": traceback.format_exc(),
+                }
+                yield f"data: {json.dumps(error_message, default=str)}\n\n"
+
+        return StreamingResponse(
+            stream_generator(),
+            media_type="text/event-stream",
+        )
 
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
@@ -282,82 +373,6 @@ async def play_stream(session_id: UUID, message: PlayScenarioRequest):
     except Exception as e:
         log_debug("Error preparing stream", error=str(e), traceback=traceback.format_exc(), session_id=str(session_id))
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
-
-    async def stream_generator(
-        user_message: str,
-        agent: Agent[GameSessionService, str],
-        history: list[ModelMessage],
-        deps: GameSessionService,
-    ):
-        """Generator for streaming the agent's response."""
-        try:
-            character_json = deps.character_data.model_dump() if deps.character_data else None
-            enriched_message = enrich_user_message_with_character(user_message, character_json) if character_json else user_message
-
-            async with agent.run_stream(
-                enriched_message,
-                message_history=history,
-                deps=deps,
-            ) as stream_result:
-                streamed_text = False
-                text_stream_error: Optional[Exception] = None
-
-                try:
-                    async for text_chunk in stream_result.stream_text(delta=True):
-                        streamed_text = True
-                        payload = jsonable_encoder({"content": text_chunk, "part_kind": "text-stream"})
-                        yield f"data: {json.dumps(payload, default=str)}\n\n"
-                except (AttributeError, TypeError, ValueError) as stream_err:
-                    text_stream_error = stream_err
-
-                if not streamed_text:
-                    if text_stream_error:
-                        log_debug(
-                            "Falling back to stream_responses",
-                            error=str(text_stream_error),
-                            session_id=str(session_id),
-                        )
-                    async for response, _ in stream_result.stream_responses(debounce_by=0.01):
-                        if isinstance(response, BaseModel):
-                            payload = json.loads(response.model_dump_json())
-                        else:
-                            payload = jsonable_encoder(response)
-                        yield f"data: {json.dumps(payload, default=str)}\n\n"
-
-                # After the stream is complete, save the full history
-                final_messages_json = stream_result.all_messages_json()
-                if final_messages_json:
-                    try:
-                        final_messages = json.loads(final_messages_json)
-                        pydantic_history = ModelMessagesTypeAdapter.validate_python(final_messages)
-                        deps.store.save_pydantic_history(pydantic_history)
-                        log_debug("Stream finished and history saved", session_id=str(session_id))
-                    except ValidationError as history_error:
-                        log_debug(
-                            "Skipping history persistence for streamed run",
-                            error=str(history_error),
-                            session_id=str(session_id),
-                        )
-
-        except Exception as e:
-            log_debug(
-                "Error during agent streaming",
-                error=str(e),
-                exc_info=True,
-                user_message=user_message,
-            )
-            error_message = {
-                "error": "An error occurred during the stream.",
-                "details": str(e),
-                "exception_type": e.__class__.__name__,
-                "traceback": traceback.format_exc(),
-            }
-            yield f"data: {json.dumps(error_message, default=str)}\n\n"
-
-    return StreamingResponse(
-        stream_generator(message.message, agent, history, deps),
-        media_type="text/event-stream",
-    )
 
 
 @router.get("/history/{session_id}", response_model=ScenarioHistoryResponse)
@@ -413,10 +428,9 @@ async def get_scenario_history(session_id: UUID) -> ScenarioHistoryResponse:
     """
     log_debug("Endpoint call: gamesession/get_scenario_history", session_id=str(session_id))
     try:
-        session_info: Dict[str, Any] = GameSessionService.get_session_info(str(session_id))
-        scenario_name: str = session_info["scenario_name"]
-        _, deps = build_gm_agent_pydantic(str(session_id), scenario_name)
-        history: List[Dict[str, Any]] = deps.store.read_json_history()
+        session = GameSessionService(str(session_id))
+        messages : List[ModelMessage] = await session.load_history(HISTORY_NARRATIVE)
+        history: List[Dict[str, Any]] = [msg.__dict__ for msg in messages]
         return ScenarioHistoryResponse(history=history)
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
@@ -464,9 +478,10 @@ async def delete_history_message(session_id: UUID, message_index: int) -> Delete
         session_info: Dict[str, Any] = GameSessionService.get_session_info(str(session_id))
         scenario_name: str = session_info["scenario_name"]
 
-        agent, deps = build_gm_agent_pydantic(str(session_id), scenario_name)
+        session = GameSessionService(str(session_id))
 
-        history: List[Dict[str, Any]] = deps.store.read_json_history()
+        messages = await session.load_history(HISTORY_NARRATIVE)
+        history: List[Dict[str, Any]] = [msg.__dict__ for msg in messages]
 
         if message_index >= len(history):
             raise HTTPException(
@@ -488,7 +503,7 @@ async def delete_history_message(session_id: UUID, message_index: int) -> Delete
 
         try:
             pydantic_history = ModelMessagesTypeAdapter.validate_python(history)
-            deps.store.save_pydantic_history(pydantic_history)
+            await session.save_history("narrative", pydantic_history)
         except ImportError as e:
             log_debug("PydanticAI messages import error", error=str(e))
             raise HTTPException(status_code=500, detail=f"PydanticAI configuration missing: {str(e)}")

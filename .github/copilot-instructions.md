@@ -19,7 +19,7 @@ The backend is FastAPI with PydanticAI. Your primary role is to assist in develo
 - **No I/O in Services**: Services contain business logic only. I/O is handled by dedicated data services (e.g., `CharacterDataService`).
 - **No Game Logic in Routers**: Routers handle HTTP requests and responses only.
 - **English Naming**: All code, models, and data must be in English.
-- **Type Hints**: Use type hints everywhere. This is mandatory.
+- **Type Hints**: Use type hints everywhere. This is **MANDATORY**. ALL variables, parameters, return types, and class properties MUST have explicit type annotations. No exceptions.
 - **PydanticAI**: Use PydanticAI, not LangChain.
 
 ## 4. Technology Stack
@@ -100,7 +100,22 @@ async def skill_check_with_character(
 
 ## 8. Coding Standards
 
-- **Type Hints**: **MANDATORY**. All functions and methods and variables must have type hints.
+- **Type Hints**: **MANDATORY**. All functions, methods, variables, class properties, and parameters must have explicit type hints. This includes:
+  - All function parameters and return types
+  - All class properties (declared at class level)
+  - All local variables (inline type annotations)
+  - All loop variables
+  - All comprehension variables where ambiguous
+  **Example:**
+  ```python
+  class MyService:
+      property_name: str  # Class property type hint
+      count: int
+      
+      def __init__(self, name: str) -> None:
+          self.property_name = name
+          local_var: int = 42  # Local variable type hint
+  ```
 - **Pydantic Models**: Use for all data structures. Use V2 features like `field_validator`.
 - **Async**: Use `async/await` for all I/O operations.
 - **Docstrings**: Document all public methods (description, args, returns).
@@ -121,7 +136,11 @@ async def skill_check_with_character(
 
 ## 10. Testing Guidelines
 
-1. **always use back/run_tests.sh** for launching tests, go inside "/home/cyberbobjr/projects/jdr/back"
+1. **ALWAYS use `./run_tests.sh` WITHOUT ANY ARGUMENTS** for launching tests
+2. **NEVER use `pytest` directly** or pass any arguments/file paths to `run_tests.sh`
+3. **Location**: Always run from `/home/cyberbobjr/projects/jdr/back` directory
+4. **Command**: The ONLY acceptable command is: `cd /home/cyberbobjr/projects/jdr/back && ./run_tests.sh`
+5. **NO exceptions**: This rule applies to ALL test execution scenarios
 
 ## 11. Pydantic Documentation Requirement
 

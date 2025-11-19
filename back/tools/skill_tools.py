@@ -1,5 +1,6 @@
 import random
 from pydantic_ai import RunContext
+from back.services.game_session_service import GameSessionService
 from back.utils.logger import log_debug
 from back.services.character_service import CharacterService
 

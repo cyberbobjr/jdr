@@ -15,16 +15,21 @@ from back.models.domain.equipment_manager import EquipmentManager
 from back.config import get_data_dir
 
 class CharacterService:
-    def __init__(self, character_id: str, strict_validation: bool = True):
+    character_id: str
+    strict_validation: bool
+    character_data: Character
+    
+    def __init__(self, character_id: str, strict_validation: bool = True) -> None:
         """
         ### __init__
         **Description:** Initialise le service de personnage pour un personnage spécifique
         **Paramètres:**
         - `character_id` (str): Identifiant du personnage à gérer
-        - `strict_validation` (bool): Si True, valide strictement avec le modèle Character. Si False, accepte les personnages incomplets.        **Retour:** Aucun
+        - `strict_validation` (bool): Si True, valide strictement avec le modèle Character. Si False, accepte les personnages incomplets.
+        **Retour:** Aucun
         """
         self.character_id = character_id
-        self.strict_validation = strict_validation       
+        self.strict_validation = strict_validation
         self.character_data = self._load_character()
         
     def _load_character(self) -> Character:
@@ -78,12 +83,12 @@ class CharacterService:
         **Description:** Récupère la liste de tous les personnages disponibles à partir des fichiers JSON.
         **Retour:** Liste d'objets CharacterV2.
         """
-        characters = []
-        characters_dir = os.path.join(get_data_dir(), "characters")
+        characters: List[Character] = []
+        characters_dir: str = os.path.join(get_data_dir(), "characters")
 
         for filename in os.listdir(characters_dir):
             if filename.endswith(".json"):
-                character_id = filename[:-5]  # Retire l'extension .json
+                character_id: str = filename[:-5]  # Retire l'extension .json
                 try:
                     character: Character = CharacterPersistenceService.load_character_data(character_id)
                     characters.append(character)
@@ -123,8 +128,8 @@ class CharacterService:
         - `xp` (int): Points d'expérience à ajouter
         **Retour:** Aucun
         """
-        current_xp = getattr(self.character_data, 'xp', 0)
-        new_xp = current_xp + xp
+        current_xp: int = getattr(self.character_data, 'xp', 0)
+        new_xp: int = current_xp + xp
         self.character_data.xp = new_xp
         self.save_character()
         log_debug("Ajout d'XP", action="apply_xp", player_id=self.character_id, xp_ajoute=xp, xp_total=new_xp)
@@ -137,8 +142,8 @@ class CharacterService:
         - `gold` (float): Montant d'or à ajouter (peut avoir des décimales)
         **Retour:** Aucun
         """
-        current_gold = getattr(self.character_data, 'gold', 0.0)
-        new_gold = current_gold + gold
+        current_gold: float = getattr(self.character_data, 'gold', 0.0)
+        new_gold: float = current_gold + gold
         self.character_data.gold = new_gold
         self.save_character()
         log_debug("Ajout d'or", action="add_gold", player_id=self.character_id, gold_ajoute=gold, gold_total=new_gold)
@@ -152,8 +157,8 @@ class CharacterService:
         - `source` (str): Source des dégâts (optionnel)
         **Retour:** Aucun
         """
-        current_hp = getattr(self.character_data, 'hp', 0)
-        new_hp = max(0, current_hp - amount)
+        current_hp: int = getattr(self.character_data, 'hp', 0)
+        new_hp: int = max(0, current_hp - amount)
         self.character_data.hp = new_hp
         self.save_character()
         log_debug("Application de dégâts", action="take_damage", player_id=self.character_id, 
@@ -168,9 +173,9 @@ class CharacterService:
         - `qty` (int): Quantité de l'objet (défaut: 1)
         **Retour:** Objet Item instancié.
         """
-        item_service = ItemService()
+        item_service: ItemService = ItemService()
         # On suppose que l'item_id correspond au nom de l'objet dans ItemService
-        item = item_service.create_item_from_name(item_id, quantity=qty)
+        item: Item = item_service.create_item_from_name(item_id, quantity=qty)
         return item
 
     def add_item_object(self, item: 'Item') -> Dict:
@@ -182,9 +187,9 @@ class CharacterService:
         **Retour:** dict - Résumé de l'inventaire mis à jour
         """
         # Utiliser EquipmentService pour déléguer la logique
-        data_service = CharacterDataService(self.character_id)
-        equipment_service = EquipmentService(data_service)
-        character = data_service.load_character(self.character_id)
+        data_service: CharacterDataService = CharacterDataService(self.character_id)
+        equipment_service: EquipmentService = EquipmentService(data_service)
+        character: Character = data_service.load_character(self.character_id)
         equipment_service.add_item_object(character, item)
         # Recharger les données
         self.character_data = self._load_character()
@@ -217,7 +222,7 @@ class CharacterService:
         log_debug("Ajout d'un objet à l'inventaire", action="add_item", player_id=self.character_id, item_id=item_id, qty=qty)
         if not hasattr(self.character_data, 'inventory') or self.character_data.inventory is None:
             self.character_data.inventory = []
-        found = False
+        found: bool = False
         for item in self.character_data.inventory:
             if hasattr(item, 'id') and item.id == item_id:
                 item.quantity += qty
@@ -225,7 +230,7 @@ class CharacterService:
                 break
         if not found:
             # Instancie l'objet et l'ajoute à l'inventaire
-            item = self.instantiate_item_by_id(item_id, qty)
+            item: Item = self.instantiate_item_by_id(item_id, qty)
             self.character_data.inventory.append(item)
         self.save_character()
         return {"inventory": [item.model_dump() if hasattr(item, 'model_dump') else item for item in self.character_data.inventory]}
@@ -298,35 +303,36 @@ class CharacterService:
         log_debug("Achat d'équipement", action="buy_equipment", character_id=self.character_id, equipment_name=equipment_name)
         
         # Récupérer les détails de l'équipement
-        equipment_manager = EquipmentManager()
-        equipment_details = equipment_manager.get_equipment_by_name(equipment_name)
+        equipment_manager: EquipmentManager = EquipmentManager()
+        equipment_details: Dict[str, any] | None = equipment_manager.get_equipment_by_name(equipment_name)
         if not equipment_details:
             raise ValueError(f"Équipement '{equipment_name}' non trouvé")
         
         # Vérifier le budget avec la clé 'gold'
         # Gérer le cas où character_data est un dict ou un objet Character
+        character_dict: Dict[str, any]
         if hasattr(self.character_data, 'model_dump'):
             character_dict = self.character_data.model_dump()
         else:
             character_dict = self.character_data.copy() if isinstance(self.character_data, dict) else self.character_data
             
-        current_gold = character_dict.get('gold', 0)
-        equipment_cost = equipment_details.get('cost', 0)
+        current_gold: float = character_dict.get('gold', 0)
+        equipment_cost: float = equipment_details.get('cost', 0)
         
         if current_gold < equipment_cost:
             raise ValueError("Pas assez d'argent pour acheter cet équipement")
         
         # Ajouter l'équipement à la liste
-        equipment_list = character_dict.get('equipment', [])
+        equipment_list: List[str] = character_dict.get('equipment', [])
         if equipment_name not in equipment_list:
             equipment_list.append(equipment_name)
-          # Mettre à jour l'or du personnage
-        new_gold = current_gold - equipment_cost
+        # Mettre à jour l'or du personnage
+        new_gold: float = current_gold - equipment_cost
         
         # Calculer le poids total pour la réponse
-        total_weight = 0
+        total_weight: float = 0
         for equipment_name_in_list in equipment_list:
-            equipment_item = equipment_manager.get_equipment_by_name(equipment_name_in_list)
+            equipment_item: Dict[str, any] | None = equipment_manager.get_equipment_by_name(equipment_name_in_list)
             if equipment_item:
                 total_weight += equipment_item.get('weight', 0)
         
@@ -364,33 +370,34 @@ class CharacterService:
         log_debug("Vente d'équipement", action="sell_equipment", character_id=self.character_id, equipment_name=equipment_name)
         
         # Récupérer les détails de l'équipement
-        equipment_manager = EquipmentManager()
-        equipment_details = equipment_manager.get_equipment_by_name(equipment_name)
+        equipment_manager: EquipmentManager = EquipmentManager()
+        equipment_details: Dict[str, any] | None = equipment_manager.get_equipment_by_name(equipment_name)
         if not equipment_details:
             raise ValueError(f"Équipement '{equipment_name}' non trouvé")
         
         # Retirer l'équipement de la liste
         # Gérer le cas où character_data est un dict ou un objet Character
+        character_dict: Dict[str, any]
         if hasattr(self.character_data, 'model_dump'):
             character_dict = self.character_data.model_dump()
         else:
             character_dict = self.character_data.copy() if isinstance(self.character_data, dict) else self.character_data
             
-        equipment_list = character_dict.get('equipment', [])
+        equipment_list: List[str] = character_dict.get('equipment', [])
         if equipment_name not in equipment_list:
             raise ValueError(f"L'équipement '{equipment_name}' n'est pas dans l'inventaire")
             
         equipment_list.remove(equipment_name)
         
         # Rembourser l'or du personnage
-        current_gold = character_dict.get('gold', 0)
-        equipment_cost = equipment_details.get('cost', 0)
-        new_gold = current_gold + equipment_cost
+        current_gold: float = character_dict.get('gold', 0)
+        equipment_cost: float = equipment_details.get('cost', 0)
+        new_gold: float = current_gold + equipment_cost
         
         # Calculer le poids total pour la réponse
-        total_weight = 0
+        total_weight: float = 0
         for equipment_name_in_list in equipment_list:
-            equipment_item = equipment_manager.get_equipment_by_name(equipment_name_in_list)
+            equipment_item: Dict[str, any] | None = equipment_manager.get_equipment_by_name(equipment_name_in_list)
             if equipment_item:
                 total_weight += equipment_item.get('weight', 0)
         
@@ -425,15 +432,16 @@ class CharacterService:
         **Retour:** dict - Résumé avec statut et nouvel argent
         """
         log_debug("Mise à jour de l'argent", action="update_money", character_id=self.character_id, amount=amount)
-          # Mettre à jour l'argent avec la clé 'gold'
+        # Mettre à jour l'argent avec la clé 'gold'
         # Gérer le cas où character_data est un dict ou un objet Character
+        character_dict: Dict[str, any]
         if hasattr(self.character_data, 'model_dump'):
             character_dict = self.character_data.model_dump()
         else:
             character_dict = self.character_data.copy() if isinstance(self.character_data, dict) else self.character_data
             
-        current_gold = character_dict.get('gold', 0)
-        new_gold = max(0, current_gold + amount)  # Ne pas aller en négatif
+        current_gold: float = character_dict.get('gold', 0)
+        new_gold: float = max(0, current_gold + amount)  # Ne pas aller en négatif
         
         # Mettre à jour les données du personnage
         if hasattr(self.character_data, 'gold'):
@@ -462,7 +470,7 @@ class CharacterService:
         character_data["id"] = character_id
         
         # Vérifier si le personnage est complet ou en cours de création
-        is_incomplete = (
+        is_incomplete: bool = (
             character_data.get("name") is None or 
             character_data.get("status") == CharacterStatus.IN_PROGRESS or
             character_data.get("status") is None

@@ -2,7 +2,7 @@
 
 from datetime import datetime, timezone
 
-from back.config import get_logger
+from ..config import get_logger
 
 # Logger pour ce module
 logger = get_logger(__name__)
@@ -15,17 +15,23 @@ def log_debug(message: str, **kwargs):
     - `message` (str) : Message à logger.
     - `kwargs` (dict) : Informations additionnelles à inclure dans le log.
     **Retour :** None
+    **Raises :** ValueError si des attributs réservés sont passés dans kwargs.
     """
-    try:
-        # Prévenir le conflit sur 'message' dans kwargs
-        if 'message' in kwargs:
-            raise ValueError("'message' ne doit pas être passé à la fois comme argument et dans kwargs.")
+    # Prévenir le conflit sur les attributs réservés dans kwargs
+    reserved_attrs = {'message', 'msg', 'args', 'levelname', 'levelno', 'pathname', 
+                     'filename', 'module', 'lineno', 'funcName', 'created', 
+                     'msecs', 'relativeCreated', 'thread', 'threadName', 
+                     'processName', 'process', 'name'}
+    conflicting = set(kwargs.keys()) & reserved_attrs
+    if conflicting:
+        raise ValueError(f"Les clés suivantes sont réservées par LogRecord: {conflicting}")
 
+    try:
         # Utiliser le système de logging standard avec format JSON
+        # Ne pas mettre 'message' ou 'level' dans extra pour éviter les conflits
         extra_data = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "level": "DEBUG",
-            "message": message,
+            "log_timestamp": datetime.now(timezone.utc).isoformat(),
+            "log_level": "DEBUG",
             **kwargs
         }
 
@@ -33,7 +39,7 @@ def log_debug(message: str, **kwargs):
         logger.debug(message, extra=extra_data)
 
     except Exception as e:
-        # Log minimal sur erreur de log
+        # Log minimal sur erreur de log (pas pour les erreurs de validation)
         print(f"[LOGGING ERROR] {e}")
         import traceback
         print(traceback.format_exc())
@@ -47,7 +53,11 @@ def log_info(message: str, **kwargs):
     - `kwargs` (dict) : Informations additionnelles.
     """
     try:
-        extra_data = {"level": "INFO", **kwargs}
+        extra_data = {
+            "log_timestamp": datetime.now(timezone.utc).isoformat(),
+            "log_level": "INFO",
+            **kwargs
+        }
         logger.info(message, extra=extra_data)
     except Exception as e:
         print(f"[LOGGING ERROR] {e}")
@@ -61,7 +71,11 @@ def log_warning(message: str, **kwargs):
     - `kwargs` (dict) : Informations additionnelles.
     """
     try:
-        extra_data = {"level": "WARNING", **kwargs}
+        extra_data = {
+            "log_timestamp": datetime.now(timezone.utc).isoformat(),
+            "log_level": "WARNING",
+            **kwargs
+        }
         logger.warning(message, extra=extra_data)
     except Exception as e:
         print(f"[LOGGING ERROR] {e}")
@@ -75,7 +89,11 @@ def log_error(message: str, **kwargs):
     - `kwargs` (dict) : Informations additionnelles.
     """
     try:
-        extra_data = {"level": "ERROR", **kwargs}
+        extra_data = {
+            "log_timestamp": datetime.now(timezone.utc).isoformat(),
+            "log_level": "ERROR",
+            **kwargs
+        }
         logger.error(message, extra=extra_data)
     except Exception as e:
         print(f"[LOGGING ERROR] {e}")
@@ -89,7 +107,11 @@ def log_critical(message: str, **kwargs):
     - `kwargs` (dict) : Informations additionnelles.
     """
     try:
-        extra_data = {"level": "CRITICAL", **kwargs}
+        extra_data = {
+            "log_timestamp": datetime.now(timezone.utc).isoformat(),
+            "log_level": "CRITICAL",
+            **kwargs
+        }
         logger.critical(message, extra=extra_data)
     except Exception as e:
         print(f"[LOGGING ERROR] {e}")

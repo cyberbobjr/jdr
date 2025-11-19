@@ -82,6 +82,16 @@ The backend uses a modular architecture with strict separation of responsibiliti
 - **Memory**: Conversation history stored in JSONL via `back/storage/pydantic_jsonl_store.py`
 - **System Prompt**: Modular prompt built dynamically from scenario and rules
 
+### Graph-Based Session Management
+
+The system uses **Pydantic Graph** for orchestrating session state transitions between narrative and combat modes:
+
+- **Graph Nodes** (`back/graph/nodes/`): `DispatcherNode`, `NarrativeNode`, `CombatNode`
+- **State Management**: `SessionGraphState` encapsulates game state, player messages, and history buffers
+- **DTOs** (`back/graph/dto/`): Structured payloads for combat and session data
+- **Persistence**: Separate JSONL histories for narrative and combat, with `game_state.json` for session metadata
+- **Transitions**: Deterministic mode switching via structured agent outputs
+
 ## 🎮 Game System
 
 ### Character Statistics (Simplified V2)

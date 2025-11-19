@@ -49,6 +49,17 @@ When a new file is created, ensure that:
 - Prefix private class members with underscore (\_)
 - Use ALL_CAPS for constants
 
+## Type Annotations
+
+- **MANDATORY**: Use type hints everywhere. ALL variables, parameters, return types, and class properties MUST have explicit type annotations. No exceptions.
+- Use `List[T]` instead of `list` for better clarity and specificity.
+- For return types, always specify the exact type, e.g., `List[ModelMessage]` or `List[Dict[str, Any]]` instead of generic `list`.
+- Import types from `typing` (e.g., `List`, `Dict`, `Any`, `Optional`) and specific modules as needed.
+- Use `from __future__ import annotations` in files where forward references are needed to avoid import issues.
+- Type all local variables in methods where the type is not immediately obvious, e.g., `history: List[ModelMessage] = ModelMessagesTypeAdapter.validate_python(data)`.
+- **FORBIDDEN**: Never use import fallbacks (e.g., try/except ImportError with None assignments). Let imports fail naturally if dependencies are missing.
+- When using conditional imports (e.g., for optional dependencies), use `TYPE_CHECKING` to import types only for static analysis, ensuring runtime compatibility.
+
 ## Error Handling
 
 - Use try/catch blocks for async operations

@@ -154,7 +154,7 @@ class EquipmentService:
         
         return character
     
-    def get_equipment_list(self, character: Character) -> list:
+    def get_equipment_list(self, character: Character) -> List[str]:
         """
         ### get_equipment_list
         **Description:** Récupère la liste des équipements du personnage.
@@ -167,7 +167,7 @@ class EquipmentService:
             names.extend([it.get("name") for it in lst if isinstance(it, dict) and it.get("name")])
         return names
     
-    def get_equipment_details(self, character: Character) -> list:
+    def get_equipment_details(self, character: Character) -> List[Dict[str, Any]]:
         """
         ### get_equipment_details
         **Description:** Récupère les détails complets des équipements du personnage.

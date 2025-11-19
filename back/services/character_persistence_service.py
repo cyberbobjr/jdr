@@ -5,7 +5,6 @@ Factorisation du code de lecture/écriture utilisé par CharacterService et autr
 
 import os
 import json
-from typing import Optional
 from dataclasses import asdict, is_dataclass
 from back.models.domain.character import Character
 from back.utils.logger import log_debug
@@ -102,21 +101,21 @@ class CharacterPersistenceService:
             raise
     
     @staticmethod
-    def save_character_data(character_id: str, character: Character | dict) -> Optional[Character]:
+    def save_character_data(character_id: str, character: Character) -> Character:
         """
         ### save_character_data
         **Description :** Sauvegarde les données complètes d'un personnage dans son fichier JSON.
         Effectue un merge avec les données existantes pour éviter l'écrasement.
         **Paramètres :**
         - `character_id` (str) : Identifiant du personnage (UUID).
-        - `character` (Character or dict) : Données à sauvegarder.
-        **Retour :** Les données complètes fusionnées du personnage (Character).
+        - `character` (Character) : Objet Character à sauvegarder.
+        **Retour :** L'objet Character sauvegardé.
         """
-        filepath = CharacterPersistenceService._get_character_file_path(character_id)
+        filepath: str = CharacterPersistenceService._get_character_file_path(character_id)
 
         try:
             # Charger les données existantes si le fichier existe
-            existing_data = {}
+            existing_data: dict = {}
             if os.path.exists(filepath):
                 try:
                     with open(filepath, "r", encoding="utf-8") as file:
@@ -128,14 +127,11 @@ class CharacterPersistenceService:
                              error=str(e))
                     existing_data = {}
 
-            # Convertir le character en dict pour le merge
-            if isinstance(character, dict):
-                character_dict = character
-            else:
-                character_dict = character.model_dump()
+            # Convertir le Character en dict avec mode='json' pour sérialisation JSON
+            character_dict: dict = character.model_dump(mode='json')
 
             # Merger les données (les nouvelles données ont priorité)
-            merged_data = {**existing_data, **character_dict}
+            merged_data: dict = {**existing_data, **character_dict}
 
             # Créer le répertoire si nécessaire
             os.makedirs(os.path.dirname(filepath), exist_ok=True)
@@ -149,17 +145,8 @@ class CharacterPersistenceService:
                      filepath=os.path.abspath(filepath),
                      keys_updated=list(character_dict.keys()))
 
-            # Try to return a CharacterV2 with the merged data
-            try:
-                return Character(**merged_data)
-            except Exception as e:
-                # If merged data is not valid for CharacterV2, log and return None
-                # This can happen with partial data during character creation
-                log_debug("Merged data not valid for CharacterV2, returning None",
-                         action="save_character_data_partial",
-                         character_id=character_id,
-                         error=str(e))
-                return None
+            # Retourner l'objet Character avec les données mergées
+            return Character(**merged_data)
         except Exception as e:
             log_debug("Erreur lors de la sauvegarde",
                      action="save_character_data_error",

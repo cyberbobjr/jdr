@@ -86,11 +86,19 @@ class ValidateCharacterV2Response(BaseModel):
     message: str = Field(..., description="Validation message")
 
 
-def _validate_character_payload(character_payload: Dict[str, Any]) -> ValidateCharacterV2Response:
-    """Run CharacterV2 validation and build a standardized response."""
+def _validate_character_payload(character_payload: Dict[str, Any], character_id: str | None = None) -> ValidateCharacterV2Response:
+    """Run CharacterV2 validation and build a standardized response.
+    
+    If character_id is provided, persists any status changes after validation.
+    """
     try:
         validated_character = Character(**character_payload)
         validated_character.sync_status_from_completion()
+        
+        # Persist status change if character_id is provided
+        if character_id:
+            CharacterPersistenceService.save_character_data(character_id, validated_character)
+        
         return ValidateCharacterV2Response(
             valid=True,
             character=validated_character.model_dump(),
@@ -192,7 +200,7 @@ async def create_random_character() -> CharacterV2Response:
         # 3. Allocate skills based on race affinities and stats
         skill_allocation_service = SkillAllocationService()
         stats_obj = Stats(**random_stats)
-        allocated_skills = skill_allocation_service.allocate_skills_for_character(
+        allocated_skills = skill_allocation_service.allocate_random_skills_for_character(
             random_race_data.name, random_culture_data.name, stats_obj
         )
 
@@ -547,7 +555,7 @@ def create_character(request: CreateCharacterV2Request) -> CreateCharacterV2Resp
         character.sync_status_from_completion()
 
         # Save character data
-        CharacterPersistenceService.save_character_data(character_id, character.model_dump())
+        CharacterPersistenceService.save_character_data(character_id, character)
         
         return CreateCharacterV2Response(
             character_id=character_id,
@@ -836,4 +844,4 @@ async def validate_character_by_id(request: ValidateCharacterByIdRequest) -> Val
     except ValueError as value_error:
         raise HTTPException(status_code=400, detail=str(value_error)) from value_error
 
-    return _validate_character_payload(character.model_dump())
+    return _validate_character_payload(character.model_dump(), character_id=request.character_id)

@@ -25,13 +25,10 @@ app:
   # Hôte du serveur FastAPI
   host: "0.0.0.0"
 
-  # Niveau de log
-  log_level: "INFO"
-
 # Configuration du logging
 logging:
   # Niveau de log global (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-  level: "INFO"
+  level: "DEBUG"
 
   # Format des logs (JSON pour Grafana/Loki)
   format: "json"
@@ -44,6 +41,3 @@ logging:
 
   # Nombre de fichiers de backup à conserver
   backup_count: 5
-
-  # Inclure les logs de débogage détaillés
-  debug_enabled: false

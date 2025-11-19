@@ -333,10 +333,10 @@ class Character(BaseModel):
     
     All fields in English for backend consistency.
     Simplified from original system:
-    - 400 stat points (down from 550)
-    - 40 skill development points (down from 84)
-    - 6 stat attributes (unchanged)
-    - 6 skill groups (down from 9)
+    - 400 stat points 
+    - 40 skill development points
+    - 6 stat attributes
+    - 6 skill groups
     """
     
     # Identity
@@ -495,6 +495,203 @@ class Character(BaseModel):
     def hp(self, value: int) -> None:
         value_int = max(0, int(value))
         self.combat_stats.current_hit_points = min(value_int, self.combat_stats.max_hit_points)
+
+    def build_narrative_prompt_block(self) -> str:
+        """
+        ### build_narrative_prompt_block
+        **Description:** Produce a rich multi-section textual representation of the character for narrative prompts.
+        **Parameters:**
+        - (none)
+        **Returns:** A formatted string containing identity, stats, skills, combat stats, equipment and descriptions.
+        """
+        from typing import Dict, List, Any
+
+        # Stats formatting
+        stats_dict: Dict[str, int] = self.stats.model_dump()
+        stats_lines: List[str] = [f"  - {stat.upper()}: {value}" for stat, value in stats_dict.items()]
+        stats_block: str = "\n".join(stats_lines)
+
+        # Skills formatting (all groups)
+        skills_dict: Dict[str, Dict[str, int]] = self.skills.model_dump()
+        skill_group_blocks: List[str] = []
+        for group_name, group_skills in skills_dict.items():
+            group_name_fmt: str = group_name.replace('_', ' ').title()
+            if group_skills:
+                group_skill_lines: List[str] = [f"    - {skill.replace('_', ' ').title()}: {rank}" for skill, rank in group_skills.items()]
+                group_block: str = f"\n  {group_name_fmt}:\n" + "\n".join(group_skill_lines)
+            else:
+                group_block: str = f"\n  {group_name_fmt}:\n    - None"
+            skill_group_blocks.append(group_block)
+        skills_block: str = "".join(skill_group_blocks)
+
+        # Equipment formatting
+        equipment_dict: Dict[str, Any] = self.equipment.model_dump()
+        weapons_names: List[str] = [w.get("name", "unknown") for w in equipment_dict.get("weapons", [])]
+        armor_names: List[str] = [a.get("name", "unknown") for a in equipment_dict.get("armor", [])]
+        accessories_names: List[str] = [acc.get("name", "unknown") for acc in equipment_dict.get("accessories", [])]
+        consumables_names: List[str] = [c.get("name", "unknown") for c in equipment_dict.get("consumables", [])]
+        weapons_str: str = ", ".join(weapons_names) if weapons_names else "None"
+        armor_str: str = ", ".join(armor_names) if armor_names else "None"
+        accessories_str: str = ", ".join(accessories_names) if accessories_names else "None"
+        consumables_str: str = ", ".join(consumables_names) if consumables_names else "None"
+
+        # Combat stats formatting
+        combat_dict: Dict[str, int] = self.combat_stats.model_dump()
+        hp_line: str = f"  - HP: {combat_dict.get('current_hit_points')}/{combat_dict.get('max_hit_points')}"
+        mp_line: str = f"  - MP: {combat_dict.get('current_mana_points')}/{combat_dict.get('max_mana_points')}"
+        ac_line: str = f"  - Armor Class: {combat_dict.get('armor_class')}"
+        atk_line: str = f"  - Attack Bonus: {combat_dict.get('attack_bonus')}"
+        combat_block: str = "\n".join([hp_line, mp_line, ac_line, atk_line])
+
+        background_str: str = self.description if self.description else 'Not defined'
+        physical_str: str = self.physical_description if self.physical_description else 'Not defined'
+
+        narrative_block: str = (
+            f"Name: {self.name}\n"
+            f"Race: {self.race}\n"
+            f"Culture: {self.culture}\n"
+            f"Level: {self.level}\n\n"
+            f"Stats:\n{stats_block}\n\n"
+            f"Skills:{skills_block}\n\n"
+            f"Combat Stats:\n{combat_block}\n\n"
+            f"Experience: {self.experience_points} XP\n"
+            f"Gold: {equipment_dict.get('gold', 0)}\n\n"
+            f"Equipment:\n  - Weapons: {weapons_str}\n  - Armor: {armor_str}\n  - Accessories: {accessories_str}\n  - Consumables: {consumables_str}\n\n"
+            f"Background: {background_str}\n"
+            f"Physical Description: {physical_str}\n"
+        )
+        return narrative_block
+
+    def build_combat_prompt_block(self) -> str:
+        """
+        ### build_combat_prompt_block
+        **Description:** Produce a focused combat-oriented representation of the character for combat prompts.
+        **Parameters:**
+        - (none)
+        **Returns:** A formatted string emphasizing combat stats, combat skills and equipped items.
+        """
+        from typing import Dict, List, Any
+
+        # Core stat modifiers for quick reference
+        stats_dict: Dict[str, int] = self.stats.model_dump()
+        stat_lines: List[str] = [
+            f"  - {stat.upper()}: {value} (modifier: {self.stats.get_modifier(stat)})" for stat, value in stats_dict.items()
+        ]
+        stats_block: str = "\n".join(stat_lines)
+
+        # Combat skills only
+        skills_dict: Dict[str, Dict[str, int]] = self.skills.model_dump()
+        combat_skills_dict: Dict[str, int] = skills_dict.get('combat', {})
+        combat_skill_lines: List[str] = [
+            f"    - {skill.replace('_', ' ').title()}: {rank}" for skill, rank in combat_skills_dict.items()
+        ] if combat_skills_dict else ["    - None"]
+        combat_skills_block: str = "\n".join(combat_skill_lines)
+
+        # Equipment (weapons + armor)
+        equipment_dict: Dict[str, Any] = self.equipment.model_dump()
+        weapons_list: List[Dict[str, Any]] = equipment_dict.get("weapons", [])
+        armor_list: List[Dict[str, Any]] = equipment_dict.get("armor", [])
+        weapons_lines: List[str] = [
+            f"    - {w.get('name', 'unknown')}: {w.get('damage', 'N/A')} damage" for w in weapons_list
+        ] if weapons_list else ["    - None"]
+        armor_lines: List[str] = [
+            f"    - {a.get('name', 'unknown')}: {a.get('defense', 'N/A')} defense" for a in armor_list
+        ] if armor_list else ["    - None"]
+        weapons_block: str = "\n".join(weapons_lines)
+        armor_block: str = "\n".join(armor_lines)
+
+        # Combat stats
+        combat_dict: Dict[str, int] = self.combat_stats.model_dump()
+        hp_line: str = f"  - HP: {combat_dict.get('current_hit_points')}/{combat_dict.get('max_hit_points')}"
+        mp_line: str = f"  - MP: {combat_dict.get('current_mana_points')}/{combat_dict.get('max_mana_points')}"
+        ac_line: str = f"  - Armor Class: {combat_dict.get('armor_class')}"
+        atk_line: str = f"  - Attack Bonus: {combat_dict.get('attack_bonus')}"
+        init_line: str = f"  - Initiative Bonus: {self.calculate_initiative()}"
+        combat_core_block: str = "\n".join([hp_line, mp_line, ac_line, atk_line, init_line])
+
+        combat_prompt_block: str = (
+            f"Name: {self.name}\n"
+            f"Race: {self.race} | Culture: {self.culture} | Level: {self.level}\n\n"
+            f"Combat Stats:\n{stats_block}\n\n"
+            f"Combat Skills:\n{combat_skills_block}\n\n"
+            f"Health & Defense:\n{combat_core_block}\n\n"
+            f"Equipped Weapons:\n{weapons_block}\n\n"
+            f"Equipped Armor:\n{armor_block}\n"
+        )
+        return combat_prompt_block
+
+    def build_narrative_prompt_json(self) -> dict:
+        """
+        ### build_narrative_prompt_json
+        **Description:** Provide a structured JSON-friendly representation of the character for narrative contexts.
+        **Returns:** Dict with identity, stats, skills, combat, equipment and descriptions.
+        """
+        from typing import Dict, Any
+        stats_dict: Dict[str, int] = self.stats.model_dump()
+        skills_dict: Dict[str, Dict[str, int]] = self.skills.model_dump()
+        equipment_dict: Dict[str, Any] = self.equipment.model_dump()
+        combat_dict: Dict[str, int] = self.combat_stats.model_dump()
+        return {
+            "id": str(self.id),
+            "name": self.name,
+            "race": self.race,
+            "culture": self.culture,
+            "level": self.level,
+            "stats": stats_dict,
+            "skills": skills_dict,
+            "combat": {
+                "hp": combat_dict.get("current_hit_points"),
+                "max_hp": combat_dict.get("max_hit_points"),
+                "mp": combat_dict.get("current_mana_points"),
+                "max_mp": combat_dict.get("max_mana_points"),
+                "armor_class": combat_dict.get("armor_class"),
+                "attack_bonus": combat_dict.get("attack_bonus"),
+                "initiative_bonus": self.calculate_initiative()
+            },
+            "experience_points": self.experience_points,
+            "gold": equipment_dict.get("gold", 0),
+            "equipment": equipment_dict,
+            "background": self.description,
+            "physical_description": self.physical_description,
+            "status": self.status.value
+        }
+
+    def build_combat_prompt_json(self) -> dict:
+        """
+        ### build_combat_prompt_json
+        **Description:** Provide a compact structured JSON representation for combat resolution.
+        **Returns:** Dict focused on combat relevant data (stats, combat stats, combat skills, equipped weapons/armor).
+        """
+        from typing import Dict, Any, List
+        stats_dict: Dict[str, int] = self.stats.model_dump()
+        skills_dict: Dict[str, Dict[str, int]] = self.skills.model_dump()
+        combat_skills: Dict[str, int] = skills_dict.get("combat", {})
+        equipment_dict: Dict[str, Any] = self.equipment.model_dump()
+        weapons: List[Dict[str, Any]] = equipment_dict.get("weapons", [])
+        armor: List[Dict[str, Any]] = equipment_dict.get("armor", [])
+        combat_dict: Dict[str, int] = self.combat_stats.model_dump()
+        return {
+            "id": str(self.id),
+            "name": self.name,
+            "race": self.race,
+            "culture": self.culture,
+            "level": self.level,
+            "stats": stats_dict,
+            "combat_stats": {
+                "hp": combat_dict.get("current_hit_points"),
+                "max_hp": combat_dict.get("max_hit_points"),
+                "mp": combat_dict.get("current_mana_points"),
+                "max_mp": combat_dict.get("max_mana_points"),
+                "armor_class": combat_dict.get("armor_class"),
+                "attack_bonus": combat_dict.get("attack_bonus"),
+                "initiative_bonus": self.calculate_initiative()
+            },
+            "combat_skills": combat_skills,
+            "equipped": {
+                "weapons": weapons,
+                "armor": armor
+            }
+        }
     
     model_config = ConfigDict(
         json_schema_extra={

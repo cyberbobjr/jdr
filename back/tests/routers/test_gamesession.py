@@ -2,7 +2,7 @@ from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock, AsyncMock
 from uuid import uuid4
 from back.app import app
-from back.models.domain.character import Character, Stats, Skills, CombatStats
+from back.models.domain.character import Character, Stats, Skills, CombatStats, CharacterStatus
 from back.models.schema import ActiveSessionsResponse
 
 client = TestClient(app)
@@ -88,6 +88,7 @@ def test_start_scenario_success():
     """
     Test successfully starting a new scenario.
     """
+    from back.graph.dto.session import GameState, DispatchResult
     mock_session_id = uuid4()
     mock_character_id = uuid4()
     mock_scenario_name = "Test Scenario"
@@ -97,33 +98,44 @@ def test_start_scenario_success():
         "session_id": str(mock_session_id),
         "scenario_name": mock_scenario_name,
         "character_id": str(mock_character_id),
-        "message": "Scenario started.",
     }
 
+    mock_game_state = GameState(
+        session_mode="narrative",
+        narrative_history_id="default",
+        combat_history_id="default"
+    )
+
+    expected_messages = [{"content": mock_llm_response, "part_kind": "text"}]
+    mock_dispatch_result = DispatchResult(all_messages=expected_messages, new_messages=expected_messages)
+
     with patch('back.routers.gamesession.GameSessionService.start_scenario', return_value=start_scenario_response):
-        with patch('back.routers.gamesession.CharacterPersistenceService.load_character_data', return_value=MagicMock(status='active')):
-            with patch('back.routers.gamesession.build_gm_agent_pydantic') as mock_build_agent:
-                mock_agent = MagicMock()
-                mock_run_result = MagicMock()
-                mock_run_result.output = mock_llm_response
-                mock_run_result.all_messages.return_value = []
-                mock_agent.run = AsyncMock(return_value=mock_run_result)
+        with patch('back.routers.gamesession.CharacterPersistenceService') as MockPersistence:
+            mock_persistence_instance = MockPersistence.return_value
+            mock_char = MagicMock()
+            mock_char.status = CharacterStatus.ACTIVE
+            mock_persistence_instance.load_character_data.return_value = mock_char
+            
+            with patch('back.routers.gamesession.GameSessionService') as MockSessionService:
+                mock_service_instance = MagicMock()
+                mock_service_instance.load_game_state = AsyncMock(return_value=mock_game_state)
+                mock_service_instance.update_game_state = AsyncMock()
+                MockSessionService.return_value = mock_service_instance
+                
+                with patch('back.routers.gamesession.Graph') as MockGraph:
+                    mock_graph_instance = MagicMock()
+                    mock_run_result = MagicMock()
+                    mock_run_result.output = mock_dispatch_result
+                    mock_graph_instance.run = AsyncMock(return_value=mock_run_result)
+                    MockGraph.return_value = mock_graph_instance
 
-                mock_deps = MagicMock()
-                mock_deps.character_data.model_dump.return_value = {}
-                mock_deps.store.save_pydantic_history.return_value = None
+                    request_data = {
+                        "scenario_name": mock_scenario_name,
+                        "character_id": str(mock_character_id)
+                    }
+                    response = client.post("/api/gamesession/start", json=request_data)
 
-                mock_build_agent.return_value = (mock_agent, mock_deps)
-
-                request_data = {
-                    "scenario_name": mock_scenario_name,
-                    "character_id": str(mock_character_id)
-                }
-                response = client.post("/api/gamesession/start", json=request_data)
-
-                assert response.status_code == 200
-                response_data = response.json()
-                assert response_data["session_id"] == str(mock_session_id)
-                assert response_data["scenario_name"] == mock_scenario_name
-                assert response_data["character_id"] == str(mock_character_id)
-                assert response_data["llm_response"] == mock_llm_response
+                    assert response.status_code == 200
+                    response_data = response.json()
+                    assert "response" in response_data
+                    assert response_data["response"] == expected_messages

@@ -1,0 +1,278 @@
+"""
+Tests for Character serialization in CharacterPersistenceService.
+Validates that Character objects are correctly serialized to JSON and deserialized back.
+"""
+
+import pytest
+import json
+import os
+from uuid import uuid4, UUID
+from datetime import datetime
+from unittest.mock import patch
+
+from back.services.character_persistence_service import CharacterPersistenceService
+from back.models.domain.character import Character, CharacterStatus
+
+
+@pytest.fixture
+def temp_characters_dir(tmp_path):
+    """Create a temporary directory for character data and patch the service."""
+    d = tmp_path / "characters"
+    d.mkdir()
+    with patch('back.services.character_persistence_service.CHARACTERS_DIR', str(d)):
+        yield str(d)
+
+
+@pytest.fixture
+def sample_character():
+    """Create a sample Character object for testing."""
+    character_id: UUID = uuid4()
+    now: str = datetime.now().isoformat()
+    
+    character_dict = {
+        "id": str(character_id),
+        "name": "Test Character",
+        "race": "humans",
+        "culture": "gondorians",
+        "stats": {
+            "strength": 15,
+            "constitution": 14,
+            "agility": 13,
+            "intelligence": 12,
+            "wisdom": 16,
+            "charisma": 15
+        },
+        "skills": {
+            "combat": {
+                "melee_weapons": 5,
+                "archery": 3
+            },
+            "general": {
+                "perception": 4
+            }
+        },
+        "combat_stats": {
+            "max_hit_points": 140,
+            "current_hit_points": 140,
+            "max_mana_points": 112,
+            "current_mana_points": 112,
+            "armor_class": 11,
+            "attack_bonus": 2
+        },
+        "equipment": {
+            "weapons": [],
+            "armor": [],
+            "accessories": [],
+            "consumables": [],
+            "gold": 100
+        },
+        "spells": {
+            "known_spells": [],
+            "spell_slots": {},
+            "spell_bonus": 0
+        },
+        "level": 1,
+        "status": "active",
+        "experience_points": 0,
+        "created_at": now,
+        "updated_at": now,
+        "description": "A brave warrior from Gondor",
+        "physical_description": "Tall with dark hair"
+    }
+    
+    return Character(**character_dict)
+
+
+def test_save_character_object_success(temp_characters_dir, sample_character):
+    """
+    Test that a Character object is successfully saved to JSON with proper serialization.
+    """
+    character_id: str = str(sample_character.id)
+    
+    # Save the Character object
+    result: Character = CharacterPersistenceService.save_character_data(character_id, sample_character)
+    
+    # Verify the file was created
+    expected_file: str = os.path.join(temp_characters_dir, f"{character_id}.json")
+    assert os.path.exists(expected_file), "Character file should be created"
+    
+    # Verify the content is valid JSON
+    with open(expected_file, 'r', encoding='utf-8') as f:
+        saved_data: dict = json.load(f)
+    
+    # Verify all fields are present and correctly serialized
+    assert saved_data["id"] == character_id, "ID should be serialized as string"
+    assert saved_data["name"] == "Test Character"
+    assert saved_data["race"] == "humans"
+    assert saved_data["status"] == "active", "Enum should be serialized as string"
+    assert isinstance(saved_data["stats"], dict), "Stats should be a dict"
+    assert isinstance(saved_data["skills"], dict), "Skills should be a dict"
+    
+    # Verify the returned Character matches the saved one
+    assert result.id == sample_character.id
+    assert result.name == sample_character.name
+
+
+def test_save_and_load_character_roundtrip(temp_characters_dir, sample_character):
+    """
+    Test that a Character can be saved and loaded back with all data intact.
+    """
+    character_id: str = str(sample_character.id)
+    
+    # Save the Character
+    CharacterPersistenceService.save_character_data(character_id, sample_character)
+    
+    # Load it back
+    loaded_character: Character = CharacterPersistenceService.load_character_data(character_id)
+    
+    # Verify all critical fields match
+    assert loaded_character.id == sample_character.id
+    assert loaded_character.name == sample_character.name
+    assert loaded_character.race == sample_character.race
+    assert loaded_character.culture == sample_character.culture
+    assert loaded_character.status == sample_character.status
+    assert loaded_character.stats.strength == sample_character.stats.strength
+    assert loaded_character.level == sample_character.level
+    assert loaded_character.experience_points == sample_character.experience_points
+
+
+def test_save_character_with_uuid_serialization(temp_characters_dir, sample_character):
+    """
+    Test that UUID fields are properly serialized to strings in JSON.
+    """
+    character_id: str = str(sample_character.id)
+    
+    # Save the Character
+    CharacterPersistenceService.save_character_data(character_id, sample_character)
+    
+    # Read the raw JSON file
+    expected_file: str = os.path.join(temp_characters_dir, f"{character_id}.json")
+    with open(expected_file, 'r', encoding='utf-8') as f:
+        saved_data: dict = json.load(f)
+    
+    # Verify UUID is stored as string, not as UUID object
+    assert isinstance(saved_data["id"], str), "UUID should be serialized as string"
+    assert saved_data["id"] == character_id
+
+
+def test_save_character_with_enum_serialization(temp_characters_dir, sample_character):
+    """
+    Test that Enum fields (CharacterStatus) are properly serialized to strings.
+    """
+    character_id: str = str(sample_character.id)
+    
+    # Ensure the character has an ACTIVE status
+    sample_character.status = CharacterStatus.ACTIVE
+    
+    # Save the Character
+    CharacterPersistenceService.save_character_data(character_id, sample_character)
+    
+    # Read the raw JSON file
+    expected_file: str = os.path.join(temp_characters_dir, f"{character_id}.json")
+    with open(expected_file, 'r', encoding='utf-8') as f:
+        saved_data: dict = json.load(f)
+    
+    # Verify status is stored as string
+    assert isinstance(saved_data["status"], str), "Enum should be serialized as string"
+    assert saved_data["status"] == "active"
+
+
+def test_save_character_merge_behavior(temp_characters_dir, sample_character):
+    """
+    Test that saving a character merges with existing data without losing fields.
+    """
+    character_id: str = str(sample_character.id)
+    
+    # Save initial character
+    CharacterPersistenceService.save_character_data(character_id, sample_character)
+    
+    # Modify the character
+    sample_character.name = "Updated Name"
+    sample_character.level = 2
+    
+    # Save again
+    CharacterPersistenceService.save_character_data(character_id, sample_character)
+    
+    # Load and verify
+    loaded_character: Character = CharacterPersistenceService.load_character_data(character_id)
+    
+    assert loaded_character.name == "Updated Name", "Name should be updated"
+    assert loaded_character.level == 2, "Level should be updated"
+    assert loaded_character.race == sample_character.race, "Other fields should remain"
+    assert loaded_character.stats.strength == sample_character.stats.strength, "Stats should remain"
+
+
+def test_save_character_updates_status_correctly(temp_characters_dir):
+    """
+    Test that saving a character with DRAFT status and then ACTIVE status persists correctly.
+    """
+    character_id: UUID = uuid4()
+    now: str = datetime.now().isoformat()
+    
+    # Create a draft character
+    draft_dict = {
+        "id": str(character_id),
+        "name": "Draft Character",
+        "race": "humans",
+        "culture": "gondorians",
+        "stats": {
+            "strength": 10,
+            "constitution": 10,
+            "agility": 10,
+            "intelligence": 10,
+            "wisdom": 10,
+            "charisma": 10
+        },
+        "skills": {},
+        "combat_stats": {
+            "max_hit_points": 100,
+            "current_hit_points": 100,
+            "max_mana_points": 80,
+            "current_mana_points": 80,
+            "armor_class": 10,
+            "attack_bonus": 0
+        },
+        "equipment": {"weapons": [], "armor": [], "accessories": [], "consumables": [], "gold": 0},
+        "spells": {"known_spells": [], "spell_slots": {}, "spell_bonus": 0},
+        "level": 1,
+        "status": "draft",
+        "experience_points": 0,
+        "created_at": now,
+        "updated_at": now,
+        "description": None,
+        "physical_description": None
+    }
+    
+    draft_character: Character = Character(**draft_dict)
+    
+    # Save as draft
+    CharacterPersistenceService.save_character_data(str(character_id), draft_character)
+    
+    # Verify status is draft
+    loaded: Character = CharacterPersistenceService.load_character_data(str(character_id))
+    assert loaded.status == CharacterStatus.DRAFT
+    
+    # Update to active
+    draft_character.status = CharacterStatus.ACTIVE
+    draft_character.description = "Now complete"
+    draft_character.physical_description = "Fully described"
+    
+    # Save again
+    CharacterPersistenceService.save_character_data(str(character_id), draft_character)
+    
+    # Verify status is now active
+    loaded_active: Character = CharacterPersistenceService.load_character_data(str(character_id))
+    assert loaded_active.status == CharacterStatus.ACTIVE
+    assert loaded_active.description == "Now complete"
+    assert loaded_active.physical_description == "Fully described"
+
+
+def test_save_character_invalid_id_raises_error(sample_character):
+    """
+    Test that saving with an invalid character_id raises ValueError.
+    """
+    with pytest.raises(ValueError, match="Character ID must be a non-empty string"):
+        CharacterPersistenceService.save_character_data("", sample_character)
+    
+    with pytest.raises(ValueError, match="Character ID must be a non-empty string"):
+        CharacterPersistenceService.save_character_data(None, sample_character)

@@ -24,14 +24,14 @@ class SkillAllocationService:
     def __init__(self):
         self.skills_manager = UnifiedSkillsManager()
 
-    def allocate_skills_for_character(
+    def allocate_random_skills_for_character(
         self,
         race_name: str,
         culture_name: str,
         stats: Stats
     ) -> Dict[str, Dict[str, int]]:
         """
-        Allocate skills for a character based on race, culture, and stats.
+        Allocate skills randomly for a character based on race, culture, and stats.
 
         Args:
             race_name: The character's race
@@ -39,17 +39,16 @@ class SkillAllocationService:
             stats: The character's stats
 
         Returns:
-            Dictionary of skill groups with allocated skills
+            Dictionary of skill groups with allocated skills (all skills initialized to 0, then allocated)
         """
-        # Initialize empty skill allocation
-        allocated_skills = {
-            "artistic": {},
-            "magic_arts": {},
-            "athletic": {},
-            "combat": {},
-            "concentration": {},
-            "general": {}
-        }
+        # Initialize all skills from YAML data with 0 points
+        allocated_skills: Dict[str, Dict[str, int]] = {}
+        all_skills = self.skills_manager.get_all_skills()
+        
+        for group_name, skills_dict in all_skills.items():
+            allocated_skills[group_name] = {}
+            for skill_id in skills_dict.keys():
+                allocated_skills[group_name][skill_id] = 0
 
         # Step 1: Allocate race-based affinities
         race_affinities: List[Dict[str, int]] = self.skills_manager.get_race_affinities(race_name)

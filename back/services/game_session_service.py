@@ -9,6 +9,8 @@ import pathlib
 from typing import Dict, Any, Optional, List
 from uuid import UUID, uuid4
 
+from pydantic_ai import ModelMessage
+
 from back.models.domain.character import Character
 from back.services.character_data_service import CharacterDataService
 from back.services.character_business_service import CharacterBusinessService
@@ -16,6 +18,11 @@ from back.services.equipment_service import EquipmentService
 from back.storage.pydantic_jsonl_store import PydanticJsonlStore
 from back.config import get_data_dir
 from back.utils.logger import log_debug
+
+
+# History types constants
+HISTORY_NARRATIVE = "narrative"
+HISTORY_COMBAT = "combat"
 
 
 class GameSessionService:
@@ -27,7 +34,6 @@ class GameSessionService:
     - `session_id` (str): Session identifier
     - `character_data` (Character): Character data for the session (typed object)
     - `scenario_id` (str): Scenario ID associated with the session
-    - `store` (PydanticJsonlStore): Store for message history
     - `data_service` (CharacterDataService): Data service for character
     - `business_service` (CharacterBusinessService): Business logic service
     - `equipment_service` (EquipmentService): Equipment service
@@ -52,12 +58,7 @@ class GameSessionService:
         self.business_service: Optional[CharacterBusinessService] = None
         self.equipment_service: Optional[EquipmentService] = None
 
-        # Initialize the store for history
-        if not os.path.isabs(session_id):
-            history_path = os.path.join(get_data_dir(), "sessions", f"{session_id}.jsonl")
-        else:
-            history_path = session_id + ".jsonl"
-        self.store = PydanticJsonlStore(history_path)
+        # Store is created on demand in save_history/load_history methods
 
         # Load session data or create a new session
         if not self._load_session_data():
@@ -430,3 +431,130 @@ class GameSessionService:
     # - load_history
     # - save_history
     # - update_character_data
+
+    async def save_history(self, kind: str, messages: list) -> None:
+        """
+        ### save_history
+        **Description:** Save history messages for narrative or combat.
+        **Parameters:**
+        - `kind` (str): "narrative" or "combat"
+        - `messages` (list): List of ModelMessage
+        """
+        history_path = os.path.join(get_data_dir(), "sessions", self.session_id, f"history_{kind}.jsonl")
+        store = PydanticJsonlStore(history_path)
+        store.save_pydantic_history(messages)
+
+    async def load_history(self, kind: str) -> List[ModelMessage]:
+        """
+        ### load_history
+        **Description:** Load history messages for narrative or combat.
+        **Parameters:**
+        - `kind` (str): "narrative" or "combat"
+        **Returns:** List of ModelMessage
+        """
+        history_path = os.path.join(get_data_dir(), "sessions", self.session_id, f"history_{kind}.jsonl")
+        if os.path.exists(history_path):
+            store = PydanticJsonlStore(history_path)
+            return store.load_pydantic_history()
+        return []
+
+    async def load_history_raw_json(self, kind: str) -> List[Dict[str, Any]]:
+        """
+        ### load_history_raw_json
+        **Description:** Load history messages for narrative or combat as raw JSON.
+        **Parameters:**
+        - `kind` (str): "narrative" or "combat"
+        **Returns:** List of raw JSON message dictionaries
+        """
+        history_path = os.path.join(get_data_dir(), "sessions", self.session_id, f"history_{kind}.jsonl")
+        if os.path.exists(history_path):
+            store = PydanticJsonlStore(history_path)
+            return store.load_raw_json_history()
+        return []
+
+    async def update_game_state(self, game_state) -> None:
+        """
+        ### update_game_state
+        **Description:** Save the game state to game_state.json.
+        **Parameters:**
+        - `game_state`: GameState instance
+        """
+        import json
+        state_path = os.path.join(get_data_dir(), "sessions", self.session_id, "game_state.json")
+        with open(state_path, 'w', encoding='utf-8') as f:
+            json.dump(game_state.model_dump(), f, ensure_ascii=False, indent=2)
+
+    async def load_game_state(self):
+        """
+        ### load_game_state
+        **Description:** Load the game state from game_state.json.
+        **Returns:** GameState instance or None if not exists
+        """
+        from back.graph.dto.session import GameState
+        import json
+        state_path = os.path.join(get_data_dir(), "sessions", self.session_id, "game_state.json")
+        if os.path.exists(state_path):
+            with open(state_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return GameState(**data)
+        return None
+
+    async def build_narrative_prompt(self) -> str:
+        """
+        ### build_narrative_prompt
+        **Description:** Build the system prompt for narrative mode.
+        **Returns:** System prompt string
+        """
+        # Load scenario content
+        scenario_path = os.path.join(get_data_dir(), "scenarios", self.scenario_id)
+        if os.path.exists(scenario_path):
+            with open(scenario_path, 'r', encoding='utf-8') as f:
+                scenario_content = f.read()
+        else:
+            scenario_content = "No scenario loaded."
+
+        # Build complete character information via Character method
+        character_info = self.character_data.build_narrative_prompt_block() if self.character_data else "Unknown character"
+
+        return f"""
+You are a Game Master for a Middle-earth RPG.
+
+Scenario:
+{scenario_content}
+
+CHARACTER INFORMATION:
+{character_info}
+
+Guide the story and trigger combat when appropriate. Respond with structured output if combat starts.
+Use the character's stats, skills, and equipment when resolving actions and determining outcomes.
+"""
+
+    async def build_combat_prompt(self, combat_state: dict) -> str:
+        """
+        ### build_combat_prompt
+        **Description:** Build the system prompt for combat mode.
+        **Parameters:**
+        - `combat_state` (dict): Current combat state
+        **Returns:** System prompt string
+        """
+        # Build complete character information for combat via Character method
+        character_info = self.character_data.build_combat_prompt_block() if self.character_data else "Unknown character"
+
+        return f"""
+You are a Combat Master for a Middle-earth RPG.
+
+Current Combat State:
+{combat_state}
+
+CHARACTER INFORMATION:
+{character_info}
+
+Resolve combat turns using the character's stats, skills, and equipment.
+Use tools to:
+- Roll initiative and attacks
+- Apply damage and healing
+- Track combat state
+- End combat when appropriate
+
+Always consider the character's combat skills, equipment bonuses, and current HP when resolving actions.
+"""

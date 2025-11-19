@@ -11,85 +11,85 @@ combat_state_service = CombatStateService()
 
 def roll_initiative_tool(ctx: RunContext[GameSessionService], characters: list[dict]) -> list:
     """
-    Calcule l'ordre d'initiative des personnages.
+    Calculates the initiative order of characters.
 
     Args:
-        characters (list[dict]): Liste des personnages participant au combat.
+        characters (list[dict]): List of characters participating in combat.
     
     Returns:
-        list: Liste triée selon l'initiative.
+        list: List sorted by initiative.
     """
-    log_debug("Tool roll_initiative_tool appelé", tool="roll_initiative_tool", characters=characters)
+    log_debug("Tool roll_initiative_tool called", tool="roll_initiative_tool", characters=characters)
     # Ensure each character has an 'id' for CombatState
     for c in characters:
         if 'id' not in c:
             c['id'] = str(uuid.uuid4())
-    # Utilisation de CombatService pour l'initiative
+    # Use CombatService for initiative
     state = combat_service.start_combat(characters)
     state = combat_service.roll_initiative(state)
-    # Retourne la liste triée des personnages selon l'ordre d'initiative
+    # Return the sorted list of characters by initiative order
     return [p for cid in state.initiative_order for p in state.participants if p['id'] == cid]
 
 # Tool definition removed - now handled directly by PydanticAI agent
 
 def perform_attack_tool(ctx: RunContext[GameSessionService], dice: str) -> int:
     """
-    Effectue un jet d'attaque.
+    Performs an attack roll.
 
     Args:
-        dice (str): Notation des dés à lancer. Ex. : "1d20".
+        dice (str): Dice notation to roll. E.g.: "1d20".
     
     Returns:
-        int: Résultat du jet d'attaque.
+        int: Result of the attack roll.
     """
-    log_debug("Tool perform_attack_tool appelé", tool="perform_attack_tool", dice=dice)
+    log_debug("Tool perform_attack_tool called", tool="perform_attack_tool", dice=dice)
     return roll_attack(dice)
 
 # Tool definition removed - now handled directly by PydanticAI agent
 
 def resolve_attack_tool(ctx: RunContext[GameSessionService], attack_roll: int, defense_roll: int) -> bool:
     """
-    Résout une attaque en comparant les jets d'attaque et de défense.
+    Resolves an attack by comparing attack and defense rolls.
 
     Args:
-        attack_roll (int): Résultat du jet d'attaque.
-        defense_roll (int): Résultat du jet de défense.
+        attack_roll (int): Result of the attack roll.
+        defense_roll (int): Result of the defense roll.
     
     Returns:
-        bool: True si l'attaque réussit, False sinon.
+        bool: True if the attack succeeds, False otherwise.
     """
-    log_debug("Tool resolve_attack_tool appelé", tool="resolve_attack_tool", attack_roll=attack_roll, defense_roll=defense_roll)
+    log_debug("Tool resolve_attack_tool called", tool="resolve_attack_tool", attack_roll=attack_roll, defense_roll=defense_roll)
     return attack_roll > defense_roll
 
 # Tool definition removed - now handled directly by PydanticAI agent
 
 def calculate_damage_tool(ctx: RunContext[GameSessionService], base_damage: int, bonus: int = 0) -> int:
     """
-    Calcule les dégâts infligés en tenant compte des modificateurs.
+    Calculates damage dealt taking modifiers into account.
 
     Args:
-        base_damage (int): Dégâts de base de l'attaque.
-        bonus (int): Bonus/malus de dégâts. Par défaut : 0.
+        base_damage (int): Base damage of the attack.
+        bonus (int): Damage bonus/malus. Default: 0.
     
     Returns:
-        int: Dégâts finaux infligés.
+        int: Final damage dealt.
     """
-    log_debug("Tool calculate_damage_tool appelé", tool="calculate_damage_tool", base_damage=base_damage, bonus=bonus)
-    # Utilisation de CombatService pour le calcul des dégâts
+    log_debug("Tool calculate_damage_tool called", tool="calculate_damage_tool", base_damage=base_damage, bonus=bonus)
+    # Use CombatService for damage calculation
     return max(0, base_damage + bonus)
 
 # Tool definition removed - now handled directly by PydanticAI agent
 
 def end_combat_tool(ctx: RunContext[GameSessionService], combat_id: str, reason: str) -> dict:
     """
-    Termine explicitement un combat en précisant la raison.
+    Explicitly ends a combat by specifying the reason.
 
     Args:
-        combat_id (str): Identifiant du combat.
-        reason (str): Raison de la fin du combat (fuite, reddition, victoire, etc.).
+        combat_id (str): Combat identifier.
+        reason (str): Reason for ending the combat (flee, surrender, victory, etc.).
     
     Returns:
-        dict: Dictionnaire contenant le statut final du combat.
+        dict: Dictionary containing the final combat status.
     """
     try:
         session_id = ctx.deps.session_id
@@ -99,46 +99,46 @@ def end_combat_tool(ctx: RunContext[GameSessionService], combat_id: str, reason:
             combat_state = combat_service.end_combat(combat_state, reason)
             combat_state_service.save_combat_state(session_id, combat_state)
             
-            # Supprimer l'état du combat car il est terminé
+            # Delete the combat state since it's finished
             combat_state_service.delete_combat_state(session_id)
             
             return combat_service.get_combat_summary(combat_state)
         else:
-            return {"combat_id": combat_id, "status": "termine", "end_reason": reason, "error": "Combat non trouvé"}
+            return {"combat_id": combat_id, "status": "ended", "end_reason": reason, "error": "Combat not found"}
     except Exception as e:
-        log_debug("Erreur dans end_combat_tool", error=str(e), combat_id=combat_id)
-        return {"combat_id": combat_id, "status": "termine", "end_reason": reason, "error": str(e)}
+        log_debug("Error in end_combat_tool", error=str(e), combat_id=combat_id)
+        return {"combat_id": combat_id, "status": "ended", "end_reason": reason, "error": str(e)}
 
 
 def end_turn_tool(ctx: RunContext[GameSessionService], combat_id: str) -> dict:
     """
-    Termine explicitement le tour courant et passe au suivant.
+    Explicitly ends the current turn and moves to the next.
     
     Args:
-        combat_id (str): Identifiant du combat.
+        combat_id (str): Combat identifier.
     
     Returns:
-        dict: État mis à jour avec le joueur suivant.
+        dict: Updated state with the next player.
     """
-    log_debug("Tool end_turn_tool appelé", tool="end_turn_tool", combat_id=combat_id)
+    log_debug("Tool end_turn_tool called", tool="end_turn_tool", combat_id=combat_id)
     
     try:
         session_id = ctx.deps.session_id
         combat_state = combat_state_service.load_combat_state(session_id)
         
         if not combat_state or combat_state.combat_id != combat_id:
-            return {"error": "Combat non trouvé", "combat_id": combat_id}
+            return {"error": "Combat not found", "combat_id": combat_id}
         
-        if combat_state.status != "en_cours":
-            return {"error": "Combat non actif", "combat_id": combat_id, "status": combat_state.status}
+        if combat_state.status != "ongoing":
+            return {"error": "Combat not active", "combat_id": combat_id, "status": combat_state.status}
         
-        # Terminer le tour courant
+        # End the current turn
         combat_state = combat_service.end_turn(combat_state)
         
-        # Sauvegarder l'état mis à jour
+        # Save the updated state
         combat_state_service.save_combat_state(session_id, combat_state)
         
-        # Retourner l'état avec le participant suivant
+        # Return the state with the next participant
         summary = combat_service.get_combat_summary(combat_state)
         current_participant = None
         if combat_state.current_turn < len(combat_state.initiative_order):
@@ -146,91 +146,91 @@ def end_turn_tool(ctx: RunContext[GameSessionService], combat_id: str) -> dict:
             current_participant = next((p for p in combat_state.participants if p['id'] == current_id), None)
         
         summary["current_participant"] = current_participant
-        summary["message"] = f"Tour terminé. C'est maintenant au tour de {current_participant['nom'] if current_participant else 'Inconnu'}"
+        summary["message"] = f"Turn ended. It's now {current_participant['name'] if current_participant else 'Unknown'}'s turn"
         
         return summary
         
     except Exception as e:
-        log_debug("Erreur dans end_turn_tool", error=str(e), combat_id=combat_id)
+        log_debug("Error in end_turn_tool", error=str(e), combat_id=combat_id)
         return {"error": str(e), "combat_id": combat_id}
 
 
 def check_combat_end_tool(ctx: RunContext[GameSessionService], combat_id: str) -> dict:
     """
-    Vérifie automatiquement si le combat est terminé.
+    Automatically checks if the combat has ended.
     
     Args:
-        combat_id (str): Identifiant du combat.
+        combat_id (str): Combat identifier.
     
     Returns:
-        dict: Statut du combat et actions automatiques prises.
+        dict: Combat status and automatic actions taken.
     """
-    log_debug("Tool check_combat_end_tool appelé", tool="check_combat_end_tool", combat_id=combat_id)
+    log_debug("Tool check_combat_end_tool called", tool="check_combat_end_tool", combat_id=combat_id)
     
     try:
         session_id = ctx.deps.session_id
         combat_state = combat_state_service.load_combat_state(session_id)
         
         if not combat_state or combat_state.combat_id != combat_id:
-            return {"error": "Combat non trouvé", "combat_id": combat_id}
+            return {"error": "Combat not found", "combat_id": combat_id}
         
-        if combat_state.status != "en_cours":
+        if combat_state.status != "ongoing":
             return {"combat_ended": True, "status": combat_state.status, "end_reason": combat_state.end_reason}
         
-        # Vérifier si le combat est terminé
+        # Check if the combat has ended
         is_ended = combat_service.check_combat_end(combat_state)
         
         if is_ended:
-            # Déterminer la raison de la fin
-            players_alive = any(p.get('camp') == 'joueur' and p.get('hp', 1) > 0 for p in combat_state.participants)
-            enemies_alive = any(p.get('camp') == 'adversaire' and p.get('hp', 1) > 0 for p in combat_state.participants)
+            # Determine the reason for ending
+            players_alive = any(p.get('camp') == 'player' and p.get('hp', 1) > 0 for p in combat_state.participants)
+            enemies_alive = any(p.get('camp') == 'enemy' and p.get('hp', 1) > 0 for p in combat_state.participants)
             
             if not players_alive:
-                reason = "défaite"
+                reason = "defeat"
             elif not enemies_alive:
-                reason = "victoire"
+                reason = "victory"
             else:
-                reason = "match_nul"
+                reason = "draw"
             
-            # Terminer automatiquement le combat
+            # End the combat automatically
             combat_state = combat_service.end_combat(combat_state, reason)
             combat_state_service.save_combat_state(session_id, combat_state)
             
-            # Supprimer l'état du combat car il est terminé
+            # Delete the combat state since it's finished
             combat_state_service.delete_combat_state(session_id)
             
             return {
                 "combat_ended": True,
-                "status": "termine",
+                "status": "ended",
                 "end_reason": reason,
-                "message": f"Combat terminé automatiquement : {reason}",
+                "message": f"Combat ended automatically: {reason}",
                 "summary": combat_service.get_combat_summary(combat_state)
             }
         else:
             return {
                 "combat_ended": False,
-                "status": "en_cours",
-                "message": "Combat en cours"
+                "status": "ongoing",
+                "message": "Combat ongoing"
             }
             
     except Exception as e:
-        log_debug("Erreur dans check_combat_end_tool", error=str(e), combat_id=combat_id)
+        log_debug("Error in check_combat_end_tool", error=str(e), combat_id=combat_id)
         return {"error": str(e), "combat_id": combat_id}
 
 
 def apply_damage_tool(ctx: RunContext[GameSessionService], combat_id: str, target_id: str, amount: int) -> dict:
     """
-    Applique des dégâts à un participant et vérifie l'état du combat.
+    Applies damage to a participant and checks combat state.
     
     Args:
-        combat_id (str): Identifiant du combat.
-        target_id (str): ID de la cible.
-        amount (int): Points de dégâts à appliquer.
+        combat_id (str): Combat identifier.
+        target_id (str): Target ID.
+        amount (int): Damage points to apply.
     
     Returns:
-        dict: État mis à jour après application des dégâts.
+        dict: Updated state after applying damage.
     """
-    log_debug("Tool apply_damage_tool appelé", tool="apply_damage_tool", 
+    log_debug("Tool apply_damage_tool called", tool="apply_damage_tool", 
               combat_id=combat_id, target_id=target_id, amount=amount)
     
     try:
@@ -238,39 +238,39 @@ def apply_damage_tool(ctx: RunContext[GameSessionService], combat_id: str, targe
         combat_state = combat_state_service.load_combat_state(session_id)
         
         if not combat_state or combat_state.combat_id != combat_id:
-            return {"error": "Combat non trouvé", "combat_id": combat_id}
+            return {"error": "Combat not found", "combat_id": combat_id}
         
-        if combat_state.status != "en_cours":
-            return {"error": "Combat non actif", "combat_id": combat_id, "status": combat_state.status}
+        if combat_state.status != "ongoing":
+            return {"error": "Combat not active", "combat_id": combat_id, "status": combat_state.status}
         
-        # Appliquer les dégâts
+        # Apply the damage
         combat_state = combat_service.apply_damage(combat_state, target_id, amount)
         
-        # Vérifier automatiquement si le combat est terminé
+        # Automatically check if the combat has ended
         is_ended = combat_service.check_combat_end(combat_state)
         auto_end_info = None
         
         if is_ended:
-            players_alive = any(p.get('camp') == 'joueur' and p.get('hp', 1) > 0 for p in combat_state.participants)
-            enemies_alive = any(p.get('camp') == 'adversaire' and p.get('hp', 1) > 0 for p in combat_state.participants)
+            players_alive = any(p.get('camp') == 'player' and p.get('hp', 1) > 0 for p in combat_state.participants)
+            enemies_alive = any(p.get('camp') == 'enemy' and p.get('hp', 1) > 0 for p in combat_state.participants)
             
             if not players_alive:
-                reason = "défaite"
+                reason = "defeat"
             elif not enemies_alive:
-                reason = "victoire"
+                reason = "victory"
             else:
-                reason = "match_nul"
+                reason = "draw"
             
             combat_state = combat_service.end_combat(combat_state, reason)
             auto_end_info = {"ended": True, "reason": reason}
             
-            # Supprimer l'état du combat car il est terminé
+            # Delete the combat state since it's finished
             combat_state_service.delete_combat_state(session_id)
         
-        # Sauvegarder l'état mis à jour
+        # Save the updated state
         combat_state_service.save_combat_state(session_id, combat_state)
         
-        # Trouver la cible pour les informations de retour
+        # Find the target for return information
         target = next((p for p in combat_state.participants if p['id'] == target_id), None)
         
         result = {
@@ -285,32 +285,32 @@ def apply_damage_tool(ctx: RunContext[GameSessionService], combat_id: str, targe
         return result
         
     except Exception as e:
-        log_debug("Erreur dans apply_damage_tool", error=str(e), combat_id=combat_id, target_id=target_id)
+        log_debug("Error in apply_damage_tool", error=str(e), combat_id=combat_id, target_id=target_id)
         return {"error": str(e), "combat_id": combat_id}
 
 
 def get_combat_status_tool(ctx: RunContext[GameSessionService], combat_id: str) -> dict:
     """
-    Retourne l'état complet du combat pour injection dans le prompt.
+    Returns the complete combat state for injection into the prompt.
     
     Args:
-        combat_id (str): Identifiant du combat.
+        combat_id (str): Combat identifier.
     
     Returns:
-        dict: Résumé structuré du combat (round, qui joue, HP, etc.).
+        dict: Structured summary of the combat (round, who is playing, HP, etc.).
     """
-    log_debug("Tool get_combat_status_tool appelé", tool="get_combat_status_tool", combat_id=combat_id)
+    log_debug("Tool get_combat_status_tool called", tool="get_combat_status_tool", combat_id=combat_id)
     
     try:
         session_id = ctx.deps.session_id
         combat_state = combat_state_service.load_combat_state(session_id)
         
         if not combat_state or combat_state.combat_id != combat_id:
-            return {"error": "Combat non trouvé", "combat_id": combat_id}
+            return {"error": "Combat not found", "combat_id": combat_id}
         
         summary = combat_service.get_combat_summary(combat_state)
         
-        # Ajouter des informations enrichies
+        # Add enriched information
         current_participant = None
         if combat_state.current_turn < len(combat_state.initiative_order):
             current_id = combat_state.initiative_order[combat_state.current_turn]
@@ -323,82 +323,82 @@ def get_combat_status_tool(ctx: RunContext[GameSessionService], combat_id: str) 
         return summary
         
     except Exception as e:
-        log_debug("Erreur dans get_combat_status_tool", error=str(e), combat_id=combat_id)
+        log_debug("Error in get_combat_status_tool", error=str(e), combat_id=combat_id)
         return {"error": str(e), "combat_id": combat_id}
 
 
 def start_combat_tool(ctx: RunContext[GameSessionService], participants: list[dict]) -> dict:
     """
-    Démarre un nouveau combat avec les participants donnés.
+    Starts a new combat with the given participants.
     
     Args:
-        participants (list[dict]): Liste des participants (joueur et adversaires).
+        participants (list[dict]): List of participants (player and enemies).
     
     Returns:
-        dict: État initial du combat.
+        dict: Initial combat state.
     """
-    log_debug("Tool start_combat_tool appelé", tool="start_combat_tool", participants=participants)
+    log_debug("Tool start_combat_tool called", tool="start_combat_tool", participants=participants)
     
     try:
         session_id = ctx.deps.session_id
         
-        # Vérifier qu'il n'y a pas déjà un combat actif
+        # Check that there's no active combat already
         if combat_state_service.has_active_combat(session_id):
-            return {"error": "Un combat est déjà en cours pour cette session"}
-        # Normaliser les participants (gérer les champs name/nom, health/hp)
+            return {"error": "A combat is already in progress for this session"}
+        # Normalize the participants (handle name/nom fields, health/hp)
         for p in participants:
             if 'id' not in p:
                 p['id'] = str(uuid.uuid4())
             
-            # Normaliser name -> nom
+            # Normalize name -> nom
             if 'name' in p and 'nom' not in p:
                 p['nom'] = p['name']
             elif 'nom' not in p:
-                p['nom'] = p.get('id', 'Inconnu')
+                p['nom'] = p.get('id', 'Unknown')
             
-            # Normaliser health -> hp
+            # Normalize health -> hp
             if 'health' in p and 'hp' not in p:
                 p['hp'] = p['health']
             elif 'hp' not in p:
                 p['hp'] = 1
             
-            # Ajouter initiative si manquante
+            # Add initiative if missing
             if 'initiative' not in p:
-                p['initiative'] = 10  # Valeur par défaut
+                p['initiative'] = 10  # Default value
             
-            # Ajouter camp si manquant
+            # Add camp if missing
             if 'camp' not in p:
-                p['camp'] = 'adversaire'  # Par défaut adversaire sauf le premier qui est souvent le joueur
+                p['camp'] = 'enemy'  # Default to enemy except the first who is often the player
         
-        # Le premier participant est souvent le joueur
+        # The first participant is often the player
         if participants and 'camp' not in participants[0]:
-            participants[0]['camp'] = 'joueur'
+            participants[0]['camp'] = 'player'
         
-        # Créer l'état initial du combat
+        # Create the initial combat state
         combat_state = combat_service.start_combat(participants)
         combat_state.combat_id = f"{session_id}_{uuid.uuid4().hex[:8]}"
         
-        # Calculer l'initiative
+        # Calculate initiative
         combat_state = combat_service.roll_initiative(combat_state)
         
-        # Sauvegarder l'état initial
+        # Save the initial state
         combat_state_service.save_combat_state(session_id, combat_state)
         
         summary = combat_service.get_combat_summary(combat_state)
         
-        # Ajouter des informations sur le premier participant
+        # Add information about the first participant
         current_participant = None
         if combat_state.current_turn < len(combat_state.initiative_order):
             current_id = combat_state.initiative_order[combat_state.current_turn]
             current_participant = next((p for p in combat_state.participants if p['id'] == current_id), None)
         
         summary["current_participant"] = current_participant
-        summary["message"] = f"Combat démarré ! C'est au tour de {current_participant['nom'] if current_participant else 'Inconnu'}"
+        summary["message"] = f"Combat started! It's {current_participant['nom'] if current_participant else 'Unknown'}'s turn"
         
         return summary
         
     except Exception as e:
-        log_debug("Erreur dans start_combat_tool", error=str(e))
+        log_debug("Error in start_combat_tool", error=str(e))
         return {"error": str(e)}
 
 # Tool definition removed - now handled directly by PydanticAI agent

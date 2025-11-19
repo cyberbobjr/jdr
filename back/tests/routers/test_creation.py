@@ -76,7 +76,7 @@ def test_create_character_v2_physical_description_persisted(mock_races_service, 
 
     # Verify that the saved character data contains the physical description
     assert saved_character is not None
-    assert saved_character.get("physical_description") == "Scar over left eye"
+    assert saved_character.physical_description == "Scar over left eye"
 
 
 @patch('back.routers.creation.CharacterPersistenceService')
@@ -111,7 +111,7 @@ def test_create_character_v2_sets_active_when_complete(mock_races_service, mock_
     response = client.post("/api/creation/create", json=request_data)
     assert response.status_code == 200
     assert saved_character is not None
-    assert saved_character["status"] == "active"
+    assert saved_character.status.value == "active"
 
 
 @patch('back.routers.creation.CharacterPersistenceService')
@@ -262,8 +262,9 @@ def test_create_character_v2_missing_stats(mock_persistence_service):
         assert "character_id" in response_data
 
         assert "data" in saved_payload
-        stats = saved_payload["data"]["stats"]
-        assert all(value == 10 for value in stats.values())
+        character = saved_payload["data"]
+        stats = character.stats
+        assert all(value == 10 for value in stats.model_dump().values())
 
 
 @patch('back.routers.creation.CharacterPersistenceService')
