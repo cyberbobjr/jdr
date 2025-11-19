@@ -43,9 +43,9 @@ MOCK_CHARACTER_1 = Character(
 )
 
 
-@patch('back.routers.creation.CharacterPersistenceService')
+@patch('back.routers.creation.CharacterDataService')
 @patch('back.routers.creation.RacesDataService')
-def test_create_character_v2_physical_description_persisted(mock_races_service, mock_persistence_service):
+def test_create_character_v2_physical_description_persisted(mock_races_service, mock_data_service):
     """
     Test that physical description is properly persisted when creating a character.
     """
@@ -55,11 +55,11 @@ def test_create_character_v2_physical_description_persisted(mock_races_service, 
 
     # Mock persistence service save method
     saved_character = None
-    def save_side_effect(cid, data):
+    def save_side_effect(data, cid):
         nonlocal saved_character
         saved_character = data
         return data
-    mock_persistence_service.save_character_data.side_effect = save_side_effect
+    mock_data_service.return_value.save_character.side_effect = save_side_effect
 
     request_data = {
         "name": "Phys Desc",
@@ -79,21 +79,21 @@ def test_create_character_v2_physical_description_persisted(mock_races_service, 
     assert saved_character.physical_description == "Scar over left eye"
 
 
-@patch('back.routers.creation.CharacterPersistenceService')
+@patch('back.routers.creation.CharacterDataService')
 @patch('back.routers.creation.RacesDataService')
-def test_create_character_v2_sets_active_when_complete(mock_races_service, mock_persistence_service):
+def test_create_character_v2_sets_active_when_complete(mock_races_service, mock_data_service):
     """Ensure completed payloads are stored as active characters."""
     mock_races_service_instance = mock_races_service.return_value
     mock_races_service_instance.get_race_by_id.return_value = MOCK_RACES_DATA[0]
 
     saved_character: Dict[str, Any] | None = None
 
-    def save_side_effect(character_id: str, payload: dict) -> dict:
+    def save_side_effect(payload: dict, character_id: str) -> dict:
         nonlocal saved_character
         saved_character = payload
         return payload
 
-    mock_persistence_service.save_character_data.side_effect = save_side_effect
+    mock_data_service.return_value.save_character.side_effect = save_side_effect
 
     request_data = {
         "name": "Complete Hero",
@@ -114,9 +114,9 @@ def test_create_character_v2_sets_active_when_complete(mock_races_service, mock_
     assert saved_character.status.value == "active"
 
 
-@patch('back.routers.creation.CharacterPersistenceService')
+@patch('back.routers.creation.CharacterDataService')
 @patch('back.routers.creation.RacesDataService')
-def test_create_character_v2_invalid_race(mock_races_service, mock_persistence_service):
+def test_create_character_v2_invalid_race(mock_races_service, mock_data_service):
     """
     Test character creation with invalid race.
     """
@@ -135,11 +135,11 @@ def test_create_character_v2_invalid_race(mock_races_service, mock_persistence_s
     response = client.post("/api/creation/create", json=request_data)
     assert response.status_code == 404
     assert "Race with id 'invalid_race' not found" in response.json()["detail"]
-    mock_persistence_service.save_character_data.assert_not_called()
+    mock_data_service.return_value.save_character.assert_not_called()
 
 
-@patch('back.routers.creation.CharacterPersistenceService')
-def test_update_character_v2_success(mock_persistence_service):
+@patch('back.routers.creation.CharacterDataService')
+def test_update_character_v2_success(mock_data_service):
     """
     Test successful character update.
     """
@@ -149,7 +149,7 @@ def test_update_character_v2_success(mock_persistence_service):
     existing_character.name = "Old Name"
 
     # Mock persistence service
-    mock_persistence_service.load_character_data.return_value = existing_character
+    mock_data_service.return_value.load_character.return_value = existing_character
 
     request_data = {
         "character_id": character_id,
@@ -165,12 +165,12 @@ def test_update_character_v2_success(mock_persistence_service):
     assert data["character"]["physical_description"] == "Updated description"
 
     # Verify the service methods were called
-    mock_persistence_service.load_character_data.assert_called_once_with(character_id)
-    mock_persistence_service.save_character_data.assert_called_once()
+    mock_data_service.return_value.load_character.assert_called_once_with(character_id)
+    mock_data_service.return_value.save_character.assert_called_once()
 
 
-@patch('back.routers.creation.CharacterPersistenceService')
-def test_update_character_v2_sets_active_when_complete(mock_persistence_service):
+@patch('back.routers.creation.CharacterDataService')
+def test_update_character_v2_sets_active_when_complete(mock_data_service):
     """Ensure updates flip status to active once every section is filled."""
     character_id = str(uuid4())
     existing_character = MOCK_CHARACTER_1.model_copy()
@@ -183,16 +183,16 @@ def test_update_character_v2_sets_active_when_complete(mock_persistence_service)
     existing_character.physical_description = None
     existing_character.status = CharacterStatus.DRAFT
 
-    mock_persistence_service.load_character_data.return_value = existing_character
+    mock_data_service.return_value.load_character.return_value = existing_character
 
     saved_character: Character | None = None
 
-    def save_side_effect(character_id: str, payload: Character) -> Character:
+    def save_side_effect(payload: Character, character_id: str) -> Character:
         nonlocal saved_character
         saved_character = payload
         return payload
 
-    mock_persistence_service.save_character_data.side_effect = save_side_effect
+    mock_data_service.return_value.save_character.side_effect = save_side_effect
 
     request_data = {
         "character_id": character_id,
@@ -206,14 +206,14 @@ def test_update_character_v2_sets_active_when_complete(mock_persistence_service)
     assert saved_character.status == CharacterStatus.ACTIVE
 
 
-@patch('back.routers.creation.CharacterPersistenceService')
-def test_update_character_v2_not_found(mock_persistence_service):
+@patch('back.routers.creation.CharacterDataService')
+def test_update_character_v2_not_found(mock_data_service):
     """
     Test updating non-existent character.
     """
     character_id = str(uuid4())
     # Mock persistence service to return None (character not found)
-    mock_persistence_service.load_character_data.return_value = None
+    mock_data_service.return_value.load_character.return_value = None
 
     request_data = {
         "character_id": character_id,
@@ -225,13 +225,13 @@ def test_update_character_v2_not_found(mock_persistence_service):
     assert f"Character with id '{character_id}' not found" in response.json()["detail"]
 
     # Ensure save was not called
-    mock_persistence_service.save_character_data.assert_not_called()
+    mock_data_service.return_value.save_character.assert_not_called()
 
 
 
 
-@patch('back.routers.creation.CharacterPersistenceService')
-def test_create_character_v2_missing_stats(mock_persistence_service):
+@patch('back.routers.creation.CharacterDataService')
+def test_create_character_v2_missing_stats(mock_data_service):
     """
     Ensure default stats are applied when not provided in the request.
     """
@@ -241,12 +241,12 @@ def test_create_character_v2_missing_stats(mock_persistence_service):
     with patch('back.routers.creation.RacesDataService', return_value=mock_races_service_instance):
         saved_payload: Dict[str, Any] = {}
 
-        def save_side_effect(character_id: str, character_data: dict) -> dict:
+        def save_side_effect(character_data: dict, character_id: str) -> dict:
             saved_payload["character_id"] = character_id
             saved_payload["data"] = character_data
             return character_data
 
-        mock_persistence_service.save_character_data.side_effect = save_side_effect
+        mock_data_service.return_value.save_character.side_effect = save_side_effect
 
         request_data = {
             "name": "Test Character",
@@ -267,9 +267,9 @@ def test_create_character_v2_missing_stats(mock_persistence_service):
         assert all(value == 10 for value in stats.model_dump().values())
 
 
-@patch('back.routers.creation.CharacterPersistenceService')
+@patch('back.routers.creation.CharacterDataService')
 @patch('back.routers.creation.RacesDataService')
-def test_create_character_v2_service_error(mock_races_service, mock_persistence_service):
+def test_create_character_v2_service_error(mock_races_service, mock_data_service):
     """
     Test character creation when service raises an exception.
     """
@@ -278,7 +278,7 @@ def test_create_character_v2_service_error(mock_races_service, mock_persistence_
     mock_races_service_instance.get_race_by_id.return_value = MOCK_RACES_DATA[0]
 
     # Mock persistence service to raise an exception
-    mock_persistence_service.save_character_data.side_effect = Exception("Database error")
+    mock_data_service.return_value.save_character.side_effect = Exception("Database error")
 
     request_data = {
         "name": "Test Character",
@@ -293,8 +293,8 @@ def test_create_character_v2_service_error(mock_races_service, mock_persistence_
     assert "Character creation failed" in response.json()["detail"]
 
 
-@patch('back.routers.creation.CharacterPersistenceService')
-def test_validate_character_v2_success(mock_persistence_service):
+@patch('back.routers.creation.CharacterDataService')
+def test_validate_character_v2_success(mock_data_service):
     """
     Test successful character validation.
     """
@@ -324,8 +324,8 @@ def test_validate_character_v2_success(mock_persistence_service):
     assert "message" in data
 
 
-@patch('back.routers.creation.CharacterPersistenceService')
-def test_validate_character_v2_invalid_data(mock_persistence_service):
+@patch('back.routers.creation.CharacterDataService')
+def test_validate_character_v2_invalid_data(mock_data_service):
     """
     Test character validation with invalid data.
     """
@@ -355,11 +355,11 @@ def test_validate_character_v2_invalid_data(mock_persistence_service):
     assert len(data["errors"]) > 0
 
 
-@patch('back.routers.creation.CharacterPersistenceService')
-def test_validate_character_by_id_success(mock_persistence_service):
+@patch('back.routers.creation.CharacterDataService')
+def test_validate_character_by_id_success(mock_data_service):
     """Validate a stored character using only its identifier."""
     stored_character = MOCK_CHARACTER_1.model_copy()
-    mock_persistence_service.load_character_data.return_value = stored_character
+    mock_data_service.return_value.load_character.return_value = stored_character
 
     response = client.post(
         "/api/creation/validate-character/by-id",
@@ -369,13 +369,13 @@ def test_validate_character_by_id_success(mock_persistence_service):
     assert response.status_code == 200
     payload = response.json()
     assert payload["valid"] is True
-    mock_persistence_service.load_character_data.assert_called_once_with(str(stored_character.id))
+    mock_data_service.return_value.load_character.assert_called_once_with(str(stored_character.id))
 
 
-@patch('back.routers.creation.CharacterPersistenceService')
-def test_validate_character_by_id_not_found(mock_persistence_service):
+@patch('back.routers.creation.CharacterDataService')
+def test_validate_character_by_id_not_found(mock_data_service):
     """Return 404 when the character JSON file cannot be located."""
-    mock_persistence_service.load_character_data.side_effect = FileNotFoundError("missing")
+    mock_data_service.return_value.load_character.side_effect = FileNotFoundError("missing")
 
     response = client.post(
         "/api/creation/validate-character/by-id",
@@ -386,8 +386,8 @@ def test_validate_character_by_id_not_found(mock_persistence_service):
     assert "missing" in response.json()["detail"]
 
 
-@patch('back.routers.creation.CharacterPersistenceService')
-def test_validate_character_by_id_invalid_payload(mock_persistence_service):
+@patch('back.routers.creation.CharacterDataService')
+def test_validate_character_by_id_invalid_payload(mock_data_service):
     """Surface validation errors when the stored payload is incomplete."""
     invalid_character = MagicMock()
     invalid_character.model_dump.return_value = {
@@ -409,7 +409,7 @@ def test_validate_character_by_id_invalid_payload(mock_persistence_service):
         "physical_description": None,
     }
 
-    mock_persistence_service.load_character_data.return_value = invalid_character
+    mock_data_service.return_value.load_character.return_value = invalid_character
 
     response = client.post(
         "/api/creation/validate-character/by-id",

@@ -5,7 +5,6 @@ Implémente l'injection de dépendances pour respecter DIP et faciliter les test
 
 from typing import Dict, Any
 from back.config import Config
-from back.services.character_persistence_service import CharacterPersistenceService
 from back.services.character_data_service import CharacterDataService
 from back.services.item_service import ItemService
 from back.services.equipment_service import EquipmentService
@@ -27,7 +26,6 @@ class DependencyContainer:
         """Enregistre tous les services avec leurs dépendances."""
         # Services de base
         self._services['config'] = self._config
-        self._services['character_persistence_service'] = CharacterPersistenceService()
         self._services['character_data_service'] = CharacterDataService()
         self._services['item_service'] = ItemService()
         self._services['equipment_service'] = EquipmentService(self._services['character_data_service'])

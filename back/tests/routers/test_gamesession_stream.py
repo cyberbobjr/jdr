@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock, AsyncMock
 
 from back.app import app
+from back.utils.exceptions import SessionNotFoundError
 
 client = TestClient(app)
 
@@ -58,31 +59,11 @@ def test_play_stream_success():
         mock_service_instance.update_game_state = AsyncMock()
         mock_service_instance.load_history = AsyncMock(return_value=[])
         mock_service_instance.save_history = AsyncMock()
-        mock_service_instance.build_narrative_prompt = AsyncMock(return_value="Test prompt")
+        mock_service_instance.build_narrative_system_prompt = AsyncMock(return_value="Test prompt")
         MockSessionService.return_value = mock_service_instance
         
-        # Mock the Graph execution
-        with patch('back.routers.gamesession.Graph') as MockGraph:
-            mock_graph_instance = MagicMock()
-            
-            # Mock the graph iterator
-            mock_run = AsyncMock()
-            mock_run.result = MagicMock()
-            mock_run.result.output = mock_result
-            
-            # Create an async iterator for nodes
-            async def node_iterator():
-                yield MagicMock()  # Simulate node execution
-            
-            mock_run.__aiter__ = lambda self: node_iterator()
-            
-            # Mock the iter context manager
-            mock_iter_cm = AsyncMock()
-            mock_iter_cm.__aenter__ = AsyncMock(return_value=mock_run)
-            mock_iter_cm.__aexit__ = AsyncMock(return_value=None)
-            
-            mock_graph_instance.iter = MagicMock(return_value=mock_iter_cm)
-            MockGraph.return_value = mock_graph_instance
+        with patch('back.routers.gamesession.session_graph.run', new_callable=AsyncMock) as mock_run:
+            mock_run.return_value = mock_result
 
             response = client.post(f"/api/gamesession/play-stream?session_id={session_id}", json={"message": user_message})
             assert response.status_code == 200
@@ -93,7 +74,7 @@ def test_play_stream_session_not_found():
     """
     session_id = uuid4()
     with patch('back.routers.gamesession.GameSessionService') as MockSessionService:
-        MockSessionService.side_effect = FileNotFoundError("Session not found")
+        MockSessionService.side_effect = SessionNotFoundError("Session not found")
         response = client.post(f"/api/gamesession/play-stream?session_id={session_id}", json={"message": "test"})
         
         assert response.status_code == 404
@@ -131,28 +112,12 @@ def test_play_stream_valid_session():
         mock_service_instance.update_game_state = AsyncMock()
         mock_service_instance.load_history = AsyncMock(return_value=[])
         mock_service_instance.save_history = AsyncMock()
-        mock_service_instance.build_narrative_prompt = AsyncMock(return_value="Test prompt")
+        mock_service_instance.build_narrative_system_prompt = AsyncMock(return_value="Test prompt")
         MockSessionService.return_value = mock_service_instance
         
         # Mock the Graph execution
-        with patch('back.routers.gamesession.Graph') as MockGraph:
-            mock_graph_instance = MagicMock()
-            
-            mock_run = AsyncMock()
-            mock_run.result = MagicMock()
-            mock_run.result.output = mock_result
-            
-            async def node_iterator():
-                yield MagicMock()
-            
-            mock_run.__aiter__ = lambda self: node_iterator()
-            
-            mock_iter_cm = AsyncMock()
-            mock_iter_cm.__aenter__ = AsyncMock(return_value=mock_run)
-            mock_iter_cm.__aexit__ = AsyncMock(return_value=None)
-            
-            mock_graph_instance.iter = MagicMock(return_value=mock_iter_cm)
-            MockGraph.return_value = mock_graph_instance
+        with patch('back.routers.gamesession.session_graph.run', new_callable=AsyncMock) as mock_run:
+            mock_run.return_value = mock_result
 
             response = client.post(f"/api/gamesession/play-stream?session_id={session_id}", json={"message": "test"})
             
@@ -208,24 +173,8 @@ def test_play_stream_combat_mode():
         mock_service_instance.build_combat_prompt = AsyncMock(return_value="Combat prompt")
         MockSessionService.return_value = mock_service_instance
         
-        with patch('back.routers.gamesession.Graph') as MockGraph:
-            mock_graph_instance = MagicMock()
-            
-            mock_run = AsyncMock()
-            mock_run.result = MagicMock()
-            mock_run.result.output = mock_result
-            
-            async def node_iterator():
-                yield MagicMock()
-            
-            mock_run.__aiter__ = lambda self: node_iterator()
-            
-            mock_iter_cm = AsyncMock()
-            mock_iter_cm.__aenter__ = AsyncMock(return_value=mock_run)
-            mock_iter_cm.__aexit__ = AsyncMock(return_value=None)
-            
-            mock_graph_instance.iter = MagicMock(return_value=mock_iter_cm)
-            MockGraph.return_value = mock_graph_instance
+        with patch('back.routers.gamesession.session_graph.run', new_callable=AsyncMock) as mock_run:
+            mock_run.return_value = mock_result
 
             response = client.post(f"/api/gamesession/play-stream?session_id={session_id}", json={"message": "I attack"})
             assert response.status_code == 200
@@ -261,27 +210,11 @@ def test_play_stream_empty_message():
         mock_service_instance.update_game_state = AsyncMock()
         mock_service_instance.load_history = AsyncMock(return_value=[])
         mock_service_instance.save_history = AsyncMock()
-        mock_service_instance.build_narrative_prompt = AsyncMock(return_value="Test prompt")
+        mock_service_instance.build_narrative_system_prompt = AsyncMock(return_value="Test prompt")
         MockSessionService.return_value = mock_service_instance
         
-        with patch('back.routers.gamesession.Graph') as MockGraph:
-            mock_graph_instance = MagicMock()
-            
-            mock_run = AsyncMock()
-            mock_run.result = MagicMock()
-            mock_run.result.output = mock_result
-            
-            async def node_iterator():
-                yield MagicMock()
-            
-            mock_run.__aiter__ = lambda self: node_iterator()
-            
-            mock_iter_cm = AsyncMock()
-            mock_iter_cm.__aenter__ = AsyncMock(return_value=mock_run)
-            mock_iter_cm.__aexit__ = AsyncMock(return_value=None)
-            
-            mock_graph_instance.iter = MagicMock(return_value=mock_iter_cm)
-            MockGraph.return_value = mock_graph_instance
+        with patch('back.routers.gamesession.session_graph.run', new_callable=AsyncMock) as mock_run:
+            mock_run.return_value = mock_result
 
             response = client.post(f"/api/gamesession/play-stream?session_id={session_id}", json={"message": ""})
             
@@ -314,27 +247,11 @@ def test_play_stream_no_game_state():
         mock_service_instance.update_game_state = AsyncMock()
         mock_service_instance.load_history = AsyncMock(return_value=[])
         mock_service_instance.save_history = AsyncMock()
-        mock_service_instance.build_narrative_prompt = AsyncMock(return_value="Test prompt")
+        mock_service_instance.build_narrative_system_prompt = AsyncMock(return_value="Test prompt")
         MockSessionService.return_value = mock_service_instance
         
-        with patch('back.routers.gamesession.Graph') as MockGraph:
-            mock_graph_instance = MagicMock()
-            
-            mock_run = AsyncMock()
-            mock_run.result = MagicMock()
-            mock_run.result.output = mock_result
-            
-            async def node_iterator():
-                yield MagicMock()
-            
-            mock_run.__aiter__ = lambda self: node_iterator()
-            
-            mock_iter_cm = AsyncMock()
-            mock_iter_cm.__aenter__ = AsyncMock(return_value=mock_run)
-            mock_iter_cm.__aexit__ = AsyncMock(return_value=None)
-            
-            mock_graph_instance.iter = MagicMock(return_value=mock_iter_cm)
-            MockGraph.return_value = mock_graph_instance
+        with patch('back.routers.gamesession.session_graph.run', new_callable=AsyncMock) as mock_run:
+            mock_run.return_value = mock_result
 
             response = client.post(f"/api/gamesession/play-stream?session_id={session_id}", json={"message": "start"})
             

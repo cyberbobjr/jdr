@@ -4,7 +4,7 @@ title Agent Tool Usage Sequence (Skill Check)
 participant "GM Agent\n(gm_agent_pydantic.py)" as GmAgent
 participant "Skill Check Tool\n(skill_tools.py)" as SkillTool
 participant "CharacterService" as CharacterService
-participant "CharacterPersistenceService" as PersistenceService
+participant "CharacterDataService" as DataService
 database "Character JSON" as CharacterDB
 participant "Dice Roller\n(dice.py)" as Dice
 
@@ -16,8 +16,8 @@ activate SkillTool
 
 SkillTool -> CharacterService: get_character_data()
 activate CharacterService
-CharacterService -> PersistenceService: load_character_data()
-activate PersistenceService
+CharacterService -> DataService: load_character_data()
+activate DataService
 PersistenceService -> CharacterDB: Read character file
 PersistenceService --> CharacterService: character_data
 deactivate PersistenceService

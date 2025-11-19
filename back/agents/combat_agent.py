@@ -1,9 +1,10 @@
-from typing import Optional
-from pydantic_ai import Agent
+from typing import Any, Optional
+from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
 from back.graph.dto.combat import CombatTurnContinuePayload, CombatTurnEndPayload
-from back.config import get_llm_config
+from back.models.schema import LLMConfig
+from back.services.game_session_service import GameSessionService
 
 
 class CombatAgent:
@@ -13,26 +14,51 @@ class CombatAgent:
     Handles turns, damage, and combat state updates.
     """
 
-    def __init__(self):
+    DEFAULT_SYSTEM_PROMPT = "You are a combat master for a Middle-earth RPG."
+
+    def __init__(self, llm_config: LLMConfig):
         """
         ### __init__
-        **Description:** Initialize the combat agent with appropriate configuration.
+        **Description:** Initialize the combat agent with LLM configuration.
+        **Parameters:**
+        - `llm_config` (LLMConfig): LLM configuration containing api_endpoint, api_key, model.
         """
-        llm_config = get_llm_config()
         provider = OpenAIProvider(
-            base_url=llm_config["api_endpoint"],
-            api_key=llm_config["api_key"]
+            base_url=llm_config.api_endpoint,
+            api_key=llm_config.api_key
         )
         model = OpenAIChatModel(
-            model_name=llm_config["model"],
+            model_name=llm_config.model,
             provider=provider
         )
+        
+        # Register tools
+        from back.tools import combat_tools, skill_tools, equipment_tools
+        self.system_prompt = ""
         self.agent = Agent(
             model=model,
             output_type=CombatTurnContinuePayload | CombatTurnEndPayload,
+            deps_type=GameSessionService,
+            tools=[
+                combat_tools.roll_initiative_tool,
+                combat_tools.perform_attack_tool,
+                combat_tools.resolve_attack_tool,
+                combat_tools.calculate_damage_tool,
+                combat_tools.end_combat_tool,
+                combat_tools.end_turn_tool,
+                combat_tools.check_combat_end_tool,
+                combat_tools.apply_damage_tool,
+                combat_tools.get_combat_status_tool,
+                skill_tools.skill_check_with_character,
+                equipment_tools.inventory_remove_item,
+            ]
         )
 
-    async def run(self, user_message: str, message_history: Optional[list] = None, system_prompt: str = ""):
+        @self.agent.system_prompt
+        def _inject_dynamic_system_prompt(ctx: RunContext[GameSessionService]) -> str:
+            return self.system_prompt
+
+    async def run(self, user_message: str, deps: GameSessionService, message_history: Optional[list] = None, system_prompt: str = ""):
         """
         ### run
         **Description:** Run the combat agent with user input.
@@ -40,38 +66,51 @@ class CombatAgent:
         - `user_message` (str): Player's message.
         - `message_history` (list): Previous messages.
         - `system_prompt` (str): System prompt for combat.
+        - `deps` (GameSessionService): Service dependencies.
         **Returns:** Agent run result.
         """
-        # Create a new agent with the system prompt
-        agent = Agent(
-            model=self.agent.model,
-            output_type=self.agent.output_type,
-            system_prompt=system_prompt or "You are a combat master for a Middle-earth RPG."
-        )
-
-        return await agent.run(
+        self.system_prompt = system_prompt or self.DEFAULT_SYSTEM_PROMPT
+        return await self.agent.run(
             user_prompt=user_message,
-            message_history=message_history or []
+            message_history=message_history or [],
+            deps=deps
         )
 
-    async def run_stream(self, user_message: str, message_history: Optional[list] = None, system_prompt: str = ""):
+    async def run_stream(self, user_message: str, deps: GameSessionService, message_history: Optional[list] = None, system_prompt: str = ""):
         """
         ### run_stream
         **Description:** Run the combat agent with streaming support.
         **Parameters:**
         - `user_message` (str): Player's message.
+        - `deps` (GameSessionService): Service dependencies.
         - `message_history` (Optional[list]): Previous messages.
         - `system_prompt` (str): System prompt for combat state.
         **Returns:** Agent streaming result context manager.
         """
-        # Create a new agent with the system prompt
-        agent = Agent(
-            model=self.agent.model,
-            output_type=self.agent.output_type,
-            system_prompt=system_prompt or "You are a combat master for a Middle-earth RPG."
+        self.system_prompt = system_prompt or self.DEFAULT_SYSTEM_PROMPT
+        stream = self.agent.run_stream(
+            user_prompt=user_message,
+            message_history=message_history or [],
+            deps=deps
         )
 
-        return agent.run_stream(
-            user_prompt=user_message,
-            message_history=message_history or []
-        )
+        return self._CombatStreamContext(stream)
+
+    class _CombatStreamContext:
+        def __init__(self, inner: Any):
+            self._inner = inner
+
+        async def __aenter__(self):
+            return await self._inner.__aenter__()
+
+        async def __aexit__(self, exc_type, exc, tb):
+            return await self._inner.__aexit__(exc_type, exc, tb)
+
+        def __aiter__(self):
+            return self._inner.__aiter__()
+
+        async def __anext__(self):
+            return await self._inner.__anext__()
+
+        def __getattr__(self, name: str) -> Any:
+            return getattr(self._inner, name)

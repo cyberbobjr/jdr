@@ -120,19 +120,19 @@ Add future tests under the matching folder to preserve Single Responsibility ali
 
 ## 11. Writing New Tests (Quick Template)
 
-Example for a service function in `character_business_service.py`:
+Example for a service function in `character_service.py`:
 ```python
 import pytest
-from back.services.character_business_service import CharacterBusinessService
+from back.services.character_service import CharacterService
 
 def test_apply_damage():
-    service = CharacterBusinessService()
+    service = CharacterService()
     character = ...  # build or mock character instance
     updated = service.apply_damage(character, 12)
     assert updated.hp == character.hp - 12
 ```
 
-Place this in `back/tests/services/test_character_business_service.py`.
+Place this in `back/tests/services/test_character_service.py`.
 
 ## 12. Continuous Integration (Future)
 

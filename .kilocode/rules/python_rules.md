@@ -123,7 +123,7 @@ def calculate_bonus(stat_value: int) -> int:
 
 ### 3.1. Service Layer (Strict SRP)
 
-- **Business Logic Services** (e.g., `CharacterBusinessService`): Contain pure business logic. **Must not** perform any I/O operations (file access, database calls). They should operate on data passed to them.
+- **Business Logic Services** (e.g., `CharacterService`): Contain pure business logic. **Must not** perform any I/O operations (file access, database calls). They should operate on data passed to them.
 - **Data Services** (e.g., `CharacterDataService`): Handle all I/O operations (reading/writing files). **Must not** contain business logic.
 - **Routers** (`back/routers/`): Handle HTTP request/response logic only. Delegate all business operations to services. **Must not** contain any game rules or business logic.
 

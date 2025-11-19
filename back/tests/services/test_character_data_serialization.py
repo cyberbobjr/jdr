@@ -1,5 +1,5 @@
 """
-Tests for Character serialization in CharacterPersistenceService.
+Tests for Character serialization in CharacterDataService.
 Validates that Character objects are correctly serialized to JSON and deserialized back.
 """
 
@@ -10,7 +10,7 @@ from uuid import uuid4, UUID
 from datetime import datetime
 from unittest.mock import patch
 
-from back.services.character_persistence_service import CharacterPersistenceService
+from back.services.character_data_service import CharacterDataService
 from back.models.domain.character import Character, CharacterStatus
 
 
@@ -19,7 +19,8 @@ def temp_characters_dir(tmp_path):
     """Create a temporary directory for character data and patch the service."""
     d = tmp_path / "characters"
     d.mkdir()
-    with patch('back.services.character_persistence_service.CHARACTERS_DIR', str(d)):
+    # Patch get_data_dir to return tmp_path, so _get_characters_dir returns tmp_path/characters
+    with patch('back.services.character_data_service.get_data_dir', return_value=str(tmp_path)):
         yield str(d)
 
 
@@ -90,7 +91,7 @@ def test_save_character_object_success(temp_characters_dir, sample_character):
     character_id: str = str(sample_character.id)
     
     # Save the Character object
-    result: Character = CharacterPersistenceService.save_character_data(character_id, sample_character)
+    result: Character = CharacterDataService().save_character(sample_character, character_id)
     
     # Verify the file was created
     expected_file: str = os.path.join(temp_characters_dir, f"{character_id}.json")
@@ -120,10 +121,10 @@ def test_save_and_load_character_roundtrip(temp_characters_dir, sample_character
     character_id: str = str(sample_character.id)
     
     # Save the Character
-    CharacterPersistenceService.save_character_data(character_id, sample_character)
+    CharacterDataService().save_character(sample_character, character_id)
     
     # Load it back
-    loaded_character: Character = CharacterPersistenceService.load_character_data(character_id)
+    loaded_character: Character = CharacterDataService().load_character(character_id)
     
     # Verify all critical fields match
     assert loaded_character.id == sample_character.id
@@ -143,7 +144,7 @@ def test_save_character_with_uuid_serialization(temp_characters_dir, sample_char
     character_id: str = str(sample_character.id)
     
     # Save the Character
-    CharacterPersistenceService.save_character_data(character_id, sample_character)
+    CharacterDataService().save_character(sample_character, character_id)
     
     # Read the raw JSON file
     expected_file: str = os.path.join(temp_characters_dir, f"{character_id}.json")
@@ -165,7 +166,7 @@ def test_save_character_with_enum_serialization(temp_characters_dir, sample_char
     sample_character.status = CharacterStatus.ACTIVE
     
     # Save the Character
-    CharacterPersistenceService.save_character_data(character_id, sample_character)
+    CharacterDataService().save_character(sample_character, character_id)
     
     # Read the raw JSON file
     expected_file: str = os.path.join(temp_characters_dir, f"{character_id}.json")
@@ -184,17 +185,17 @@ def test_save_character_merge_behavior(temp_characters_dir, sample_character):
     character_id: str = str(sample_character.id)
     
     # Save initial character
-    CharacterPersistenceService.save_character_data(character_id, sample_character)
+    CharacterDataService().save_character(sample_character, character_id)
     
     # Modify the character
     sample_character.name = "Updated Name"
     sample_character.level = 2
     
     # Save again
-    CharacterPersistenceService.save_character_data(character_id, sample_character)
+    CharacterDataService().save_character(sample_character, character_id)
     
     # Load and verify
-    loaded_character: Character = CharacterPersistenceService.load_character_data(character_id)
+    loaded_character: Character = CharacterDataService().load_character(character_id)
     
     assert loaded_character.name == "Updated Name", "Name should be updated"
     assert loaded_character.level == 2, "Level should be updated"
@@ -246,10 +247,10 @@ def test_save_character_updates_status_correctly(temp_characters_dir):
     draft_character: Character = Character(**draft_dict)
     
     # Save as draft
-    CharacterPersistenceService.save_character_data(str(character_id), draft_character)
+    CharacterDataService().save_character(draft_character, str(character_id))
     
     # Verify status is draft
-    loaded: Character = CharacterPersistenceService.load_character_data(str(character_id))
+    loaded: Character = CharacterDataService().load_character(str(character_id))
     assert loaded.status == CharacterStatus.DRAFT
     
     # Update to active
@@ -258,21 +259,43 @@ def test_save_character_updates_status_correctly(temp_characters_dir):
     draft_character.physical_description = "Fully described"
     
     # Save again
-    CharacterPersistenceService.save_character_data(str(character_id), draft_character)
+    CharacterDataService().save_character(draft_character, str(character_id))
     
     # Verify status is now active
-    loaded_active: Character = CharacterPersistenceService.load_character_data(str(character_id))
+    loaded_active: Character = CharacterDataService().load_character(str(character_id))
     assert loaded_active.status == CharacterStatus.ACTIVE
     assert loaded_active.description == "Now complete"
     assert loaded_active.physical_description == "Fully described"
 
 
-def test_save_character_invalid_id_raises_error(sample_character):
+def test_save_character_auto_detects_id(temp_characters_dir, sample_character):
     """
-    Test that saving with an invalid character_id raises ValueError.
+    Test that save_character uses the character's ID if the character_id argument is missing or empty.
     """
-    with pytest.raises(ValueError, match="Character ID must be a non-empty string"):
-        CharacterPersistenceService.save_character_data("", sample_character)
+    # Case 1: character_id is None
+    saved_char = CharacterDataService().save_character(sample_character, None)
+    assert saved_char.id == sample_character.id
+    assert os.path.exists(os.path.join(temp_characters_dir, f"{sample_character.id}.json"))
     
-    with pytest.raises(ValueError, match="Character ID must be a non-empty string"):
-        CharacterPersistenceService.save_character_data(None, sample_character)
+    # Case 2: character_id is empty string
+    # We need to modify the ID to verify it uses the new one or overwrites
+    new_id = uuid4()
+    sample_character.id = new_id
+    saved_char_2 = CharacterDataService().save_character(sample_character, "")
+    assert saved_char_2.id == new_id
+    assert os.path.exists(os.path.join(temp_characters_dir, f"{new_id}.json"))
+
+
+def test_save_character_raises_error_if_no_id():
+    """
+    Test that saving raises ValueError if no ID can be determined.
+    """
+    # Create a dummy object without ID
+    class DummyChar:
+        def model_dump(self, mode='json'):
+            return {"name": "No ID"}
+            
+    dummy = DummyChar()
+    
+    with pytest.raises(ValueError, match="Aucun character_id fourni"):
+        CharacterDataService().save_character(dummy, None)

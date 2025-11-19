@@ -2,12 +2,13 @@
 Narrative agent for story progression.
 """
 
-from typing import Optional
-from pydantic_ai import Agent
+from typing import Any, Optional
+from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
 from back.graph.dto.combat import CombatSeedPayload
-from back.config import get_llm_config
+from back.models.schema import LLMConfig
+from back.services.game_session_service import GameSessionService
 
 
 class NarrativeAgent:
@@ -17,65 +18,100 @@ class NarrativeAgent:
     Handles story advancement and triggers combat when appropriate.
     """
 
-    def __init__(self):
+    def __init__(self, llm_config: LLMConfig):
         """
         ### __init__
-        **Description:** Initialize the narrative agent with appropriate configuration.
+        **Description:** Initialize the narrative agent with LLM configuration.
+        **Parameters:**
+        - `llm_config` (LLMConfig): LLM configuration containing api_endpoint, api_key, model.
         """
-        llm_config = get_llm_config()
         provider = OpenAIProvider(
-            base_url=llm_config["api_endpoint"],
-            api_key=llm_config["api_key"]
+            base_url=llm_config.api_endpoint,
+            api_key=llm_config.api_key
         )
         model = OpenAIChatModel(
-            model_name=llm_config["model"],
+            model_name=llm_config.model,
             provider=provider
         )
+        
+        # Register tools
+        from back.tools import character_tools, equipment_tools, skill_tools, combat_tools
+        
+        self.system_prompt = ""
         self.agent = Agent(
             model=model,
             output_type=str | CombatSeedPayload,
+            deps_type=GameSessionService,
+            tools=[
+                character_tools.character_apply_xp,
+                character_tools.character_add_gold,
+                character_tools.character_take_damage,
+                equipment_tools.inventory_add_item,
+                equipment_tools.inventory_remove_item,
+                skill_tools.skill_check_with_character,
+                combat_tools.start_combat_tool,
+            ]
         )
 
-    async def run(self, user_message: str, message_history: Optional[list] = None, system_prompt: str = ""):
+        @self.agent.system_prompt
+        def _inject_dynamic_system_prompt(ctx: RunContext[GameSessionService]) -> str:
+            return self.system_prompt
+
+    async def run(self, user_message: str, deps: GameSessionService, message_history: Optional[list] = None, system_prompt: str = ""):
         """
         ### run
         **Description:** Run the narrative agent with user input.
         **Parameters:**
         - `user_message` (str): Player's message.
+        - `deps` (GameSessionService): Service dependencies.
         - `message_history` (Optional[list]): Previous messages.
         - `system_prompt` (str): System prompt for the scenario.
         **Returns:** Agent run result.
         """
-        # Create a new agent with the system prompt
-        agent = Agent(
-            model=self.agent.model,
-            output_type=self.agent.output_type,
-            system_prompt=system_prompt or "You are a game master for a Middle-earth RPG."
-        )
-
-        return await agent.run(
+        self.system_prompt = system_prompt or "You are a game master for a Middle-earth RPG."
+        
+        return await self.agent.run(
             user_prompt=user_message,
-            message_history=message_history or []
+            message_history=message_history or [],
+            deps=deps
         )
 
-    async def run_stream(self, user_message: str, message_history: Optional[list] = None, system_prompt: str = ""):
+    async def run_stream(self, user_message: str, deps: GameSessionService, message_history: Optional[list] = None, system_prompt: str = ""):
         """
         ### run_stream
         **Description:** Run the narrative agent with streaming support.
         **Parameters:**
         - `user_message` (str): Player's message.
+        - `deps` (GameSessionService): Service dependencies.
         - `message_history` (Optional[list]): Previous messages.
         - `system_prompt` (str): System prompt for the scenario.
         **Returns:** Agent streaming result context manager.
         """
-        # Create a new agent with the system prompt
-        agent = Agent(
-            model=self.agent.model,
-            output_type=self.agent.output_type,
-            system_prompt=system_prompt or "You are a game master for a Middle-earth RPG."
+        self.system_prompt = system_prompt or "You are a game master for a Middle-earth RPG."
+
+        stream = self.agent.run_stream(
+            user_prompt=user_message,
+            message_history=message_history or [],
+            deps=deps
         )
 
-        return agent.run_stream(
-            user_prompt=user_message,
-            message_history=message_history or []
-        )
+        return self._NarrativeStreamContext(stream)
+
+    class _NarrativeStreamContext:
+        def __init__(self, inner: Any):
+            self._inner = inner
+
+        async def __aenter__(self):
+            return await self._inner.__aenter__()
+
+        async def __aexit__(self, exc_type, exc, tb):
+            return await self._inner.__aexit__(exc_type, exc, tb)
+
+        def __aiter__(self):
+            return self._inner.__aiter__()
+
+        async def __anext__(self):
+            return await self._inner.__anext__()
+
+        def __getattr__(self, name: str) -> Any:
+            return getattr(self._inner, name)

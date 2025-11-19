@@ -8,6 +8,7 @@ from back.graph.dto.combat import CombatSeedPayload
 from back.agents.narrative_agent import NarrativeAgent
 from back.utils.logger import log_debug
 from back.services.game_session_service import GameSessionService, HISTORY_NARRATIVE, HISTORY_COMBAT
+from back.config import get_llm_config
 
 
 class NarrativeNode(BaseNode[SessionGraphState, GameSessionService, DispatchResult]):
@@ -23,7 +24,8 @@ class NarrativeNode(BaseNode[SessionGraphState, GameSessionService, DispatchResu
         ### __init__
         **Description:** Initialize with a NarrativeAgent instance.
         """
-        self.narrative_agent = NarrativeAgent()
+        llm_config = get_llm_config()
+        self.narrative_agent = NarrativeAgent(llm_config)
 
     async def run(
         self, ctx: GraphRunContext[SessionGraphState, GameSessionService]
@@ -38,13 +40,14 @@ class NarrativeNode(BaseNode[SessionGraphState, GameSessionService, DispatchResu
         log_debug("Running NarrativeNode", session_id=ctx.deps.session_id)
 
         # Build system prompt with scenario
-        system_prompt = await ctx.deps.build_narrative_prompt()
+        system_prompt = await ctx.deps.build_narrative_system_prompt()
 
         # Run the agent
         result = await self.narrative_agent.run(
             user_message=ctx.state.pending_player_message.message,
             message_history=ctx.state.model_messages or [],
-            system_prompt=system_prompt
+            system_prompt=system_prompt,
+            deps=ctx.deps
         )
 
         # Persist the new messages

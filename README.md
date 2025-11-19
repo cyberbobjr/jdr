@@ -33,7 +33,7 @@ This is a tabletop RPG set in Middle-earth (Tolkien's world), where the narratio
 The architecture follows strict **SOLID principles** with clear separation of responsibilities:
 
 - **Services** (`back/services/`): Each service encapsulates a unique business responsibility (Single Responsibility Principle)
-- **Agents** (`back/agents/`): Assemble tools and memory, orchestrate narration via LLM with PydanticAI
+- **Graph & Agents** (`back/graph/`, `back/agents/`): Orchestrate game flow and narration via Pydantic Graph and specialized PydanticAI agents
 - **Routers** (`back/routers/`): Expose REST endpoints, delegate all business logic to services
 - **Models** (`back/models/domain/`): Pydantic models with strict validation
 - **Tools** (`back/tools/`): PydanticAI tools for LLM interaction
@@ -62,35 +62,30 @@ The backend uses a modular architecture with strict separation of responsibiliti
 ### Character Management Services
 
 - **CharacterDataService**: Specialized for loading and saving character data (I/O operations)
-- **CharacterBusinessService**: Business logic (XP, gold, damage, healing)
-- **CharacterPersistenceService**: Centralized character persistence (JSON files)
+- **CharacterService**: Business logic (XP, gold, damage, healing) and inventory management
 - **EquipmentService**: Equipment buy/sell, inventory (add/remove/equip), and money management
 
 ### Game Services
 
 - **GameSessionService**: Game session management (history, character, scenario)
 - **ScenarioService**: Scenario flow management
-- **CombatService**: Combat mechanics
-- **CombatStateService**: Combat state persistence
-- **SkillService**: Skill checks and rolls
 - **ItemService**: Item management
+- **SkillAllocationService**: Automated skill distribution logic
 
-### PydanticAI Integration
+### Graph & Agent Layer
 
-- **GM Agent**: Uses `pydantic_ai.Agent` with OpenAI-compatible model and persistent memory (JSONL)
+The system uses **Pydantic Graph** to orchestrate session state transitions between narrative and combat modes:
+
+- **Graph Nodes** (`back/graph/nodes/`):
+    - `NarrativeNode`: Uses `NarrativeAgent` for story progression
+    - `CombatNode`: Uses `CombatAgent` for combat turns
+    - `DispatcherNode`: Routes based on session state
+- **Specialized Agents** (`back/agents/`):
+    - `NarrativeAgent`: Handles storytelling and combat triggers
+    - `CombatAgent`: Handles combat mechanics and state updates
 - **Tools**: All tools use `RunContext[GameSessionService]` signature to access services
 - **Memory**: Conversation history stored in JSONL via `back/storage/pydantic_jsonl_store.py`
 - **System Prompt**: Modular prompt built dynamically from scenario and rules
-
-### Graph-Based Session Management
-
-The system uses **Pydantic Graph** for orchestrating session state transitions between narrative and combat modes:
-
-- **Graph Nodes** (`back/graph/nodes/`): `DispatcherNode`, `NarrativeNode`, `CombatNode`
-- **State Management**: `SessionGraphState` encapsulates game state, player messages, and history buffers
-- **DTOs** (`back/graph/dto/`): Structured payloads for combat and session data
-- **Persistence**: Separate JSONL histories for narrative and combat, with `game_state.json` for session metadata
-- **Transitions**: Deterministic mode switching via structured agent outputs
 
 ## 🎮 Game System
 
@@ -153,10 +148,15 @@ The new system uses **6 core attributes** with a per‑stat cap:
 │   ├── requirements.txt        # Backend Python dependencies
 │   ├── agents/
 │   │   ├── __init__.py
-│   │   ├── gm_agent_pydantic.py # Production GM agent powered by PydanticAI
+│   │   ├── combat_agent.py     # Specialized combat agent
+│   │   ├── gm_agent_pydantic.py # Generic agent (names, backgrounds)
+│   │   ├── narrative_agent.py  # Specialized narrative agent
 │   │   └── PROMPT.py           # Modular system prompt builder
 │   ├── docs/
 │   │   └── LOGGING_GUIDE.md    # Logging guide
+│   ├── graph/                  # Pydantic Graph implementation
+│   │   ├── nodes/              # Graph nodes (Narrative, Combat, Dispatcher)
+│   │   └── dto/                # Data Transfer Objects for graph state
 │   ├── models/
 │   │   ├── __init__.py
 │   │   ├── api_dto.py          # API DTO definitions
@@ -168,8 +168,8 @@ The new system uses **6 core attributes** with a per‑stat cap:
 │   │       ├── combat_state.py # Combat state model
 │   │       ├── combat_system_manager.py # Combat rules loader
 │   │       ├── equipment_manager.py # Equipment data manager
+│   │       ├── npc.py          # NPC domain model
 │   │       ├── races_manager.py # Race and culture data manager
-│   │       ├── skills_manager.py # Legacy skills manager
 │   │       ├── spells_manager.py # Spell data manager
 │   │       ├── stats_manager.py # Stat metadata manager
 │   │       └── unified_skills_manager.py # Aggregated skills interface for the LLM
@@ -185,14 +185,11 @@ The new system uses **6 core attributes** with a per‑stat cap:
 │   │   ├── character_data_service.py # Aggregates persistence + validation
 │   │   ├── character_persistence_service.py # JSON persistence utilities
 │   │   ├── character_service.py # Legacy service kept for backward compatibility
-│   │   ├── combat_service.py    # Combat mechanics
-│   │   ├── combat_state_service.py # Combat state persistence
 │   │   ├── equipment_service.py # Buy/sell/equip gear flows
 │   │   ├── game_session_service.py # Session orchestration and storage
 │   │   ├── item_service.py      # Generic item helpers
 │   │   ├── scenario_service.py  # Scenario management helpers
-│   │   ├── skill_allocation_service.py # Automated skill distribution logic
-│   │   └── skill_service.py     # Skill check helpers
+│   │   └── skill_allocation_service.py # Automated skill distribution logic
 │   ├── storage/
 │   │   ├── __init__.py
 │   │   └── pydantic_jsonl_store.py # JSONL conversation history backend
@@ -275,16 +272,18 @@ This diagram illustrates the overall backend architecture, showing the flow from
 graph TD
     A[main.py] --> B[uvicorn]
     B --> C[app.py - FastAPI]
-    C --> D[routers/ - characters, scenarios, creation]
-    D --> E[services/ - character_service, scenario_service, etc.]
-    E --> F[models/domain/ - Character, CombatState, EquipmentManager]
-    E --> G[agents/ - gm_agent_pydantic.py]
-    G --> H[tools/ - character_tools, combat_tools, etc.]
-    G --> I[storage/ - pydantic_jsonl_store.py]
-    C --> J[config.py - Config class]
-    J --> K[config.yaml]
-    J --> L[LLM Config]
-    J --> M[Data Dir]
+    C --> D[routers/ - gamesession, creation]
+    D --> E[services/ - GameSessionService]
+    E --> F[graph/ - DispatcherNode]
+    F --> G[graph/nodes/ - NarrativeNode]
+    F --> H[graph/nodes/ - CombatNode]
+    G --> I[agents/ - NarrativeAgent]
+    H --> J[agents/ - CombatAgent]
+    I --> K[tools/ - character_tools, etc.]
+    J --> K
+    K --> L[services/ - CharacterService, etc.]
+    L --> M[models/domain/]
+    L --> N[storage/ - JSON/JSONL]
 ```
 
 ### Class Diagrams
@@ -371,19 +370,24 @@ This diagram shows the sequence for a user playing a scenario turn via the API.
 ```mermaid
 sequenceDiagram
     participant User
-    participant Router as scenarios.py
-    participant Service as scenario_service.py
-    participant Agent as gm_agent_pydantic.py
+    participant Router as gamesession.py
+    participant Service as game_session_service.py
+    participant Graph as DispatcherNode
+    participant Node as NarrativeNode
+    participant Agent as NarrativeAgent
     participant Tools as tools/*.py
     participant Storage as pydantic_jsonl_store.py
 
-    User->>Router: POST /api/scenarios/play (session_id, message)
+    User->>Router: POST /api/gamesession/play (session_id, message)
     Router->>Service: play_scenario(session_id, message)
-    Service->>Agent: build_gm_agent_pydantic(session_id)
-    Agent->>Agent: enrich_user_message_with_character/combat
-    Agent->>Tools: Execute tools if needed (e.g., skill_check)
-    Tools->>Storage: Access/update data if required
-    Agent->>Service: Generate response via LLM
+    Service->>Graph: run()
+    Graph->>Node: dispatch based on state
+    Node->>Agent: run(user_message)
+    Agent->>Tools: Execute tools if needed
+    Tools->>Storage: Access/update data
+    Agent->>Node: Return response
+    Node->>Graph: Return result
+    Graph->>Service: Return result
     Service->>Router: Return response
     Router->>User: Response with LLM output
 ```
@@ -943,7 +947,7 @@ class CharacterDataService:
         """Handle I/O only"""
         character.to_file()
 
-class CharacterBusinessService:
+class CharacterService:
     def apply_damage(self, character: Character, damage: int) -> Character:
         """Handle business logic only"""
         character.hp = max(0, character.hp - damage)

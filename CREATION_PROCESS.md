@@ -4,7 +4,7 @@ A guided wizard where the AI proposes curated options at each step (with concise
 
 - Data model: `CharacterV2` with `Stats` (each 3–20, total ≤ 400) and `Skills` (ranks 0–10, total ≤ 40).
 - Validation: Use `POST /creation/validate-character` (full payload) or `/creation/validate-character/by-id` (stored draft) before finalization.
-- Persistence: `CharacterPersistenceService` to `data/characters/{id}.json`; `status` transitions from `draft` to `active`.
+- Persistence: `CharacterDataService` to `data/characters/{id}.json`; `status` transitions from `draft` to `active`.
 
 | Validation Endpoint | Body | Primary use case |
 | --- | --- | --- |
@@ -14,7 +14,7 @@ A guided wizard where the AI proposes curated options at each step (with concise
 ## Architecture Alignment
 
 - Routers: `back/routers/creation.py` for read/write operations.
-- Services: `CharacterPersistenceService` for I/O; V2 rules enforced by Pydantic models (`CharacterV2`, `Stats`, `Skills`, `Equipment`, `CombatStats`, `Spells`).
+- Services: `CharacterDataService` for I/O; V2 rules enforced by Pydantic models (`CharacterV2`, `Stats`, `Skills`, `Equipment`, `CombatStats`, `Spells`).
 - Managers (read-only data): `RacesManager`, `SkillsManager`, `EquipmentManager`, `StatsManager` (labels/bonus tables only).
 - Spells: Available manager-side (`SpellsManager`), expose via a future route if needed.
 
@@ -95,7 +95,7 @@ A guided wizard where the AI proposes curated options at each step (with concise
 
 - Autosave: After each accepted suggestion or edit, write to draft via `POST /creation/update`.
 - Status: `draft` throughout the wizard; set to `active` on finalization.
-- Storage: JSON files under `data/characters/` via `CharacterPersistenceService`.
+- Storage: JSON files under `data/characters/` via `CharacterDataService`.
 
 ## Error Handling & UX
 

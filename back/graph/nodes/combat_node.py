@@ -8,6 +8,7 @@ from back.graph.dto.combat import CombatTurnEndPayload
 from back.agents.combat_agent import CombatAgent
 from back.utils.logger import log_debug
 from back.services.game_session_service import GameSessionService, HISTORY_NARRATIVE, HISTORY_COMBAT
+from back.config import get_llm_config
 
 
 class CombatNode(BaseNode[SessionGraphState, GameSessionService, DispatchResult]):
@@ -26,7 +27,8 @@ class CombatNode(BaseNode[SessionGraphState, GameSessionService, DispatchResult]
         ### __init__
         **Description:** Initialize with a CombatAgent instance.
         """
-        self.combat_agent = CombatAgent()
+        llm_config = get_llm_config()
+        self.combat_agent = CombatAgent(llm_config)
 
     async def run(
         self, ctx: GraphRunContext[SessionGraphState, GameSessionService]
@@ -47,7 +49,8 @@ class CombatNode(BaseNode[SessionGraphState, GameSessionService, DispatchResult]
         result = await self.combat_agent.run(
             user_message=ctx.state.pending_player_message.message,
             message_history=ctx.state.model_messages or [],
-            system_prompt=system_prompt
+            system_prompt=system_prompt,
+            deps=ctx.deps
         )
 
         # Persist the new messages

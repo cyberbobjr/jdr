@@ -37,7 +37,8 @@ def test_list_active_sessions_success():
     )
 
     with patch('back.routers.gamesession.GameSessionService.list_all_sessions', return_value=mock_sessions):
-        with patch('back.routers.gamesession.CharacterPersistenceService.load_character_data', return_value=mock_character):
+        with patch('back.routers.gamesession.CharacterDataService') as MockDataService:
+            MockDataService.return_value.load_character.return_value = mock_character
             response = client.get("/api/gamesession/sessions")
     
     assert response.status_code == 200
@@ -75,7 +76,8 @@ def test_list_active_sessions_character_not_found():
     ]
 
     with patch('back.routers.gamesession.GameSessionService.list_all_sessions', return_value=mock_sessions):
-        with patch('back.routers.gamesession.CharacterPersistenceService.load_character_data', side_effect=FileNotFoundError):
+        with patch('back.routers.gamesession.CharacterDataService') as MockDataService:
+            MockDataService.return_value.load_character.side_effect = FileNotFoundError
             response = client.get("/api/gamesession/sessions")
 
     assert response.status_code == 200
@@ -110,11 +112,11 @@ def test_start_scenario_success():
     mock_dispatch_result = DispatchResult(all_messages=expected_messages, new_messages=expected_messages)
 
     with patch('back.routers.gamesession.GameSessionService.start_scenario', return_value=start_scenario_response):
-        with patch('back.routers.gamesession.CharacterPersistenceService') as MockPersistence:
-            mock_persistence_instance = MockPersistence.return_value
+        with patch('back.routers.gamesession.CharacterDataService') as MockDataService:
+            mock_data_instance = MockDataService.return_value
             mock_char = MagicMock()
             mock_char.status = CharacterStatus.ACTIVE
-            mock_persistence_instance.load_character_data.return_value = mock_char
+            mock_data_instance.load_character.return_value = mock_char
             
             with patch('back.routers.gamesession.GameSessionService') as MockSessionService:
                 mock_service_instance = MagicMock()
@@ -122,12 +124,10 @@ def test_start_scenario_success():
                 mock_service_instance.update_game_state = AsyncMock()
                 MockSessionService.return_value = mock_service_instance
                 
-                with patch('back.routers.gamesession.Graph') as MockGraph:
-                    mock_graph_instance = MagicMock()
+                with patch('back.routers.gamesession.session_graph.run', new_callable=AsyncMock) as mock_run:
                     mock_run_result = MagicMock()
                     mock_run_result.output = mock_dispatch_result
-                    mock_graph_instance.run = AsyncMock(return_value=mock_run_result)
-                    MockGraph.return_value = mock_graph_instance
+                    mock_run.return_value = mock_run_result
 
                     request_data = {
                         "scenario_name": mock_scenario_name,

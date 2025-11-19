@@ -1,52 +1,92 @@
 """
-Agent GM utilisant PydanticAI pour la gestion des sessions de jeu de rôle.
-Migration progressive de Haystack vers PydanticAI.
+GM Agent using PydanticAI for role-playing game session management.
+Progressive migration from Haystack to PydanticAI.
 """
 
+from typing import Optional, List, Any
 from dotenv import load_dotenv
-from pydantic_ai import Agent
+from pydantic_ai import Agent, ModelMessage
 
-# Charger les variables d'environnement depuis le fichier .env
+# Load environment variables from .env file
 load_dotenv()
 
 from back.config import get_llm_config
-
-# Configuration LLM centralisée
-llm_config = get_llm_config()
-api_key = llm_config["api_key"]
-api_base_url = llm_config["api_endpoint"]
-api_model = llm_config["model"]
+from back.models.schema import LLMConfig
 
 
-def build_simple_gm_agent():
+class GenericAgent:
+    """
+    ### GenericAgent
+    **Description:** A generic PydanticAI agent for simple generation tasks without session context.
+    Handles content generation like names, backgrounds, descriptions.
+    """
+
+    agent: Agent
+
+    def __init__(self, llm_config: LLMConfig, system_prompt: str = "") -> None:
+        """
+        ### __init__
+        **Description:** Initialize the generic agent with LLM configuration and system prompt.
+        **Parameters:**
+        - `llm_config` (LLMConfig): LLM configuration containing api_endpoint, api_key, model.
+        - `system_prompt` (str): System prompt for the agent.
+        """
+        from pydantic_ai.models.openai import OpenAIChatModel
+        from pydantic_ai.providers.openai import OpenAIProvider
+        provider = OpenAIProvider(
+            base_url=llm_config.api_endpoint,
+            api_key=llm_config.api_key
+        )
+        model = OpenAIChatModel(
+            model_name=llm_config.model,
+            provider=provider
+        )
+        self.agent = Agent(
+            model=model,
+            system_prompt=system_prompt
+        )
+
+    async def run(self, user_message: str, message_history: Optional[List[ModelMessage]] = None) -> Any:
+        """
+        ### run
+        **Description:** Run the generic agent with user input.
+        **Parameters:**
+        - `user_message` (str): User's message.
+        - `message_history` (Optional[List[ModelMessage]]): Previous messages.
+        **Returns:** Agent run result.
+        """
+        return await self.agent.run(
+            user_prompt=user_message,
+            message_history=message_history or []
+        )
+
+    async def run_stream(self, user_message: str, message_history: Optional[List[ModelMessage]] = None) -> Any:
+        """
+        ### run_stream
+        **Description:** Run the generic agent with streaming support.
+        **Parameters:**
+        - `user_message` (str): User's message.
+        - `message_history` (Optional[List[ModelMessage]]): Previous messages.
+        **Returns:** Agent streaming result context manager.
+        """
+        return self.agent.run_stream(
+            user_prompt=user_message,
+            message_history=message_history or []
+        )
+
+
+def build_simple_gm_agent() -> Agent:
     """
     ### build_simple_gm_agent
-    **Description :** Construit un agent GM simple sans contexte de session pour les tâches de génération (nom, background, description).
-    **Paramètres :** Aucun
-    **Retour :** Agent PydanticAI configuré sans dépendances de session.
+    **Description:** Builds a simple GM agent without session context for generation tasks (name, background, description).
+    **Parameters:** None
+    **Returns:** Configured PydanticAI agent without session dependencies.
     """
-    # Prompt système simple pour la génération de contenu
-    system_prompt = """Tu es un maître de jeu expert en jeu de rôle medieval-fantastique.
-Tu aides à créer des personnages cohérents et immersifs.
-Réponds toujours de manière concise et appropriée au contexte fourni."""
+    # Simple system prompt for content generation
+    system_prompt = """You are an expert game master in medieval-fantasy role-playing games.
+You help create coherent and immersive characters.
+Always respond concisely and appropriately to the provided context."""
     
-    # Créer l'agent avec la configuration DeepSeek
-    from pydantic_ai.models.openai import OpenAIChatModel
-    from pydantic_ai.providers.openai import OpenAIProvider
-    provider = OpenAIProvider(
-        base_url=api_base_url,
-        api_key=api_key
-    )
-    
-    model = OpenAIChatModel(
-        model_name=api_model,
-        provider=provider
-    )
-    
-    # Agent simple sans outils ni dépendances
-    agent = Agent(
-        model=model,
-        system_prompt=system_prompt
-    )
-    
-    return agent
+    # Create the agent with DeepSeek configuration
+    llm_config = get_llm_config()
+    return GenericAgent(llm_config, system_prompt).agent

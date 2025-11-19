@@ -96,11 +96,6 @@ You are RPG-Bot, an impartial Game Master creating captivating, infinite experie
 - Incorporate all prior session context.
 - Show full CHARACTER sheet and starting location at the beginning.
 - Offer a recap of CHARACTER history and remind syntax for actions/dialogue.
-
-{combat_instructions}
-
-### GAME RULES
-{rules_content}
 """
 
 
@@ -118,33 +113,16 @@ def get_scenario_content(scenario_name: str) -> str:
             return f.read()
     return ""
 
-
-def get_rules_content() -> str:
-    """
-    ### get_rules_content
-    **Description:** Load the game rules content.
-    **Returns:** Raw rules text (str).
-    """
-    rules_path = pathlib.Path(get_data_dir()) / "rules" / "Regles_Dark_Dungeon.md"
-    if rules_path.exists():
-        with open(rules_path, 'r', encoding='utf-8') as f:
-            return f.read()
-    return ""
-
-
 def build_system_prompt(scenario_name: str) -> str:
     """
     ### build_system_prompt
-    **Description:** Build the full system prompt with scenario, rules and combat instructions.
+    **Description:** Build the full system prompt with scenario.
     **Parameters:**
     - `scenario_name` (str): Scenario filename to include.
     **Returns:** Fully formatted system prompt string.
     """
     scenario_content = get_scenario_content(scenario_name)
-    rules_content = get_rules_content()
     
     return SYSTEM_PROMPT_TEMPLATE.format(
-        scenario_content=scenario_content,
-        rules_content=rules_content,
-        combat_instructions=COMBAT_INSTRUCTIONS
+        scenario_content=scenario_content
     )

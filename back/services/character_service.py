@@ -1,23 +1,22 @@
-# filepath: c:\Users\benjamin\IdeaProjects\jdr\back\services\character_service.py
 # Logique métier unitaire (SRP)
 
-import os
 from typing import List, Dict
 from back.models.schema import Item, CharacterStatus
 from back.models.domain.character import Character
-from back.utils.logger import log_debug
+from back.utils.logger import log_debug, log_info, log_warning, get_logger
 from back.utils.model_converter import ModelConverter
-from back.services.character_persistence_service import CharacterPersistenceService
 from back.services.character_data_service import CharacterDataService
 from back.services.item_service import ItemService
 from back.services.equipment_service import EquipmentService
 from back.models.domain.equipment_manager import EquipmentManager
-from back.config import get_data_dir
+
+logger = get_logger(__name__)
 
 class CharacterService:
     character_id: str
     strict_validation: bool
     character_data: Character
+    data_service: CharacterDataService
     
     def __init__(self, character_id: str, strict_validation: bool = True) -> None:
         """
@@ -30,6 +29,7 @@ class CharacterService:
         """
         self.character_id = character_id
         self.strict_validation = strict_validation
+        self.data_service = CharacterDataService()
         self.character_data = self._load_character()
         
     def _load_character(self) -> Character:
@@ -38,7 +38,7 @@ class CharacterService:
         **Description:** Charge les données du personnage depuis le stockage persistant
         **Retour:** Objet CharacterV2 chargé
         """
-        character: Character = CharacterPersistenceService.load_character_data(self.character_id)
+        character: Character = self.data_service.load_character(self.character_id)
 
         # Vérifier si le personnage est complet
         is_incomplete = (
@@ -51,13 +51,14 @@ class CharacterService:
 
         # Retourner l'objet CharacterV2 (Pydantic gère les valeurs par défaut)
         return character
+
     def save_character(self) -> None:
         """
         ### save_character
         **Description:** Sauvegarde les données du personnage vers le stockage persistant
         **Retour:** Aucun
         """
-        CharacterPersistenceService.save_character_data(self.character_id, self.character_data)
+        self.data_service.save_character(self.character_data, self.character_id)
         log_debug("Sauvegarde du personnage", action="save_character", character_id=self.character_id)
     
     def get_character(self) -> Character:
@@ -83,25 +84,8 @@ class CharacterService:
         **Description:** Récupère la liste de tous les personnages disponibles à partir des fichiers JSON.
         **Retour:** Liste d'objets CharacterV2.
         """
-        characters: List[Character] = []
-        characters_dir: str = os.path.join(get_data_dir(), "characters")
-
-        for filename in os.listdir(characters_dir):
-            if filename.endswith(".json"):
-                character_id: str = filename[:-5]  # Retire l'extension .json
-                try:
-                    character: Character = CharacterPersistenceService.load_character_data(character_id)
-                    characters.append(character)
-
-                except (FileNotFoundError, ValueError) as e:
-                    log_debug("Erreur lors du chargement du personnage",
-                              action="get_all_characters_error",
-                              filename=filename,
-                              error=str(e))
-                    continue
-
-        log_debug("Chargement de tous les personnages", action="get_all_characters", count=len(characters))
-        return characters
+        data_service = CharacterDataService()
+        return data_service.get_all_characters()
     
     @staticmethod
     def get_character_by_id(character_id: str) -> Character:
@@ -113,56 +97,127 @@ class CharacterService:
         **Retour:** Objet CharacterV2 du personnage.
         """
         try:
-            character: Character = CharacterPersistenceService.load_character_data(character_id)
+            data_service = CharacterDataService()
+            character: Character = data_service.load_character(character_id)
 
             log_debug("Chargement du personnage", action="get_character_by_id", character_id=character_id)
             return character
         except Exception as e:
             raise e
 
-    def apply_xp(self, xp: int) -> None:
+    # --- Business Logic Methods ---
+
+    def apply_xp(self, xp: int) -> Character:
         """
         ### apply_xp
-        **Description:** Ajoute de l'XP au personnage et met à jour ses données
+        **Description:** Ajoute de l'XP au personnage.
         **Paramètres:**
         - `xp` (int): Points d'expérience à ajouter
-        **Retour:** Aucun
+        **Retour:** Personnage modifié
         """
-        current_xp: int = getattr(self.character_data, 'xp', 0)
-        new_xp: int = current_xp + xp
-        self.character_data.xp = new_xp
+        self.character_data.xp += xp
         self.save_character()
-        log_debug("Ajout d'XP", action="apply_xp", player_id=self.character_id, xp_ajoute=xp, xp_total=new_xp)
-
-    def add_gold(self, gold: float) -> None:
+        
+        log_info("XP ajouté au personnage",
+                   extra={"action": "apply_xp",
+                          "character_id": str(self.character_data.id),
+                          "xp_ajoute": xp,
+                          "xp_total": self.character_data.xp})
+        
+        return self.character_data
+    
+    def add_gold(self, gold: float) -> Character:
         """
         ### add_gold
-        **Description:** Ajoute de l'or au portefeuille du personnage
+        **Description:** Ajoute de l'or au portefeuille du personnage.
         **Paramètres:**
         - `gold` (float): Montant d'or à ajouter (peut avoir des décimales)
-        **Retour:** Aucun
+        **Retour:** Personnage modifié
         """
-        current_gold: float = getattr(self.character_data, 'gold', 0.0)
-        new_gold: float = current_gold + gold
-        self.character_data.gold = new_gold
+        self.character_data.gold += int(gold)
         self.save_character()
-        log_debug("Ajout d'or", action="add_gold", player_id=self.character_id, gold_ajoute=gold, gold_total=new_gold)
-
-    def take_damage(self, amount: int, source: str = "combat") -> None:
+        
+        log_info("Or ajouté au personnage",
+                   extra={"action": "add_gold",
+                          "character_id": str(self.character_data.id),
+                          "gold_ajoute": gold,
+                          "gold_total": self.character_data.gold})
+        
+        return self.character_data
+    
+    def take_damage(self, amount: int, source: str = "combat") -> Character:
         """
         ### take_damage
-        **Description:** Diminue les points de vie du personnage
+        **Description:** Diminue les points de vie du personnage.
         **Paramètres:**
         - `amount` (int): Points de dégâts à appliquer
         - `source` (str): Source des dégâts (optionnel)
-        **Retour:** Aucun
+        **Retour:** Personnage modifié
         """
-        current_hp: int = getattr(self.character_data, 'hp', 0)
-        new_hp: int = max(0, current_hp - amount)
-        self.character_data.hp = new_hp
+        # Delegate to combat stats to ensure consistency
+        self.character_data.combat_stats.take_damage(int(amount))
         self.save_character()
-        log_debug("Application de dégâts", action="take_damage", player_id=self.character_id, 
-                 amount=amount, hp_restant=new_hp, source=source)
+        
+        log_warning("Dégâts appliqués au personnage",
+                      extra={"action": "take_damage",
+                             "character_id": str(self.character_data.id),
+                             "amount": amount,
+                             "hp_restant": self.character_data.hp,
+                             "source": source})
+        
+        return self.character_data
+    
+    def heal(self, amount: int, source: str = "soin") -> Character:
+        """
+        ### heal
+        **Description:** Augmente les points de vie du personnage.
+        **Paramètres:**
+        - `amount` (int): Points de vie à restaurer
+        - `source` (str): Source du soin (optionnel)
+        **Retour:** Personnage modifié
+        """
+        max_hp = self.character_data.combat_stats.max_hit_points
+        self.character_data.hp = min(max_hp, self.character_data.hp + int(amount))
+        self.save_character()
+        
+        log_info("Soins appliqués au personnage",
+                   extra={"action": "heal",
+                          "character_id": str(self.character_data.id),
+                          "amount": amount,
+                          "hp_restant": self.character_data.hp,
+                          "source": source})
+        
+        return self.character_data
+
+    def calculate_max_hp(self) -> int:
+        """
+        ### calculate_max_hp
+        **Description:** Calcule les PV maximums du personnage basés sur sa constitution.
+        **Retour:** PV maximums calculés
+        """
+        # Simplified v2 formula based on character stats and level
+        constitution = self.character_data.stats.constitution
+        level = self.character_data.level
+        return constitution * 10 + level * 5
+    
+    def is_alive(self) -> bool:
+        """
+        ### is_alive
+        **Description:** Vérifie si le personnage est en vie.
+        **Retour:** True si le personnage est en vie, False sinon
+        """
+        return self.character_data.combat_stats.is_alive()
+    
+    def get_level(self) -> int:
+        """
+        ### get_level
+        **Description:** Calcule le niveau du personnage basé sur son XP.
+        **Retour:** Niveau calculé
+        """
+        # In v2, level is tracked directly on the character
+        return self.character_data.level
+
+    # --- Item Management Methods ---
 
     def instantiate_item_by_id(self, item_id: str, qty: int = 1) -> 'Item':
         """
@@ -187,9 +242,8 @@ class CharacterService:
         **Retour:** dict - Résumé de l'inventaire mis à jour
         """
         # Utiliser EquipmentService pour déléguer la logique
-        data_service: CharacterDataService = CharacterDataService(self.character_id)
-        equipment_service: EquipmentService = EquipmentService(data_service)
-        character: Character = data_service.load_character(self.character_id)
+        equipment_service: EquipmentService = EquipmentService(self.data_service)
+        character: Character = self.data_service.load_character(self.character_id)
         equipment_service.add_item_object(character, item)
         # Recharger les données
         self.character_data = self._load_character()
@@ -454,48 +508,3 @@ class CharacterService:
             'status': 'success',
             'gold': new_gold
         }
-    
-    @staticmethod
-    def _process_character_data(character_id: str, character_data: dict, action_prefix: str = "process_character") -> object:
-        """
-        ### _process_character_data
-        **Description:** Traite les données d'un personnage pour déterminer son statut et retourner l'objet approprié
-        **Paramètres:**
-        - `character_id` (str): Identifiant du personnage
-        - `character_data` (dict): Données brutes du personnage
-        - `action_prefix` (str): Préfixe pour les logs de debug
-        **Retour:** Objet Character ou dict selon l'état du personnage
-        """
-        # Ajouter l'ID dans tous les cas
-        character_data["id"] = character_id
-        
-        # Vérifier si le personnage est complet ou en cours de création
-        is_incomplete: bool = (
-            character_data.get("name") is None or 
-            character_data.get("status") == CharacterStatus.IN_PROGRESS or
-            character_data.get("status") is None
-        )
-        
-        if is_incomplete:
-            # Pour les personnages incomplets, définir le statut à "en_cours"
-            character_data["status"] = CharacterStatus.IN_PROGRESS
-            log_debug("Personnage incomplet détecté", 
-                     action=f"{action_prefix}_incomplete", 
-                     character_id=character_id,
-                     name=character_data.get("name"),
-                     status=character_data.get("status"))
-            return character_data
-        else:            
-            try:
-                character_obj = Character(**character_data)
-                log_debug("Personnage complet chargé", 
-                         action=f"{action_prefix}_complete", 
-                         character_id=character_id)
-                return character_obj
-            except Exception as validation_error:
-                # Si la validation échoue, on retourne quand même le dict brut
-                log_debug("Erreur de validation, personnage retourné en dict brut", 
-                         action=f"{action_prefix}_validation_error", 
-                         character_id=character_id,
-                         error=str(validation_error))
-                return character_data

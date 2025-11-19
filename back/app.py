@@ -1,10 +1,19 @@
 # back/app.py
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from back.routers import characters, scenarios, creation, gamesession
 from fastapi.openapi.utils import get_openapi
+from back.utils.exceptions import InternalServerError
 
 app = FastAPI(title="JdR – Terres du Milieu")
+
+@app.exception_handler(InternalServerError)
+async def internal_server_error_handler(request: Request, exc: InternalServerError):
+    return JSONResponse(
+        status_code=500,
+        content={"detail": str(exc)},
+    )
 
 # CORS configuration (kept for potential future frontend/dev tools)
 app.add_middleware(

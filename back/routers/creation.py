@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import List, Dict, Any
 
 from back.models.domain.character import Character, Stats, Skills
-from back.services.character_persistence_service import CharacterPersistenceService
+from back.services.character_data_service import CharacterDataService
 from back.services.skill_allocation_service import SkillAllocationService
 from back.services.races_data_service import RacesDataService
 from back.models.domain.stats_manager import StatsManager
@@ -97,7 +97,7 @@ def _validate_character_payload(character_payload: Dict[str, Any], character_id:
         
         # Persist status change if character_id is provided
         if character_id:
-            CharacterPersistenceService.save_character_data(character_id, validated_character)
+            CharacterDataService().save_character(validated_character, character_id)
         
         return ValidateCharacterV2Response(
             valid=True,
@@ -250,7 +250,7 @@ async def create_random_character() -> CharacterV2Response:
         
         character = Character(**character_dict)
         character.sync_status_from_completion()
-        CharacterPersistenceService.save_character_data(character_id, character)
+        CharacterDataService().save_character(character, character_id)
         
         return CharacterV2Response(
             character=character,
@@ -555,7 +555,7 @@ def create_character(request: CreateCharacterV2Request) -> CreateCharacterV2Resp
         character.sync_status_from_completion()
 
         # Save character data
-        CharacterPersistenceService.save_character_data(character_id, character)
+        CharacterDataService().save_character(character, character_id)
         
         return CreateCharacterV2Response(
             character_id=character_id,
@@ -664,7 +664,7 @@ def update_character(request: UpdateCharacterV2Request) -> UpdateCharacterV2Resp
     
     try:
         # Load existing character
-        existing_character = CharacterPersistenceService.load_character_data(request.character_id)
+        existing_character = CharacterDataService().load_character(request.character_id)
         if existing_character is None:
             raise CharacterNotFoundError(f"Character with id '{request.character_id}' not found")
 
@@ -683,8 +683,8 @@ def update_character(request: UpdateCharacterV2Request) -> UpdateCharacterV2Resp
         existing_character.sync_status_from_completion()
         existing_character.update_timestamp()
 
-        # Save updated character
-        CharacterPersistenceService.save_character_data(request.character_id, existing_character)
+        # 3. Save updated character
+        CharacterDataService().save_character(existing_character, request.character_id)
         
         return UpdateCharacterV2Response(
             character=existing_character.model_dump(),
@@ -838,7 +838,7 @@ async def validate_character(character: ValidateCharacterV2Request) -> ValidateC
 async def validate_character_by_id(request: ValidateCharacterByIdRequest) -> ValidateCharacterV2Response:
     """Validate a persisted character without resending its entire payload."""
     try:
-        character = CharacterPersistenceService.load_character_data(request.character_id)
+        character = CharacterDataService().load_character(request.character_id)
     except FileNotFoundError as not_found_error:
         raise HTTPException(status_code=404, detail=str(not_found_error)) from not_found_error
     except ValueError as value_error:

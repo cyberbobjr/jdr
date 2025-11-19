@@ -7,6 +7,12 @@ from enum import Enum
 if TYPE_CHECKING:
     from back.models.domain.character import Character
 
+class LLMConfig(BaseModel):
+    """Configuration for LLM provider"""
+    api_endpoint: str
+    api_key: str
+    model: str
+
 class ItemType(str, Enum):
     """Types d'objets possibles"""
     MATERIEL = "Materiel"
@@ -22,11 +28,11 @@ class CharacterStatus(str, Enum):
     ARCHIVE = "archive"
 
 class Item(BaseModel):
-    """Modèle pour un objet d'inventaire avec toutes ses propriétés"""
-    id: str  # Identifiant unique de l'instance de l'objet
-    name: str  # Nom de l'objet (ex: "Coutelas")
-    item_type: ItemType  # Type d'objet (Arme, Armure, Materiel, etc.)
-    price_pc: float  # Prix en pièces de cuivre (support des décimales)
+    """Model for an inventory item with all its properties"""
+    id: str  # Unique identifier of the item instance
+    name: str  # Item name (e.g., "Dagger")
+    item_type: ItemType  # Item type (Weapon, Armor, Material, etc.)
+    price_pc: float  # Price in copper pieces (supports decimals)
     weight_kg: float  # Poids en kilogrammes
     description: str  # Description de l'objet
     category: Optional[str] = None  # Catégorie spécifique (ex: "Couteau", "Cuir", etc.)
@@ -76,14 +82,14 @@ class ScenarioList(BaseModel):
     scenarios: List[ScenarioStatus]
 
 class MessagePart(BaseModel):
-    """Modèle pour une partie de message dans l'historique de conversation"""
+    """Model for a message part in conversation history"""
     content: str
     timestamp: str
     dynamic_ref: Optional[str] = None
-    part_kind: str  # ex: "system-prompt", "user-prompt", "text", "tool-call", "tool-return"
+    part_kind: str  # e.g., "system-prompt", "user-prompt", "text", "tool-call", "tool-return"
 
 class MessageUsage(BaseModel):
-    """Modèle pour les informations d'usage des tokens"""
+    """Model for token usage information"""
     requests: int
     request_tokens: int
     response_tokens: int
@@ -91,10 +97,10 @@ class MessageUsage(BaseModel):
     details: Optional[Dict[str, Any]] = None
 
 class ConversationMessage(BaseModel):
-    """Modèle pour un message complet dans l'historique de conversation"""
+    """Model for a complete message in conversation history"""
     parts: List[MessagePart]
     instructions: Optional[str] = None
-    kind: str  # ex: "request", "response"
+    kind: str  # e.g., "request", "response"
     usage: Optional[MessageUsage] = None
     model_name: Optional[str] = None
     timestamp: Optional[str] = None
@@ -102,29 +108,31 @@ class ConversationMessage(BaseModel):
     vendor_id: Optional[str] = None
 
 class PlayScenarioRequest(BaseModel):
-    """Modèle de requête pour l'endpoint /scenarios/play"""
-    message: str
+    """Request model for the merged /gamesession/play endpoint"""
+    message: Optional[str] = None  # Optional for starting (uses default message)
+    scenario_name: Optional[str] = None  # For starting a new session
+    character_id: Optional[str] = None   # For starting a new session
 
-# Modèles de réponse pour les autres endpoints scenarios
+# Response models for other scenario endpoints
 
 class SessionInfo(BaseModel):
-    """Modèle pour les informations d'une session active"""
+    """Model for active session information"""
     session_id: str
     scenario_name: str
     character_id: str
     character_name: str
 
 class ActiveSessionsResponse(BaseModel):
-    """Modèle de réponse pour l'endpoint /scenarios/sessions"""
+    """Response model for the /scenarios/sessions endpoint"""
     sessions: List[SessionInfo]
 
 class StartScenarioRequest(BaseModel):
-    """Modèle de requête pour l'endpoint /scenarios/start"""
+    """Request model for the /scenarios/start endpoint"""
     scenario_name: str
     character_id: str
 
 class StartScenarioResponse(BaseModel):
-    """Modèle de réponse pour l'endpoint /scenarios/start"""
+    """Response model for the /scenarios/start endpoint"""
     session_id: str
     scenario_name: str
     character_id: str
@@ -132,15 +140,15 @@ class StartScenarioResponse(BaseModel):
     llm_response: str
 
 class PlayScenarioResponse(BaseModel):
-    """Modèle de réponse pour l'endpoint /scenarios/play"""
+    """Response model for the /scenarios/play endpoint"""
     response: List[Dict[str, Any]]
 
 class ScenarioHistoryResponse(BaseModel):
-    """Modèle de réponse pour l'endpoint /scenarios/history/{session_id}"""
+    """Response model for the /scenarios/history/{session_id} endpoint"""
     history: List[Dict[str, Any]]
 
 class DeleteMessageResponse(BaseModel):
-    """Modèle de réponse pour l'endpoint DELETE /scenarios/history/{session_id}/{message_index}"""
+    """Response model for the DELETE /scenarios/history/{session_id}/{message_index} endpoint"""
     message: str
     deleted_message_info: Dict[str, Any]
     remaining_messages_count: int
@@ -181,20 +189,20 @@ class CharacterListAny(BaseModel):
     characters: List[dict]
 
 class CharacteristicSchema(BaseModel):
-    """Schéma pour une caractéristique individuelle"""
+    """Schema for an individual characteristic"""
     short_name: str
-    category: str  # 'physical', 'mental', ou 'social'
+    category: str  # 'physical', 'mental', or 'social'
     description: str
     examples: List[str]
 
 class CharacteristicsResponse(BaseModel):
-    """Schéma de réponse pour le endpoint /api/creation/characteristics"""
+    """Response schema for the /api/creation/characteristics endpoint"""
     characteristics: Dict[str, CharacteristicSchema]
     bonus_table: Dict[str, int]
     cost_table: Dict[str, int]
     starting_points: int
 
-# Les modèles RaceData et CultureData sont maintenant définis plus haut et remplacent RaceSchema et CultureSchema
+# The RaceData and CultureData models are now defined above and replace RaceSchema and CultureSchema
 
 class UpdateSkillsRequest(BaseModel):
     character_id: str
@@ -203,7 +211,7 @@ class UpdateSkillsRequest(BaseModel):
 class UpdateSkillsResponse(BaseModel):
     status: str
 
-# === Schémas pour la gestion d'équipement ===
+# === Schemas for equipment management ===
 
 class AddEquipmentRequest(BaseModel):
     character_id: str
@@ -227,38 +235,38 @@ class RemoveEquipmentResponse(BaseModel):
 
 class UpdateMoneyRequest(BaseModel):
     character_id: str
-    amount: float  # Positif pour ajouter, négatif pour retirer
+    amount: float  # Positive to add, negative to subtract
 
 class UpdateMoneyResponse(BaseModel):
     status: str
     gold: float
 
-# === Schémas pour les compétences ===
+# === Schemas for skills ===
 
 class SkillStatBonus(BaseModel):
-    """Modèle pour les bonus de statistiques sur une compétence"""
+    """Model for stat bonuses on a skill"""
     min_value: int
     bonus_points: int
 
 class SkillInfo(BaseModel):
-    """Modèle pour les informations d'une compétence individuelle"""
+    """Model for individual skill information"""
     id: str
     name: str
     description: str
     stat_bonuses: Optional[Dict[str, SkillStatBonus]] = None
 
 class SkillGroup(BaseModel):
-    """Modèle pour un groupe de compétences"""
+    """Model for a skill group"""
     name: str
     skills: Dict[str, SkillInfo]
 
 class RacialAffinity(BaseModel):
-    """Modèle pour une affinité raciale"""
+    """Model for racial affinity"""
     skill: str
     base_points: int
 
 class SkillsResponse(BaseModel):
-    """Modèle de réponse pour l'endpoint /api/creation/skills"""
+    """Response model for the /api/creation/skills endpoint"""
     skill_groups: Dict[str, SkillGroup]
     racial_affinities: Dict[str, List[RacialAffinity]]
 
@@ -278,14 +286,14 @@ class EquipmentItem(BaseModel):
     type: Optional[str] = None
 
 class EquipmentResponse(BaseModel):
-    """Modèle de réponse pour l'endpoint /api/creation/equipment"""
+    """Response model for the /api/creation/equipment endpoint"""
     weapons: List[EquipmentItem]
     armor: List[EquipmentItem]
     accessories: List[EquipmentItem]
     consumables: List[EquipmentItem]
 
 class StatInfo(BaseModel):
-    """Modèle pour les informations d'une statistique"""
+    """Model for stat information"""
     id: str
     name: str
     description: str
@@ -293,12 +301,12 @@ class StatInfo(BaseModel):
     max_value: int
 
 class ValueRange(BaseModel):
-    """Modèle pour la plage de valeurs des statistiques"""
+    """Model for stat value range"""
     min: int
     max: int
 
 class StatsResponse(BaseModel):
-    """Modèle de réponse pour l'endpoint /api/creation/stats"""
+    """Response model for the /api/creation/stats endpoint"""
     stats: Dict[str, StatInfo]
     value_range: ValueRange
     bonus_formula: str

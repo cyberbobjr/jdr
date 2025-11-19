@@ -6,7 +6,6 @@ from pydantic import BaseModel
 
 from back.models.domain.character import Character
 from back.services.character_data_service import CharacterDataService
-from back.services.character_persistence_service import CharacterPersistenceService
 from back.utils.exceptions import InternalServerError
 from back.utils.logger import log_debug
 
@@ -167,7 +166,8 @@ async def get_character_detail(character_id: str) -> CharacterV2Response:
     ```
     """
     try:
-        character = CharacterPersistenceService.load_character_data(character_id)
+        data_service = CharacterDataService()
+        character = data_service.load_character(character_id)
         if character is None:
             raise HTTPException(status_code=404, detail=f"Character with id '{character_id}' not found")
 
@@ -200,10 +200,11 @@ async def delete_character_v2(character_id: str) -> None:
     - **Output**: 204 No Content if successful
     """
     try:
-        data = CharacterPersistenceService.load_character_data(character_id)  # Verify character exists
+        data_service = CharacterDataService()
+        data = data_service.load_character(character_id)  # Verify character exists
         if not data:
             raise HTTPException(status_code=404, detail=f"Character with id '{character_id}' not found")
-        CharacterPersistenceService.delete_character_data(character_id)
+        data_service.delete_character(character_id)
 
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail=f"Character with id '{character_id}' not found")

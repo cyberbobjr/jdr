@@ -7,6 +7,7 @@
 ### Technology Stack
 
 **Backend:**
+
 - **Framework**: FastAPI (async REST API)
 - **AI Framework**: PydanticAI (agent orchestration with OpenAI-compatible APIs)
 - **Validation**: Pydantic V2 (comprehensive type safety)
@@ -14,6 +15,7 @@
 - **LLM Provider**: OpenAI-compatible API (DeepSeek default)
 
 **Frontend:**
+
 - Removed for now; will be recreated later.
 
 ## Architectural Principles
@@ -31,6 +33,7 @@
 **Location**: `back/routers/`
 
 Three main routers expose REST endpoints:
+
 - **`characters.py`** (`/api/characters/`) - Character management and retrieval
 - **`scenarios.py`** (`/api/scenarios/`) - Scenario flow, gameplay, session management
 - **`creation.py`** (`/api/creation/`) - Character creation wizard with LLM-assisted generation
@@ -44,32 +47,38 @@ Three main routers expose REST endpoints:
 Services encapsulate unique business responsibilities:
 
 **Character Management Services:**
+
 - `CharacterDataService` - I/O operations (loading/saving)
-- `CharacterBusinessService` - Business logic (XP, gold, damage, healing)
-- `CharacterPersistenceService` - Centralized JSON persistence
-- Inventory functionality is merged into `EquipmentService` (add/remove/equip)
+- `CharacterService` - Business logic (XP, gold, damage, healing) and inventory management
 - `EquipmentService` - Equipment buy/sell and money management
 
 **Game Services:**
+
 - `GameSessionService` - Game session management (history, character, scenario)
 - `ScenarioService` - Scenario flow orchestration
-- `CombatService` - Combat mechanics calculations
-- `CombatStateService` - Combat state persistence
-- `SkillService` - Skill checks and dice rolls
 - `ItemService` - Item management
+- `SkillAllocationService` - Automated skill distribution logic
 
-### 3. AI Agent Layer (PydanticAI)
+### 3. Graph & Agent Layer (PydanticAI + Pydantic Graph)
 
-**Location**: `back/agents/`
+**Location**: `back/graph/` and `back/agents/`
 
-**GM Agent** (`gm_agent_pydantic.py`):
-- **Type**: PydanticAI Agent with OpenAI-compatible model
-- **System Prompt**: Dynamically built from scenario content and game rules
-- **Tools**: Access to character manipulation, combat, inventory, and skill check tools
-- **Memory**: Conversation history stored in JSONL via `PydanticJsonlStore`
-- **Dependencies**: `GMAgentDependencies` (session_id, character_data, history store)
+The system uses **Pydantic Graph** to orchestrate the game flow between Narrative and Combat modes.
+
+**Graph Nodes** (`back/graph/nodes/`):
+
+- **`NarrativeNode`**: Handles story progression using `NarrativeAgent`.
+- **`CombatNode`**: Handles combat turns using `CombatAgent`.
+- **`DispatcherNode`**: Routes the session to the correct node based on state.
+
+**Specialized Agents** (`back/agents/`):
+
+- **`NarrativeAgent`**: PydanticAI agent for storytelling. Can trigger combat via `CombatSeedPayload`.
+- **`CombatAgent`**: PydanticAI agent for combat resolution. Returns `CombatTurnContinuePayload` or `CombatTurnEndPayload`.
+- **`GenericAgent`** (`gm_agent_pydantic.py`): Simple agent for content generation (names, backgrounds) without session context.
 
 **Agent Tools** (`back/tools/`):
+
 - `character_tools.py` - apply_xp, add_gold, take_damage
 - `combat_tools.py` - roll_initiative, perform_attack, resolve_attack, calculate_damage, end_combat
 - `equipment_tools.py` - add_item, remove_item (via EquipmentService)
@@ -80,13 +89,15 @@ Services encapsulate unique business responsibilities:
 **Location**: `back/models/domain/`
 
 **Core Models:**
-- `character_v2.py` - Simplified character model (6 attributes, 3–20 per stat, bonus = (value - 10) // 2)
-- `combat_state_v2.py` - Combat state tracking
-- `npc_v2.py` - NPC models
+
+- `character.py` - Simplified character model (6 attributes, 3–20 per stat, bonus = (value - 10) // 2)
+- `combat_state.py` - Combat state tracking
+- `npc.py` - NPC models
 
 **Data Managers** (load YAML configuration):
-- `stats_manager.py` - Stats info, value range (3–20), bonus formula; no point budget/cost table
-- `skills_manager.py` - 6 skill groups with detailed skills
+
+- `stats_manager.py` - Stats info, value range (3–20), bonus formula
+- `unified_skills_manager.py` - Unified interface for skill groups and definitions
 - `races_manager.py` - Available races, cultures, stat bonuses
 - `equipment_manager.py` - Weapons, armor, items with stats
 - `spells_manager.py` - Available spells by sphere
@@ -98,7 +109,7 @@ Services encapsulate unique business responsibilities:
 
 - `PydanticJsonlStore` - Custom JSONL store for PydanticAI conversation history
 - Character sheets: `data/characters/*.json`
-- Combat states: `data/combat/*.json`
+- Combat states: `data/combat/*.json` (managed via Graph state)
 - Session history: `data/sessions/*.jsonl`
 - Game data: `back/gamedata/*.yaml`
 
@@ -109,7 +120,7 @@ Services encapsulate unique business responsibilities:
 ```text
 User (Frontend) → Creation Router → Managers (races/skills/stats/equipment)
                                   ↓
-                        CharacterPersistenceService → JSON file
+                        CharacterDataService → JSON file
 ```
 
 ### Gameplay Flow
@@ -136,6 +147,7 @@ User prompt → Scenarios Router → GameSessionService → GM Agent (PydanticAI
 ## Configuration Management
 
 **Centralized Config**: `back/config.yaml` + `back/config.py`
+
 - Data directory paths
 - LLM configuration (model, endpoint, API key)
 - Application settings

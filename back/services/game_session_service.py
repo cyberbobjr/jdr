@@ -13,11 +13,17 @@ from pydantic_ai import ModelMessage
 
 from back.models.domain.character import Character
 from back.services.character_data_service import CharacterDataService
-from back.services.character_business_service import CharacterBusinessService
+from back.services.character_service import CharacterService
 from back.services.equipment_service import EquipmentService
 from back.storage.pydantic_jsonl_store import PydanticJsonlStore
 from back.config import get_data_dir
 from back.utils.logger import log_debug
+from back.agents.PROMPT import build_system_prompt
+from back.utils.exceptions import (
+    ServiceNotInitializedError,
+    SessionNotFoundError,
+    CharacterNotFoundError
+)
 
 
 # History types constants
@@ -35,7 +41,7 @@ class GameSessionService:
     - `character_data` (Character): Character data for the session (typed object)
     - `scenario_id` (str): Scenario ID associated with the session
     - `data_service` (CharacterDataService): Data service for character
-    - `business_service` (CharacterBusinessService): Business logic service
+    - `character_service` (CharacterService): Character service
     - `equipment_service` (EquipmentService): Equipment service
     """
 
@@ -55,8 +61,9 @@ class GameSessionService:
 
         # Specialized services
         self.data_service: Optional[CharacterDataService] = None
-        self.business_service: Optional[CharacterBusinessService] = None
+        self.character_service: Optional[CharacterService] = None
         self.equipment_service: Optional[EquipmentService] = None
+        self._combat_system_prompt: Optional[str] = None
 
         # Store is created on demand in save_history/load_history methods
 
@@ -66,7 +73,7 @@ class GameSessionService:
             if character_id and scenario_id:
                 self._create_session(character_id, scenario_id)
             else:
-                raise ValueError(f"Session {session_id} does not exist and creation parameters are not provided")
+                raise SessionNotFoundError(f"Session {session_id} does not exist and creation parameters are not provided")
 
     def _load_session_data(self) -> bool:
         """
@@ -89,9 +96,9 @@ class GameSessionService:
                     if self.data_service:
                         self.character_data = self.data_service.load_character(character_id)
                     else:
-                        raise ValueError("Data service not initialized")
+                        raise ServiceNotInitializedError("Data service not initialized")
                 except FileNotFoundError:
-                    raise ValueError(f"Character {character_id} not found")
+                    raise CharacterNotFoundError(f"Character {character_id} not found")
 
             # Load scenario ID
             scenario_file = session_dir / "scenario.txt"
@@ -134,9 +141,9 @@ class GameSessionService:
             if self.data_service:
                 self.character_data = self.data_service.load_character(character_id)
             else:
-                raise ValueError("Data service not initialized")
+                raise ServiceNotInitializedError("Data service not initialized")
         except FileNotFoundError:
-            raise ValueError(f"Character {character_id} not found")
+            raise CharacterNotFoundError(f"Character {character_id} not found")
 
         self.scenario_id = scenario_id
 
@@ -148,10 +155,10 @@ class GameSessionService:
         - `character_id` (str): Character ID
         """
         # Data service
-        self.data_service = CharacterDataService(character_id)
+        self.data_service = CharacterDataService()
 
-        # Business logic service (depends on data service)
-        self.business_service = CharacterBusinessService(self.data_service)
+        # Character service
+        self.character_service = CharacterService(character_id)
 
         # Equipment service (depends on data service)
         self.equipment_service = EquipmentService(self.data_service)
@@ -165,100 +172,6 @@ class GameSessionService:
         if self.character_data and self.data_service:
             self.data_service.save_character(self.character_data)
 
-    def apply_xp(self, xp: int) -> Character:
-        """
-        ### apply_xp
-        **Description:** Apply XP to the character.
-        **Parameters:**
-        - `xp` (int): Experience points to add
-        **Returns:** Modified character
-        """
-        if self.character_data and self.business_service:
-            self.character_data = self.business_service.apply_xp(self.character_data, xp)
-            return self.character_data
-        raise ValueError("Services not initialized")
-
-    def add_gold(self, gold: float) -> Character:
-        """
-        ### add_gold
-        **Description:** Add gold to the character.
-        **Parameters:**
-        - `gold` (float): Amount of gold to add
-        **Returns:** Modified character
-        """
-        if self.character_data and self.business_service:
-            self.character_data = self.business_service.add_gold(self.character_data, gold)
-            return self.character_data
-        raise ValueError("Services not initialized")
-
-    def take_damage(self, amount: int, source: str = "combat") -> Character:
-        """
-        ### take_damage
-        **Description:** Apply damage to the character.
-        **Parameters:**
-        - `amount` (int): Damage points to apply
-        - `source` (str): Damage source (optional)
-        **Returns:** Modified character
-        """
-        if self.character_data and self.business_service:
-            self.character_data = self.business_service.take_damage(self.character_data, amount, source)
-            return self.character_data
-        raise ValueError("Services not initialized")
-
-    def add_item(self, item_id: str, quantity: int = 1) -> Character:
-        """
-        ### add_item
-        **Description:** Add an item to the character's inventory.
-        **Parameters:**
-        - `item_id` (str): Item identifier
-        - `quantity` (int): Quantity to add (default: 1)
-        **Returns:** Modified character
-        """
-        if self.character_data and self.equipment_service:
-            self.character_data = self.equipment_service.add_item(self.character_data, item_id, quantity)
-            return self.character_data
-        raise ValueError("Services not initialized")
-
-    def remove_item(self, item_id: str, quantity: int = 1) -> Character:
-        """
-        ### remove_item
-        **Description:** Remove an item from the character's inventory.
-        **Parameters:**
-        - `item_id` (str): Item identifier
-        - `quantity` (int): Quantity to remove (default: 1)
-        **Returns:** Modified character
-        """
-        if self.character_data and self.equipment_service:
-            self.character_data = self.equipment_service.remove_item(self.character_data, item_id, quantity)
-            return self.character_data
-        raise ValueError("Services not initialized")
-
-    def buy_equipment(self, equipment_name: str) -> Character:
-        """
-        ### buy_equipment
-        **Description:** Buy equipment for the character.
-        **Parameters:**
-        - `equipment_name` (str): Equipment name
-        **Returns:** Modified character
-        """
-        if self.character_data and self.equipment_service:
-            self.character_data = self.equipment_service.buy_equipment(self.character_data, equipment_name)
-            return self.character_data
-        raise ValueError("Services not initialized")
-
-    def sell_equipment(self, equipment_name: str) -> Character:
-        """
-        ### sell_equipment
-        **Description:** Sell equipment from the character.
-        **Parameters:**
-        - `equipment_name` (str): Equipment name
-        **Returns:** Modified character
-        """
-        if self.character_data and self.equipment_service:
-            self.character_data = self.equipment_service.sell_equipment(self.character_data, equipment_name)
-            return self.character_data
-        raise ValueError("Services not initialized")
-
     @staticmethod
     def list_all_sessions() -> List[Dict[str, Any]]:
         """
@@ -267,7 +180,7 @@ class GameSessionService:
         **Returns:** List of dictionaries containing information for each session
         """
         sessions_dir = pathlib.Path(get_data_dir()) / "sessions"
-
+        
         all_sessions = []
 
         if sessions_dir.exists() and sessions_dir.is_dir():
@@ -356,12 +269,12 @@ class GameSessionService:
             Dict[str, str]: A dictionary containing character_id and scenario_name.
 
         Raises:
-            FileNotFoundError: If the session does not exist.
+            SessionNotFoundError: If the session does not exist.
         """
         session_dir = pathlib.Path(get_data_dir()) / "sessions" / session_id
 
         if not session_dir.exists() or not session_dir.is_dir():
-            raise FileNotFoundError(f"The session '{session_id}' does not exist.")
+            raise SessionNotFoundError(f"The session '{session_id}' does not exist.")
 
         # Retrieve the character ID
         character_file = session_dir / "character.txt"
@@ -396,7 +309,7 @@ class GameSessionService:
             bool: True if a session already exists, False otherwise.
         """
         sessions_dir = pathlib.Path(get_data_dir()) / "sessions"
-
+        
         if not sessions_dir.exists() or not sessions_dir.is_dir():
             return False
 
@@ -414,10 +327,10 @@ class GameSessionService:
 
                         # Compare with provided parameters
                         if existing_scenario == scenario_name and existing_character == character_id:
-                            log_debug("Existing session found",
-                                      action="check_existing_session",
-                                      session_id=session_folder.name,
-                                      scenario_name=scenario_name,
+                            log_debug("Existing session found", 
+                                      action="check_existing_session", 
+                                      session_id=session_folder.name, 
+                                      scenario_name=scenario_name, 
                                       character_id=character_id)
                             return True
 
@@ -499,35 +412,19 @@ class GameSessionService:
             return GameState(**data)
         return None
 
-    async def build_narrative_prompt(self) -> str:
+    async def build_narrative_system_prompt(self) -> str:
         """
-        ### build_narrative_prompt
+        ### build_narrative_system_prompt
         **Description:** Build the system prompt for narrative mode.
         **Returns:** System prompt string
         """
-        # Load scenario content
-        scenario_path = os.path.join(get_data_dir(), "scenarios", self.scenario_id)
-        if os.path.exists(scenario_path):
-            with open(scenario_path, 'r', encoding='utf-8') as f:
-                scenario_content = f.read()
-        else:
-            scenario_content = "No scenario loaded."
+        # Use the full system prompt template
+        prompt = build_system_prompt(self.scenario_id)
 
         # Build complete character information via Character method
         character_info = self.character_data.build_narrative_prompt_block() if self.character_data else "Unknown character"
 
-        return f"""
-You are a Game Master for a Middle-earth RPG.
-
-Scenario:
-{scenario_content}
-
-CHARACTER INFORMATION:
-{character_info}
-
-Guide the story and trigger combat when appropriate. Respond with structured output if combat starts.
-Use the character's stats, skills, and equipment when resolving actions and determining outcomes.
-"""
+        return prompt + f"\n\nCHARACTER INFORMATION:\n{character_info}"
 
     async def build_combat_prompt(self, combat_state: dict) -> str:
         """
@@ -550,11 +447,18 @@ CHARACTER INFORMATION:
 {character_info}
 
 Resolve combat turns using the character's stats, skills, and equipment.
-Use tools to:
-- Roll initiative and attacks
-- Apply damage and healing
-- Track combat state
-- End combat when appropriate
+You have access to the following tools:
+- roll_initiative_tool: Roll initiative for participants
+- perform_attack_tool: Execute an attack roll
+- resolve_attack_tool: Resolve attack vs defense
+- calculate_damage_tool: Calculate damage with modifiers
+- apply_damage_tool: Apply damage to a participant
+- end_turn_tool: End the current turn
+- check_combat_end_tool: Check if combat should end
+- end_combat_tool: End the combat session
+- get_combat_status_tool: Get current combat status
+- skill_check_with_character: Perform skill checks
+- inventory_remove_item: Remove items (e.g. ammunition)
 
 Always consider the character's combat skills, equipment bonuses, and current HP when resolving actions.
 """

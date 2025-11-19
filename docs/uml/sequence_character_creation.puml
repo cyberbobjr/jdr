@@ -4,18 +4,18 @@ title Character Creation Sequence
 actor User
 participant "FastAPI Router\n(creation.py)" as Router
 participant "Managers (races/skills/stats/equipment)" as Managers
-participant "CharacterPersistenceService" as PersistenceService
+participant "CharacterDataService" as DataService
 database "Character JSON" as CharacterDB
 
 User -> Router: POST /api/creation/start
 activate Router
 Router -> Managers: load_required_data()
 activate Managers
-Managers -> PersistenceService: create_character_template()
-activate PersistenceService
-PersistenceService -> CharacterDB: Save new character
-PersistenceService --> Managers: character_id
-deactivate PersistenceService
+Managers -> DataService: create_character_template()
+activate DataService
+DataService -> CharacterDB: Save new character
+DataService --> Managers: character_id
+deactivate DataService
 Managers --> Router: character_id
 deactivate Managers
 Router --> User: 200 OK (character_id)

@@ -16,7 +16,7 @@ def character_apply_xp(ctx: RunContext[GameSessionService], xp: int) -> str:
     log_debug("Tool character_apply_xp appelé", tool="character_apply_xp", player_id=str(ctx.deps.character_id), xp=xp)
     
     # ✅ PATTERN CORRECT - Utilisation des services spécialisés via SessionService
-    character = ctx.deps.apply_xp(xp)
+    character = ctx.deps.character_service.apply_xp(xp)
     return f"✅ {xp} XP appliqués au personnage. Total XP: {character.xp}"
 
 def character_add_gold(ctx: RunContext[GameSessionService], gold: int) -> str:
@@ -32,7 +32,7 @@ def character_add_gold(ctx: RunContext[GameSessionService], gold: int) -> str:
     log_debug("Tool character_add_gold appelé", tool="character_add_gold", player_id=str(ctx.deps.character_id), gold=gold)
     
     # ✅ PATTERN CORRECT - Utilisation des services spécialisés via SessionService
-    character = ctx.deps.add_gold(float(gold))
+    character = ctx.deps.character_service.add_gold(float(gold))
     return f"💰 {gold} pièces d'or {'ajoutées' if gold > 0 else 'retirées'}. Total: {character.gold:.2f} po"
 
 def character_take_damage(ctx: RunContext[GameSessionService], amount: int, source: str = "combat") -> str:
@@ -49,5 +49,5 @@ def character_take_damage(ctx: RunContext[GameSessionService], amount: int, sour
     log_debug("Tool character_take_damage appelé", tool="character_take_damage", player_id=str(ctx.deps.character_id), amount=amount, source=source)
     
     # ✅ PATTERN CORRECT - Utilisation des services spécialisés via SessionService
-    character = ctx.deps.take_damage(amount, source)
+    character = ctx.deps.character_service.take_damage(amount, source)
     return f"💔 {amount} points de dégâts subis ({source}). PV restants: {character.hp}"

@@ -119,6 +119,7 @@ async def skill_check_with_character(
 - **Pydantic Models**: Use for all data structures. Use V2 features like `field_validator`.
 - **Async**: Use `async/await` for all I/O operations.
 - **Docstrings**: Document all public methods (description, args, returns).
+- **FastAPI Route Documentation**: For all FastAPI router endpoints, provide comprehensive docstrings with detailed descriptions, parameter explanations, request/response JSON examples, and error conditions. This ensures complete OpenAPI documentation for API consumers. Include full JSON schemas for requests and responses to facilitate automatic API documentation generation.
 - **Error Handling**: Use custom exceptions from `utils/exceptions.py`.
 - **File Naming**:
   - Services: `{domain}_service.py`

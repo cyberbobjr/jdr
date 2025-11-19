@@ -15,7 +15,13 @@ source back/venv/bin/activate
 # Add the project root to the PYTHONPATH to resolve 'from back.app...' imports.
 export PYTHONPATH="$PWD"
 
-echo "Running all tests from back/tests/..."
-echo "------------------------"
-pytest back/tests/
+if [ $# -eq 0 ]; then
+    echo "Running all tests from back/tests/..."
+    echo "------------------------"
+    pytest back/tests/
+else
+    echo "Running tests: $@"
+    echo "------------------------"
+    pytest "$@"
+fi
 

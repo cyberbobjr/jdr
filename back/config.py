@@ -6,6 +6,7 @@ import logging.handlers
 from typing import Dict, Any, Optional
 from pathlib import Path
 import yaml
+from back.models.schema import LLMConfig
 
 class Config:
     """Classe de configuration centralisée utilisant un fichier YAML."""
@@ -27,21 +28,21 @@ class Config:
         except yaml.YAMLError as e:
             raise ValueError(f"Erreur de syntaxe dans le fichier de configuration: {e}")
 
-    def get_llm_config(self) -> Dict[str, str]:
+    def get_llm_config(self) -> LLMConfig:
         """
         ### get_llm_config
         **Description :** Retourne la configuration du modèle LLM.
         **Returns :**
-        - (Dict[str, str]) : Configuration avec model, api_endpoint, api_key
+        - (LLMConfig) : Configuration avec model, api_endpoint, api_key
         """
         llm_config = self._config.get("llm", {})
 
         # Surcharge par les variables d'environnement si elles existent
-        return {
-            "model": os.environ.get("DEEPSEEK_API_MODEL") or llm_config.get("model", "deepseek-chat"),
-            "api_endpoint": os.environ.get("DEEPSEEK_API_BASE_URL") or llm_config.get("api_endpoint", "https://api.deepseek.com"),
-            "api_key": os.environ.get("DEEPSEEK_API_KEY") or llm_config.get("api_key", "")
-        }
+        return LLMConfig(
+            model=os.environ.get("DEEPSEEK_API_MODEL") or llm_config.get("model", "deepseek-chat"),
+            api_endpoint=os.environ.get("DEEPSEEK_API_BASE_URL") or llm_config.get("api_endpoint", "https://api.deepseek.com"),
+            api_key=os.environ.get("DEEPSEEK_API_KEY") or llm_config.get("api_key", "")
+        )
 
     def get_data_dir(self) -> str:
         """
@@ -151,7 +152,7 @@ def get_data_dir() -> str:
     """Fonction de compatibilité pour get_data_dir."""
     return config.get_data_dir()
 
-def get_llm_config() -> Dict[str, str]:
+def get_llm_config() -> LLMConfig:
     """Fonction de compatibilité pour la configuration LLM."""
     return config.get_llm_config()
 
