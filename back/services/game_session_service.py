@@ -34,29 +34,40 @@ HISTORY_COMBAT = "combat"
 class GameSessionService:
     """
     ### GameSessionService
-    **Description:** Service for managing game sessions, including message history,
-    character data and scenario.
+    **Description:** Service responsible for managing game sessions.
+    It handles the lifecycle of a session, including:
+    - Loading and saving session metadata (character ID, scenario ID).
+    - Managing message history for narrative and combat modes.
+    - Initializing and providing access to specialized services (`CharacterService`, `EquipmentService`).
+    - Building system prompts for agents.
+
     **Attributes:**
-    - `session_id` (str): Session identifier
-    - `character_data` (Character): Character data for the session (typed object)
-    - `scenario_id` (str): Scenario ID associated with the session
-    - `data_service` (CharacterDataService): Data service for character
-    - `character_service` (CharacterService): Character service
-    - `equipment_service` (EquipmentService): Equipment service
+    - `session_id` (str): Unique identifier for the session.
+    - `character_id` (Optional[str]): ID of the character associated with the session.
+    - `scenario_id` (str): ID of the scenario associated with the session.
+    - `data_service` (Optional[CharacterDataService]): Service for character data persistence.
+    - `character_service` (Optional[CharacterService]): Service for character business logic.
+    - `equipment_service` (Optional[EquipmentService]): Service for equipment management.
     """
 
-    def __init__(self, session_id: str, character_id: Optional[str] = None, scenario_id: Optional[str] = None):
+    def __init__(self, session_id: str, character_id: Optional[str] = None, scenario_id: Optional[str] = None) -> None:
         """
         ### __init__
-        **Description:** Initialize the session service with an identifier.
+        **Description:** Initializes the session service with a session identifier.
+        If the session exists, it loads the data. If not, and creation parameters are provided, it creates a new session.
+
         **Parameters:**
-        - `session_id` (str): Unique session identifier
-        - `character_id` (Optional[str]): Character ID for creating a new session
-        - `scenario_id` (Optional[str]): Scenario ID for creating a new session
+        - `session_id` (str): Unique session identifier.
+        - `character_id` (Optional[str]): Character ID (required for creating a new session).
+        - `scenario_id` (Optional[str]): Scenario ID (required for creating a new session).
+        
+        **Returns:** None.
+
+        **Raises:**
+        - `SessionNotFoundError`: If the session does not exist and creation parameters are missing.
         """
         self.session_id = session_id
         self.character_id = character_id
-        self.character_data: Optional[Character] = None
         self.scenario_id: str = ""
 
         # Specialized services
@@ -75,11 +86,33 @@ class GameSessionService:
             else:
                 raise SessionNotFoundError(f"Session {session_id} does not exist and creation parameters are not provided")
 
+    @property
+    def character_data(self) -> Optional[Character]:
+        """
+        ### character_data
+        **Description:** Returns the character data from the `CharacterService`.
+        Delegates access to the specialized service to avoid state duplication.
+
+        **Returns:**
+        - `Optional[Character]`: The character object if loaded, None otherwise.
+        """
+        if self.character_service:
+            return self.character_service.character_data
+        return None
+
     def _load_session_data(self) -> bool:
         """
         ### _load_session_data
-        **Description:** Load session data (character and scenario) from files.
-        **Returns:** True if session exists, False otherwise.
+        **Description:** Loads session metadata (character and scenario IDs) from the file system.
+        Initializes specialized services if the session exists.
+
+        **Returns:** 
+        - `bool`: True if the session exists and was loaded, False otherwise.
+
+        **Raises:**
+        - `CharacterNotFoundError`: If the referenced character file does not exist.
+        - `ValueError`: If the scenario file is missing.
+        - `ServiceNotInitializedError`: If services fail to initialize.
         """
         session_dir = pathlib.Path(get_data_dir()) / "sessions" / self.session_id
         if session_dir.exists() and session_dir.is_dir():
@@ -93,10 +126,6 @@ class GameSessionService:
                 # Initialize specialized services for this character
                 try:
                     self._initialize_services(character_id)
-                    if self.data_service:
-                        self.character_data = self.data_service.load_character(character_id)
-                    else:
-                        raise ServiceNotInitializedError("Data service not initialized")
                 except FileNotFoundError:
                     raise CharacterNotFoundError(f"Character {character_id} not found")
 
@@ -111,13 +140,21 @@ class GameSessionService:
 
         return False
 
-    def _create_session(self, character_id: str, scenario_id: str):
+    def _create_session(self, character_id: str, scenario_id: str) -> None:
         """
         ### _create_session
-        **Description:** Create a new session with character ID and scenario ID.
+        **Description:** Creates a new session directory and saves initial metadata.
+        Initializes specialized services for the new session.
+
         **Parameters:**
-        - `character_id` (str): Character ID
-        - `scenario_id` (str): Scenario ID
+        - `character_id` (str): ID of the character for this session.
+        - `scenario_id` (str): ID of the scenario for this session.
+        
+        **Returns:** None.
+
+        **Raises:**
+        - `CharacterNotFoundError`: If the character does not exist.
+        - `ServiceNotInitializedError`: If services fail to initialize.
         """
         session_dir = pathlib.Path(get_data_dir()) / "sessions" / self.session_id
 
@@ -138,21 +175,20 @@ class GameSessionService:
         # Initialize specialized services for this character
         try:
             self._initialize_services(character_id)
-            if self.data_service:
-                self.character_data = self.data_service.load_character(character_id)
-            else:
-                raise ServiceNotInitializedError("Data service not initialized")
         except FileNotFoundError:
             raise CharacterNotFoundError(f"Character {character_id} not found")
 
         self.scenario_id = scenario_id
 
-    def _initialize_services(self, character_id: str):
+    def _initialize_services(self, character_id: str) -> None:
         """
         ### _initialize_services
-        **Description:** Initialize specialized services for a given character.
+        **Description:** Initializes specialized services (`CharacterDataService`, `CharacterService`, `EquipmentService`) for the given character.
+
         **Parameters:**
-        - `character_id` (str): Character ID
+        - `character_id` (str): ID of the character.
+        
+        **Returns:** None.
         """
         # Data service
         self.data_service = CharacterDataService()
@@ -163,21 +199,14 @@ class GameSessionService:
         # Equipment service (depends on data service)
         self.equipment_service = EquipmentService(self.data_service)
 
-    def save_character(self) -> None:
-        """
-        ### save_character
-        **Description:** Save the current character data.
-        **Returns:** None
-        """
-        if self.character_data and self.data_service:
-            self.data_service.save_character(self.character_data)
-
     @staticmethod
     def list_all_sessions() -> List[Dict[str, Any]]:
         """
         ### list_all_sessions
-        **Description:** Retrieve the list of all sessions with scenario and character information.
-        **Returns:** List of dictionaries containing information for each session
+        **Description:** Retrieves a list of all available game sessions with their metadata.
+
+        **Returns:** 
+        - `List[Dict[str, Any]]`: A list of dictionaries containing `session_id`, `character_id`, and `scenario_id` for each session.
         """
         sessions_dir = pathlib.Path(get_data_dir()) / "sessions"
         
@@ -211,18 +240,19 @@ class GameSessionService:
     @staticmethod
     def start_scenario(scenario_name: str, character_id: UUID) -> Dict[str, Any]:
         """
-        Start a scenario with a specific character and create a unique session.
+        ### start_scenario
+        **Description:** Starts a new scenario with a specific character by creating a unique session.
 
-        Args:
-            scenario_name (str): The name of the scenario to start.
-            character_id (UUID): The character identifier.
+        **Parameters:**
+        - `scenario_name` (str): The name of the scenario to start.
+        - `character_id` (UUID): The unique identifier of the character.
 
-        Returns:
-            Dict[str, Any]: A dictionary containing session id, scenario name, character id, and confirmation message.
+        **Returns:**
+        - `Dict[str, Any]`: A dictionary containing `session_id`, `scenario_name`, `character_id`, and a confirmation message.
 
-        Raises:
-            ValueError: If a session already exists with the same scenario and character.
-            FileNotFoundError: If the scenario does not exist.
+        **Raises:**
+        - `ValueError`: If a session already exists for this scenario and character.
+        - `FileNotFoundError`: If the scenario definition does not exist.
         """
         # Check if a session already exists with the same scenario and character
         if GameSessionService.check_existing_session(scenario_name, str(character_id)):
@@ -260,16 +290,18 @@ class GameSessionService:
     @staticmethod
     def get_session_info(session_id: str) -> Dict[str, str]:
         """
-        Retrieve session information (character_id and scenario_name) from its ID.
+        ### get_session_info
+        **Description:** Retrieves metadata (character ID and scenario name) for a given session ID.
 
-        Args:
-            session_id (str): The session identifier.
+        **Parameters:**
+        - `session_id` (str): The unique session identifier.
 
-        Returns:
-            Dict[str, str]: A dictionary containing character_id and scenario_name.
+        **Returns:**
+        - `Dict[str, str]`: A dictionary containing `character_id` and `scenario_name`.
 
-        Raises:
-            SessionNotFoundError: If the session does not exist.
+        **Raises:**
+        - `SessionNotFoundError`: If the session directory does not exist.
+        - `FileNotFoundError`: If metadata files are missing within the session directory.
         """
         session_dir = pathlib.Path(get_data_dir()) / "sessions" / session_id
 
@@ -299,14 +331,15 @@ class GameSessionService:
     @staticmethod
     def check_existing_session(scenario_name: str, character_id: str) -> bool:
         """
-        Check if a session already exists with the same scenario and character.
+        ### check_existing_session
+        **Description:** Checks if a session already exists for a specific combination of scenario and character.
 
-        Args:
-            scenario_name (str): The scenario name.
-            character_id (str): The character identifier.
+        **Parameters:**
+        - `scenario_name` (str): The name of the scenario.
+        - `character_id` (str): The character identifier.
 
-        Returns:
-            bool: True if a session already exists, False otherwise.
+        **Returns:**
+        - `bool`: True if a matching session exists, False otherwise.
         """
         sessions_dir = pathlib.Path(get_data_dir()) / "sessions"
         
@@ -340,18 +373,16 @@ class GameSessionService:
 
         return False
 
-    # The following methods are removed as they are only used in tests:
-    # - load_history
-    # - save_history
-    # - update_character_data
-
     async def save_history(self, kind: str, messages: list) -> None:
         """
         ### save_history
-        **Description:** Save history messages for narrative or combat.
+        **Description:** Saves the message history for a specific mode (narrative or combat) to a JSONL file.
+
         **Parameters:**
-        - `kind` (str): "narrative" or "combat"
-        - `messages` (list): List of ModelMessage
+        - `kind` (str): The type of history ("narrative" or "combat").
+        - `messages` (list): A list of `ModelMessage` objects to save.
+        
+        **Returns:** None.
         """
         history_path = os.path.join(get_data_dir(), "sessions", self.session_id, f"history_{kind}.jsonl")
         store = PydanticJsonlStore(history_path)
@@ -360,10 +391,13 @@ class GameSessionService:
     async def load_history(self, kind: str) -> List[ModelMessage]:
         """
         ### load_history
-        **Description:** Load history messages for narrative or combat.
+        **Description:** Loads the message history for a specific mode (narrative or combat) from a JSONL file.
+
         **Parameters:**
-        - `kind` (str): "narrative" or "combat"
-        **Returns:** List of ModelMessage
+        - `kind` (str): The type of history ("narrative" or "combat").
+
+        **Returns:**
+        - `List[ModelMessage]`: A list of loaded `ModelMessage` objects. Returns an empty list if the file does not exist.
         """
         history_path = os.path.join(get_data_dir(), "sessions", self.session_id, f"history_{kind}.jsonl")
         if os.path.exists(history_path):
@@ -374,10 +408,14 @@ class GameSessionService:
     async def load_history_raw_json(self, kind: str) -> List[Dict[str, Any]]:
         """
         ### load_history_raw_json
-        **Description:** Load history messages for narrative or combat as raw JSON.
+        **Description:** Loads the message history for a specific mode as raw JSON dictionaries.
+        Useful for API responses or debugging.
+
         **Parameters:**
-        - `kind` (str): "narrative" or "combat"
-        **Returns:** List of raw JSON message dictionaries
+        - `kind` (str): The type of history ("narrative" or "combat").
+
+        **Returns:**
+        - `List[Dict[str, Any]]`: A list of message dictionaries. Returns an empty list if the file does not exist.
         """
         history_path = os.path.join(get_data_dir(), "sessions", self.session_id, f"history_{kind}.jsonl")
         if os.path.exists(history_path):
@@ -385,23 +423,28 @@ class GameSessionService:
             return store.load_raw_json_history()
         return []
 
-    async def update_game_state(self, game_state) -> None:
+    async def update_game_state(self, game_state: Any) -> None:
         """
         ### update_game_state
-        **Description:** Save the game state to game_state.json.
+        **Description:** Saves the current game state object to `game_state.json`.
+
         **Parameters:**
-        - `game_state`: GameState instance
+        - `game_state` (Any): The GameState object to save (must have a `model_dump` method).
+        
+        **Returns:** None.
         """
         import json
         state_path = os.path.join(get_data_dir(), "sessions", self.session_id, "game_state.json")
         with open(state_path, 'w', encoding='utf-8') as f:
             json.dump(game_state.model_dump(), f, ensure_ascii=False, indent=2)
 
-    async def load_game_state(self):
+    async def load_game_state(self) -> Optional[Any]:
         """
         ### load_game_state
-        **Description:** Load the game state from game_state.json.
-        **Returns:** GameState instance or None if not exists
+        **Description:** Loads the game state from `game_state.json`.
+
+        **Returns:**
+        - `Optional[GameState]`: The loaded GameState object, or None if the file does not exist.
         """
         from back.graph.dto.session import GameState
         import json
@@ -415,8 +458,11 @@ class GameSessionService:
     async def build_narrative_system_prompt(self) -> str:
         """
         ### build_narrative_system_prompt
-        **Description:** Build the system prompt for narrative mode.
-        **Returns:** System prompt string
+        **Description:** Builds the system prompt for the narrative agent.
+        Combines the scenario-specific prompt with the character's narrative information block.
+
+        **Returns:**
+        - `str`: The complete system prompt string.
         """
         # Use the full system prompt template
         prompt = build_system_prompt(self.scenario_id)
@@ -429,10 +475,14 @@ class GameSessionService:
     async def build_combat_prompt(self, combat_state: dict) -> str:
         """
         ### build_combat_prompt
-        **Description:** Build the system prompt for combat mode.
+        **Description:** Builds the system prompt for the combat agent.
+        Includes the current combat state, character combat info, and available tools.
+
         **Parameters:**
-        - `combat_state` (dict): Current combat state
-        **Returns:** System prompt string
+        - `combat_state` (dict): The current state of the combat (participants, turns, etc.).
+
+        **Returns:**
+        - `str`: The complete system prompt string.
         """
         # Build complete character information for combat via Character method
         character_info = self.character_data.build_combat_prompt_block() if self.character_data else "Unknown character"

@@ -147,7 +147,9 @@ class TestGameSessionServiceInstance:
         service.data_service = mock_services['data_service']
         service.character_service = mock_services['character_service']
         service.equipment_service = mock_services['equipment_service']
-        service.character_data = mock_services['data_service'].load_character.return_value
+        
+        # Mock the character_data property on character_service
+        service.character_service.character_data = mock_services['data_service'].load_character.return_value
         return service
 
     def test_apply_xp(self, mock_services):

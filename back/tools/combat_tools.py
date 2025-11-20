@@ -347,17 +347,24 @@ def get_combat_status_tool(ctx: RunContext[GameSessionService], combat_id: str) 
         return {"error": str(e), "combat_id": combat_id}
 
 
-def start_combat_tool(ctx: RunContext[GameSessionService], participants: list[dict]) -> dict:
+def start_combat_tool(ctx: RunContext[GameSessionService], location: str, description: str, participants: list[dict]) -> dict:
     """
     Starts a new combat with the given participants.
-    
+
     Args:
-        participants (list[dict]): List of participants (player and enemies).
-    
+        location (str): Location of the combat.
+        description (str): Description of the combat setup.
+        participants (list[dict]): List of participants. Each participant should have:
+            - name (str): Name of the participant.
+            - role (str): "enemy" or "ally".
+            - archetype (str): Description/Class (e.g., "Orc Warrior", "Goblin Archer").
+            - level (int, optional): Level of the NPC if known/defined in scenario.
+            - is_unique_npc (bool, optional): If this is a specific named NPC from the scenario.
+
     Returns:
-        dict: Initial combat state.
+        dict: CombatSeedPayload structure (location, participants, description).
     """
-    log_debug("Tool start_combat_tool called", tool="start_combat_tool", participants=participants)
+    log_debug("Tool start_combat_tool called", tool="start_combat_tool", location=location, description=description, participants=participants)
     
     try:
         session_id = uuid.UUID(ctx.deps.session_id)
@@ -366,38 +373,90 @@ def start_combat_tool(ctx: RunContext[GameSessionService], participants: list[di
         if combat_state_service.has_active_combat(session_id):
             return {"error": "A combat is already in progress for this session"}
         
-        # Normalize the participants (handle name/nom fields, health/hp)
-        for p in participants:
-            if 'id' not in p:
-                p['id'] = str(uuid.uuid4())
-            
-            # Normalize name -> nom
-            if 'name' in p and 'nom' not in p:
-                p['nom'] = p['name']
-            elif 'nom' not in p:
-                p['nom'] = p.get('id', 'Unknown')
-            
-            # Normalize health -> hp
-            if 'health' in p and 'hp' not in p:
-                p['hp'] = p['health']
-            elif 'hp' not in p:
-                p['hp'] = 1
-            
-            # Add initiative if missing
-            if 'initiative' not in p:
-                p['initiative'] = 10  # Default value
-            
-            # Add camp if missing
-            if 'camp' not in p:
-                p['camp'] = 'enemy'  # Default to enemy except the first who is often the player
+        # Process and normalize participants
+        processed_participants = []
         
-        # The first participant is often the player
-        if participants and 'camp' not in participants[0]:
-            participants[0]['camp'] = 'player'
+        # Always add the player if not present (usually handled by the agent, but good to ensure)
+        # However, the agent might not include the player in the list if it assumes the player is always there.
+        # For now, we assume the agent provides the list of *opponents* and allies, and we inject the player?
+        # Or the agent provides everyone? The prompt says "list of participants".
+        # Let's assume the agent provides everyone including the player if they are part of the context, 
+        # but usually the player is implicit in the session. 
+        # Actually, CombatService.start_combat usually expects a list of dicts.
+        # Let's look at how we handled it before: "The first participant is often the player".
+        # We should probably ensure the player is added by the service if not in the list, 
+        # or we explicitly add the player here.
+        # Let's stick to the plan: "participant generator logic".
+        
+        for p in participants:
+            # Basic normalization
+            p_data = p.copy()
+            
+            if 'id' not in p_data:
+                p_data['id'] = str(uuid.uuid4())
+            
+            # Map fields to what CombatService expects
+            if 'name' in p_data:
+                p_data['nom'] = p_data['name']
+            
+            # Determine stats based on archetype/level
+            level = p_data.get('level', 1)
+            archetype = p_data.get('archetype', 'Unknown').lower()
+            is_unique = p_data.get('is_unique_npc', False)
+            
+            # Simple generator logic (placeholder for more complex logic)
+            # In a real system, we would query a database of monsters/NPCs
+            base_hp = 10
+            base_ac = 10
+            initiative_bonus = 0
+            
+            if 'orc' in archetype:
+                base_hp = 15 + (level * 5)
+                base_ac = 13
+                initiative_bonus = 1
+            elif 'goblin' in archetype:
+                base_hp = 8 + (level * 4)
+                base_ac = 12
+                initiative_bonus = 2
+            elif 'troll' in archetype:
+                base_hp = 40 + (level * 10)
+                base_ac = 15
+                initiative_bonus = -1
+            elif 'boss' in archetype or is_unique:
+                base_hp = 50 + (level * 10)
+                base_ac = 16
+                initiative_bonus = 3
+            else:
+                # Generic scaling
+                base_hp = 10 + (level * 5)
+            
+            # Set stats if not provided
+            if 'hp' not in p_data and 'health' not in p_data:
+                p_data['hp'] = base_hp
+            
+            # Ensure camp is set
+            if 'role' in p_data:
+                p_data['camp'] = 'player' if p_data['role'] == 'ally' else 'enemy'
+            elif 'camp' not in p_data:
+                p_data['camp'] = 'enemy'
+
+            # Initiative (will be rolled by service, but we can set a bonus)
+            if 'initiative' not in p_data:
+                p_data['initiative'] = 10 + initiative_bonus
+
+            processed_participants.append(p_data)
+        
+        # Ensure the player is included? 
+        # The previous code said: "The first participant is often the player".
+        # If the agent follows instructions, it might list the player. 
+        # If not, CombatService.start_combat might need to handle it.
+        # Let's check CombatService.start_combat signature. 
+        # It takes `participants: list[dict]`.
+        # And `session_service` to resolve player character.
+        # So we just pass the processed list.
         
         # Create the initial combat state
-        # Pass session service to help resolve player character
-        combat_state = combat_service.start_combat(participants, session_service=ctx.deps)
+        combat_state = combat_service.start_combat(processed_participants, session_service=ctx.deps)
         
         # Calculate initiative
         combat_state = combat_service.roll_initiative(combat_state)
@@ -405,19 +464,29 @@ def start_combat_tool(ctx: RunContext[GameSessionService], participants: list[di
         # Save the initial state
         combat_state_service.save_combat_state(session_id, combat_state)
         
-        summary = combat_service.get_combat_summary(combat_state)
+        # Return CombatSeedPayload structure
+        # We need to convert the combat_state back to a dict of participants for the payload?
+        # Or just return what we constructed?
+        # CombatSeedPayload has: location, participants (Dict[str, Any]), description
+        # The participants dict in CombatSeedPayload seems to be a map of ID -> data?
+        # Let's check CombatSeedPayload definition again.
+        # participants: Dict[str, Any]
         
-        # Add information about the first participant
-        current_participant = combat_state.get_current_combatant()
-        
-        summary["current_participant"] = {
-            "id": str(current_participant.id),
-            "name": current_participant.name
-        } if current_participant else None
-        
-        summary["message"] = f"Combat started! It's {current_participant.name if current_participant else 'Unknown'}'s turn"
-        
-        return summary
+        participants_payload = {}
+        for p in combat_state.participants:
+            participants_payload[str(p.id)] = {
+                "name": p.name,
+                "hp": p.current_hit_points,
+                "max_hp": p.max_hit_points,
+                "camp": p.camp.value if hasattr(p.camp, 'value') else str(p.camp),
+                "type": p.type.value if hasattr(p.type, 'value') else str(p.type)
+            }
+
+        return {
+            "location": location,
+            "description": description,
+            "participants": participants_payload
+        }
         
     except Exception as e:
         log_debug("Error in start_combat_tool", error=str(e))

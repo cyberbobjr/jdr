@@ -58,7 +58,29 @@ class NarrativeNode(BaseNode[SessionGraphState, GameSessionService, DispatchResu
         if isinstance(output, CombatSeedPayload):
             # Transition to combat
             ctx.state.game_state.session_mode = "combat"
-            ctx.state.game_state.combat_state = output.model_dump()
+            
+            # Load the full combat state that was initialized by the tool
+            from back.services.combat_state_service import CombatStateService
+            combat_state_service = CombatStateService()
+            
+            # We need the session_id to load the state
+            session_id = ctx.deps.session_id
+            # Ensure session_id is a UUID if needed, but load_combat_state likely takes UUID
+            import uuid
+            try:
+                session_uuid = uuid.UUID(session_id)
+                combat_state = combat_state_service.load_combat_state(session_uuid)
+                
+                if combat_state:
+                    # Serialize the combat state to dict for the game_state
+                    # Assuming combat_state is a pydantic model or has a dict method
+                    # Based on other code, it seems we store it as a dict in game_state
+                    ctx.state.game_state.combat_state = combat_state.model_dump()
+                else:
+                    log_debug("Failed to load combat state after seed", session_id=session_id)
+            except Exception as e:
+                 log_debug(f"Error loading combat state: {e}", session_id=session_id)
+
             await ctx.deps.update_game_state(ctx.state.game_state)
             log_debug("Transitioning to combat mode", session_id=ctx.deps.session_id)
 

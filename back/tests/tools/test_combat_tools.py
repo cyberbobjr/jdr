@@ -191,16 +191,27 @@ def test_start_combat_tool(mock_combat_service, mock_combat_state_service, mock_
     p1 = MagicMock()
     p1.id = "123"
     p1.name = "Player"
+    p1.current_hit_points = 10
+    p1.max_hit_points = 10
+    p1.camp = "player"
+    p1.type = "player"
+    
     mock_state.participants = [p1]
     mock_state.get_current_combatant.return_value = p1
     
     mock_combat_service.start_combat.return_value = mock_state
     mock_combat_service.roll_initiative.return_value = mock_state
-    mock_combat_service.get_combat_summary.return_value = {}
     
     participants = [{"name": "Player", "camp": "player"}]
-    result = start_combat_tool(mock_run_context, participants)
+    location = "Forest"
+    description = "A dark forest"
+    
+    result = start_combat_tool(mock_run_context, location, description, participants)
     
     mock_combat_service.start_combat.assert_called_once()
     mock_combat_state_service.save_combat_state.assert_called_once()
-    assert "Combat started" in result["message"]
+    
+    assert result["location"] == location
+    assert result["description"] == description
+    assert "participants" in result
+    assert result["participants"]["123"]["name"] == "Player"
