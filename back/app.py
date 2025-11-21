@@ -12,7 +12,7 @@ app = FastAPI(title="JdR – Terres du Milieu")
 def scrubbing_callback(m: logfire.ScrubMatch):
     return m.value
 
-logfire.configure(scrubbing=logfire.ScrubbingOptions(callback=scrubbing_callback))
+logfire.configure(scrubbing=logfire.ScrubbingOptions(callback=scrubbing_callback),environment='dev')
 logfire.instrument_fastapi(app)
 logfire.instrument_pydantic_ai()
 

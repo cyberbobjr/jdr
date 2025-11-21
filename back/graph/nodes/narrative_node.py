@@ -88,7 +88,7 @@ class NarrativeNode(BaseNode[SessionGraphState, GameSessionService, DispatchResu
         # Check for player death (automatic detection)
         if ctx.deps.character_service:
             character = ctx.deps.character_service.get_character()
-            if character and character.current_hit_points <= 0:
+            if character and character.combat_stats.current_hit_points <= 0:
                 # Force scenario end due to death
                 output = ScenarioEndPayload(
                     outcome="death",

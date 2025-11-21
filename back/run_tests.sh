@@ -15,13 +15,23 @@ source back/venv/bin/activate
 # Add the project root to the PYTHONPATH to resolve 'from back.app...' imports.
 export PYTHONPATH="$PWD"
 
-if [ $# -eq 0 ]; then
-    echo "Running all tests from back/tests/..."
-    echo "------------------------"
-    pytest back/tests/
-else
-    echo "Running tests: $@"
-    echo "------------------------"
-    pytest "$@"
+TEST_ARGS="$@"
+if [ -z "$TEST_ARGS" ]; then
+    TEST_ARGS="back/tests/"
 fi
+
+# Check if running integration tests to enable DEBUG logs
+if [[ "$TEST_ARGS" == *"integration"* ]]; then
+    echo "Integration tests detected: Enabling DEBUG logs for detailed LLM tracking."
+    # Enable CLI logging at DEBUG level
+    PYTEST_OPTS="-o log_cli=true -o log_cli_level=DEBUG"
+else
+    PYTEST_OPTS=""
+fi
+
+echo "Running tests: $TEST_ARGS"
+echo "------------------------"
+
+# Run tests
+pytest $TEST_ARGS $PYTEST_OPTS
 

@@ -15,6 +15,28 @@ def mock_session_service():
     service.build_narrative_system_prompt = AsyncMock(return_value="System Prompt")
     service.save_history = AsyncMock()
     service.update_game_state = AsyncMock()
+    
+    # Mock character service
+    mock_char_service = MagicMock()
+    
+    class FakeCombatStats:
+        def __init__(self):
+            self.current_hit_points = 10
+            
+    class FakeCharacter:
+        def __init__(self):
+            self.combat_stats = FakeCombatStats()
+            self.name = "Test Character"
+            
+        @property
+        def hp(self):
+            return self.combat_stats.current_hit_points
+            
+    mock_character = FakeCharacter()
+    
+    mock_char_service.get_character.return_value = mock_character
+    service.character_service = mock_char_service
+    
     return service
 
 @pytest.fixture

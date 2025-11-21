@@ -7,6 +7,7 @@ from pydantic import ValidationError
 from back.agents.narrative_agent import NarrativeAgent
 from back.graph.dto.combat import CombatSeedPayload
 from back.models.schema import LLMConfig
+from back.graph.dto.scenario import ScenarioEndPayload
 
 
 class TestNarrativeAgent:
@@ -21,7 +22,7 @@ class TestNarrativeAgent:
         )
         agent = NarrativeAgent(llm_config)
         assert agent.agent is not None
-        assert agent.agent.output_type == str | CombatSeedPayload
+        assert agent.agent.output_type == str | CombatSeedPayload | ScenarioEndPayload
 
     def test_init_missing_api_endpoint(self):
         """Test that LLMConfig raises ValidationError with missing api_endpoint."""
