@@ -5,18 +5,15 @@ from pydantic_ai import RunContext
 from pydantic_ai.usage import RunUsage
 from back.services.game_session_service import GameSessionService
 from back.tools.combat_tools import (
-    roll_initiative_tool,
-    perform_attack_tool,
-    resolve_attack_tool,
-    calculate_damage_tool,
+    execute_attack_tool,
+    apply_direct_damage_tool,
     end_combat_tool,
     end_turn_tool,
     check_combat_end_tool,
-    apply_damage_tool,
     get_combat_status_tool,
     start_combat_tool
 )
-from back.models.domain.combat_state import CombatState, Combatant
+from back.models.domain.combat_state import CombatState, Combatant, CombatantType
 
 @pytest.fixture
 def mock_session_service():
@@ -30,55 +27,80 @@ def mock_run_context(mock_session_service):
     usage = RunUsage(requests=1)
     return RunContext(deps=mock_session_service, retry=0, tool_name="test_tool", model=mock_model, usage=usage)
 
+@patch('back.tools.combat_tools.combat_state_service')
 @patch('back.tools.combat_tools.combat_service')
-def test_roll_initiative_tool(mock_combat_service, mock_run_context):
-    # Setup
-    characters = [{"name": "Player", "id": "123"}, {"name": "Enemy", "id": "456"}]
+def test_execute_attack_tool(mock_combat_service, mock_combat_state_service, mock_run_context):
+    combat_id = "combat-123"
+    attacker_id = "attacker-1"
+    target_id = "target-1"
     
     mock_state = MagicMock(spec=CombatState)
-    mock_state.initiative_order = ["123", "456"]
+    mock_state.id = combat_id
     
+    mock_combat_state_service.load_combat_state.return_value = mock_state
+    
+    # Mock successful attack result
+    mock_combat_service.execute_attack.return_value = (mock_state, "Hit! 5 damage.")
+    mock_combat_service.check_combat_end.return_value = False
+    mock_combat_service.get_combat_summary.return_value = {"status": "ongoing"}
+    
+    result = execute_attack_tool(mock_run_context, attacker_id, target_id)
+    
+    mock_combat_service.execute_attack.assert_called_once_with(mock_state, attacker_id, target_id)
+    mock_combat_state_service.save_combat_state.assert_called_once()
+    assert result["message"] == "Hit! 5 damage."
+    assert result["auto_ended"] is None
+
+@patch('back.tools.combat_tools.combat_state_service')
+@patch('back.tools.combat_tools.combat_service')
+def test_execute_attack_tool_ends_combat(mock_combat_service, mock_combat_state_service, mock_run_context):
+    combat_id = "combat-123"
+    attacker_id = "attacker-1"
+    target_id = "target-1"
+    
+    mock_state = MagicMock(spec=CombatState)
+    mock_state.id = combat_id
+    # Mock participants for end check
     p1 = MagicMock(spec=Combatant)
-    p1.id = "123"
-    p1.name = "Player"
-    p1.initiative_roll = 15
-    
+    p1.type = CombatantType.PLAYER
+    p1.is_alive.return_value = True
     p2 = MagicMock(spec=Combatant)
-    p2.id = "456"
-    p2.name = "Enemy"
-    p2.initiative_roll = 10
-    
+    p2.type = CombatantType.NPC
+    p2.is_alive.return_value = False # Enemy dead
     mock_state.participants = [p1, p2]
-    mock_state.get_combatant.side_effect = lambda uid: p1 if uid == "123" else p2
-    mock_state.turn_order = ["123", "456"]
     
-    mock_combat_service.start_combat.return_value = mock_state
-    mock_combat_service.roll_initiative.return_value = mock_state
+    mock_combat_state_service.load_combat_state.return_value = mock_state
+    mock_combat_service.execute_attack.return_value = (mock_state, "Hit! Enemy dead.")
+    mock_combat_service.check_combat_end.return_value = True
+    mock_combat_service.end_combat.return_value = mock_state
     
-    # Execute
-    result = roll_initiative_tool(mock_run_context, characters)
+    result = execute_attack_tool(mock_run_context, attacker_id, target_id)
     
-    # Assert
-    mock_combat_service.start_combat.assert_called_once()
-    mock_combat_service.roll_initiative.assert_called_once()
-    assert len(result) == 2
-    assert result[0]["name"] == "Player"
-    assert result[1]["name"] == "Enemy"
+    mock_combat_service.end_combat.assert_called_once_with(mock_state, "victory")
+    mock_combat_state_service.delete_combat_state.assert_called_once()
+    assert result["auto_ended"]["ended"] is True
+    assert result["auto_ended"]["reason"] == "victory"
 
-@patch('back.tools.combat_tools.roll_attack')
-def test_perform_attack_tool(mock_roll_attack, mock_run_context):
-    mock_roll_attack.return_value = 15
-    result = perform_attack_tool(mock_run_context, "1d20")
-    mock_roll_attack.assert_called_once_with("1d20")
-    assert result == 15
-
-def test_resolve_attack_tool(mock_run_context):
-    assert resolve_attack_tool(mock_run_context, 15, 10) is True
-    assert resolve_attack_tool(mock_run_context, 10, 15) is False
-
-def test_calculate_damage_tool(mock_run_context):
-    assert calculate_damage_tool(mock_run_context, 5, 2) == 7
-    assert calculate_damage_tool(mock_run_context, 5, -10) == 0
+@patch('back.tools.combat_tools.combat_state_service')
+@patch('back.tools.combat_tools.combat_service')
+def test_apply_direct_damage_tool(mock_combat_service, mock_combat_state_service, mock_run_context):
+    combat_id = "combat-123"
+    target_id = "target-1"
+    amount = 10
+    
+    mock_state = MagicMock(spec=CombatState)
+    mock_state.id = combat_id
+    
+    mock_combat_state_service.load_combat_state.return_value = mock_state
+    mock_combat_service.apply_direct_damage.return_value = mock_state
+    mock_combat_service.check_combat_end.return_value = False
+    mock_combat_service.get_combat_summary.return_value = {}
+    
+    result = apply_direct_damage_tool(mock_run_context, target_id, amount, "Fireball")
+    
+    mock_combat_service.apply_direct_damage.assert_called_once_with(mock_state, target_id, amount, is_attack=False)
+    mock_combat_state_service.save_combat_state.assert_called_once()
+    assert "Applied 10 damage" in result["message"]
 
 @patch('back.tools.combat_tools.combat_state_service')
 @patch('back.tools.combat_tools.combat_service')
@@ -103,7 +125,6 @@ def test_end_turn_tool(mock_combat_service, mock_combat_state_service, mock_run_
     combat_id = "combat-123"
     mock_state = MagicMock(spec=CombatState)
     mock_state.id = combat_id
-    mock_state.is_active = True
     
     mock_combat_state_service.load_combat_state.return_value = mock_state
     mock_combat_service.end_turn.return_value = mock_state
@@ -125,7 +146,6 @@ def test_check_combat_end_tool_ongoing(mock_combat_service, mock_combat_state_se
     combat_id = "combat-123"
     mock_state = MagicMock(spec=CombatState)
     mock_state.id = combat_id
-    mock_state.is_active = True
     
     mock_combat_state_service.load_combat_state.return_value = mock_state
     mock_combat_service.check_combat_end.return_value = False
@@ -137,42 +157,13 @@ def test_check_combat_end_tool_ongoing(mock_combat_service, mock_combat_state_se
 
 @patch('back.tools.combat_tools.combat_state_service')
 @patch('back.tools.combat_tools.combat_service')
-def test_apply_damage_tool(mock_combat_service, mock_combat_state_service, mock_run_context):
-    combat_id = "combat-123"
-    target_id = str(uuid4())
-    mock_state = MagicMock(spec=CombatState)
-    mock_state.id = combat_id
-    mock_state.is_active = True
-    
-    mock_combat_state_service.load_combat_state.return_value = mock_state
-    mock_combat_service.apply_damage.return_value = mock_state
-    mock_combat_service.check_combat_end.return_value = False
-    mock_combat_service.get_combat_summary.return_value = {}
-    
-    target = MagicMock()
-    target.id = target_id
-    target.name = "Target"
-    target.current_hit_points = 5
-    mock_state.get_combatant.return_value = target
-    
-    result = apply_damage_tool(mock_run_context, combat_id, target_id, 5)
-    
-    mock_combat_service.apply_damage.assert_called_once()
-    assert result["damage_applied"] == 5
-    assert result["target"]["name"] == "Target"
-
-@patch('back.tools.combat_tools.combat_state_service')
-@patch('back.tools.combat_tools.combat_service')
 def test_get_combat_status_tool(mock_combat_service, mock_combat_state_service, mock_run_context):
     combat_id = "combat-123"
     mock_state = MagicMock(spec=CombatState)
     mock_state.id = combat_id
     
     mock_combat_state_service.load_combat_state.return_value = mock_state
-    mock_combat_service.get_combat_summary.return_value = {}
-    
-    mock_state.get_current_combatant.return_value = None
-    mock_state.participants = []
+    mock_combat_service.get_combat_summary.return_value = {"alive_participants": []}
     
     result = get_combat_status_tool(mock_run_context, combat_id)
     
@@ -185,24 +176,11 @@ def test_start_combat_tool(mock_combat_service, mock_combat_state_service, mock_
     mock_combat_state_service.has_active_combat.return_value = False
     
     mock_state = MagicMock(spec=CombatState)
-    mock_state.current_turn = 0
-    mock_state.initiative_order = ["123"]
-    
-    p1 = MagicMock()
-    p1.id = "123"
-    p1.name = "Player"
-    p1.current_hit_points = 10
-    p1.max_hit_points = 10
-    p1.camp = "player"
-    p1.type = "player"
-    
-    mock_state.participants = [p1]
-    mock_state.get_current_combatant.return_value = p1
+    mock_state.id = uuid4()
     
     mock_combat_service.start_combat.return_value = mock_state
-    mock_combat_service.roll_initiative.return_value = mock_state
     
-    participants = [{"name": "Player", "camp": "player"}]
+    participants = [{"name": "Player", "role": "ally"}]
     location = "Forest"
     description = "A dark forest"
     
@@ -211,7 +189,6 @@ def test_start_combat_tool(mock_combat_service, mock_combat_state_service, mock_
     mock_combat_service.start_combat.assert_called_once()
     mock_combat_state_service.save_combat_state.assert_called_once()
     
-    assert result["location"] == location
-    assert result["description"] == description
-    assert "participants" in result
-    assert result["participants"]["123"]["name"] == "Player"
+    assert "combat_id" in result
+    assert "message" in result
+    assert location in result["message"]

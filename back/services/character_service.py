@@ -62,7 +62,7 @@ class CharacterService:
         # Check if the character is complete
         is_incomplete = (
             character.name is None or
-            character.status == CharacterStatus.IN_PROGRESS or
+            character.status == CharacterStatus.DRAFT or
             character.status is None
         )
 

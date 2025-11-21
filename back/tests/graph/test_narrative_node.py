@@ -64,9 +64,8 @@ async def test_narrative_node_run_combat_transition(mock_graph_context):
     
     # Mock the agent run result returning CombatSeedPayload
     seed_payload = CombatSeedPayload(
-        location="Forest",
-        description="Ambush",
-        participants={"1": {"name": "Orc"}}
+        combat_id="combat-1",
+        message="Ambush!"
     )
     
     mock_result = MagicMock()
@@ -82,6 +81,7 @@ async def test_narrative_node_run_combat_transition(mock_graph_context):
         mock_service_instance = MockServiceClass.return_value
         
         mock_combat_state = MagicMock()
+        mock_combat_state.id = "combat-1"
         mock_combat_state.model_dump.return_value = {"id": "combat-1", "participants": []}
         
         mock_service_instance.load_combat_state.return_value = mock_combat_state
@@ -92,7 +92,7 @@ async def test_narrative_node_run_combat_transition(mock_graph_context):
         # Assert
         assert isinstance(result, End)
         assert mock_graph_context.state.game_state.session_mode == "combat"
-        assert mock_graph_context.state.game_state.combat_state == {"id": "combat-1", "participants": []}
+        assert mock_graph_context.state.game_state.active_combat_id == "combat-1"
         
         mock_service_instance.load_combat_state.assert_called_once()
         mock_graph_context.deps.update_game_state.assert_called_once()
@@ -104,9 +104,8 @@ async def test_narrative_node_combat_load_failure(mock_graph_context):
     
     # Mock the agent run result returning CombatSeedPayload
     seed_payload = CombatSeedPayload(
-        location="Forest",
-        description="Ambush",
-        participants={"1": {"name": "Orc"}}
+        combat_id="combat-1",
+        message="Ambush!"
     )
     
     mock_result = MagicMock()
@@ -129,9 +128,9 @@ async def test_narrative_node_combat_load_failure(mock_graph_context):
         
         # Assert
         assert isinstance(result, End)
-        assert mock_graph_context.state.game_state.session_mode == "combat"
-        # Combat state should remain None or whatever it was, but not updated with new state
-        assert mock_graph_context.state.game_state.combat_state is None
+        # Should revert to narrative if combat state load fails
+        assert mock_graph_context.state.game_state.session_mode == "narrative"
+        assert mock_graph_context.state.game_state.active_combat_id is None
         
         mock_service_instance.load_combat_state.assert_called_once()
         mock_graph_context.deps.update_game_state.assert_called_once()

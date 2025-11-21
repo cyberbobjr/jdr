@@ -111,31 +111,41 @@ def test_start_scenario_success():
     expected_messages = [{"content": mock_llm_response, "part_kind": "text"}]
     mock_dispatch_result = DispatchResult(all_messages=expected_messages, new_messages=expected_messages)
 
-    with patch('back.routers.gamesession.GameSessionService.start_scenario', return_value=start_scenario_response):
-        with patch('back.routers.gamesession.CharacterDataService') as MockDataService:
-            mock_data_instance = MockDataService.return_value
-            mock_char = MagicMock()
-            mock_char.status = CharacterStatus.ACTIVE
-            mock_data_instance.load_character.return_value = mock_char
+    # from back.services.game_session_service import GameSessionService
+    
+    # with patch.object(GameSessionService, 'start_scenario', return_value=start_scenario_response):
+    with patch('back.routers.gamesession.CharacterDataService') as MockDataService:
+        mock_data_instance = MockDataService.return_value
+        mock_char = MagicMock()
+        mock_char.status = CharacterStatus.ACTIVE
+        mock_data_instance.load_character.return_value = mock_char
+        
+        with patch('back.routers.gamesession.GameSessionService') as MockSessionService:
+            mock_service_instance = MagicMock()
+            # Configure the static method on the mock class
+            MockSessionService.start_scenario.return_value = start_scenario_response
             
-            with patch('back.routers.gamesession.GameSessionService') as MockSessionService:
-                mock_service_instance = MagicMock()
-                mock_service_instance.load_game_state = AsyncMock(return_value=mock_game_state)
-                mock_service_instance.update_game_state = AsyncMock()
-                MockSessionService.return_value = mock_service_instance
-                
-                with patch('back.routers.gamesession.session_graph.run', new_callable=AsyncMock) as mock_run:
-                    mock_run_result = MagicMock()
-                    mock_run_result.output = mock_dispatch_result
-                    mock_run.return_value = mock_run_result
+            mock_service_instance.load_game_state = AsyncMock(return_value=mock_game_state)
+            mock_service_instance.update_game_state = AsyncMock()
+            mock_service_instance.update_game_state = AsyncMock()
+            MockSessionService.return_value = mock_service_instance
+            
+            with patch('back.routers.gamesession.session_graph.run', new_callable=AsyncMock) as mock_run:
+                mock_run_result = MagicMock()
+                mock_run_result.output = mock_dispatch_result
+                mock_run.return_value = mock_run_result
 
-                    request_data = {
-                        "scenario_name": mock_scenario_name,
-                        "character_id": str(mock_character_id)
-                    }
-                    response = client.post("/api/gamesession/start", json=request_data)
+                request_data = {
+                    "scenario_name": mock_scenario_name,
+                    "character_id": str(mock_character_id)
+                }
+                response = client.post("/api/gamesession/play", json=request_data)
 
-                    assert response.status_code == 200
-                    response_data = response.json()
-                    assert "response" in response_data
-                    assert response_data["response"] == expected_messages
+                assert response.status_code == 200
+                response_data = response.json()
+                assert "response" in response_data
+                assert "session_id" in response_data
+                assert response_data["session_id"] == str(mock_session_id)
+                assert response_data["response"] == expected_messages
+
+

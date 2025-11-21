@@ -21,7 +21,7 @@ def mock_session_service():
 def mock_graph_context(mock_session_service):
     game_state = GameState(
         session_mode="combat",
-        combat_state={"id": "combat-1", "participants": []}
+        active_combat_id="combat-1"
     )
     player_message = PlayerMessagePayload(message="Attack")
     state = SessionGraphState(
@@ -42,23 +42,28 @@ async def test_combat_node_run_continue(mock_graph_context):
     
     # Mock the agent run result (normal turn)
     mock_result = MagicMock()
-    mock_result.output = "Turn continues" # Or some other payload if defined, but usually string or specific payload
+    mock_result.output = "Turn continues"
     mock_result.all_messages.return_value = []
     mock_result.all_messages_json.return_value = "[]"
     mock_result.new_messages_json.return_value = "[]"
     
     node.combat_agent.run = AsyncMock(return_value=mock_result)
     
-    # Execute
-    result = await node.run(mock_graph_context)
-    
-    # Assert
-    assert isinstance(result, End)
-    assert isinstance(result.data, DispatchResult)
-    assert mock_graph_context.state.game_state.session_mode == "combat"
-    assert mock_graph_context.state.game_state.combat_state is not None
-    mock_graph_context.deps.save_history.assert_called_once()
-    mock_graph_context.deps.update_game_state.assert_called_once()
+    # Mock CombatStateService
+    with patch('back.services.combat_state_service.CombatStateService') as MockServiceClass:
+        mock_service_instance = MockServiceClass.return_value
+        mock_service_instance.load_combat_state.return_value = {"id": "combat-1", "participants": []}
+        
+        # Execute
+        result = await node.run(mock_graph_context)
+        
+        # Assert
+        assert isinstance(result, End)
+        assert isinstance(result.data, DispatchResult)
+        assert mock_graph_context.state.game_state.session_mode == "combat"
+        # combat_state is no longer in GameState
+        mock_graph_context.deps.save_history.assert_called_once()
+        mock_graph_context.deps.update_game_state.assert_called_once()
 
 @pytest.mark.asyncio
 async def test_combat_node_run_end(mock_graph_context):
@@ -81,13 +86,18 @@ async def test_combat_node_run_end(mock_graph_context):
     
     node.combat_agent.run = AsyncMock(return_value=mock_result)
     
-    # Execute
-    result = await node.run(mock_graph_context)
-    
-    # Assert
-    assert isinstance(result, End)
-    assert mock_graph_context.state.game_state.session_mode == "narrative"
-    assert mock_graph_context.state.game_state.combat_state is None
-    assert mock_graph_context.state.game_state.last_combat_result == end_payload.model_dump()
-    
-    mock_graph_context.deps.update_game_state.assert_called_once()
+    # Mock CombatStateService
+    with patch('back.services.combat_state_service.CombatStateService') as MockServiceClass:
+        mock_service_instance = MockServiceClass.return_value
+        mock_service_instance.load_combat_state.return_value = {"id": "combat-1", "participants": []}
+        
+        # Execute
+        result = await node.run(mock_graph_context)
+        
+        # Assert
+        assert isinstance(result, End)
+        assert mock_graph_context.state.game_state.session_mode == "narrative"
+        assert mock_graph_context.state.game_state.active_combat_id is None
+        assert mock_graph_context.state.game_state.last_combat_result == end_payload.model_dump()
+        
+        mock_graph_context.deps.update_game_state.assert_called_once()

@@ -40,7 +40,11 @@ class NarrativeNode(BaseNode[SessionGraphState, GameSessionService, DispatchResu
         log_debug("Running NarrativeNode", session_id=ctx.deps.session_id)
 
         # Build system prompt with scenario
-        system_prompt = await ctx.deps.build_narrative_system_prompt()
+        from back.services.settings_service import SettingsService
+        settings_service = SettingsService()
+        language = settings_service.get_preferences().language
+        
+        system_prompt = await ctx.deps.build_narrative_system_prompt(language)
 
         # Run the agent
         result = await self.narrative_agent.run(
@@ -56,9 +60,6 @@ class NarrativeNode(BaseNode[SessionGraphState, GameSessionService, DispatchResu
         # Handle structured output
         output = result.output
         if isinstance(output, CombatSeedPayload):
-            # Transition to combat
-            ctx.state.game_state.session_mode = "combat"
-            
             # Load the full combat state that was initialized by the tool
             from back.services.combat_state_service import CombatStateService
             combat_state_service = CombatStateService()
@@ -72,17 +73,16 @@ class NarrativeNode(BaseNode[SessionGraphState, GameSessionService, DispatchResu
                 combat_state = combat_state_service.load_combat_state(session_uuid)
                 
                 if combat_state:
-                    # Serialize the combat state to dict for the game_state
-                    # Assuming combat_state is a pydantic model or has a dict method
-                    # Based on other code, it seems we store it as a dict in game_state
-                    ctx.state.game_state.combat_state = combat_state.model_dump()
+                    # Transition to combat
+                    ctx.state.game_state.session_mode = "combat"
+                    ctx.state.game_state.active_combat_id = combat_state.id
+                    log_debug("Transitioning to combat mode", session_id=ctx.deps.session_id)
                 else:
                     log_debug("Failed to load combat state after seed", session_id=session_id)
             except Exception as e:
                  log_debug(f"Error loading combat state: {e}", session_id=session_id)
 
             await ctx.deps.update_game_state(ctx.state.game_state)
-            log_debug("Transitioning to combat mode", session_id=ctx.deps.session_id)
 
         # Use built-in JSON serialization methods
         import json

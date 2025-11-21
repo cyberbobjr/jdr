@@ -2,11 +2,19 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from back.routers import characters, scenarios, creation, gamesession
+from back.routers import characters, scenarios, creation, gamesession, user
 from fastapi.openapi.utils import get_openapi
 from back.utils.exceptions import InternalServerError
+import logfire
 
 app = FastAPI(title="JdR – Terres du Milieu")
+
+def scrubbing_callback(m: logfire.ScrubMatch):
+    return m.value
+
+logfire.configure(scrubbing=logfire.ScrubbingOptions(callback=scrubbing_callback))
+logfire.instrument_fastapi(app)
+logfire.instrument_pydantic_ai()
 
 @app.exception_handler(InternalServerError)
 async def internal_server_error_handler(request: Request, exc: InternalServerError):
@@ -29,6 +37,7 @@ app.include_router(characters.router, prefix="/api/characters")
 app.include_router(scenarios.router,  prefix="/api/scenarios")
 app.include_router(creation.router,   prefix="/api/creation")
 app.include_router(gamesession.router, prefix="/api/gamesession")
+app.include_router(user.router)
 
 # Ajout de la documentation Swagger personnalisée
 @app.get("/openapi.json", include_in_schema=False)

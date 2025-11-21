@@ -2,6 +2,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 from back.services.character_service import CharacterService
 from back.models.domain.character import Character, Stats, CombatStats
+from back.models.domain.items import EquipmentItem
 
 @pytest.fixture
 def mock_character_data():
@@ -12,7 +13,7 @@ def mock_character_data():
         culture="Empire",
         level=1,
         experience_points=0, # Maps to xp property
-        equipment={"gold": 100}, # Maps to gold property
+        equipment={"gold": 100, "weapons": [], "armor": [], "accessories": [], "consumables": []}, # Maps to gold property
         stats=Stats(
             strength=10,
             agility=10,

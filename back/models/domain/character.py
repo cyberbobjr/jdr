@@ -17,12 +17,8 @@ from enum import Enum
  
 
 
-class CharacterStatus(str, Enum):
-    """Character lifecycle status"""
-    DRAFT = "draft"
-    ACTIVE = "active"
-    ARCHIVED = "archived"
-    IN_GAME = "in_game"
+from back.models.enums import CharacterStatus
+from back.models.domain.items import EquipmentItem
 
 
 class Stats(BaseModel):
@@ -185,19 +181,19 @@ class Skills(BaseModel):
 
 class Equipment(BaseModel):
     """Simplified equipment system"""
-    weapons: List[Dict] = Field(
+    weapons: List[EquipmentItem] = Field(
         default_factory=list,
         description="Equipped weapons with stats"
     )
-    armor: List[Dict] = Field(
+    armor: List[EquipmentItem] = Field(
         default_factory=list,
         description="Equipped armor pieces"
     )
-    accessories: List[Dict] = Field(
+    accessories: List[EquipmentItem] = Field(
         default_factory=list,
         description="Accessories and magical items"
     )
-    consumables: List[Dict] = Field(
+    consumables: List[EquipmentItem] = Field(
         default_factory=list,
         description="Consumable items (potions, scrolls)"
     )
@@ -208,7 +204,7 @@ class Equipment(BaseModel):
         total_weight = 0.0
         for item_list in [self.weapons, self.armor, self.accessories, self.consumables]:
             for item in item_list:
-                total_weight += item.get('weight', 0)
+                total_weight += item.weight
         return total_weight
     
     model_config = ConfigDict(

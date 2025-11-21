@@ -2,6 +2,8 @@ from pydantic import BaseModel
 from uuid import UUID
 from typing import Dict, List, Optional, Any, TYPE_CHECKING
 from enum import Enum
+from back.models.enums import CharacterStatus, ItemType
+from back.models.domain.items import EquipmentItem
 
 # Import conditionnel pour éviter les imports circulaires
 if TYPE_CHECKING:
@@ -13,19 +15,7 @@ class LLMConfig(BaseModel):
     api_key: str
     model: str
 
-class ItemType(str, Enum):
-    """Types d'objets possibles"""
-    MATERIEL = "Materiel"
-    ARME = "Arme" 
-    ARMURE = "Armure"
-    NOURRITURE = "Nourriture"
-    OBJET_MAGIQUE = "Objet_Magique"
 
-class CharacterStatus(str, Enum):
-    """Statuts possibles pour un personnage"""
-    IN_PROGRESS = "en_cours"
-    DONE = "complet"
-    ARCHIVE = "archive"
 
 class Item(BaseModel):
     """Model for an inventory item with all its properties"""
@@ -142,6 +132,7 @@ class StartScenarioResponse(BaseModel):
 class PlayScenarioResponse(BaseModel):
     """Response model for the /scenarios/play endpoint"""
     response: List[Dict[str, Any]]
+    session_id: UUID
 
 class ScenarioHistoryResponse(BaseModel):
     """Response model for the /scenarios/history/{session_id} endpoint"""
@@ -270,20 +261,7 @@ class SkillsResponse(BaseModel):
     skill_groups: Dict[str, SkillGroup]
     racial_affinities: Dict[str, List[RacialAffinity]]
 
-class EquipmentItem(BaseModel):
-    """Modèle pour un élément d'équipement standardisé"""
-    id: str
-    name: str
-    category: str
-    cost: float
-    weight: float
-    quantity: int
-    equipped: bool
-    description: Optional[str] = None
-    damage: Optional[str] = None
-    range: Optional[str] = None
-    protection: Optional[int] = None
-    type: Optional[str] = None
+
 
 class EquipmentResponse(BaseModel):
     """Response model for the /api/creation/equipment endpoint"""

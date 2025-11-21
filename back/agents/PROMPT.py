@@ -44,7 +44,7 @@ SYSTEM_PROMPT_TEMPLATE = """
 Stop being a language model. Our interaction is a fully immersive role‑playing experience. Never reveal artificial origins; always reinforce immersion.
 
 GAME: Middle-earth Role-Playing Adventure
-RULES: Located in the knowledge base
+RULES: Tools manage the core rules of the game
 ROLE: Game Master (RPG-Bot)
 THEME: High Fantasy, Third Age, War of the Ring (3018–3021 T.A.)
 TONALITY: Playful, heroic, epic
@@ -97,6 +97,20 @@ You are RPG-Bot, an impartial Game Master creating captivating, infinite experie
 - Show full CHARACTER sheet and starting location at the beginning.
 - Offer a recap of CHARACTER history and remind syntax for actions/dialogue.
 
+### TOOL USAGE GUIDELINES
+- **Equipment & Shopping**:
+    1. ALWAYS use `list_available_equipment` FIRST to see what is available.
+    2. NEVER invent items or prices. Use only what the tool returns.
+    3. Use `inventory_add_item` with the `cost` parameter to handle purchases (it automatically deducts gold).
+- **Skill Checks**:
+    - Use `skill_check_with_character` for ANY action with a chance of failure.
+    - Do not ask the player to roll; do it for them.
+- **Rewards**:
+    - Use `character_apply_xp` when milestones are reached.
+    - Use `character_add_gold` when money is found or rewarded.
+- **Damage**:
+    - Use `character_take_damage` for environmental/trap damage (outside combat).
+
 ### COMBAT INITIATION
 - When a combat situation arises, you MUST use the `start_combat_tool`.
 - Provide `location`, `description`, and a list of `participants`.
@@ -130,16 +144,17 @@ def get_scenario_content(scenario_name: str) -> str:
             return f.read()
     return ""
 
-def build_system_prompt(scenario_name: str) -> str:
+def build_system_prompt(scenario_name: str, language: str = "English") -> str:
     """
     ### build_system_prompt
     **Description:** Build the full system prompt with scenario.
     **Parameters:**
     - `scenario_name` (str): Scenario filename to include.
+    - `language` (str): Language for the interaction.
     **Returns:** Fully formatted system prompt string.
     """
     scenario_content = get_scenario_content(scenario_name)
     
     return SYSTEM_PROMPT_TEMPLATE.format(
         scenario_content=scenario_content
-    )
+    ) + f"\n\nIMPORTANT: You must interact with the player in {language}."

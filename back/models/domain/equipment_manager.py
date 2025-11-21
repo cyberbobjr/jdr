@@ -27,6 +27,16 @@ from back.config import get_data_dir
 class EquipmentManager:
     """
     Equipment manager for the game.
+
+    Purpose:
+        Manages all equipment data loaded from YAML configuration files.
+        This manager provides standardized access to weapons, armor, accessories, and
+        consumables, ensuring consistent item schemas across the application. It handles
+        data normalization, category classification, and item lookup operations, enabling
+        services and tools to work with equipment without directly parsing YAML files.
+
+    Attributes:
+        _equipment_data (Dict[str, Any]): Raw equipment data loaded from YAML.
     """
     
     def __init__(self):
@@ -59,6 +69,7 @@ class EquipmentManager:
                 f"Invalid YAML in equipment file {data_path}: {str(e)}. "
                 f"Please check the file format and syntax."
             )
+            
     def get_all_equipment(self) -> Dict[str, List[Dict[str, Any]]]:
         """
         Return all equipment as standardized dictionaries grouped by categories.

@@ -4,6 +4,7 @@ DTOs for combat-related payloads and events.
 
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
+from dataclasses import dataclass
 
 
 class CombatantOutcome(BaseModel):
@@ -80,18 +81,20 @@ class XPEvent(BaseModel):
     xp_gained: int
 
 
-class CombatSeedPayload(BaseModel):
+@dataclass
+class CombatSeedPayload:
     """
     ### CombatSeedPayload
-    **Description:** Payload to initialize a new combat.
+    **Description:** Initial payload returned by start_combat_tool.
+    Contains the ID of the created combat and a feedback message.
+    The actual state is stored in the database/file system.
+    
     **Attributes:**
-    - `location` (str): Location of the combat.
-    - `participants` (Dict[str, Any]): Initial state of participants.
-    - `description` (str): Description of the combat setup.
+    - `combat_id` (str): UUID of the created combat session.
+    - `message` (str): Narrative feedback about the combat start.
     """
-    location: str
-    participants: Dict[str, Any]
-    description: str
+    combat_id: str
+    message: str
 
 
 class CombatTurnContinuePayload(BaseModel):

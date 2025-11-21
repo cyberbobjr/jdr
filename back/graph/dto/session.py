@@ -6,6 +6,7 @@ from typing import Any, Literal, Optional
 from pydantic import BaseModel, Field
 from pydantic_ai.messages import ModelMessage
 from dataclasses import dataclass
+from back.models.domain.preferences import UserPreferences
 
 
 class GameState(BaseModel):
@@ -16,13 +17,15 @@ class GameState(BaseModel):
     - `session_mode` (Literal["narrative", "combat"]): Current mode of the session.
     - `narrative_history_id` (str): ID for narrative history file.
     - `combat_history_id` (str): ID for combat history file.
-    - `combat_state` (dict[str, Any] | None): Snapshot of active combat state.
+    - `combat_history_id` (str): ID for combat history file.
+    - `active_combat_id` (str | None): ID of the currently active combat, if any.
     - `last_combat_result` (dict[str, Any] | None): Result of the last combat.
     """
     session_mode: Literal["narrative", "combat"] = "narrative"
     narrative_history_id: str = "default"
     combat_history_id: str = "default"
-    combat_state: Optional[dict[str, Any]] = None
+    active_combat_id: Optional[str] = None
+    active_combat_id: Optional[str] = None
     last_combat_result: Optional[dict[str, Any]] = None
 
 

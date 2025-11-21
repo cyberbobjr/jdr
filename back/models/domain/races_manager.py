@@ -5,7 +5,19 @@ from ...config import get_data_dir
 from ..schema import RaceData, CultureData
 
 class RacesManager:
-    """Manages races and cultures using the new simplified YAML system"""
+    """
+    Manages races and cultures using the new simplified YAML system.
+
+    Purpose:
+        Provides centralized access to race and culture data for character creation.
+        This manager loads and exposes racial characteristics, cultural bonuses, languages,
+        and special traits from YAML configuration. It enables the character creation
+        process to apply appropriate racial and cultural modifiers while maintaining
+        data consistency and supporting easy updates to game content.
+
+    Attributes:
+        races_data (List[RaceData]): List of all available races with their cultures.
+    """
 
     def __init__(self):
         self._load_races_data()

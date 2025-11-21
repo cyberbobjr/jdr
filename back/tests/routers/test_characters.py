@@ -10,6 +10,7 @@ from unittest.mock import patch
 from uuid import uuid4
 from back.app import app
 from back.models.domain.character import Character, Stats, Skills, CombatStats, Equipment, Spells, CharacterStatus
+from back.models.domain.items import EquipmentItem
 
 client = TestClient(app)
 
@@ -196,10 +197,28 @@ def test_get_character_detail_with_inventory(mock_data_service):
     """
     character_with_inventory = MOCK_CHARACTER_1.model_copy()
     character_with_inventory.equipment.weapons = [
-        {"name": "Longsword", "damage": "1d8+4", "weight": 1.5, "cost": 150.0}
+        EquipmentItem(
+            id=str(uuid4()),
+            name="Longsword",
+            category="weapons",
+            cost=150.0,
+            weight=1.5,
+            quantity=1,
+            equipped=True,
+            damage="1d8+4"
+        )
     ]
     character_with_inventory.equipment.armor = [
-        {"name": "Chain Mail", "defense": 4, "weight": 10.0, "cost": 300.0}
+        EquipmentItem(
+            id=str(uuid4()),
+            name="Chain Mail",
+            category="armor",
+            cost=300.0,
+            weight=10.0,
+            quantity=1,
+            equipped=True,
+            protection=4
+        )
     ]
 
     mock_data_service.return_value.load_character.return_value = character_with_inventory

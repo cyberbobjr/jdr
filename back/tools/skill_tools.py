@@ -1,132 +1,162 @@
 import random
+from typing import Dict, Any
 from pydantic_ai import RunContext
 from back.services.game_session_service import GameSessionService
-from back.utils.logger import log_debug
 from back.services.character_service import CharacterService
-
-import random
-from pydantic_ai import RunContext
+from back.models.domain.character import Character
 from back.utils.logger import log_debug
-from back.services.character_service import CharacterService
-from back.models.domain.unified_skills_manager import UnifiedSkillsManager
-from back.models.domain.stats_manager import StatsManager
 
-def skill_check_with_character(ctx: RunContext[GameSessionService], skill_name: str, difficulty_name: str = "Moyenne", difficulty_modifier: int = 0) -> str:
+
+def skill_check_with_character(
+    ctx: RunContext[GameSessionService], 
+    skill_name: str, 
+    difficulty_name: str = "normal", 
+    difficulty_modifier: int = 0
+) -> str:
     """
-    Effectue un test de compétence en utilisant les données du personnage de la session.
-
+    Performs a skill check using the session character's data.
+    
+    This tool resolves skill checks by:
+    1. Looking up the skill in the character's skills groups
+    2. Falling back to base stats if the skill is not trained
+    3. Applying difficulty modifiers
+    4. Rolling 1d100 and determining success/failure with degrees
+    
     Args:
-        skill_name (str): Nom de la compétence/caractéristique testée (ex: "Perception", "Force", "Discrétion").
-        difficulty_name (str): Nom de la difficulté ("Facile", "Moyenne", "Difficile", "Très Difficile").
-        difficulty_modifier (int): Modificateur additionnel de difficulté (optionnel, par défaut 0).
+        skill_name (str): Name of the skill or stat to test (e.g., "perception", "strength", "acrobatics").
+        difficulty_name (str): Difficulty level ("favorable", "normal", "unfavorable"). Default: "normal".
+        difficulty_modifier (int): Additional difficulty modifier (optional, default 0).
     
     Returns:
-        str: Résultat détaillé du test avec jet de dé, calculs et interprétation.
+        dict: Detailed result of the test including roll, target, success status, and degree.
     """
-    try:        # Récupérer la fiche du personnage via CharacterService
-        character_service = CharacterService(ctx.deps.character_id)
-        character = character_service.get_character()
-        # Gérer le cas où character est un dict ou un objet Character
-        if hasattr(character, 'model_dump'):
-            character_data = character.model_dump()  # Objet Character
+    try:
+        # Get character via CharacterService
+        character_service: CharacterService = CharacterService(ctx.deps.character_id)
+        character: Character = character_service.get_character()
+        
+        # Determine the skill value to use for the test
+        skill_value: int = 0
+        source_used: str = ""
+        
+        # Normalize skill_name to lowercase for comparison
+        skill_name_lower: str = skill_name.lower().replace(" ", "_")
+        
+        # 1. Check if it's a direct stat (strength, constitution, agility, intelligence, wisdom, charisma)
+        stat_mapping: Dict[str, str] = {
+            "strength": "strength",
+            "constitution": "constitution",
+            "agility": "agility",
+            "intelligence": "intelligence",
+            "wisdom": "wisdom",
+            "charisma": "charisma"
+        }
+        
+        if skill_name_lower in stat_mapping:
+            stat_key: str = stat_mapping[skill_name_lower]
+            stat_value: int = getattr(character.stats, stat_key)
+            # Convert stat to percentage-based value (stat * 5 for d100 system)
+            skill_value = stat_value * 5
+            source_used = f"Base stat {stat_key.title()}"
+        
+        # 2. Check if it's a trained skill in any skill group
         else:
-            character_data = character  # Déjà un dict        # Extraction des compétences et caractéristiques
-        competences = character_data.get("competences", {})
-        caracteristiques = character_data.get("caracteristiques", {})
-        # Récupérer les bonus culturels depuis culture.skill_bonuses
-        culture = character_data.get("culture", {})
-        culture_bonuses = culture.get("skill_bonuses", {}) if culture else {}
-        
-        # Déterminer la valeur à utiliser pour le test
-        skill_value = 0        # Récupération des managers pour les nouvelles données
-        skills_manager = UnifiedSkillsManager()
-        characteristics_manager = StatsManager()
-        
-        source_used = ""
-        
-        # 1. Vérifier d'abord si c'est une compétence directe
-        if skill_name in competences:
-            skill_value = competences[skill_name]
-            source_used = f"Compétence {skill_name}"
-        
-        # 2. Vérifier les bonus culturels
-        elif skill_name in culture_bonuses:
-            # Utiliser le skills_manager pour trouver la caractéristique de base
-            skill_data = skills_manager.get_skill_by_name(skill_name)
-            if skill_data:
-                base_char = skill_data.get("primary_characteristic", "Raisonnement")
-            else:
-                base_char = "Raisonnement"
+            skill_found: bool = False
+            skill_groups: Dict[str, Dict[str, int]] = character.skills.model_dump()
             
-            char_value = caracteristiques.get(base_char, 50)
-            culture_bonus = culture_bonuses[skill_name]
-            skill_value = char_value + culture_bonus
-            source_used = f"{base_char} ({char_value}) + Bonus Culturel {skill_name} ({culture_bonus})"
+            for group_name, group_skills in skill_groups.items():
+                if skill_name_lower in group_skills:
+                    skill_rank: int = group_skills[skill_name_lower]
+                    # Calculate skill value: base stat * 5 + skill rank * 10
+                    # For simplicity, we'll use a default base stat of 10 if we can't determine it
+                    base_stat_value: int = 10
+                    skill_value = (base_stat_value * 5) + (skill_rank * 10)
+                    source_used = f"Skill {skill_name} (rank {skill_rank}) in {group_name}"
+                    skill_found = True
+                    break
+            
+            # 3. If skill not found, use default value based on related stat
+            if not skill_found:
+                # Default to wisdom-based check
+                default_stat_value: int = character.stats.wisdom
+                skill_value = default_stat_value * 5
+                source_used = f"Untrained skill (using Wisdom base: {default_stat_value})"
         
-        # 3. Vérifier si c'est une caractéristique directe
-        elif skill_name in caracteristiques:
-            skill_value = caracteristiques[skill_name]
-            source_used = f"Caractéristique {skill_name}"
-        
-        # 4. Mapper vers la caractéristique de base via le skills_manager
-        else:
-            skill_data = skills_manager.get_skill_by_name(skill_name)
-            if skill_data:
-                base_char = skill_data.get("primary_characteristic", "Raisonnement")
-                skill_value = caracteristiques.get(base_char, 50)
-                source_used = f"Caractéristique de base {base_char} (pour {skill_name})"
-            else:
-                # Valeur par défaut
-                skill_value = 50
-                source_used = f"Valeur par défaut (compétence {skill_name} non trouvée)"
-        
-        # Simplified difficulty modifiers for modern gameplay
-        difficulty_modifiers = {
+        # Difficulty modifiers
+        difficulty_modifiers: Dict[str, int] = {
             "favorable": -20,
             "normal": 0,
             "unfavorable": 20
         }
         
-        base_difficulty = difficulty_modifiers.get(difficulty_name, 0)
-        total_difficulty = base_difficulty + difficulty_modifier
+        base_difficulty: int = difficulty_modifiers.get(difficulty_name.lower(), 0)
+        total_difficulty: int = base_difficulty + difficulty_modifier
         
-        roll = random.randint(1, 100)
-        target = skill_value - total_difficulty
-        success = roll <= target
+        # Roll 1d100
+        roll: int = random.randint(1, 100)
+        target: int = skill_value - total_difficulty
+        success: bool = roll <= target
         
-        # Calcul des degrés de réussite/échec
-        margin = abs(roll - target)
+        # Calculate degrees of success/failure
+        margin: int = abs(roll - target)
         if success:
             if margin >= 50:
-                degree = "Réussite Critique"
+                degree: str = "Critical Success"
             elif margin >= 30:
-                degree = "Réussite Excellente"
+                degree = "Excellent Success"
             elif margin >= 10:
-                degree = "Réussite Bonne"
+                degree = "Good Success"
             else:
-                degree = "Réussite Simple"
+                degree = "Simple Success"
         else:
             if margin >= 50:
-                degree = "Échec Critique"
+                degree = "Critical Failure"
             elif margin >= 30:
-                degree = "Échec Grave"
+                degree = "Severe Failure"
             elif margin >= 10:
-                degree = "Échec Moyen"
+                degree = "Moderate Failure"
             else:
-                degree = "Échec Simple"
-        result = f"Test de {skill_name}: {source_used} = {skill_value}, Jet 1d100 = {roll}, Seuil = {target} ({skill_value} - {total_difficulty}), Résultat: **{degree}**"
+                degree = "Simple Failure"
         
-        log_debug("Tool skill_check_with_character appelé", tool="skill_check_with_character", 
-                  player_id=str(ctx.deps.character_id), skill_name=skill_name, 
-                  source_used=source_used, skill_value=skill_value, difficulty_name=difficulty_name, 
-                  roll=roll, target=target, success=success, degree=degree)
-        return result
+        result_message: str = (
+            f"Skill check for {skill_name}: {source_used} = {skill_value}, "
+            f"Roll 1d100 = {roll}, Target = {target} ({skill_value} - {total_difficulty}), "
+            f"Result: **{degree}**"
+        )
+        
+        log_debug(
+            "Tool skill_check_with_character called", 
+            tool="skill_check_with_character", 
+            player_id=str(ctx.deps.character_id), 
+            skill_name=skill_name, 
+            source_used=source_used, 
+            skill_value=skill_value, 
+            difficulty_name=difficulty_name, 
+            roll=roll, 
+            target=target, 
+            success=success, 
+            degree=degree
+        )
+        
+        return {
+            "message": result_message,
+            "skill_name": skill_name,
+            "roll": roll,
+            "target": target,
+            "success": success,
+            "degree": degree,
+            "source_used": source_used
+        }
         
     except Exception as e:
-        error_msg = f"Erreur lors du test de {skill_name}: {str(e)}"
-        log_debug("Erreur dans skill_check_with_character", error=str(e), 
-                  player_id=str(ctx.deps.character_id), skill_name=skill_name)
-        return error_msg
+        error_msg: str = f"Error during skill check for {skill_name}: {str(e)}"
+        log_debug(
+            "Error in skill_check_with_character", 
+            error=str(e), 
+            player_id=str(ctx.deps.character_id), 
+            skill_name=skill_name
+        )
+        return {"error": error_msg}
 
-# Outil principal à utiliser avec les données complètes du personnage
+
 # Tool definition removed - now handled directly by PydanticAI agent

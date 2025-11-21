@@ -42,8 +42,37 @@ class CombatNode(BaseNode[SessionGraphState, GameSessionService, DispatchResult]
         """
         log_debug("Running CombatNode", session_id=ctx.deps.session_id)
 
-        # Build system prompt with combat state
-        system_prompt = await ctx.deps.build_combat_prompt(ctx.state.game_state.combat_state) # type: ignore
+        # Load the active combat state
+        from back.services.combat_state_service import CombatStateService
+        combat_state_service = CombatStateService()
+        
+        # Ensure we have a session ID (should be in deps)
+        session_id_uuid = ctx.deps.session_id
+        # Convert to UUID if it's a string (GameSessionService stores it as string usually, but let's be safe)
+        import uuid
+        if isinstance(session_id_uuid, str):
+            session_id_uuid = uuid.UUID(session_id_uuid)
+
+        combat_state = combat_state_service.load_combat_state(session_id_uuid)
+        
+        if not combat_state:
+            # Fallback if no combat state found but we are in combat mode
+            # This shouldn't happen if flow is correct, but safety net:
+            log_debug("No active combat state found in CombatNode, reverting to narrative", session_id=ctx.deps.session_id)
+            ctx.state.game_state.session_mode = "narrative"
+            ctx.state.game_state.active_combat_id = None
+            await ctx.deps.update_game_state(ctx.state.game_state)
+            return End(DispatchResult(
+                all_messages=[],
+                new_messages=[{"role": "system", "content": "Combat state lost. Returning to narrative mode."}]
+            ))
+
+        # Build system prompt with loaded combat state
+        from back.services.settings_service import SettingsService
+        settings_service = SettingsService()
+        language = settings_service.get_preferences().language
+
+        system_prompt = await ctx.deps.build_combat_prompt(combat_state, language)
 
         # Run the agent
         result = await self.combat_agent.run(
@@ -62,11 +91,17 @@ class CombatNode(BaseNode[SessionGraphState, GameSessionService, DispatchResult]
             # End combat
             ctx.state.game_state.session_mode = "narrative"
             ctx.state.game_state.last_combat_result = output.model_dump()
-            ctx.state.game_state.combat_state = None  # Clear combat state
+            ctx.state.game_state.active_combat_id = None  # Clear active combat
+            
+            # TODO: Handle Player Death gracefully.
+            # If the player died (see last_combat_result), we should probably transition to a "Game Over" or "Unconscious" state
+            # rather than just returning to narrative mode as if nothing happened.
+            
             await ctx.deps.update_game_state(ctx.state.game_state)
             log_debug("Ending combat mode", session_id=ctx.deps.session_id)
         else:
-            # Continue combat, combat_state already updated by tools
+            # Continue combat
+            # Note: We don't need to save combat_state here as tools update it directly via CombatStateService
             await ctx.deps.update_game_state(ctx.state.game_state)
 
         # Use built-in JSON serialization methods

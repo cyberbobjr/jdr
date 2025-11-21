@@ -274,7 +274,8 @@ class TestGameSessionServiceInstance:
             service = GameSessionService("test-session")
 
             # Mock the PydanticJsonlStore
-            with patch('back.services.game_session_service.PydanticJsonlStore') as mock_store_cls:
+            with patch('back.services.game_session_service.PydanticJsonlStore') as mock_store_cls, \
+                 patch('os.path.exists', return_value=True):
                 mock_store = Mock()
                 mock_store.load_raw_json_history.return_value = [{"kind": "request", "parts": []}]
                 mock_store_cls.return_value = mock_store

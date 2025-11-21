@@ -1,5 +1,7 @@
 from uuid import uuid4
-from back.models.domain.character import Character, Stats, Skills, Equipment, CombatStats, Spells, CharacterStatus
+from back.models.domain.character import Character, Stats, Skills, Equipment, CombatStats, Spells
+from back.models.enums import CharacterStatus
+from back.models.domain.items import EquipmentItem
 
 
 def _build_sample_character() -> Character:
@@ -15,8 +17,8 @@ def _build_sample_character() -> Character:
     combat_stats: CombatStats = Character.calculate_combat_stats(stats, level=2)
     skills: Skills = Skills(combat={"weapon_handling": 5, "combat_style": 3}, general={"perception": 4})
     equipment: Equipment = Equipment(
-        weapons=[{"name": "longsword", "damage": "1d8"}],
-        armor=[{"name": "leather_armor", "defense": 2}],
+        weapons=[EquipmentItem(id="w1", name="longsword", category="weapon", cost=15, weight=2, quantity=1, equipped=True, damage="1d8")],
+        armor=[EquipmentItem(id="a1", name="leather_armor", category="armor", cost=10, weight=5, quantity=1, equipped=True, protection=2)],
         gold=25
     )
     spells: Spells = Spells(known_spells=["light"], spell_slots={1: 2}, spell_bonus=1)

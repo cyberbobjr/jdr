@@ -1,12 +1,33 @@
 """NPC domain model."""
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from uuid import UUID, uuid4
 from .character import Stats, Skills, Equipment, CombatStats, Spells
 
 
 class NPC(BaseModel):
-    """Simplified NPC model mirroring the Character data contract."""
+    """
+    Simplified NPC model mirroring the Character data contract.
+
+    Purpose:
+        Provides a streamlined data structure for non-player characters in the game.
+        This model mirrors the Character structure but focuses on combat-relevant data
+        and simplified stat management suitable for NPCs. It enables the game master
+        to quickly create and manage enemies and allies without the full complexity
+        of player character creation, while maintaining compatibility with the combat system.
+
+    Attributes:
+        id (UUID): Unique NPC identifier.
+        name (str): NPC name, 1-100 characters.
+        description (Optional[str]): NPC description, max 1000 characters.
+        stats (Stats): NPC base statistics.
+        skills (Skills): NPC skills, defaults to empty Skills object.
+        equipment (Equipment): NPC equipment, defaults to empty Equipment object.
+        combat_stats (CombatStats): NPC combat statistics (HP, AC, attack bonus).
+        spells (Spells): NPC known spells, defaults to empty Spells object.
+        archetype (str): Type of NPC (e.g., 'Goblin Warrior', 'Forest Elf Archer').
+        level (int): NPC challenge level, 1-20.
+    """
     id: UUID = Field(default_factory=uuid4, description="Unique NPC identifier")
     name: str = Field(..., min_length=1, max_length=100, description="NPC name")
     description: Optional[str] = Field(default=None, max_length=1000, description="NPC description")
@@ -30,8 +51,8 @@ class NPC(BaseModel):
     archetype: str = Field(..., description="Type of NPC (e.g., 'Goblin Warrior', 'Forest Elf Archer')")
     level: int = Field(default=1, ge=1, le=20, description="NPC challenge level")
     
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "id": "123e4567-e89b-12d3-a456-426614174001",
                 "name": "Goblin Grunt",
@@ -63,5 +84,6 @@ class NPC(BaseModel):
                 "spells": {}
             }
         }
+    )
 
 __all__ = ['NPC']

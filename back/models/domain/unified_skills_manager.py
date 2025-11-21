@@ -17,7 +17,15 @@ class UnifiedSkillsManager:
     """
     Manager for unified skills data from skills.yaml.
 
-    Provides access to skill groups, racial affinities, and stat bonuses.
+    Purpose:
+        Provides centralized access to skill groups, racial affinities, and stat-based bonuses.
+        This manager loads the unified skills configuration and exposes methods for querying
+        skill information, calculating bonuses, and retrieving racial skill affinities. It
+        enables the character creation and skill allocation systems to work with consistent
+        skill data while supporting flexible skill group organization and stat-skill relationships.
+
+    Attributes:
+        _data (Dict): Complete skills data loaded from YAML including skill groups and racial affinities.
     """
 
     def __init__(self):

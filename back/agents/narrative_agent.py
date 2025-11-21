@@ -48,6 +48,7 @@ class NarrativeAgent:
                 character_tools.character_take_damage,
                 equipment_tools.inventory_add_item,
                 equipment_tools.inventory_remove_item,
+                equipment_tools.list_available_equipment,
                 skill_tools.skill_check_with_character,
                 combat_tools.start_combat_tool,
             ]

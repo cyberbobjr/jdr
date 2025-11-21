@@ -3,51 +3,76 @@ from pydantic_ai import RunContext
 from back.services.game_session_service import GameSessionService
 from back.utils.logger import log_debug
 
-def character_apply_xp(ctx: RunContext[GameSessionService], xp: int) -> str:
+def character_apply_xp(ctx: RunContext[GameSessionService], xp: int) -> dict:
     """
-    Applique les XP au personnage.
+    Apply experience points (XP) to the character.
+
+    Use this tool when the character completes a quest, defeats enemies, or achieves a milestone.
+    The tool automatically handles leveling up if the XP threshold is reached.
 
     Args:
-        xp (int): Le nombre d'expériences à ajouter. Ex. : 50.
-    
+        xp (int): The amount of XP to add. Must be a positive integer.
+
     Returns:
-        str: Message confirmant l'application des XP.
+        dict: A summary of the action, including total XP and current level.
     """
-    log_debug("Tool character_apply_xp appelé", tool="character_apply_xp", player_id=str(ctx.deps.character_id), xp=xp)
+    log_debug("Tool character_apply_xp called", tool="character_apply_xp", player_id=str(ctx.deps.character_id), xp=xp)
     
-    # ✅ PATTERN CORRECT - Utilisation des services spécialisés via SessionService
+    # ✅ CORRECT PATTERN - Use specialized services via SessionService
     character = ctx.deps.character_service.apply_xp(xp)
-    return f"✅ {xp} XP appliqués au personnage. Total XP: {character.xp}"
+    
+    return {
+        "message": f"✅ {xp} XP applied to character.",
+        "total_xp": character.xp,
+        "level": character.level if hasattr(character, 'level') else 1 # Assuming level exists or is calculated
+    }
 
-def character_add_gold(ctx: RunContext[GameSessionService], gold: int) -> str:
+def character_add_gold(ctx: RunContext[GameSessionService], gold: int) -> dict:
     """
-    Ajoute de l'or au portefeuille du personnage.
+    Add or remove gold from the character's wallet.
+
+    Use this tool when the character finds money, receives a reward, or pays for something 
+    (if not using a specific transaction tool like inventory_add_item).
+    Use negative values to remove gold.
 
     Args:
-        gold (int): Montant d'or à ajouter. Ex. : 50.
-    
+        gold (int): Amount of gold to add (positive) or remove (negative).
+
     Returns:
-        str: Message confirmant l'ajout d'or.
+        dict: A summary of the transaction and the new balance.
     """
-    log_debug("Tool character_add_gold appelé", tool="character_add_gold", player_id=str(ctx.deps.character_id), gold=gold)
+    log_debug("Tool character_add_gold called", tool="character_add_gold", player_id=str(ctx.deps.character_id), gold=gold)
     
-    # ✅ PATTERN CORRECT - Utilisation des services spécialisés via SessionService
+    # ✅ CORRECT PATTERN - Use specialized services via SessionService
     character = ctx.deps.character_service.add_gold(float(gold))
-    return f"💰 {gold} pièces d'or {'ajoutées' if gold > 0 else 'retirées'}. Total: {character.gold:.2f} po"
+    
+    action = "added" if gold > 0 else "removed"
+    return {
+        "message": f"💰 {abs(gold)} gold pieces {action}.",
+        "total_gold": character.gold
+    }
 
-def character_take_damage(ctx: RunContext[GameSessionService], amount: int, source: str = "combat") -> str:
+def character_take_damage(ctx: RunContext[GameSessionService], amount: int, source: str = "combat") -> dict:
     """
-    Applique des dégâts au personnage (réduit ses PV).
+    Apply damage to the character (reduce HP).
+
+    Use this tool when the character gets hurt outside of the combat system (e.g., traps, falls, environmental damage).
+    For combat damage, prefer using the combat tools if a combat session is active.
 
     Args:
-        amount (int): Points de dégâts à appliquer. Ex. : 10.
-        source (str): Source des dégâts. Par défaut : "combat".
-    
+        amount (int): Amount of damage to apply. Must be positive.
+        source (str): The source of the damage (e.g., "trap", "fall"). Default: "combat".
+
     Returns:
-        str: Message confirmant l'application des dégâts.
+        dict: A summary of the damage taken and remaining HP.
     """
-    log_debug("Tool character_take_damage appelé", tool="character_take_damage", player_id=str(ctx.deps.character_id), amount=amount, source=source)
+    log_debug("Tool character_take_damage called", tool="character_take_damage", player_id=str(ctx.deps.character_id), amount=amount, source=source)
     
-    # ✅ PATTERN CORRECT - Utilisation des services spécialisés via SessionService
+    # ✅ CORRECT PATTERN - Use specialized services via SessionService
     character = ctx.deps.character_service.take_damage(amount, source)
-    return f"💔 {amount} points de dégâts subis ({source}). PV restants: {character.hp}"
+    
+    return {
+        "message": f"💔 {amount} damage taken from {source}.",
+        "current_hp": character.hp,
+        "is_alive": character.hp > 0
+    }

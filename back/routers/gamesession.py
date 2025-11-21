@@ -16,14 +16,14 @@ from back.services.game_session_service import GameSessionService, HISTORY_NARRA
 from back.models.schema import (
     PlayScenarioRequest,
     ActiveSessionsResponse,
-    StartScenarioRequest,
     PlayScenarioResponse,
     ScenarioHistoryResponse,
     DeleteMessageResponse,
     SessionInfo,
 )
 from back.utils.logger import log_debug
-from back.models.domain.character import Character, CharacterStatus
+from back.models.domain.character import Character
+from back.models.enums import CharacterStatus
 from back.services.character_data_service import CharacterDataService
 from pydantic_ai.messages import ModelMessagesTypeAdapter
 from back.utils.exceptions import (
@@ -88,114 +88,6 @@ async def list_active_sessions() -> ActiveSessionsResponse:
         log_debug("Error retrieving active sessions", error=str(e), traceback=traceback.format_exc())
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
 
-@router.post("/start", response_model=PlayScenarioResponse)
-async def start_scenario(request: StartScenarioRequest) -> PlayScenarioResponse:
-    """
-    Start a scenario with a specific character, return session ID and trigger initial narration with LLM.
-
-    **Request Body:**
-    ```json
-    {
-        "scenario_name": "Les_Pierres_du_Passe.md",
-        "character_id": "87654321-4321-8765-2109-987654321def"
-    }
-    ```
-
-    **Response:**
-    ```json
-    {
-        "response": [
-            {
-                "parts": [
-                    {
-                        "content": "Start the scenario and present the initial situation.",
-                        "timestamp": "2025-06-21T12:00:00.000000Z",
-                        "part_kind": "user-prompt"
-                    }
-                ],
-                "kind": "request",
-                "timestamp": "2025-06-21T12:00:00.000000Z"
-            },
-            {
-                "parts": [
-                    {
-                        "content": "**Esgalbar, central square of the village**...",
-                        "timestamp": "2025-06-21T12:00:05.123456Z",
-                        "part_kind": "text"
-                    }
-                ],
-                "kind": "response",
-                "usage": {
-                    "requests": 1,
-                    "request_tokens": 1250,
-                    "response_tokens": 567,
-                    "total_tokens": 1817
-                },
-                "model_name": "deepseek-chat",
-                "timestamp": "2025-06-21T12:00:05.123456Z"
-            }
-        ]
-    }
-    ```
-
-    **Raises:**
-    - HTTPException 409: If a session already exists with the same scenario and character.
-    - HTTPException 404: If the requested scenario does not exist.
-    """
-    log_debug("Endpoint call: gamesession/start_scenario")
-
-    try:
-        data_service = CharacterDataService()
-        character_data = data_service.load_character(str(request.character_id))
-        if character_data.status == CharacterStatus.DRAFT:
-            raise HTTPException(status_code=400, detail="Cannot start a scenario with a character in creation.")
-
-        session_info: Dict[str, Any] = GameSessionService.start_scenario(request.scenario_name, UUID(request.character_id))
-        session_id: str = session_info["session_id"]
-    except ValueError as e:
-        raise HTTPException(status_code=409, detail=str(e))
-    except FileNotFoundError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    
-    try:
-        # Get session service
-        session_service = GameSessionService(session_id)
-
-        # Load or create game_state
-        game_state = await session_service.load_game_state()
-        if game_state is None:
-            # Create initial game_state
-            game_state = GameState(
-                session_mode="narrative",
-                narrative_history_id="default",
-                combat_history_id="default"
-            )
-            await session_service.update_game_state(game_state)
-
-        # Create graph state with start message
-        start_message = "Start the scenario and present the initial situation."
-        player_message = PlayerMessagePayload(message=start_message)
-        graph_state = SessionGraphState(
-            game_state=game_state,
-            pending_player_message=player_message
-        )
-
-        # Run graph
-        result = await session_graph.run(DispatcherNode(), state=graph_state, deps=session_service)
-
-        # Use all_messages directly (already in the correct JSON format)
-        log_debug("Scenario started via graph", action="start_scenario", session_id=session_id, character_id=request.character_id, scenario_name=request.scenario_name)
-        return PlayScenarioResponse(response=result.output.all_messages)
-
-    except SessionNotFoundError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except CharacterNotFoundError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except ServiceNotInitializedError as e:
-        raise HTTPException(status_code=500, detail=f"Service initialization error: {str(e)}")
-    except Exception as e:
-        log_debug("Error starting scenario with graph", error=str(e), traceback=traceback.format_exc(), session_id=session_id)
-        raise HTTPException(status_code=500, detail=f"Error starting scenario: {str(e)}")
 
 @router.post("/play", response_model=PlayScenarioResponse)
 async def play_scenario(
@@ -221,7 +113,9 @@ async def play_scenario(
 
     **Response:**
     ```json
+    ```json
     {
+        "session_id": "12345678-1234-5678-9012-123456789abc",
         "response": [
             {
                 "parts": [
@@ -309,7 +203,10 @@ async def play_scenario(
         result = await session_graph.run(DispatcherNode(), state=graph_state, deps=session_service)
 
         log_debug("Graph response generated", action="play_scenario", session_id=str(session_id))
-        return PlayScenarioResponse(response=result.output.all_messages)
+        return PlayScenarioResponse(
+            response=result.output.all_messages,
+            session_id=session_id
+        )
 
     except SessionNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
@@ -557,4 +454,30 @@ async def delete_history_message(session_id: UUID, message_index: int) -> Delete
             session_id=str(session_id),
             message_index=message_index
         )
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+
+@router.get("/{session_id}/preferences", response_model=Dict[str, str])
+async def get_preferences(session_id: UUID) -> Dict[str, str]:
+    """
+    Retrieve the user preferences for the specified session.
+
+    **Parameters:**
+    - `session_id` (UUID): Game session identifier.
+
+    **Response:**
+    ```json
+    {
+        "language": "English"
+    }
+    ```
+    """
+    log_debug("Endpoint call: gamesession/get_preferences", session_id=str(session_id))
+    try:
+        session_service = GameSessionService(str(session_id))
+        game_state = await session_service.load_game_state()
+        if not game_state:
+            raise HTTPException(status_code=404, detail="Game state not found")
+        
+        return {"language": game_state.preferences.language}
+    except SessionNotFoundError as e:
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")

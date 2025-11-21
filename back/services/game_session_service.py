@@ -12,6 +12,7 @@ from uuid import UUID, uuid4
 from pydantic_ai import ModelMessage
 
 from back.models.domain.character import Character
+from back.models.enums import CharacterStatus
 from back.services.character_data_service import CharacterDataService
 from back.services.character_service import CharacterService
 from back.services.equipment_service import EquipmentService
@@ -279,6 +280,17 @@ class GameSessionService:
         scenario_file = session_dir / "scenario.txt"
         scenario_file.write_text(scenario_name, encoding='utf-8')
 
+        # Update character status to IN_GAME
+        try:
+            char_service = CharacterService(str(character_id))
+            char_service.character_data.status = CharacterStatus.IN_GAME
+            char_service.save_character()
+            log_debug(f"Character {character_id} status updated to IN_GAME")
+        except Exception as e:
+            log_debug(f"Failed to update character status to IN_GAME: {e}")
+            # Non-blocking error, we continue
+
+
         log_debug("Scenario started", action="start_scenario", session_id=session_id, character_id=str(character_id), scenario_name=scenario_name)
         return {
             "session_id": session_id,
@@ -286,6 +298,8 @@ class GameSessionService:
             "character_id": str(character_id),
             "message": f"Scenario '{scenario_name}' successfully started for character {character_id}."
         }
+
+
 
     @staticmethod
     def get_session_info(session_id: str) -> Dict[str, str]:
@@ -455,31 +469,35 @@ class GameSessionService:
             return GameState(**data)
         return None
 
-    async def build_narrative_system_prompt(self) -> str:
+    async def build_narrative_system_prompt(self, language: str = "English") -> str:
         """
         ### build_narrative_system_prompt
         **Description:** Builds the system prompt for the narrative agent.
         Combines the scenario-specific prompt with the character's narrative information block.
 
+        **Parameters:**
+        - `language` (str): The language for the interaction.
+
         **Returns:**
         - `str`: The complete system prompt string.
         """
         # Use the full system prompt template
-        prompt = build_system_prompt(self.scenario_id)
+        prompt = build_system_prompt(self.scenario_id, language)
 
         # Build complete character information via Character method
         character_info = self.character_data.build_narrative_prompt_block() if self.character_data else "Unknown character"
 
         return prompt + f"\n\nCHARACTER INFORMATION:\n{character_info}"
 
-    async def build_combat_prompt(self, combat_state: dict) -> str:
+    async def build_combat_prompt(self, combat_state: Any, language: str = "English") -> str:
         """
         ### build_combat_prompt
         **Description:** Builds the system prompt for the combat agent.
         Includes the current combat state, character combat info, and available tools.
 
         **Parameters:**
-        - `combat_state` (dict): The current state of the combat (participants, turns, etc.).
+        - `combat_state` (Any): The current state of the combat (CombatState object or dict).
+        - `language` (str): The language for the interaction.
 
         **Returns:**
         - `str`: The complete system prompt string.
@@ -487,28 +505,54 @@ class GameSessionService:
         # Build complete character information for combat via Character method
         character_info = self.character_data.build_combat_prompt_block() if self.character_data else "Unknown character"
 
+        # Format combat state if it's an object
+        state_summary = combat_state
+        if hasattr(combat_state, 'model_dump'):
+             # It's a Pydantic model (CombatState)
+             # We can use a summary method if available, or dump it
+             # Ideally we use the service's summary method, but here we might just dump it
+             # or rely on the __str__ or similar.
+             # Let's use model_dump for now, or better, just pass it and let str() handle it if it's a dict
+             state_summary = combat_state.model_dump()
+
         return f"""
 You are a Combat Master for a Middle-earth RPG.
+Language: {language}
 
 Current Combat State:
-{combat_state}
+{state_summary}
 
 CHARACTER INFORMATION:
 {character_info}
 
-Resolve combat turns using the character's stats, skills, and equipment.
-You have access to the following tools:
-- roll_initiative_tool: Roll initiative for participants
-- perform_attack_tool: Execute an attack roll
-- resolve_attack_tool: Resolve attack vs defense
-- calculate_damage_tool: Calculate damage with modifiers
-- apply_damage_tool: Apply damage to a participant
-- end_turn_tool: End the current turn
-- check_combat_end_tool: Check if combat should end
-- end_combat_tool: End the combat session
-- get_combat_status_tool: Get current combat status
-- skill_check_with_character: Perform skill checks
-- inventory_remove_item: Remove items (e.g. ammunition)
+YOUR ROLE:
+- You are the Game Master handling the combat logic.
+- You MUST make high-level decisions based on the player's intent and the combat state.
+- Do NOT ask the player to roll dice. YOU decide the outcome using the provided tools.
+- Describe the action dynamically and immersively.
 
-Always consider the character's combat skills, equipment bonuses, and current HP when resolving actions.
+TOOLS USAGE:
+- execute_attack_tool: Use this for ANY physical attack (melee or ranged). It handles the roll, AC check, and damage automatically.
+- apply_direct_damage_tool: Use this for spells, traps, or environmental damage that does NOT require an attack roll (e.g., "Fireball" save, falling damage).
+- end_turn_tool: MANDATORY at the end of the active participant's turn.
+- check_combat_end_tool: Use this after every action that might end the combat.
+- end_combat_tool: Use this to force end the combat (e.g., surrender, escape).
+- get_combat_status_tool: Use this if you need to refresh the state.
+- skill_check_with_character: Use this for non-combat actions (e.g., Acrobatics to jump on a table).
+- inventory_remove_item: Use this to consume ammo or items.
+
+TURN FLOW:
+1. Analyze the current turn owner (Player or NPC).
+2. If NPC: Decide their action, execute it using tools, describe the result, and END TURN.
+3. If Player: Interpret their message.
+   - If they attack: Call `execute_attack_tool`.
+   - If they cast a spell (damage): Call `apply_direct_damage_tool` (after checking logic/saves if needed).
+   - If they do something else: Resolve it.
+   - AFTER the action, call `check_combat_end_tool`.
+   - If combat continues, call `end_turn_tool`.
+4. ALWAYS describe the outcome of the tools (hit/miss, damage) in the narrative.
+
+IMPORTANT:
+- `execute_attack_tool` requires `attacker_id` and `target_id`.
+- Do NOT hallucinate weapon names or damage dice; the tool handles it.
 """

@@ -1,6 +1,6 @@
 """Real-time combat state models."""
 from typing import List, Optional
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, ConfigDict
 from uuid import UUID, uuid4
 from enum import Enum
 
@@ -8,12 +8,43 @@ from .character import Character
 from .npc import NPC
 
 class CombatantType(str, Enum):
+    """
+    Enumeration of combatant types in the combat system.
+
+    Purpose:
+        Defines the two fundamental types of participants in combat encounters.
+        This distinction is crucial for applying different rules, AI behaviors, and
+        data persistence strategies between player-controlled characters and NPCs.
+        The enum ensures type safety and prevents invalid combatant classifications.
+
+    Attributes:
+        PLAYER (str): Represents a player-controlled character with persistent data.
+        NPC (str): Represents a non-player character managed by the game master.
+    """
     PLAYER = "player"
     NPC = "npc"
 
 class Combatant(BaseModel):
     """
     Represents a participant in combat, either a player character or an NPC.
+
+    Purpose:
+        Encapsulates all combat-relevant data for a single participant in an encounter.
+        This model serves as the runtime representation of combatants, tracking their
+        current state (HP, initiative) while maintaining references to their full character
+        or NPC data. It provides a unified interface for combat operations regardless of
+        whether the combatant is a player or NPC, enabling consistent combat mechanics.
+
+    Attributes:
+        id (UUID): Unique identifier for the combatant in this combat instance.
+        name (str): Display name of the combatant.
+        type (CombatantType): Whether this is a player or NPC combatant.
+        current_hit_points (int): Current HP, must be >= 0.
+        max_hit_points (int): Maximum HP, must be >= 1.
+        armor_class (int): Armor Class for defense calculations, must be >= 1.
+        initiative_roll (int): Result of the initiative roll determining turn order.
+        character_ref (Optional[Character]): Full Character data if this is a player.
+        npc_ref (Optional[NPC]): Full NPC data if this is an NPC.
     """
     id: UUID = Field(default_factory=uuid4, description="Unique identifier for the combatant")
     name: str = Field(..., description="Name of the combatant")
@@ -57,6 +88,22 @@ class Combatant(BaseModel):
 class CombatState(BaseModel):
     """
     Represents the real-time state of a combat encounter.
+
+    Purpose:
+        Manages the complete state of an active combat session, including all participants,
+        turn order, and combat history. This model serves as the single source of truth
+        for combat resolution, enabling the system to track initiative, manage turns,
+        and maintain a detailed log of all combat events. It provides validation to
+        ensure data consistency and supports both synchronous and asynchronous combat flows.
+
+    Attributes:
+        id (UUID): Unique identifier for this combat instance.
+        participants (List[Combatant]): All combatants in the encounter.
+        turn_order (List[UUID]): Ordered list of combatant IDs for turn resolution.
+        current_turn_combatant_id (Optional[UUID]): ID of the combatant whose turn it is.
+        round_number (int): Current round number, must be >= 1.
+        is_active (bool): True if combat is ongoing, False if ended.
+        log (List[str]): Chronological log of combat actions and events.
     """
     id: UUID = Field(default_factory=uuid4, description="Unique identifier for this combat instance")
     participants: List[Combatant] = Field(..., description="List of all combatants in the encounter")
@@ -92,8 +139,8 @@ class CombatState(BaseModel):
         """Add an event to the combat log."""
         self.log.append(f"Round {self.round_number} - {entry}")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "id": "123e4567-e89b-12d3-a456-426614174002",
                 "participants": [
@@ -126,6 +173,7 @@ class CombatState(BaseModel):
                 "log": ["Combat started.", "Aragorn rolled 15 for initiative."]
             }
         }
+    )
 
 __all__ = [
     'CombatState',

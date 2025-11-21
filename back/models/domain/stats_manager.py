@@ -4,12 +4,21 @@ from typing import Dict, List, Optional
 from ...config import get_data_dir
 
 class StatsManager:
-    """Stats manager for the simplified V2 system (3–20).
+    """
+    Stats manager for the simplified V2 system (3–20).
 
-    This manager loads stat metadata from YAML and provides helpers to:
-    - Retrieve stat descriptions and names
-    - Compute stat modifiers using the simplified formula (value - 10) // 2
-    - Manage simple racial bonuses per stat
+    Purpose:
+        Manages character statistics using the simplified 3-20 point scale system.
+        This manager loads stat metadata from YAML, calculates modifiers using the
+        simplified formula (value - 10) // 2, and tracks racial bonuses. It provides
+        a clean interface for stat-related operations while abstracting the underlying
+        calculation rules, enabling consistent stat management across character creation
+        and gameplay.
+
+    Attributes:
+        _stats_info (Dict[str, Any]): Metadata for each stat from YAML.
+        _stats (Dict[str, int]): Current stat values (defaults to 10).
+        _racial_bonuses (Dict[str, int]): Racial bonuses for each stat.
 
     Note: Legacy concepts like 0–100 scales, 400 starting points, and cost tables
     are no longer used. Any related methods now behave as no-ops for compatibility.
