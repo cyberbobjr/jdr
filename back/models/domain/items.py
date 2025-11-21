@@ -9,7 +9,9 @@ class EquipmentItem(BaseModel):
     id: str
     name: str
     category: str
-    cost: float
+    cost_gold: int = 0
+    cost_silver: int = 0
+    cost_copper: int = 0
     weight: float
     quantity: int
     equipped: bool

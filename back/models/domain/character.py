@@ -198,6 +198,8 @@ class Equipment(BaseModel):
         description="Consumable items (potions, scrolls)"
     )
     gold: int = Field(default=0, ge=0, description="Gold pieces")
+    silver: int = Field(default=0, ge=0, description="Silver pieces")
+    copper: int = Field(default=0, ge=0, description="Copper pieces")
     
     def get_total_weight(self) -> float:
         """Calculate total equipment weight"""
@@ -206,6 +208,43 @@ class Equipment(BaseModel):
             for item in item_list:
                 total_weight += item.weight
         return total_weight
+
+    def get_total_in_copper(self) -> int:
+        """Calculate total wealth in copper pieces"""
+        return (self.gold * 100) + (self.silver * 10) + self.copper
+
+    def can_afford(self, gold: int = 0, silver: int = 0, copper: int = 0) -> bool:
+        """Check if character can afford a cost (with automatic conversion)"""
+        cost_in_copper = (gold * 100) + (silver * 10) + copper
+        return self.get_total_in_copper() >= cost_in_copper
+
+    def add_currency(self, gold: int = 0, silver: int = 0, copper: int = 0) -> None:
+        """Add currency to inventory"""
+        self.gold += max(0, gold)
+        self.silver += max(0, silver)
+        self.copper += max(0, copper)
+
+    def deduct_currency(self, gold: int = 0, silver: int = 0, copper: int = 0) -> bool:
+        """
+        Deduct currency with automatic conversion.
+        Returns True if successful, False if insufficient funds.
+        Strategy: Convert everything to copper, deduct, then reconvert to G/S/C.
+        """
+        cost_in_copper = (gold * 100) + (silver * 10) + copper
+        current_total = self.get_total_in_copper()
+        
+        if current_total < cost_in_copper:
+            return False
+            
+        remaining = current_total - cost_in_copper
+        
+        # Convert back to G/S/C (greedy approach: max gold, then silver, then copper)
+        self.gold = remaining // 100
+        remaining %= 100
+        self.silver = remaining // 10
+        self.copper = remaining % 10
+        
+        return True
     
     model_config = ConfigDict(
         json_schema_extra={
@@ -222,7 +261,9 @@ class Equipment(BaseModel):
                 "consumables": [
                     {"name": "health_potion", "quantity": 3, "effect": "heal 2d8"}
                 ],
-                "gold": 100
+                "gold": 100,
+                "silver": 5,
+                "copper": 10
             }
         }
     )
@@ -483,6 +524,24 @@ class Character(BaseModel):
         self.equipment.gold = max(0, int(value))
 
     @property
+    def silver(self) -> int:
+        """Compat: expose silver at character root (maps to equipment.silver)"""
+        return self.equipment.silver
+
+    @silver.setter
+    def silver(self, value: int) -> None:
+        self.equipment.silver = max(0, int(value))
+
+    @property
+    def copper(self) -> int:
+        """Compat: expose copper at character root (maps to equipment.copper)"""
+        return self.equipment.copper
+
+    @copper.setter
+    def copper(self, value: int) -> None:
+        self.equipment.copper = max(0, int(value))
+
+    @property
     def hp(self) -> int:
         """Compat: expose current HP at character root (maps to combat_stats.current_hit_points)"""
         return self.combat_stats.current_hit_points
@@ -551,7 +610,8 @@ class Character(BaseModel):
             f"Skills:{skills_block}\n\n"
             f"Combat Stats:\n{combat_block}\n\n"
             f"Experience: {self.experience_points} XP\n"
-            f"Gold: {equipment_dict.get('gold', 0)}\n\n"
+            f"Experience: {self.experience_points} XP\n"
+            f"Currency: {equipment_dict.get('gold', 0)}G {equipment_dict.get('silver', 0)}S {equipment_dict.get('copper', 0)}C\n\n"
             f"Equipment:\n  - Weapons: {weapons_str}\n  - Armor: {armor_str}\n  - Accessories: {accessories_str}\n  - Consumables: {consumables_str}\n\n"
             f"Background: {background_str}\n"
             f"Physical Description: {physical_str}\n"
@@ -645,7 +705,10 @@ class Character(BaseModel):
                 "initiative_bonus": self.calculate_initiative()
             },
             "experience_points": self.experience_points,
+            "experience_points": self.experience_points,
             "gold": equipment_dict.get("gold", 0),
+            "silver": equipment_dict.get("silver", 0),
+            "copper": equipment_dict.get("copper", 0),
             "equipment": equipment_dict,
             "background": self.description,
             "physical_description": self.physical_description,

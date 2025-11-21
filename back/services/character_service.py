@@ -163,29 +163,32 @@ class CharacterService:
                         "new_level": self.character_data.level,
                         "new_max_hp": new_max_hp})
 
-    def add_gold(self, gold: float) -> Character:
+    def add_currency(self, gold: int = 0, silver: int = 0, copper: int = 0) -> Character:
         """
-        ### add_gold
-        **Description:** Adds (or removes if negative) gold to the character's wallet.
+        ### add_currency
+        **Description:** Adds currency (gold, silver, copper) to the character's inventory.
+        Delegates to `equipment.add_currency`.
         
         **Parameters:**
-        - `gold` (float): Amount of gold to add.
+        - `gold` (int): Amount of gold to add.
+        - `silver` (int): Amount of silver to add.
+        - `copper` (int): Amount of copper to add.
         
         **Returns:** 
         - `Character`: The updated character object.
         """
-        self.character_data.gold += int(gold)
-        # Prevent negative gold
-        if self.character_data.gold < 0:
-            self.character_data.gold = 0
-            
+        self.character_data.equipment.add_currency(gold, silver, copper)
         self.save_character()
         
-        log_info("Gold modified for character",
-                   extra={"action": "add_gold",
+        log_info("Currency added to character",
+                   extra={"action": "add_currency",
                           "character_id": str(self.character_data.id),
                           "gold_added": gold,
-                          "gold_total": self.character_data.gold})
+                          "silver_added": silver,
+                          "copper_added": copper,
+                          "total_gold": self.character_data.equipment.gold,
+                          "total_silver": self.character_data.equipment.silver,
+                          "total_copper": self.character_data.equipment.copper})
         
         return self.character_data
     

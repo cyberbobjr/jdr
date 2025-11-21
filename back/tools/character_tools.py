@@ -1,78 +1,177 @@
-
 from pydantic_ai import RunContext
 from back.services.game_session_service import GameSessionService
-from back.utils.logger import log_debug
+from back.utils.logger import log_debug, log_warning
 
-def character_apply_xp(ctx: RunContext[GameSessionService], xp: int) -> dict:
+def character_add_currency(
+    ctx: RunContext[GameSessionService], 
+    gold: int = 0, 
+    silver: int = 0, 
+    copper: int = 0
+) -> dict:
     """
-    Apply experience points (XP) to the character.
-
-    Use this tool when the character completes a quest, defeats enemies, or achieves a milestone.
-    The tool automatically handles leveling up if the XP threshold is reached.
-
+    Add currency (gold, silver, copper) to the character.
+    
+    WHEN TO USE:
+    - When the character finds money (loot, chest, etc.)
+    - When the character receives a monetary reward
+    
     Args:
-        xp (int): The amount of XP to add. Must be a positive integer.
-
+        gold (int): Amount of gold to add. Default: 0.
+        silver (int): Amount of silver to add. Default: 0.
+        copper (int): Amount of copper to add. Default: 0.
+    
     Returns:
-        dict: A summary of the action, including total XP and current level.
+        dict: Updated currency totals.
     """
-    log_debug("Tool character_apply_xp called", tool="character_apply_xp", player_id=str(ctx.deps.character_id), xp=xp)
-    
-    # ✅ CORRECT PATTERN - Use specialized services via SessionService
-    character = ctx.deps.character_service.apply_xp(xp)
-    
-    return {
-        "message": f"✅ {xp} XP applied to character.",
-        "total_xp": character.xp,
-        "level": character.level if hasattr(character, 'level') else 1 # Assuming level exists or is calculated
-    }
+    try:
+        log_debug(
+            "Tool character_add_currency called",
+            tool="character_add_currency",
+            player_id=str(ctx.deps.character_id),
+            gold=gold,
+            silver=silver,
+            copper=copper
+        )
+        
+        if not ctx.deps.character_service:
+            return {"error": "Character service not available"}
+            
+        # Add currency via service
+        updated_character = ctx.deps.character_service.add_currency(gold, silver, copper)
+        
+        return {
+            "message": f"Added {gold}G {silver}S {copper}C",
+            "currency": {
+                "gold": updated_character.equipment.gold,
+                "silver": updated_character.equipment.silver,
+                "copper": updated_character.equipment.copper
+            }
+        }
+        
+    except Exception as e:
+        log_warning(
+            "Error in character_add_currency",
+            error=str(e),
+            character_id=str(ctx.deps.character_id)
+        )
+        return {"error": f"Failed to add currency: {str(e)}"}
 
-def character_add_gold(ctx: RunContext[GameSessionService], gold: int) -> dict:
+def character_take_damage(ctx: RunContext[GameSessionService], damage: int, source: str = "unknown") -> dict:
     """
-    Add or remove gold from the character's wallet.
-
-    Use this tool when the character finds money, receives a reward, or pays for something 
-    (if not using a specific transaction tool like inventory_add_item).
-    Use negative values to remove gold.
-
+    Apply damage to the character.
+    
+    WHEN TO USE:
+    - When the character takes damage from traps, environment, or narrative events outside of combat.
+    
     Args:
-        gold (int): Amount of gold to add (positive) or remove (negative).
-
+        damage (int): Amount of damage to take.
+        source (str): Source of the damage. Default: "unknown".
+    
     Returns:
-        dict: A summary of the transaction and the new balance.
+        dict: Updated character status (HP).
     """
-    log_debug("Tool character_add_gold called", tool="character_add_gold", player_id=str(ctx.deps.character_id), gold=gold)
-    
-    # ✅ CORRECT PATTERN - Use specialized services via SessionService
-    character = ctx.deps.character_service.add_gold(float(gold))
-    
-    action = "added" if gold > 0 else "removed"
-    return {
-        "message": f"💰 {abs(gold)} gold pieces {action}.",
-        "total_gold": character.gold
-    }
+    try:
+        log_debug(
+            "Tool character_take_damage called",
+            tool="character_take_damage",
+            player_id=str(ctx.deps.character_id),
+            damage=damage,
+            source=source
+        )
+        
+        if not ctx.deps.character_service:
+            return {"error": "Character service not available"}
+            
+        # Apply damage via service
+        updated_character = ctx.deps.character_service.take_damage(damage, source)
+        
+        return {
+            "message": f"Took {damage} damage from {source}",
+            "current_hp": updated_character.combat_stats.current_hit_points,
+            "max_hp": updated_character.combat_stats.max_hit_points,
+            "is_alive": updated_character.combat_stats.is_alive()
+        }
+        
+    except Exception as e:
+        log_warning("Error in character_take_damage", error=str(e))
+        return {"error": f"Failed to take damage: {str(e)}"}
 
-def character_take_damage(ctx: RunContext[GameSessionService], amount: int, source: str = "combat") -> dict:
+def character_heal(ctx: RunContext[GameSessionService], amount: int, source: str = "magic") -> dict:
     """
-    Apply damage to the character (reduce HP).
-
-    Use this tool when the character gets hurt outside of the combat system (e.g., traps, falls, environmental damage).
-    For combat damage, prefer using the combat tools if a combat session is active.
-
+    Heal the character.
+    
+    WHEN TO USE:
+    - When the character is healed by potions, spells, or rest.
+    
     Args:
-        amount (int): Amount of damage to apply. Must be positive.
-        source (str): The source of the damage (e.g., "trap", "fall"). Default: "combat".
-
+        amount (int): Amount of HP to restore.
+        source (str): Source of healing. Default: "magic".
+    
     Returns:
-        dict: A summary of the damage taken and remaining HP.
+        dict: Updated character status (HP).
     """
-    log_debug("Tool character_take_damage called", tool="character_take_damage", player_id=str(ctx.deps.character_id), amount=amount, source=source)
+    try:
+        log_debug(
+            "Tool character_heal called",
+            tool="character_heal",
+            player_id=str(ctx.deps.character_id),
+            amount=amount,
+            source=source
+        )
+        
+        if not ctx.deps.character_service:
+            return {"error": "Character service not available"}
+            
+        # Apply healing via service
+        updated_character = ctx.deps.character_service.heal(amount, source)
+        
+        return {
+            "message": f"Healed {amount} HP from {source}",
+            "current_hp": updated_character.combat_stats.current_hit_points,
+            "max_hp": updated_character.combat_stats.max_hit_points
+        }
+        
+    except Exception as e:
+        log_warning("Error in character_heal", error=str(e))
+        return {"error": f"Failed to heal: {str(e)}"}
+
+def character_apply_xp(ctx: RunContext[GameSessionService], amount: int, reason: str = "milestone") -> dict:
+    """
+    Award experience points to the character.
     
-    # ✅ CORRECT PATTERN - Use specialized services via SessionService
-    character = ctx.deps.character_service.take_damage(amount, source)
+    WHEN TO USE:
+    - When the character completes a quest, defeats enemies, or reaches a milestone.
     
-    return {
-        "message": f"💔 {amount} damage taken from {source}.",
-        "current_hp": character.hp,
-        "is_alive": character.hp > 0
-    }
+    Args:
+        amount (int): Amount of XP to award.
+        reason (str): Reason for the award. Default: "milestone".
+    
+    Returns:
+        dict: Updated XP total.
+    """
+    try:
+        log_debug(
+            "Tool character_apply_xp called",
+            tool="character_apply_xp",
+            player_id=str(ctx.deps.character_id),
+            amount=amount,
+            reason=reason
+        )
+        
+        if not ctx.deps.character_service:
+            return {"error": "Character service not available"}
+            
+        # Add XP via service
+        updated_character = ctx.deps.character_service.apply_xp(amount)
+        
+        return {
+            "message": f"Gained {amount} XP for {reason}",
+            "total_xp": updated_character.experience_points,
+            "level": updated_character.level
+        }
+        
+    except Exception as e:
+        log_warning("Error in character_apply_xp", error=str(e))
+        return {"error": f"Failed to apply XP: {str(e)}"}
+
+

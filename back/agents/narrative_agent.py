@@ -36,7 +36,7 @@ class NarrativeAgent:
         )
         
         # Register tools
-        from back.tools import character_tools, equipment_tools, skill_tools, combat_tools, scenario_tools
+        from back.tools import equipment_tools, character_tools, combat_tools, scenario_tools, skill_tools
         
         self.system_prompt = ""
         self.agent = Agent(
@@ -44,13 +44,15 @@ class NarrativeAgent:
             output_type=str | CombatSeedPayload | ScenarioEndPayload,
             deps_type=GameSessionService,
             tools=[
-                character_tools.character_apply_xp,
-                character_tools.character_add_gold,
-                character_tools.character_take_damage,
+                equipment_tools.inventory_buy_item,
                 equipment_tools.inventory_add_item,
                 equipment_tools.inventory_remove_item,
                 equipment_tools.list_available_equipment,
+                character_tools.character_add_currency,
                 skill_tools.skill_check_with_character,
+                character_tools.character_take_damage,
+                character_tools.character_heal,
+                character_tools.character_apply_xp,
                 combat_tools.start_combat_tool,
                 scenario_tools.end_scenario_tool,
             ]

@@ -66,52 +66,18 @@ def test_inventory_add_item_free(mock_run_context, mock_character):
     mock_run_context.deps.equipment_service.get_equipment_list.return_value = ["sword"]
     
     # Execute
-    result = inventory_add_item(mock_run_context, "sword", qty=1, cost=0)
+    result = inventory_add_item(mock_run_context, "sword", qty=1)
     
     # Assert
     assert result["message"] == "Added 1 x sword"
     assert result["inventory"] == ["sword"]
-    assert result["transaction"]["cost"] == 0
     mock_run_context.deps.equipment_service.add_item.assert_called_once()
-    mock_run_context.deps.character_service.add_gold.assert_not_called()
-
-
-def test_inventory_add_item_with_cost(mock_run_context, mock_character):
-    """Test adding an item with cost deduction"""
-    # Setup mocks
-    mock_character.equipment.gold = 100
-    mock_run_context.deps.equipment_service.add_item.return_value = mock_character
-    mock_run_context.deps.equipment_service.get_equipment_list.return_value = ["longsword"]
-    
-    # Execute
-    result = inventory_add_item(mock_run_context, "longsword", qty=1, cost=15)
-    
-    # Assert
-    assert "Added 1 x longsword for 15 gold" in result["message"]
-    assert result["transaction"]["cost"] == 15
-    mock_run_context.deps.character_service.add_gold.assert_called_once_with(-15)
-    mock_run_context.deps.equipment_service.add_item.assert_called_once()
-
-
-def test_inventory_add_item_insufficient_gold(mock_run_context, mock_character):
-    """Test adding an item when player doesn't have enough gold"""
-    # Setup mocks
-    mock_character.equipment.gold = 5
-    
-    # Execute
-    result = inventory_add_item(mock_run_context, "expensive_sword", qty=1, cost=100)
-    
-    # Assert
-    assert "error" in result
-    assert "Not enough gold" in result["error"]
-    assert result["transaction"] == "failed"
-    mock_run_context.deps.equipment_service.add_item.assert_not_called()
 
 
 def test_inventory_add_item_french_name_rejected(mock_run_context):
     """Test that French item names are rejected"""
     # Execute
-    result = inventory_add_item(mock_run_context, "épée_longue", qty=1, cost=0)
+    result = inventory_add_item(mock_run_context, "épée_longue", qty=1)
     
     # Assert
     assert "error" in result
@@ -125,7 +91,7 @@ def test_inventory_add_item_service_unavailable(mock_run_context):
     mock_run_context.deps.equipment_service = None
     
     # Execute
-    result = inventory_add_item(mock_run_context, "sword", qty=1, cost=0)
+    result = inventory_add_item(mock_run_context, "sword", qty=1)
     
     # Assert
     assert "error" in result
@@ -138,7 +104,7 @@ def test_inventory_add_item_exception_handling(mock_run_context):
     mock_run_context.deps.character_service.get_character.side_effect = Exception("Unexpected error")
     
     # Execute
-    result = inventory_add_item(mock_run_context, "sword", qty=1, cost=0)
+    result = inventory_add_item(mock_run_context, "sword", qty=1)
     
     # Assert
     assert "error" in result
@@ -193,10 +159,10 @@ def test_list_available_equipment_all(mock_run_context):
     mock_equipment_manager = MagicMock()
     mock_equipment_manager.get_all_equipment.return_value = {
         "weapons": [
-            {"id": "longsword", "name": "Longsword", "cost": 15, "weight": 3, "damage": "1d8", "description": "A versatile blade"}
+            {"id": "longsword", "name": "Longsword", "cost_gold": 15, "cost_silver": 0, "cost_copper": 0, "weight": 3, "damage": "1d8", "description": "A versatile blade"}
         ],
         "armor": [
-            {"id": "leather_armor", "name": "Leather Armor", "cost": 10, "weight": 5, "protection": 2, "description": "Light protection"}
+            {"id": "leather_armor", "name": "Leather Armor", "cost_gold": 10, "cost_silver": 0, "cost_copper": 0, "weight": 5, "protection": 2, "description": "Light protection"}
         ],
         "accessories": [],
         "consumables": []
@@ -212,7 +178,7 @@ def test_list_available_equipment_all(mock_run_context):
     assert "armor" in result["items"]
     assert len(result["items"]["weapons"]) == 1
     assert result["items"]["weapons"][0]["item_id"] == "longsword"
-    assert result["items"]["weapons"][0]["cost"] == 15
+    assert result["items"]["weapons"][0]["cost"]["gold"] == 15
     assert "summary" in result
 
 
@@ -222,7 +188,7 @@ def test_list_available_equipment_by_category(mock_run_context):
     mock_equipment_manager = MagicMock()
     mock_equipment_manager.get_all_equipment.return_value = {
         "weapons": [
-            {"id": "sword", "name": "Sword", "cost": 10, "weight": 2, "damage": "1d6", "description": "Basic sword"}
+            {"id": "sword", "name": "Sword", "cost_gold": 10, "cost_silver": 0, "cost_copper": 0, "weight": 2, "damage": "1d6", "description": "Basic sword"}
         ],
         "armor": [],
         "accessories": [],
