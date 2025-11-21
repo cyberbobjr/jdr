@@ -36,17 +36,24 @@ class EquipmentManager:
         services and tools to work with equipment without directly parsing YAML files.
 
     Attributes:
-        _equipment_data (Dict[str, Any]): Raw equipment data loaded from YAML.
+        _equipment_data (Optional[Dict[str, Any]]): Raw equipment data loaded from YAML.
     """
+    
+    @property
+    def equipment_data(self) -> Dict[str, Any]:
+        """Lazy load equipment data."""
+        if self._equipment_data is None:
+            self._equipment_data = self._load_equipment_data()
+        return self._equipment_data
     
     def __init__(self):
         """
         ### __init__
-        **Description:** Initialize equipment manager and load data from YAML.
+        **Description:** Initialize equipment manager. Data is loaded lazily.
         **Parameters:** None
         **Returns:** None
         """
-        self._equipment_data = self._load_equipment_data()
+        self._equipment_data = None
     
     def _load_equipment_data(self) -> Dict[str, Any]:
         """
@@ -93,7 +100,7 @@ class EquipmentManager:
             "description": "Balanced and versatile one-handed sword"
         }
         """
-        return self._standardize_catalog(self._equipment_data)
+        return self._standardize_catalog(self.equipment_data)
     
     def get_equipment_names(self) -> List[str]:
         """
@@ -103,7 +110,7 @@ class EquipmentManager:
         **Retour:** Liste des noms d'équipements.
         """
         all_names = []
-        for category in self._equipment_data.values():
+        for category in self.equipment_data.values():
             if isinstance(category, dict):
                 all_names.extend(category.keys())
         return all_names
@@ -115,7 +122,7 @@ class EquipmentManager:
         **Paramètres:** Aucun
         **Retour:** Dictionnaire des armes.
         """
-        return self._equipment_data.get("weapons", {})
+        return self.equipment_data.get("weapons", {})
     
     def get_armor(self) -> Dict[str, Dict[str, Any]]:
         """
@@ -124,7 +131,7 @@ class EquipmentManager:
         **Paramètres:** Aucun
         **Retour:** Dictionnaire des armures.
         """
-        return self._equipment_data.get("armor", {})
+        return self.equipment_data.get("armor", {})
     
     def get_items(self) -> Dict[str, Dict[str, Any]]:
         """
@@ -133,7 +140,7 @@ class EquipmentManager:
         **Paramètres:** Aucun
         **Retour:** Dictionnaire des objets.
         """
-        return self._equipment_data.get("items", {})
+        return self.equipment_data.get("items", {})
     
     def get_equipment_by_name(self, name: str) -> Optional[Dict[str, Any]]:
         """
@@ -142,7 +149,7 @@ class EquipmentManager:
         **Paramètres:**
         - `name` (str): Nom de l'équipement recherché.
         **Retour:** Dictionnaire des données de l'équipement ou None si non trouvé.        """
-        for category in self._equipment_data.values():
+        for category in self.equipment_data.values():
             if isinstance(category, dict) and name in category:
                 return category[name]
         return None
@@ -220,7 +227,7 @@ class EquipmentManager:
         Lookup an equipment item by canonical id (slug) or exact name, case-insensitive.
         Returns standardized item dict or None.
         """
-        catalog = self._standardize_catalog(self._equipment_data)
+        catalog = self._standardize_catalog(self.equipment_data)
         target = id_or_name.strip().lower()
         for lst in (catalog['weapons'], catalog['armor'], catalog['accessories'], catalog['consumables']):
             for it in lst:

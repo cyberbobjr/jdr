@@ -18,26 +18,26 @@ def inventory_add_item(ctx: RunContext[GameSessionService], item_id: str, qty: i
     Returns:
         dict: Summary of the transaction with updated inventory.
     """
-    log_debug(
-        "Tool inventory_add_item called", 
-        tool="inventory_add_item", 
-        player_id=str(ctx.deps.character_id), 
-        item_id=item_id, 
-        qty=qty,
-        cost=cost
-    )
-    
-    # Validate item_id is in English (basic check: no accented characters)
-    if any(char in item_id for char in "éèêëàâäôöûüçñ"):
-        return {
-            "error": f"Item ID must be in English. Received: '{item_id}'",
-            "suggestion": "Use English names like 'longsword' instead of 'épée_longue'"
-        }
-    
-    if not ctx.deps.equipment_service or not ctx.deps.character_service:
-        return {"error": "Equipment or character service not available"}
-    
     try:
+        log_debug(
+            "Tool inventory_add_item called", 
+            tool="inventory_add_item", 
+            player_id=str(ctx.deps.character_id), 
+            item_id=item_id, 
+            qty=qty,
+            cost=cost
+        )
+        
+        # Validate item_id is in English (basic check: no accented characters)
+        if any(char in item_id for char in "éèêëàâäôöûüçñ"):
+            return {
+                "error": f"Item ID must be in English. Received: '{item_id}'",
+                "suggestion": "Use English names like 'longsword' instead of 'épée_longue'"
+            }
+        
+        if not ctx.deps.equipment_service or not ctx.deps.character_service:
+            return {"error": "Equipment or character service not available"}
+        
         # Get current character
         character = ctx.deps.character_service.get_character()
         
@@ -105,18 +105,18 @@ def inventory_remove_item(ctx: RunContext[GameSessionService], item_id: str, qty
     Returns:
         dict: Summary of the updated inventory.
     """
-    log_debug(
-        "Tool inventory_remove_item called", 
-        tool="inventory_remove_item", 
-        player_id=str(ctx.deps.character_id), 
-        item_id=item_id, 
-        qty=qty
-    )
-    
-    if not ctx.deps.equipment_service or not ctx.deps.character_service:
-        return {"error": "Equipment or character service not available"}
-    
     try:
+        log_debug(
+            "Tool inventory_remove_item called", 
+            tool="inventory_remove_item", 
+            player_id=str(ctx.deps.character_id), 
+            item_id=item_id, 
+            qty=qty
+        )
+        
+        if not ctx.deps.equipment_service or not ctx.deps.character_service:
+            return {"error": "Equipment or character service not available"}
+        
         # Get current character
         character = ctx.deps.character_service.get_character()
         
@@ -158,17 +158,17 @@ def list_available_equipment(ctx: RunContext[GameSessionService], category: str 
     Returns:
         dict: List of available items with their item_id, name, cost, and description.
     """
-    log_debug(
-        "Tool list_available_equipment called",
-        tool="list_available_equipment",
-        player_id=str(ctx.deps.character_id),
-        category=category
-    )
-    
-    if not ctx.deps.equipment_service:
-        return {"error": "Equipment service not available"}
-    
     try:
+        log_debug(
+            "Tool list_available_equipment called",
+            tool="list_available_equipment",
+            player_id=str(ctx.deps.character_id),
+            category=category
+        )
+        
+        if not ctx.deps.equipment_service:
+            return {"error": "Equipment service not available"}
+        
         # Get equipment manager from the service
         equipment_manager = ctx.deps.equipment_service.equipment_manager
         

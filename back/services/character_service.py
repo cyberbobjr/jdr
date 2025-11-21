@@ -32,7 +32,7 @@ class CharacterService:
     character_data: Character
     data_service: CharacterDataService
     
-    def __init__(self, character_id: str, strict_validation: bool = True) -> None:
+    def __init__(self, character_id: str, strict_validation: bool = True, data_service: Optional[CharacterDataService] = None) -> None:
         """
         ### __init__
         **Description:** Initializes the character service for a specific character.
@@ -41,12 +41,14 @@ class CharacterService:
         **Parameters:**
         - `character_id` (str): Identifier of the character to manage.
         - `strict_validation` (bool): If True, strictly validates with the Character model. If False, accepts incomplete characters.
+        - `data_service` (Optional[CharacterDataService]): Injected data service. If None, creates a new instance (fallback).
         
         **Returns:** None.
         """
         self.character_id = character_id
         self.strict_validation = strict_validation
-        self.data_service = CharacterDataService()
+        # Use injected service or fallback to new instance (for backward compatibility/tests)
+        self.data_service = data_service if data_service else CharacterDataService()
         self.character_data = self._load_character()
         
     def _load_character(self) -> Character:

@@ -39,12 +39,13 @@ def mock_character_data():
 
 @pytest.fixture
 def mock_character_service(mock_character_data):
-    with patch('back.services.character_service.CharacterDataService') as MockDataService:
-        mock_instance = MockDataService.return_value
-        mock_instance.load_character.return_value = mock_character_data
-        
-        service = CharacterService("123e4567-e89b-12d3-a456-426614174000")
-        return service
+    # Create a mock for the data service
+    mock_data_service = MagicMock()
+    mock_data_service.load_character.return_value = mock_character_data
+    
+    # Inject the mock into the service
+    service = CharacterService("123e4567-e89b-12d3-a456-426614174000", data_service=mock_data_service)
+    return service
 
 def test_initialization(mock_character_service):
     assert mock_character_service.character_id == "123e4567-e89b-12d3-a456-426614174000"

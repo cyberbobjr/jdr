@@ -4,7 +4,7 @@ from uuid import uuid4
 from pydantic_ai import RunContext
 from pydantic_ai.usage import RunUsage
 from back.services.game_session_service import GameSessionService
-from back.tools.equipment_tools import inventory_add_item, inventory_remove_item
+from back.tools.equipment_tools import inventory_add_item, inventory_remove_item, list_available_equipment
 from back.models.domain.character import Character, Stats, Skills, CombatStats, Equipment
 
 
@@ -132,6 +132,19 @@ def test_inventory_add_item_service_unavailable(mock_run_context):
     assert "service not available" in result["error"]
 
 
+def test_inventory_add_item_exception_handling(mock_run_context):
+    """Test that exceptions are caught and returned as errors"""
+    # Setup mock to raise an exception
+    mock_run_context.deps.character_service.get_character.side_effect = Exception("Unexpected error")
+    
+    # Execute
+    result = inventory_add_item(mock_run_context, "sword", qty=1, cost=0)
+    
+    # Assert
+    assert "error" in result
+    assert "Failed to add item: Unexpected error" in result["error"]
+
+
 def test_inventory_remove_item(mock_run_context, mock_character):
     """Test removing an item from inventory"""
     # Setup mocks
@@ -161,6 +174,19 @@ def test_inventory_remove_item_service_unavailable(mock_run_context):
     assert "service not available" in result["error"]
 
 
+def test_inventory_remove_item_exception_handling(mock_run_context):
+    """Test that exceptions are caught and returned as errors"""
+    # Setup mock to raise an exception
+    mock_run_context.deps.character_service.get_character.side_effect = Exception("Remove error")
+    
+    # Execute
+    result = inventory_remove_item(mock_run_context, "potion", qty=1)
+    
+    # Assert
+    assert "error" in result
+    assert "Failed to remove item: Remove error" in result["error"]
+
+
 def test_list_available_equipment_all(mock_run_context):
     """Test listing all available equipment"""
     # Setup mocks
@@ -178,7 +204,6 @@ def test_list_available_equipment_all(mock_run_context):
     mock_run_context.deps.equipment_service.equipment_manager = mock_equipment_manager
     
     # Execute
-    from back.tools.equipment_tools import list_available_equipment
     result = list_available_equipment(mock_run_context, category="all")
     
     # Assert
@@ -206,7 +231,6 @@ def test_list_available_equipment_by_category(mock_run_context):
     mock_run_context.deps.equipment_service.equipment_manager = mock_equipment_manager
     
     # Execute
-    from back.tools.equipment_tools import list_available_equipment
     result = list_available_equipment(mock_run_context, category="weapons")
     
     # Assert
@@ -223,10 +247,22 @@ def test_list_available_equipment_invalid_category(mock_run_context):
     mock_run_context.deps.equipment_service.equipment_manager = mock_equipment_manager
     
     # Execute
-    from back.tools.equipment_tools import list_available_equipment
     result = list_available_equipment(mock_run_context, category="invalid")
     
     # Assert
     assert "error" in result
     assert "Invalid category" in result["error"]
 
+
+def test_list_available_equipment_exception_handling(mock_run_context):
+    """Test that exceptions are caught and returned as errors"""
+    # Setup mock to raise an exception
+    mock_run_context.deps.equipment_service.equipment_manager = MagicMock()
+    mock_run_context.deps.equipment_service.equipment_manager.get_all_equipment.side_effect = Exception("List error")
+    
+    # Execute
+    result = list_available_equipment(mock_run_context, category="all")
+    
+    # Assert
+    assert "error" in result
+    assert "Failed to list equipment: List error" in result["error"]

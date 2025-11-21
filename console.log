@@ -20888,3 +20888,74 @@ RuntimeError: Event loop is closed
 {"timestamp": "2025-11-21T10:27:01.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool skill_check_with_character called"}
 {"timestamp": "2025-11-21T10:27:01.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool skill_check_with_character called"}
 {"timestamp": "2025-11-21T10:27:01.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Error in skill_check_with_character"}
+{"timestamp": "2025-11-21T11:53:08.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool inventory_add_item called"}
+{"timestamp": "2025-11-21T11:53:08.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool inventory_add_item called"}
+{"timestamp": "2025-11-21T11:53:08.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Gold deducted for item purchase"}
+{"timestamp": "2025-11-21T11:53:08.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool inventory_add_item called"}
+{"timestamp": "2025-11-21T11:53:08.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool inventory_add_item called"}
+{"timestamp": "2025-11-21T11:53:08.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool inventory_add_item called"}
+{"timestamp": "2025-11-21T11:53:08.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool inventory_add_item called"}
+{"timestamp": "2025-11-21T11:53:08.%fZ", "level": "WARNING", "logger": "back.utils.logger", "message": "Error in inventory_add_item"}
+{"timestamp": "2025-11-21T11:53:08.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool inventory_remove_item called"}
+{"timestamp": "2025-11-21T11:53:08.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool inventory_remove_item called"}
+{"timestamp": "2025-11-21T11:53:08.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool inventory_remove_item called"}
+{"timestamp": "2025-11-21T11:53:08.%fZ", "level": "WARNING", "logger": "back.utils.logger", "message": "Error in inventory_remove_item"}
+{"timestamp": "2025-11-21T11:53:08.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool list_available_equipment called"}
+{"timestamp": "2025-11-21T11:53:08.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool list_available_equipment called"}
+{"timestamp": "2025-11-21T11:53:08.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool list_available_equipment called"}
+{"timestamp": "2025-11-21T11:53:08.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool list_available_equipment called"}
+{"timestamp": "2025-11-21T11:53:08.%fZ", "level": "WARNING", "logger": "back.utils.logger", "message": "Error in list_available_equipment"}
+{"timestamp": "2025-11-21T12:15:57.%fZ", "level": "INFO", "logger": "back.utils.logger", "message": "Initializing DependencyContainer..."}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "INFO", "logger": "back.utils.logger", "message": "Initializing DependencyContainer..."}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "INFO", "logger": "back.utils.logger", "message": "DependencyContainer initialized."}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Loading character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Loading character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Saving character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "INFO", "logger": "back.utils.logger", "message": "XP added to character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Loading character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "INFO", "logger": "back.utils.logger", "message": "Level up!"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Saving character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "INFO", "logger": "back.utils.logger", "message": "XP added to character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Loading character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "WARNING", "logger": "back.utils.logger", "message": "Attempt to add negative XP"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Loading character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Saving character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "INFO", "logger": "back.utils.logger", "message": "Gold modified for character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Saving character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "INFO", "logger": "back.utils.logger", "message": "Gold modified for character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Loading character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Saving character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "WARNING", "logger": "back.utils.logger", "message": "Damage applied to character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Saving character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "WARNING", "logger": "back.utils.logger", "message": "Damage applied to character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Loading character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Saving character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "INFO", "logger": "back.utils.logger", "message": "Healing applied to character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Saving character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "INFO", "logger": "back.utils.logger", "message": "Healing applied to character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Loading character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "INFO", "logger": "back.utils.logger", "message": "Short rest performed"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Saving character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "INFO", "logger": "back.utils.logger", "message": "Healing applied to character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Loading character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "INFO", "logger": "back.utils.logger", "message": "Long rest performed"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Saving character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "INFO", "logger": "back.utils.logger", "message": "Healing applied to character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Loading character"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool inventory_add_item called"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool inventory_add_item called"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Gold deducted for item purchase"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool inventory_add_item called"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool inventory_add_item called"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool inventory_add_item called"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool inventory_add_item called"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "WARNING", "logger": "back.utils.logger", "message": "Error in inventory_add_item"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool inventory_remove_item called"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool inventory_remove_item called"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool inventory_remove_item called"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "WARNING", "logger": "back.utils.logger", "message": "Error in inventory_remove_item"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool list_available_equipment called"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool list_available_equipment called"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool list_available_equipment called"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "DEBUG", "logger": "back.utils.logger", "message": "Tool list_available_equipment called"}
+{"timestamp": "2025-11-21T12:17:34.%fZ", "level": "WARNING", "logger": "back.utils.logger", "message": "Error in list_available_equipment"}

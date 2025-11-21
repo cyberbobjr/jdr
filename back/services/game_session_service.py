@@ -15,10 +15,11 @@ from back.models.domain.character import Character
 from back.models.enums import CharacterStatus
 from back.services.character_data_service import CharacterDataService
 from back.services.character_service import CharacterService
+from back.dependencies import global_container
 from back.services.equipment_service import EquipmentService
 from back.storage.pydantic_jsonl_store import PydanticJsonlStore
 from back.config import get_data_dir
-from back.utils.logger import log_debug
+from back.utils.logger import log_debug, log_warning
 from back.agents.PROMPT import build_system_prompt
 from back.utils.exceptions import (
     ServiceNotInitializedError,
@@ -126,7 +127,7 @@ class GameSessionService:
 
                 # Initialize specialized services for this character
                 try:
-                    self._initialize_services(character_id)
+                    self._initialize_services()
                 except FileNotFoundError:
                     raise CharacterNotFoundError(f"Character {character_id} not found")
 
@@ -175,30 +176,33 @@ class GameSessionService:
 
         # Initialize specialized services for this character
         try:
-            self._initialize_services(character_id)
+            self._initialize_services()
         except FileNotFoundError:
             raise CharacterNotFoundError(f"Character {character_id} not found")
 
         self.scenario_id = scenario_id
 
-    def _initialize_services(self, character_id: str) -> None:
+    def _initialize_services(self) -> None:
         """
         ### _initialize_services
-        **Description:** Initializes specialized services (`CharacterDataService`, `CharacterService`, `EquipmentService`) for the given character.
-
-        **Parameters:**
-        - `character_id` (str): ID of the character.
-        
-        **Returns:** None.
+        **Description:** Initializes internal services using the DependencyContainer.
+        Retrieves singleton instances for stateless services and creates a new
+        CharacterService (stateful) injected with the singleton data service.
         """
-        # Data service
-        self.data_service = CharacterDataService()
-
-        # Character service
-        self.character_service = CharacterService(character_id)
-
-        # Equipment service (depends on data service)
-        self.equipment_service = EquipmentService(self.data_service)
+        # 1. Get Singletons from Container
+        self.data_service = global_container.character_data_service
+        self.equipment_service = global_container.equipment_service
+        
+        # 2. Initialize CharacterService (Stateful - per session)
+        # We inject the singleton data_service into it
+        try:
+            self.character_service = CharacterService(
+                str(self.character_id), 
+                data_service=self.data_service
+            )
+        except Exception as e:
+            log_warning(f"Failed to initialize CharacterService: {e}", session_id=self.session_id)
+            self.character_service = None
 
     @staticmethod
     def list_all_sessions() -> List[Dict[str, Any]]:

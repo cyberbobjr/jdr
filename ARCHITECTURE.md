@@ -16,7 +16,7 @@ Ce document décrit l'architecture technique du projet JDR (Jeu de Rôle), un sy
 1. **Séparation des Responsabilités**: Chaque couche a une responsabilité unique (Présentation, Logique Métier, Données).
 2. **Type Safety**: Utilisation extensive des type hints et de Pydantic pour garantir la robustesse des données.
 3. **Stateless Services**: Les services ne conservent pas d'état entre les requêtes (sauf via la persistance).
-4. **Dependency Injection**: Les dépendances sont passées explicitement ou via un conteneur de services.
+4. **Dependency Injection**: Les dépendances sont gérées via un conteneur global (`DependencyContainer`) pour les services stateless.
 5. **Documentation First**: Le code et l'architecture sont documentés pour faciliter la maintenance.
 
 ## Architecture en Couches
@@ -40,6 +40,7 @@ Contient la logique pure du jeu et de l'application.
 - `CombatStateService`: Persistance de l'état des combats.
 - `GameSessionService`: Gestion de l'état de la session de jeu et orchestration des agents.
 - `SettingsService`: Gestion des préférences utilisateur globales.
+- `DependencyContainer`: Singleton gérant l'instanciation unique des services stateless (`CharacterDataService`, `EquipmentService`).
 
 ### 3. Couche Graph & Agent (IA)
 
