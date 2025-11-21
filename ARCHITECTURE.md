@@ -1,172 +1,211 @@
-# Architecture Overview - JdR "Terres du Milieu"
+# Architecture du Projet JDR
 
-## System Architecture
+Ce document décrit l'architecture technique du projet JDR (Jeu de Rôle), un système backend piloté par l'IA pour la gestion de parties de JDR.
 
-**JdR "Terres du Milieu"** is a Role-Playing Game set in Middle-earth where narration and game mechanics are orchestrated by Large Language Models (LLMs) acting as Game Master. The system uses a **strict service-based architecture** following SOLID principles with clear separation between presentation, business logic, and data layers.
+## Stack Technologique
 
-### Technology Stack
+- **Langage**: Python 3.11+
+- **Framework Web**: FastAPI
+- **IA & Agents**: PydanticAI, Pydantic Graph
+- **Validation de Données**: Pydantic V2
+- **Gestion de Dépendances**: Poetry
+- **Tests**: Pytest
 
-**Backend:**
+## Principes Architecturaux
 
-- **Framework**: FastAPI (async REST API)
-- **AI Framework**: PydanticAI (agent orchestration with OpenAI-compatible APIs)
-- **Validation**: Pydantic V2 (comprehensive type safety)
-- **Data Persistence**: YAML (game configuration), JSONL (conversation history), JSON (character sheets)
-- **LLM Provider**: OpenAI-compatible API (DeepSeek default)
+1. **Séparation des Responsabilités**: Chaque couche a une responsabilité unique (Présentation, Logique Métier, Données).
+2. **Type Safety**: Utilisation extensive des type hints et de Pydantic pour garantir la robustesse des données.
+3. **Stateless Services**: Les services ne conservent pas d'état entre les requêtes (sauf via la persistance).
+4. **Dependency Injection**: Les dépendances sont passées explicitement ou via un conteneur de services.
+5. **Documentation First**: Le code et l'architecture sont documentés pour faciliter la maintenance.
 
-**Frontend:**
+## Architecture en Couches
 
-- Removed for now; will be recreated later.
+### 1. Couche de Présentation (Routers)
 
-## Architectural Principles
+Gère les requêtes HTTP, la validation des entrées/sorties et la délégation aux services.
 
-1. **Strict SRP (Single Responsibility Principle)**: One responsibility per file/service
-2. **No I/O logic in services**: Services handle business logic, not file operations
-3. **No game rules in routers**: Routers only handle HTTP logic
-4. **Type Safety Everywhere**: Pydantic models throughout
-5. **English-only codebase**: Post-migration standard (from French)
+- `back/routers/creation.py`: Gestion de la création de personnages.
+- `back/routers/session.py`: Gestion des sessions de jeu et du chat.
+- `back/routers/user.py`: Gestion des préférences utilisateur globales.
 
-## Layer Architecture
+### 2. Couche Logique Métier (Services)
 
-### 1. Presentation Layer (FastAPI Routers)
+Contient la logique pure du jeu et de l'application.
 
-**Location**: `back/routers/`
+- `CharacterService`: Orchestration des actions sur les personnages.
+- `CharacterDataService`: Persistance des personnages (Load/Save).
+- `EquipmentService`: Gestion de l'inventaire, achat/vente, équipement.
+- `CombatService`: Logique centrale du combat (initiative, tours, attaques, dégâts).
+- `CombatStateService`: Persistance de l'état des combats.
+- `GameSessionService`: Gestion de l'état de la session de jeu et orchestration des agents.
+- `SettingsService`: Gestion des préférences utilisateur globales.
 
-Three main routers expose REST endpoints:
+### 3. Couche Graph & Agent (IA)
 
-- **`characters.py`** (`/api/characters/`) - Character management and retrieval
-- **`scenarios.py`** (`/api/scenarios/`) - Scenario flow, gameplay, session management
-- **`creation.py`** (`/api/creation/`) - Character creation wizard with LLM-assisted generation
+Gère l'intelligence artificielle et le flux narratif.
 
-**Responsibilities**: HTTP logic only - request validation, response formatting, delegation to services.
+- **Pydantic Graph**: Orchestre les états de la conversation (Narratif vs Combat).
+- **Agents**:
+  - `NarrativeAgent`: Gère l'histoire, les dialogues et l'exploration.
+  - `CombatAgent`: Gère les actions de combat et la stratégie des PNJ.
 
-### 2. Business Logic Layer (Services)
+### 4. Couche Modèle de Domaine (Domain Models)
 
-**Location**: `back/services/`
+Définit les structures de données et les règles de validation.
 
-Services encapsulate unique business responsibilities:
+- `back/models/domain/`: Modèles Pydantic (Character, Stats, Skills, Equipment, CombatState, UserPreferences).
+- `back/models/enums.py`: Énumérations partagées.
 
-**Character Management Services:**
+### 5. Couche de Stockage (Storage)
 
-- `CharacterDataService` - I/O operations (loading/saving)
-- `CharacterService` - Business logic (XP, gold, damage, healing) and inventory management
-- `EquipmentService` - Equipment buy/sell and money management
+Gère la persistance des données (actuellement fichiers JSON).
 
-**Game Services:**
+- `gamedata/characters/`: Sauvegarde des personnages.
+- `gamedata/settings/`: Sauvegarde des préférences utilisateur.
+- `gamedata/combat_states/`: Sauvegarde des états de combat actifs.
 
-- `GameSessionService` - Game session management (history, character, scenario)
-- `ScenarioService` - Scenario flow orchestration
-- `ItemService` - Item management
-- `SkillAllocationService` - Automated skill distribution logic
+## Diagramme d'Architecture Global
 
-### 3. Graph & Agent Layer (PydanticAI + Pydantic Graph)
+```mermaid
+graph TD
+    subgraph Client
+        UI[Interface Utilisateur]
+    end
 
-**Location**: `back/graph/` and `back/agents/`
+    subgraph "Presentation Layer (FastAPI)"
+        CreationRouter[Creation Router]
+        SessionRouter[Session Router]
+        UserRouter[User Router]
+    end
 
-The system uses **Pydantic Graph** to orchestrate the game flow between Narrative and Combat modes.
+    subgraph "Business Logic Layer (Services)"
+        CharService[CharacterService]
+        EquipService[EquipmentService]
+        CombatService[CombatService]
+        SessionService[GameSessionService]
+        SettingsService[SettingsService]
+        DataService[CharacterDataService]
+        CombatStateService[CombatStateService]
+    end
 
-**Graph Nodes** (`back/graph/nodes/`):
+    subgraph "AI & Graph Layer"
+        Orchestrator[Graph Orchestrator]
+        NarrativeAgent[Narrative Agent]
+        CombatAgent[Combat Agent]
+    end
 
-- **`NarrativeNode`**: Handles story progression using `NarrativeAgent`.
-- **`CombatNode`**: Handles combat turns using `CombatAgent`.
-- **`DispatcherNode`**: Routes the session to the correct node based on state.
+    subgraph "Storage Layer (JSON)"
+        CharFiles[(Character Files)]
+        CombatFiles[(Combat State Files)]
+        SettingsFiles[(User Preferences)]
+        StaticData[(Static Game Data)]
+    end
 
-**Specialized Agents** (`back/agents/`):
+    %% Flow
+    UI --> CreationRouter
+    UI --> SessionRouter
+    UI --> UserRouter
 
-- **`NarrativeAgent`**: PydanticAI agent for storytelling. Can trigger combat via `CombatSeedPayload`.
-- **`CombatAgent`**: PydanticAI agent for combat resolution. Returns `CombatTurnContinuePayload` or `CombatTurnEndPayload`.
-- **`GenericAgent`** (`gm_agent_pydantic.py`): Simple agent for content generation (names, backgrounds) without session context.
+    UserRouter --> SettingsService
+    SettingsService --> SettingsFiles
 
-**Agent Tools** (`back/tools/`):
+    CreationRouter --> CharService
+    SessionRouter --> SessionService
 
-- `character_tools.py` - apply_xp, add_gold, take_damage
-- `combat_tools.py` - roll_initiative, perform_attack, resolve_attack, calculate_damage, end_combat
-- `equipment_tools.py` - add_item, remove_item (via EquipmentService)
-- `skill_tools.py` - skill_check_with_character
+    SessionService --> Orchestrator
+    Orchestrator --> NarrativeAgent
+    Orchestrator --> CombatAgent
 
-### 4. Domain Model Layer
+    NarrativeAgent --> CharService
+    CombatAgent --> CombatService
 
-**Location**: `back/models/domain/`
+    CharService --> DataService
+    CharService --> EquipService
+    EquipService --> DataService
+    
+    CombatService --> CombatStateService
+    CombatService --> CharService
 
-**Core Models:**
-
-- `character.py` - Simplified character model (6 attributes, 3–20 per stat, bonus = (value - 10) // 2)
-- `combat_state.py` - Combat state tracking
-- `npc.py` - NPC models
-
-**Data Managers** (load YAML configuration):
-
-- `stats_manager.py` - Stats info, value range (3–20), bonus formula
-- `unified_skills_manager.py` - Unified interface for skill groups and definitions
-- `races_manager.py` - Available races, cultures, stat bonuses
-- `equipment_manager.py` - Weapons, armor, items with stats
-- `spells_manager.py` - Available spells by sphere
-- `combat_system_manager.py` - Combat rules and damage calculations
-
-### 5. Storage Layer
-
-**Location**: `back/storage/`
-
-- `PydanticJsonlStore` - Custom JSONL store for PydanticAI conversation history
-- Character sheets: `data/characters/*.json`
-- Combat states: `data/combat/*.json` (managed via Graph state)
-- Session history: `data/sessions/*.jsonl`
-- Game data: `back/gamedata/*.yaml`
-
-## Data Flow
-
-### Character Creation Flow
-
-```text
-User (Frontend) → Creation Router → Managers (races/skills/stats/equipment)
-                                  ↓
-                        CharacterDataService → JSON file
+    DataService --> CharFiles
+    CombatStateService --> CombatFiles
+    
+    EquipService -.-> StaticData
 ```
 
-### Gameplay Flow
+## Flux de Données
 
-```text
-User prompt → Scenarios Router → GameSessionService → GM Agent (PydanticAI)
-                                                      ↓
-                                              Tools (character, combat, inventory, skills)
-                                                      ↓
-                                              Services (business logic)
-                                                      ↓
-                                              Persistence (JSONL, JSON)
-                                                      ↓
-                                              Response to user
+1. **Chargement des Données Statiques**:
+    - Les `Managers` (EquipmentManager, RacesManager, etc.) chargent les données YAML au démarrage ou à la demande.
+    - *Note: Les managers SpellsManager et CombatSystemManager ont été retirés au profit de modèles simplifiés et de logique intégrée au service de combat.*
+
+2. **Cycle de Vie d'une Requête de Jeu**:
+    - Le client envoie un message au `SessionRouter`.
+    - Le `SessionRouter` appelle `GameSessionService`.
+    - `GameSessionService` invoque le `Graph Orchestrator`.
+    - Le graphe détermine l'agent actif (Narratif ou Combat).
+    - L'agent utilise des `Tools` pour interagir avec les `Services` (ex: `equip_item`, `attack`).
+    - Les `Services` mettent à jour les modèles de domaine et persistent les changements via `CharacterDataService` ou `CombatStateService`.
+    - La réponse est renvoyée au client.
+
+## Diagrammes de Séquence
+
+### 1. Création de Personnage (Validation)
+
+```mermaid
+sequenceDiagram
+    participant User as Client (UI)
+    participant Router as CreationRouter
+    participant Service as CharacterService
+    participant Data as CharacterDataService
+
+    User->>Router: POST /creation/validate-character
+    Router->>Service: validate_character(character_data)
+    
+    alt Invalid Data
+        Service-->>Router: ValidationError
+        Router-->>User: 400 Bad Request
+    else Valid Data
+        Service->>Data: save_character(character)
+        Data-->>Service: Character
+        Service-->>Router: ValidationResponse
+        Router-->>User: 200 OK (Character)
+    end
 ```
 
-## Character System
+### 2. Boucle de Jeu (Play Scenario)
 
-- **6 Core Attributes**: STR, CON, AGI, INT, WIS, CHA (range 3-20, total 400 points)
-- **Skills**: 6 skill groups, 40 development points, uniform cost (1 point = 1 rank)
-- **Combat**: Initiative-based, 1 major + 1 minor + 1 reaction per turn
-- **Persistence**: JSON character sheets, JSONL combat states
+```mermaid
+sequenceDiagram
+    participant User as Client (UI)
+    participant Router as SessionRouter
+    participant Session as GameSessionService
+    participant Graph as Graph Orchestrator
+    participant Agent as Active Agent (Narrative/Combat)
+    participant Tools as Agent Tools
+    participant Services as Domain Services
 
-## Configuration Management
+    User->>Router: POST /session/play (message)
+    Router->>Session: process_user_message(message)
+    Session->>Graph: run(user_input)
+    
+    loop Agentic Loop
+        Graph->>Agent: step()
+        Agent->>Tools: call_tool(args)
+        Tools->>Services: execute_logic()
+        Services-->>Tools: Result
+        Tools-->>Agent: ToolOutput
+    end
 
-**Centralized Config**: `back/config.yaml` + `back/config.py`
+    Agent-->>Graph: Final Response
+    Graph-->>Session: Session State & History
+    Session-->>Router: ResponsePayload
+    Router-->>User: 200 OK (Message + State)
+```
 
-- Data directory paths
-- LLM configuration (model, endpoint, API key)
-- Application settings
-- Environment variable overrides supported
+## Design Patterns Clés
 
-## Frontend Architecture
-
-Frontend is currently removed and will be recreated later.
-
-## Key Design Patterns
-
-1. **Dependency Injection**: Services passed as parameters, no global state
-2. **Repository Pattern**: Separation of data access (DataService) from business logic (BusinessService)
-3. **Agent Pattern**: LLM agent with tools for dynamic decision-making
-4. **Manager Pattern**: YAML data managers for game configuration
-5. **Message History Pattern**: JSONL-based conversation persistence
-
----
-
-**Version**: 2.0 (Major Refactoring Complete)  
-**Language**: English (post-migration)  
-**Framework**: PydanticAI + FastAPI
+- **Repository Pattern (Simplifié)**: `CharacterDataService` et `CombatStateService` agissent comme des repositories pour l'accès aux fichiers.
+- **Service Layer**: Encapsulation de la logique métier.
+- **Dependency Injection**: Injection des services dans les routeurs et entre services.
+- **State Machine**: Utilisation de Pydantic Graph pour gérer les états de la conversation.

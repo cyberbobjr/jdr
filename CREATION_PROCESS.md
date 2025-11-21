@@ -1,115 +1,44 @@
-# AI Copilot Character Creation (Suggest + Edit)
+# Processus de Création de Personnage (AI Copilot)
 
-A guided wizard where the AI proposes curated options at each step (with concise rationales) and the player edits inline. Every change is validated server-side using V2 Pydantic models and persisted to a draft. This flow uses `back/routers/creation.py` and read-only managers (`RacesManager`, `SkillsManager`, `EquipmentManager`, `StatsManager`) to stay consistent with the project’s architecture.
+Ce document décrit le flux de création de personnage assisté par l'IA.
 
-- Data model: `CharacterV2` with `Stats` (each 3–20, total ≤ 400) and `Skills` (ranks 0–10, total ≤ 40).
-- Validation: Use `POST /creation/validate-character` (full payload) or `/creation/validate-character/by-id` (stored draft) before finalization.
-- Persistence: `CharacterDataService` to `data/characters/{id}.json`; `status` transitions from `draft` to `active`.
+## Architecture
 
-| Validation Endpoint | Body | Primary use case |
-| --- | --- | --- |
-| `POST /creation/validate-character` | Full character payload (stats, skills, combat, equipment, spells) | Frontend already has the latest JSON (pre-save preview, inline editing) |
-| `POST /creation/validate-character/by-id` | `{ "character_id": "uuid" }` | Server-side validation of a persisted draft (after `/creation/save` or `/creation/update`) |
+Le processus est piloté par un agent IA ("Character Creation Copilot") qui guide l'utilisateur étape par étape. La validation finale est assurée par le backend via des règles strictes.
 
-## Architecture Alignment
+### Endpoints de Validation
 
-- Routers: `back/routers/creation.py` for read/write operations.
-- Services: `CharacterDataService` for I/O; V2 rules enforced by Pydantic models (`CharacterV2`, `Stats`, `Skills`, `Equipment`, `CombatStats`, `Spells`).
-- Managers (read-only data): `RacesManager`, `SkillsManager`, `EquipmentManager`, `StatsManager` (labels/bonus tables only).
-- Spells: Available manager-side (`SpellsManager`), expose via a future route if needed.
+1. **Validation à la volée (Chat)**: L'IA valide les choix de l'utilisateur au fur et à mesure via ses connaissances internes et les outils disponibles.
+2. **Validation Finale (Backend)**:
+    - `POST /creation/validate-character`: Reçoit un objet `Character` complet et vérifie sa cohérence (stats, points dépensés, équipement valide).
+    - `POST /creation/validate-character/by-id`: Charge un personnage existant par son ID et le re-valide. Utile pour vérifier un personnage avant de lancer une partie.
 
-## Endpoints Used (Creation Router)
+## Flux de Création
 
-- `GET /creation/races`: Race + culture catalog (bonuses, languages, free points, traits).
-- `GET /creation/skills`: Skills structure for V2 (groups + items) from `SkillsManager`.
-- `GET /creation/equipment`: Equipment catalog from `EquipmentManager`.
-- `GET /creation/stats`: Stat labels/bonus/cost tables for UX copy (V2 ignores legacy costs).
-- `POST /creation/create`: Create draft `CharacterV2` (returns `character_id`).
-- `POST /creation/update`: Update existing character by `character_id`.
-- `GET /creation/character/{character_id}`: Load character.
-- `DELETE /creation/character/{character_id}`: Delete character.
-- `POST /creation/validate-character`: Validate full character object against V2 rules.
+1. **Initialisation**: L'utilisateur exprime un concept (ex: "Je veux jouer un guerrier nain bourru").
+2. **Remplissage**: L'IA propose des valeurs pour les champs requis (Race, Classe, Stats, etc.).
+3. **Raffinement**: L'utilisateur ajuste les propositions.
+4. **Finalisation**: L'IA soumet le personnage pour validation.
+5. **Persistance**: Si valide, le personnage est sauvegardé (JSON).
 
-## Step‑By‑Step Flow
+## Règles de Validation
 
-### 1) Concept & Identity
+- **Stats**: La somme des points de caractéristiques doit respecter le budget (Standard Array ou Point Buy).
+- **Équipement**: L'équipement de départ doit correspondre à la classe et au background.
+- **Sorts**: Si la classe est magique, les sorts connus doivent être valides pour le niveau 1.
 
-- Capture: Player concept (role, combat vs social, magic, tone).
-- Suggest: 5 names, 3 short backgrounds, 3 physical descriptions with 1–2 line rationales.
-- Edit: Player tweaks any suggestion inline.
-- Persist: Initialize via `POST /creation/create` using minimal fields (name, race/culture placeholders, default `Stats`/`Skills`); store `character_id`, keep `status="draft"`.
-- Validate: Structural (lengths) only; full validation deferred to final checks.
+## Intégration LLM
 
-### 2) Race & Culture
+L'agent de création utilise des outils pour :
 
-- Fetch: `GET /creation/races`.
-- Explain: Show `get_complete_character_bonuses(race_id, culture_id)` (characteristic bonuses, skill bonuses, languages, free skill points, special traits, culture description).
-- Suggest: Top 3 race+culture fits for the concept with short “why this choice”.
-- Select/Edit: Player chooses or overrides; persist via `POST /creation/update`.
+- Lister les races/classes disponibles.
+- Obtenir les détails d'une compétence.
+- Vérifier la validité d'un choix spécifique.
 
-### 3) Attributes (Stats)
+## État et Persistance
 
-- Rules: V2 `Stats` — each 3–20; total ≤ 400.
-- Fetch: `GET /creation/stats` (labels/descriptions only; ignore legacy 0–100 cost tables for V2).
-- Suggest: Three allocations (offensive/defensive/balanced) with derived modifiers for clarity.
-- Edit: Inline stat adjustments with running total and remaining points.
-- Validate: Build full character payload and call `POST /creation/validate-character`; show precise field errors and actionable hints.
+Le processus de création peut être interrompu. L'état intermédiaire est géré par le contexte de la conversation jusqu'à la sauvegarde finale.
 
-### 4) Skills Distribution
+## Gestion des Erreurs
 
-- Rules: V2 `Skills` — each rank 0–10; total development points ≤ 40.
-- Fetch: `GET /creation/skills`; display groups, descriptions; enable keyword search.
-- Suggest: Three layouts (combat/social/hybrid) aligned to concept and racial/cultural bonuses.
-- Edit: Inline per-skill ranks; provide “auto‑rebalance” to fit the 40‑point cap.
-- Validate: Reuse `POST /creation/validate-character` with the updated character payload.
-
-### 5) Starter Gear (and Spells if exposed)
-
-- Fetch: `GET /creation/equipment` (and later `GET /creation/spells` if exposing `SpellsManager`).
-- Suggest: 2–3 starter kits tailored to concept (e.g., melee scout, archer, healer) with gold cost and light encumbrance notes.
-- Edit: Replace kit items; track `equipment.gold` in character.
-- Persist: `POST /creation/update`.
-- Validate: Ensure non-negative `equipment.gold` and consistent equipment shape.
-
-### 6) Summary, Final Checks, Activation
-
-- Summary: Identity, race/culture and traits, stats with modifiers, skills with totals, gear (and spells if any).
-- Explainability: For each accepted AI suggestion, keep a short rationale; allow “reroll similar” with deterministic seeds.
-- Validate: Final `POST /creation/validate-character` must pass; map errors to fields.
-- Activate: `POST /creation/update` to set `status="active"`.
-- Resume/Delete: Use `GET /creation/character/{id}` to resume and `DELETE /creation/character/{id}` to remove.
-
-## Validation Rules (Authoritative)
-
-- Stats: six attributes; each in [3, 20]; sum ≤ 400; modifiers as `(stat - 10) // 2`.
-- Skills: six groups; ranks in [0, 10]; total development points ≤ 40 (1 point per rank).
-- Combat/magic: `CombatStats` and `Spells` must be structurally valid; ensure current ≤ max for HP/MP.
-
-## LLM Integration
-
-- Suggest: Names, backgrounds, descriptions; race/culture shortlists; 3× stat allocations; 3× skill layouts; 2–3 starter kits.
-- Controls: Deterministic seeds; “reroll similar” preserving constraints and selected context; toggles to bias toward stealth/healer/tank, etc.
-- Fallback: If LLM endpoints are unavailable, run the same wizard with static templates and manager data; continue using server-side validation.
-
-## State & Persistence
-
-- Autosave: After each accepted suggestion or edit, write to draft via `POST /creation/update`.
-- Status: `draft` throughout the wizard; set to `active` on finalization.
-- Storage: JSON files under `data/characters/` via `CharacterDataService`.
-
-## Error Handling & UX
-
-- Inline errors: Map `validate-character` messages to fields; provide targeted fixes (e.g., “Reduce total skill points by 3”).
-- Accessibility: Keyboard-first inputs, concise labels from managers, tooltips for stat/skill definitions.
-- Transparency: Show totals and remaining points; display derived modifiers; clearly flag soft vs hard constraints.
-
-## Non‑LLM Fallback
-
-- Provide manual paths for each step with the same validation and autosave.
-- Predefine a small set of archetype templates (balanced, striker, guardian, face, mage) to bootstrap without the LLM.
-
-## Open Decisions
-
-- Spells exposure: Add `GET /creation/spells` (via `SpellsManager`) or defer to an in-game acquisition flow?
-- Suggestion counts: Default 3 per step (skills/stats/layouts) and 5 for names—adjustable?
-- Race/culture effects: Apply bonuses as passive metadata during creation, or pre-bake into proposed allocations?
+Si la validation backend échoue, l'API renvoie une liste détaillée des erreurs (ex: "Trop de points de force", "Sort inconnu"). L'IA doit interpréter ces erreurs et guider l'utilisateur pour les corriger.
