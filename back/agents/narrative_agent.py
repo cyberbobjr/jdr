@@ -7,6 +7,7 @@ from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
 from back.graph.dto.combat import CombatSeedPayload
+from back.graph.dto.scenario import ScenarioEndPayload
 from back.models.schema import LLMConfig
 from back.services.game_session_service import GameSessionService
 
@@ -35,12 +36,12 @@ class NarrativeAgent:
         )
         
         # Register tools
-        from back.tools import character_tools, equipment_tools, skill_tools, combat_tools
+        from back.tools import character_tools, equipment_tools, skill_tools, combat_tools, scenario_tools
         
         self.system_prompt = ""
         self.agent = Agent(
             model=model,
-            output_type=str | CombatSeedPayload,
+            output_type=str | CombatSeedPayload | ScenarioEndPayload,
             deps_type=GameSessionService,
             tools=[
                 character_tools.character_apply_xp,
@@ -51,6 +52,7 @@ class NarrativeAgent:
                 equipment_tools.list_available_equipment,
                 skill_tools.skill_check_with_character,
                 combat_tools.start_combat_tool,
+                scenario_tools.end_scenario_tool,
             ]
         )
 

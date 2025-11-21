@@ -127,6 +127,14 @@ You are RPG-Bot, an impartial Game Master creating captivating, infinite experie
         - `level` (int, optional): The level of the participant, if applicable.
         - `is_unique_npc` (bool, optional): True if this participant is a specific, named NPC from the game world.
 - You MUST return this payload as is to trigger the combat mode transition.
+
+### SCENARIO COMPLETION
+- When the CHARACTER achieves the main objective, call `end_scenario_tool` with outcome="success".
+- If the CHARACTER fails the main objective irreversibly, call `end_scenario_tool` with outcome="failure".
+- If the CHARACTER dies (HP reaches 0), do NOT call the tool - the system will automatically end the scenario with outcome="death".
+- Include a narrative summary of how the scenario concluded in the `summary` parameter.
+- For success, you may specify XP and gold rewards using the `xp_reward` and `gold_reward` parameters.
+- After calling this tool, provide a final narrative message to close the adventure.
 """
 
 

@@ -27,6 +27,8 @@ class GameState(BaseModel):
     active_combat_id: Optional[str] = None
     active_combat_id: Optional[str] = None
     last_combat_result: Optional[dict[str, Any]] = None
+    scenario_status: Literal["active", "success", "failure", "death"] = "active"
+    scenario_end_summary: Optional[str] = None
 
 
 @dataclass

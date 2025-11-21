@@ -5,6 +5,7 @@ Narrative node for handling story progression.
 from pydantic_graph import BaseNode, GraphRunContext, End
 from back.graph.dto.session import SessionGraphState, DispatchResult
 from back.graph.dto.combat import CombatSeedPayload
+from back.graph.dto.scenario import ScenarioEndPayload
 from back.agents.narrative_agent import NarrativeAgent
 from back.utils.logger import log_debug
 from back.services.game_session_service import GameSessionService, HISTORY_NARRATIVE, HISTORY_COMBAT
@@ -83,6 +84,31 @@ class NarrativeNode(BaseNode[SessionGraphState, GameSessionService, DispatchResu
                  log_debug(f"Error loading combat state: {e}", session_id=session_id)
 
             await ctx.deps.update_game_state(ctx.state.game_state)
+
+        # Check for player death (automatic detection)
+        if ctx.deps.character_service:
+            character = ctx.deps.character_service.get_character()
+            if character and character.current_hit_points <= 0:
+                # Force scenario end due to death
+                output = ScenarioEndPayload(
+                    outcome="death",
+                    summary=f"{character.name} has fallen. The adventure ends here."
+                )
+                log_debug("Player death detected, ending scenario", session_id=ctx.deps.session_id)
+
+        # Handle scenario end
+        if isinstance(output, ScenarioEndPayload):
+            # Update game state with scenario end information
+            ctx.state.game_state.scenario_status = output.outcome
+            ctx.state.game_state.scenario_end_summary = output.summary
+            await ctx.deps.update_game_state(ctx.state.game_state)
+            
+            log_debug(
+                f"Scenario ended: {output.outcome}",
+                session_id=ctx.deps.session_id,
+                outcome=output.outcome,
+                rewards=output.rewards
+            )
 
         # Use built-in JSON serialization methods
         import json
