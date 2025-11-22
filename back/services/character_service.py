@@ -192,6 +192,67 @@ class CharacterService:
         
         return self.character_data
     
+    def remove_currency(self, gold: int = 0, silver: int = 0, copper: int = 0) -> Character:
+        """
+        ### remove_currency
+        **Description:** Removes currency from the character with automatic conversion.
+        If the character doesn't have enough of a specific denomination, it will automatically
+        convert from higher denominations (1 gold = 10 silver = 100 copper).
+        
+        **Parameters:**
+        - `gold` (int): Amount of gold to remove. Must be non-negative.
+        - `silver` (int): Amount of silver to remove. Must be non-negative.
+        - `copper` (int): Amount of copper to remove. Must be non-negative.
+        
+        **Returns:** 
+        - `Character`: The updated character object.
+        
+        **Raises:**
+        - `ValueError`: If the character doesn't have enough total currency.
+        """
+        if gold < 0 or silver < 0 or copper < 0:
+            raise ValueError("Currency amounts must be non-negative")
+        
+        # Convert everything to copper for calculation
+        total_to_remove_copper = (gold * 100) + (silver * 10) + copper
+        current_total_copper = (self.character_data.equipment.gold * 100) + \
+                               (self.character_data.equipment.silver * 10) + \
+                               self.character_data.equipment.copper
+        
+        if current_total_copper < total_to_remove_copper:
+            raise ValueError(
+                f"Insufficient funds. Need {total_to_remove_copper}C total, "
+                f"but only have {current_total_copper}C"
+            )
+        
+        # Calculate new total
+        remaining_copper = current_total_copper - total_to_remove_copper
+        
+        # Convert back to gold/silver/copper
+        new_gold = remaining_copper // 100
+        remaining_copper %= 100
+        new_silver = remaining_copper // 10
+        new_copper = remaining_copper % 10
+        
+        # Update character
+        self.character_data.equipment.gold = new_gold
+        self.character_data.equipment.silver = new_silver
+        self.character_data.equipment.copper = new_copper
+        
+        self.save_character()
+        
+        log_info("Currency removed from character",
+                   extra={"action": "remove_currency",
+                          "character_id": str(self.character_data.id),
+                          "gold_removed": gold,
+                          "silver_removed": silver,
+                          "copper_removed": copper,
+                          "total_gold": self.character_data.equipment.gold,
+                          "total_silver": self.character_data.equipment.silver,
+                          "total_copper": self.character_data.equipment.copper})
+        
+        return self.character_data
+    
     def take_damage(self, amount: int, source: str = "combat") -> Character:
         """
         ### take_damage
@@ -304,3 +365,5 @@ class CharacterService:
 
         log_info("Long rest performed", action="long_rest", character_id=self.character_id, heal_amount=missing_hp)
         return self.heal(missing_hp, source="long_rest")
+
+

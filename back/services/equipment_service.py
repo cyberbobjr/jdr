@@ -446,3 +446,114 @@ class EquipmentService:
     def _all_lists(self, character: Character) -> List[List[EquipmentItem]]:
         eq = character.equipment
         return [eq.weapons, eq.armor, eq.accessories, eq.consumables]
+
+    def decrease_item_quantity(self, character: Character, item_name: str, amount: int = 1) -> Character:
+        """
+        ### decrease_item_quantity
+        **Description:** Decreases the quantity of a specific item in the character's inventory.
+        If the quantity reaches 0 or less, the item is removed from the inventory.
+        
+        **Parameters:**
+        - `character` (Character): The character to modify.
+        - `item_name` (str): The name of the item to decrease.
+        - `amount` (int): The amount to decrease by. Default is 1.
+        
+        **Returns:** 
+        - `Character`: The updated character object.
+        """
+        log_debug("Decreasing item quantity", 
+                  action="decrease_item_quantity", 
+                  character_id=str(character.id), 
+                  item_name=item_name, 
+                  amount=amount)
+
+        if amount <= 0:
+            return character
+
+        item_found = False
+        
+        # Helper to process list
+        def process_list(item_list: List[EquipmentItem]) -> bool:
+            for i, item in enumerate(item_list):
+                if item.name.lower() == item_name.lower():
+                    item.quantity -= amount
+                    
+                    if item.quantity <= 0:
+                        item_list.pop(i)
+                        log_debug("Item removed (quantity <= 0)", 
+                                 action="decrease_item_quantity_removed", 
+                                 character_id=str(character.id), 
+                                 item_name=item_name)
+                    return True
+            return False
+
+        # Check all equipment lists
+        for lst in self._all_lists(character):
+            if process_list(lst):
+                item_found = True
+                break
+        
+        if item_found:
+            self.data_service.save_character(character)
+        else:
+            log_debug("Item not found for quantity decrease", 
+                      action="decrease_item_quantity_not_found", 
+                      character_id=str(character.id), 
+                      item_name=item_name)
+            
+        return character
+
+    def increase_item_quantity(self, character: Character, item_name: str, amount: int = 1) -> Character:
+        """
+        ### increase_item_quantity
+        **Description:** Increases the quantity of a specific item in the character's inventory.
+        If the item is not found, this method does nothing (idempotent behavior).
+        
+        **Parameters:**
+        - `character` (Character): The character to modify.
+        - `item_name` (str): The name of the item to increase.
+        - `amount` (int): The amount to increase by. Default is 1.
+        
+        **Returns:** 
+        - `Character`: The updated character object.
+        """
+        log_debug("Increasing item quantity", 
+                  action="increase_item_quantity", 
+                  character_id=str(character.id), 
+                  item_name=item_name, 
+                  amount=amount)
+
+        if amount <= 0:
+            return character
+
+        item_found = False
+        
+        # Helper to process list
+        def process_list(item_list: List[EquipmentItem]) -> bool:
+            for item in item_list:
+                if item.name.lower() == item_name.lower():
+                    item.quantity += amount
+                    log_debug("Item quantity increased", 
+                             action="increase_item_quantity_success", 
+                             character_id=str(character.id), 
+                             item_name=item_name,
+                             new_quantity=item.quantity)
+                    return True
+            return False
+
+        # Check all equipment lists
+        for lst in self._all_lists(character):
+            if process_list(lst):
+                item_found = True
+                break
+        
+        if item_found:
+            self.data_service.save_character(character)
+        else:
+            log_debug("Item not found for quantity increase", 
+                      action="increase_item_quantity_not_found", 
+                      character_id=str(character.id), 
+                      item_name=item_name)
+            
+        return character
+

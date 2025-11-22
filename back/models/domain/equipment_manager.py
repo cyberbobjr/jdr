@@ -186,7 +186,7 @@ class EquipmentManager:
             'cost_silver': int(src.get('cost_silver', 0)),
             'cost_copper': int(src.get('cost_copper', 0)),
             'weight': float(src.get('weight', 0)),
-            'quantity': 1,
+            'quantity': int(src.get('quantity', 1)),
             'equipped': False,
         }
         # Preserve common optional fields without renaming

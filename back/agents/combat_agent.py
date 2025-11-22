@@ -49,6 +49,8 @@ class CombatAgent:
                 combat_tools.get_combat_status_tool,
                 skill_tools.skill_check_with_character,
                 equipment_tools.inventory_remove_item,
+                equipment_tools.inventory_decrease_quantity,
+                equipment_tools.inventory_increase_quantity,
             ],
             history_processors=[summarize_old_messages]
         )

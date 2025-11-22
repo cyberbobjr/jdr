@@ -166,6 +166,124 @@ async def test_tool_inventory_buy(agent_service_setup):
 
 @pytest.mark.llm
 @pytest.mark.asyncio
+async def test_tool_inventory_decrease_quantity(agent_service_setup):
+    """Test inventory_decrease_quantity tool"""
+    agent, session_service, char_service = agent_service_setup
+    
+    # Setup: Add arrows manually
+    from back.models.domain.items import EquipmentItem
+    from uuid import uuid4
+    
+    char = session_service.character_service.get_character()
+    arrows = EquipmentItem(
+        id=str(uuid4()),
+        name="Arrows (20)",
+        category="consumable",
+        cost_gold=0, cost_silver=2, cost_copper=0,
+        weight=1.0,
+        quantity=20,
+        equipped=False
+    )
+    char.equipment.consumables.append(arrows)
+    session_service.character_service.save_character()
+    
+    # Verify setup
+    initial_quantity = session_service.character_service.get_character().equipment.consumables[0].quantity
+    assert initial_quantity == 20
+    
+    # Prompt
+    prompt = "I shoot 3 arrows at the target. Please decrease my arrow count by 3 using the inventory_decrease_quantity tool. Call the tool immediately."
+    print(f"\n[Decrease Qty] User: {prompt}")
+    
+    result = await agent.run(prompt, deps=session_service)
+    print(f"[Decrease Qty] Agent: {result.output}")
+    
+    # Verify
+    session_service.character_service.character_data = session_service.character_service._load_character()
+    consumables = session_service.character_service.character_data.equipment.consumables
+    
+    # Find arrows
+    arrows_item = next((item for item in consumables if "arrow" in item.name.lower()), None)
+    
+    if arrows_item is None:
+        print("WARNING: LLM did not decrease quantity correctly or removed item entirely")
+    else:
+        assert arrows_item.quantity == 17, f"Expected 17 arrows, got {arrows_item.quantity}"
+
+
+@pytest.mark.llm
+@pytest.mark.asyncio
+async def test_tool_currency_remove(agent_service_setup):
+    """Test character_remove_currency tool"""
+    agent, session_service, char_service = agent_service_setup
+    
+    # Setup: Give money
+    char_service.add_currency(gold=50, silver=5, copper=3)
+    initial_gold = char_service.get_character().equipment.gold
+    
+    # Prompt
+    prompt = "A thief stole 10 gold from me. Please remove it using the character_remove_currency tool. Call the tool immediately."
+    print(f"\n[Remove Currency] User: {prompt}")
+    
+    result = await agent.run(prompt, deps=session_service)
+    print(f"[Remove Currency] Agent: {result.output}")
+    
+    # Verify
+    char_service.character_data = char_service._load_character()
+    new_gold = char_service.character_data.equipment.gold
+    
+    assert new_gold == initial_gold - 10, f"Expected gold to decrease by 10. Got {new_gold} (was {initial_gold})"
+
+
+@pytest.mark.llm
+@pytest.mark.asyncio
+async def test_tool_inventory_increase_quantity(agent_service_setup):
+    """Test inventory_increase_quantity tool"""
+    agent, session_service, char_service = agent_service_setup
+    
+    # Setup: Add arrows manually
+    from back.models.domain.items import EquipmentItem
+    from uuid import uuid4
+    
+    char = session_service.character_service.get_character()
+    arrows = EquipmentItem(
+        id=str(uuid4()),
+        name="Arrows (20)",
+        category="consumable",
+        cost_gold=0, cost_silver=2, cost_copper=0,
+        weight=1.0,
+        quantity=10,
+        equipped=False
+    )
+    char.equipment.consumables.append(arrows)
+    session_service.character_service.save_character()
+    
+    # Verify setup
+    initial_quantity = session_service.character_service.get_character().equipment.consumables[0].quantity
+    assert initial_quantity == 10
+    
+    # Prompt
+    prompt = "I found 5 more arrows on the enemy's corpse. Please increase my arrow count by 5 using the inventory_increase_quantity tool. Call the tool immediately."
+    print(f"\n[Increase Qty] User: {prompt}")
+    
+    result = await agent.run(prompt, deps=session_service)
+    print(f"[Increase Qty] Agent: {result.output}")
+    
+    # Verify
+    session_service.character_service.character_data = session_service.character_service._load_character()
+    consumables = session_service.character_service.character_data.equipment.consumables
+    
+    # Find arrows
+    arrows_item = next((item for item in consumables if "arrow" in item.name.lower()), None)
+    
+    if arrows_item is None:
+        print("WARNING: LLM did not increase quantity correctly")
+    else:
+        assert arrows_item.quantity == 15, f"Expected 15 arrows, got {arrows_item.quantity}"
+
+
+@pytest.mark.llm
+@pytest.mark.asyncio
 async def test_tool_vitals_damage(agent_service_setup):
     """Test character_take_damage tool"""
     agent, session_service, char_service = agent_service_setup

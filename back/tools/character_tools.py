@@ -56,6 +56,71 @@ def character_add_currency(
         )
         return {"error": f"Failed to add currency: {str(e)}"}
 
+def character_remove_currency(
+    ctx: RunContext[GameSessionService], 
+    gold: int = 0, 
+    silver: int = 0, 
+    copper: int = 0
+) -> dict:
+    """
+    Remove currency (gold, silver, copper) from the character.
+
+    This tool removes the specified amount of currency from the character's inventory.
+    It should be used when the character LOSES money through theft, fines, bribes, tolls, or other narrative events.
+    DO NOT use this for purchases - use inventory_buy_item instead, which handles costs automatically.
+    
+    The system automatically converts between denominations if needed (1 gold = 10 silver = 100 copper).
+    For example, if the character has 5G 0S 0C and needs to pay 3S, the system will convert to 4G 7S 0C.
+
+    Args:
+        gold (int): Amount of gold to remove. Must be non-negative. Default is 0.
+        silver (int): Amount of silver to remove. Must be non-negative. Default is 0.
+        copper (int): Amount of copper to remove. Must be non-negative. Default is 0.
+
+    Returns:
+        dict: A dictionary containing a success message and the updated currency totals, or an error if insufficient funds.
+    """
+    try:
+        log_debug(
+            "Tool character_remove_currency called",
+            tool="character_remove_currency",
+            player_id=str(ctx.deps.character_id),
+            gold=gold,
+            silver=silver,
+            copper=copper
+        )
+        
+        if not ctx.deps.character_service:
+            return {"error": "Character service not available"}
+            
+        # Remove currency via service
+        updated_character = ctx.deps.character_service.remove_currency(gold, silver, copper)
+        
+        return {
+            "message": f"Removed {gold}G {silver}S {copper}C",
+            "currency": {
+                "gold": updated_character.equipment.gold,
+                "silver": updated_character.equipment.silver,
+                "copper": updated_character.equipment.copper
+            }
+        }
+        
+    except ValueError as e:
+        # Insufficient funds
+        log_warning(
+            "Insufficient funds in character_remove_currency",
+            error=str(e),
+            character_id=str(ctx.deps.character_id)
+        )
+        return {"error": str(e)}
+    except Exception as e:
+        log_warning(
+            "Error in character_remove_currency",
+            error=str(e),
+            character_id=str(ctx.deps.character_id)
+        )
+        return {"error": f"Failed to remove currency: {str(e)}"}
+
 def character_take_damage(ctx: RunContext[GameSessionService], damage: int, source: str = "unknown") -> dict:
     """
     Apply damage to the character.

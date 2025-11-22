@@ -22,7 +22,7 @@ Créer un maître de jeu (MJ) virtuel infatigable, capable d'offrir des aventure
 
 - **Système de Combat**: Tour par tour, initiative, gestion des PV, attaques, dégâts.
 - **Gestion d'État**: Sauvegarde et reprise des combats (`CombatStateService`).
-- **Inventaire**: Achat, vente, équipement (`EquipmentService`).
+- **Inventaire**: Achat, vente, équipement, gestion des quantités (munitions, consommables) (`EquipmentService`).
 - **Préférences**: Gestion des paramètres utilisateur (`SettingsService`).
 
 ### 3. Narration & IA

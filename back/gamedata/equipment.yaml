@@ -103,3 +103,11 @@ items:
     cost_silver: 8
     cost_copper: 0
     description: First aid medical kit
+  Arrows (20):
+    type: consumable
+    weight: 1.0
+    quantity: 20
+    cost_gold: 0
+    cost_silver: 2
+    cost_copper: 0
+    description: A bundle of 20 arrows

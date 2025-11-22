@@ -58,7 +58,7 @@ Le système utilise les 6 caractéristiques classiques (Force, Dextérité, Cons
 
 ## 📂 Structure du Projet
 
-```
+```text
 back/
 ├── agents/             # Agents IA (Narrative, Combat)
 ├── models/             # Modèles Pydantic
@@ -99,8 +99,9 @@ Les données statiques (Races, Classes, Équipement) sont chargées depuis des f
 Les agents interagissent avec le monde via des outils typés définis dans `back/tools/`.
 
 - `combat_tools.py`: Outils de combat (attaquer, finir le tour).
-- `exploration_tools.py`: Outils d'exploration (se déplacer, regarder).
-- `inventory_tools.py`: Outils d'inventaire (équiper, utiliser).
+- `equipment_tools.py`: Outils d'inventaire (acheter, ajouter, retirer, décrémenter quantités).
+- `character_tools.py`: Outils de personnage (monnaie, dégâts, soins, XP).
+- `skill_tools.py`: Outils de compétences (jets de compétence).
 
 ### Persistance
 

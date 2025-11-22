@@ -162,6 +162,7 @@ def inventory_remove_item(ctx: RunContext[GameSessionService], item_id: str, qty
 
     This tool removes a specified quantity of an item from the character's inventory.
     It should be used when an item is consumed, lost, sold, or given away.
+    FOR CONSUMABLES (arrows, potions): Use `inventory_decrease_quantity` instead if you just want to use one unit.
     This action persists the changes to the character's state.
 
     Args:
@@ -315,4 +316,116 @@ def list_available_equipment(ctx: RunContext[GameSessionService], category: str 
             category=category
         )
         return {"error": f"Failed to list equipment: {str(e)}"}
+
+
+
+
+def inventory_decrease_quantity(ctx: RunContext[GameSessionService], item_name: str, amount: int = 1) -> dict:
+    """
+    Decrease the quantity of an item in the inventory.
+
+    This tool decreases the quantity of a specific item (like arrows, rations, potions).
+    If the quantity reaches 0, the item is removed from the inventory.
+    Use this for consuming ammo or supplies.
+
+    Args:
+        item_name (str): The name of the item to decrease (e.g., "Arrows (20)", "Rations").
+        amount (int): The amount to decrease by. Default is 1.
+
+    Returns:
+        dict: A dictionary containing the updated inventory status.
+    """
+    try:
+        log_debug(
+            "Tool inventory_decrease_quantity called", 
+            tool="inventory_decrease_quantity", 
+            player_id=str(ctx.deps.character_id), 
+            item_name=item_name, 
+            amount=amount
+        )
+        
+        if not ctx.deps.equipment_service or not ctx.deps.character_service:
+            return {"error": "Equipment or character service not available"}
+        
+        character = ctx.deps.character_service.get_character()
+        
+        # Decrease quantity via service
+        updated_character = ctx.deps.equipment_service.decrease_item_quantity(
+            character,
+            item_name=item_name,
+            amount=amount
+        )
+        
+        # Get updated inventory list
+        inventory_items = ctx.deps.equipment_service.get_equipment_list(updated_character)
+        
+        return {
+            "message": f"Decreased {item_name} by {amount}",
+            "inventory": inventory_items
+        }
+        
+    except Exception as e:
+        log_warning(
+            "Error in inventory_decrease_quantity",
+            error=str(e),
+            character_id=str(ctx.deps.character_id),
+            item_name=item_name
+        )
+        return {"error": f"Failed to decrease quantity: {str(e)}"}
+
+
+def inventory_increase_quantity(ctx: RunContext[GameSessionService], item_name: str, amount: int = 1) -> dict:
+    """
+    Increase the quantity of an item in the inventory.
+
+    This tool increases the quantity of a specific item (like arrows, rations, potions).
+    Use this for crafting consumables, looting ammunition from enemies, or receiving supplies.
+    
+    If the item is not found in the inventory, this tool does nothing (idempotent behavior).
+    To add a NEW item to inventory, use inventory_add_item instead.
+
+    Args:
+        item_name (str): The name of the item to increase (e.g., "Arrows (20)", "Rations").
+        amount (int): The amount to increase by. Default is 1.
+
+    Returns:
+        dict: A dictionary containing the updated inventory status.
+    """
+    try:
+        log_debug(
+            "Tool inventory_increase_quantity called", 
+            tool="inventory_increase_quantity", 
+            player_id=str(ctx.deps.character_id), 
+            item_name=item_name, 
+            amount=amount
+        )
+        
+        if not ctx.deps.equipment_service or not ctx.deps.character_service:
+            return {"error": "Equipment or character service not available"}
+        
+        character = ctx.deps.character_service.get_character()
+        
+        # Increase quantity via service
+        updated_character = ctx.deps.equipment_service.increase_item_quantity(
+            character,
+            item_name=item_name,
+            amount=amount
+        )
+        
+        # Get updated inventory list
+        inventory_items = ctx.deps.equipment_service.get_equipment_list(updated_character)
+        
+        return {
+            "message": f"Increased {item_name} by {amount}",
+            "inventory": inventory_items
+        }
+        
+    except Exception as e:
+        log_warning(
+            "Error in inventory_increase_quantity",
+            error=str(e),
+            character_id=str(ctx.deps.character_id),
+            item_name=item_name
+        )
+        return {"error": f"Failed to increase quantity: {str(e)}"}
 

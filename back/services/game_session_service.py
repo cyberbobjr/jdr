@@ -574,7 +574,8 @@ TOOLS USAGE:
 - end_combat_tool: Use this to force end the combat (e.g., surrender, escape).
 - get_combat_status_tool: Use this if you need to refresh the state.
 - skill_check_with_character: Use this for non-combat actions (e.g., Acrobatics to jump on a table).
-- inventory_remove_item: Use this to consume ammo or items.
+- inventory_remove_item: Use this to remove items (sold/lost).
+- inventory_decrease_quantity: Use this to consume ammo (arrows) or supplies (potions).
 
 TURN FLOW:
 1. Analyze the current turn owner (Player or NPC).
