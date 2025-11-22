@@ -91,17 +91,28 @@ def mock_race_manager():
 
 
 @pytest.fixture(scope="function", autouse=True)
-def temp_data_dir(tmp_path, mock_equipment_manager, mock_race_manager, monkeypatch):
+def temp_data_dir(tmp_path, monkeypatch):
     """Create temporary data directory for tests with real file persistence"""
     # Create subdirectories for persistence
     (tmp_path / "characters").mkdir()
     (tmp_path / "sessions").mkdir()
     (tmp_path / "scenarios").mkdir()
     
+    # Copy static data files from production
+    base_dir = Path(__file__).parent.parent.parent # back/tests/integration -> back/tests -> back
+    prod_data_dir = base_dir / "gamedata"
+    
+    import shutil
+    for filename in ['equipment.yaml', 'skill_groups.yaml']:
+        src = prod_data_dir / filename
+        dst = tmp_path / filename
+        if src.exists():
+            shutil.copy2(src, dst)
+
     # Use monkeypatch to ensure patches persist for entire test
     # Patch the config instance method, not the wrapper function
     monkeypatch.setattr('back.config.config.get_data_dir', lambda: str(tmp_path))
-    monkeypatch.setattr('back.services.equipment_service.EquipmentManager', lambda: mock_equipment_manager)
+    # We do NOT mock EquipmentManager anymore, we want real logic with the copied file
     
     return tmp_path
 

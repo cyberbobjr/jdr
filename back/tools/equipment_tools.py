@@ -199,10 +199,29 @@ def inventory_remove_item(ctx: RunContext[GameSessionService], item_id: str, qty
         # Get current character
         character = ctx.deps.character_service.get_character()
         
+        # Resolve item_id if it's a name
+        target_id = item_id
+        # Simple check: if it doesn't look like a UUID (len 36), try to find by name
+        if len(item_id) != 36:
+            found_item = None
+            all_items = ctx.deps.equipment_service.get_equipment_details(character)
+            for item in all_items:
+                if item.name.lower() == item_id.lower() or item.id == item_id:
+                    found_item = item
+                    break
+            
+            if found_item:
+                target_id = found_item.id
+            else:
+                # If not found by name, maybe it's a partial match or just not there.
+                # Let the service handle it (it will fail silently if not found by ID)
+                # But we can return a better error here
+                return {"error": f"Item '{item_id}' not found in inventory."}
+
         # Remove item (this also saves the character)
         updated_character = ctx.deps.equipment_service.remove_item(
             character,
-            item_id=item_id,
+            item_id=target_id,
             quantity=qty
         )
         

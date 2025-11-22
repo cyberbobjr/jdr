@@ -37,6 +37,16 @@ def start_combat_tool(ctx: RunContext[GameSessionService], location: str, descri
             # For robustness, let's error but provide info.
             return {"error": "A combat is already in progress for this session"}
         
+        # Ensure player is included in participants
+        has_player = any(p.get('role') == 'ally' or p.get('camp') == 'player' or p.get('is_player') for p in participants)
+        if not has_player:
+            participants.append({
+                "name": "Player",
+                "role": "ally",
+                "camp": "player",
+                "is_player": True
+            })
+
         # Prepare participants data for service
         processed_participants = []
         for p in participants:

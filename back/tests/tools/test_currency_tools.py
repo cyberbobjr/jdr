@@ -141,6 +141,13 @@ def test_inventory_buy_item_with_conversion(mock_run_context, mock_character):
 
 def test_character_add_currency(mock_run_context, mock_character):
     """Test adding currency to character"""
+    # Setup mock side effect to update character
+    def side_effect(gold, silver, copper):
+        mock_character.equipment.add_currency(gold, silver, copper)
+        return mock_character
+        
+    mock_run_context.deps.character_service.add_currency.side_effect = side_effect
+
     # Execute
     result = character_add_currency(mock_run_context, gold=5, silver=2, copper=10)
     
@@ -150,4 +157,8 @@ def test_character_add_currency(mock_run_context, mock_character):
     assert mock_character.gold == 15
     assert mock_character.silver == 7
     assert mock_character.copper == 60
-    mock_run_context.deps.character_service.save_character.assert_called_once()
+    mock_run_context.deps.character_service.save_character.assert_not_called() # Service calls save, but we mocked add_currency which calls save. Wait, if we mock add_currency, the REAL add_currency is not called, so save_character inside it is not called.
+    # But our side effect only updates equipment. It doesn't call save.
+    # So we shouldn't assert save_character is called unless we call it in side_effect.
+    # But the tool doesn't call save_character directly. It relies on service.
+    # So we should NOT assert save_character called here because we mocked the service method that does it.

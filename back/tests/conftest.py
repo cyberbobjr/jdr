@@ -31,6 +31,13 @@ def clean_test_data_dir():
         shutil.copytree(prod_scenarios_dir, test_scenarios_dir)
     else:
         os.makedirs(test_scenarios_dir, exist_ok=True)
+
+    # Copy static data files (equipment.yaml, skill_groups.yaml)
+    for filename in ['equipment.yaml', 'skill_groups.yaml']:
+        src = os.path.join(PROD_DATA_DIR, filename)
+        dst = os.path.join(TEST_DATA_DIR, filename)
+        if os.path.exists(src):
+            shutil.copy2(src, dst)
     
     yield
     

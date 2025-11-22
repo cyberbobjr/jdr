@@ -168,17 +168,17 @@ class TestGameSessionServiceInstance:
             # but the specialized service does.
             assert result == mock_services['character_service'].apply_xp.return_value
 
-    def test_add_gold(self, mock_services):
-        """Test adding gold to character."""
+    def test_add_currency(self, mock_services):
+        """Test adding currency to character."""
         with patch.object(GameSessionService, '_load_session_data', return_value=True), \
              patch.object(GameSessionService, '_initialize_services'):
             service = GameSessionService("test-session")
             service = self._setup_service(service, mock_services)
 
-            result = service.character_service.add_gold(50.0)
+            result = service.character_service.add_currency(gold=50.0)
 
-            mock_services['character_service'].add_gold.assert_called_once_with(50.0)
-            assert result == mock_services['character_service'].add_gold.return_value
+            mock_services['character_service'].add_currency.assert_called_once_with(gold=50.0)
+            assert result == mock_services['character_service'].add_currency.return_value
 
     def test_take_damage(self, mock_services):
         """Test taking damage."""

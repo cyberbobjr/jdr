@@ -100,8 +100,10 @@ async def test_player_death_flow(temp_data_dir, test_character, test_scenario_su
     # Initialize services
     session_service = GameSessionService(session_id, character_id, scenario_filename)
     char_service = CharacterService(character_id)
-    
-    # Kill the player
+    # 3. End Scenario
+    # Simulate end scenario tool logic which adds rewards
+    char_service.apply_xp(100)
+    char_service.add_currency(gold=50)
     char_service.take_damage(1000) # Massive damage to ensure 0 HP
     
     # Send any message

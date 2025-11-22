@@ -37,7 +37,7 @@ def mock_session_service(mock_character):
     # Mock character_service
     service.character_service = MagicMock()
     service.character_service.get_character.return_value = mock_character
-    service.character_service.add_gold = MagicMock()
+    service.character_service.add_currency = MagicMock()
     
     # Mock equipment_service
     service.equipment_service = MagicMock()
@@ -116,6 +116,12 @@ def test_inventory_remove_item(mock_run_context, mock_character):
     # Setup mocks
     mock_run_context.deps.equipment_service.remove_item.return_value = mock_character
     mock_run_context.deps.equipment_service.get_equipment_list.return_value = []
+    
+    # Mock get_equipment_details to return an item matching "potion"
+    mock_item = MagicMock()
+    mock_item.name = "Potion"
+    mock_item.id = "potion"
+    mock_run_context.deps.equipment_service.get_equipment_details.return_value = [mock_item]
     
     # Execute
     result = inventory_remove_item(mock_run_context, "potion", qty=1)

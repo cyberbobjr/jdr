@@ -65,6 +65,9 @@ def mock_run_context(mock_session_service):
 
 def test_end_scenario_success_with_rewards(mock_run_context):
     """Test ending scenario with success and rewards"""
+    # Mock end_scenario on deps
+    mock_run_context.deps.end_scenario = MagicMock()
+
     result = end_scenario_tool(
         mock_run_context,
         outcome="success",
@@ -81,11 +84,15 @@ def test_end_scenario_success_with_rewards(mock_run_context):
     
     # Verify rewards were applied
     mock_run_context.deps.character_service.apply_xp.assert_called_once_with(100)
-    mock_run_context.deps.character_service.add_gold.assert_called_once_with(50)
+    mock_run_context.deps.character_service.add_currency.assert_called_once_with(gold=50)
+    # mock_run_context.deps.end_scenario.assert_called_once() # Tool returns payload, does not call service directly
 
 
 def test_end_scenario_success_no_rewards(mock_run_context):
     """Test ending scenario with success but no rewards"""
+    # Mock end_scenario on deps
+    mock_run_context.deps.end_scenario = MagicMock()
+
     result = end_scenario_tool(
         mock_run_context,
         outcome="success",
@@ -100,11 +107,15 @@ def test_end_scenario_success_no_rewards(mock_run_context):
     
     # Verify no rewards were applied
     mock_run_context.deps.character_service.apply_xp.assert_not_called()
-    mock_run_context.deps.character_service.add_gold.assert_not_called()
+    mock_run_context.deps.character_service.add_currency.assert_not_called()
+    # mock_run_context.deps.end_scenario.assert_called_once()
 
 
 def test_end_scenario_failure(mock_run_context):
     """Test ending scenario with failure"""
+    # Mock end_scenario on deps
+    mock_run_context.deps.end_scenario = MagicMock()
+
     result = end_scenario_tool(
         mock_run_context,
         outcome="failure",
@@ -119,11 +130,15 @@ def test_end_scenario_failure(mock_run_context):
     
     # Verify no rewards were applied for failure
     mock_run_context.deps.character_service.apply_xp.assert_not_called()
-    mock_run_context.deps.character_service.add_gold.assert_not_called()
+    mock_run_context.deps.character_service.add_currency.assert_not_called()
+    # mock_run_context.deps.end_scenario.assert_called_once()
 
 
 def test_end_scenario_failure_ignores_rewards(mock_run_context):
     """Test that failure outcome ignores any specified rewards"""
+    # Mock end_scenario on deps
+    mock_run_context.deps.end_scenario = MagicMock()
+
     result = end_scenario_tool(
         mock_run_context,
         outcome="failure",
@@ -135,7 +150,8 @@ def test_end_scenario_failure_ignores_rewards(mock_run_context):
     assert result.outcome == "failure"
     # Rewards should not be applied for failure
     mock_run_context.deps.character_service.apply_xp.assert_not_called()
-    mock_run_context.deps.character_service.add_gold.assert_not_called()
+    mock_run_context.deps.character_service.add_currency.assert_not_called()
+    # mock_run_context.deps.end_scenario.assert_called_once()
 
 
 def test_scenario_end_payload_creation():

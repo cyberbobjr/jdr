@@ -5,6 +5,7 @@ Integration tests for reward flows (XP and gold).
 import pytest
 from back.services.character_service import CharacterService
 from back.services.character_data_service import CharacterDataService
+from back.services.game_session_service import GameSessionService
 from back.tests.integration.helpers import assert_character_state, load_character_from_file
 
 
@@ -31,19 +32,16 @@ def test_add_xp(temp_data_dir, test_character):
     assert saved_data["experience_points"] == 100
 
 
-def test_add_gold(temp_data_dir, test_character):
-    """Test adding gold to character with real persistence"""
+def test_add_currency_flow(temp_data_dir, test_character):
     character_id, character_data = test_character
     
-    # Initialize services
-    data_service = CharacterDataService()
-    char_service = CharacterService(character_id, data_service=data_service)
+    # 1. Initialize Service
+    session_service = GameSessionService("test_session_reward", character_id=character_id, scenario_id="test_scenario")
+    char_service = session_service.character_service
     
-    # Initial state
-    assert character_data.equipment.gold == 100
-    
-    # Add gold
-    char_service.add_gold(50)
+    # 2. Add Gold
+    initial_gold = char_service.character_data.gold
+    char_service.add_currency(gold=50)
     
     # Verify in-memory state
     updated_character = char_service.get_character()

@@ -57,7 +57,7 @@ def end_scenario_tool(
             )
         
         if gold_reward > 0:
-            ctx.deps.character_service.add_gold(gold_reward)
+            ctx.deps.character_service.add_currency(gold=gold_reward)
             log_debug(
                 "Gold reward applied",
                 character_id=str(ctx.deps.character_id),

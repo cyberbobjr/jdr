@@ -1,9 +1,10 @@
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Tuple
 from uuid import UUID, uuid4
 import random
 import re
 from back.models.domain.combat_state import CombatState, Combatant, CombatantType
-from back.models.domain.character import Stats, Skills, Equipment, CombatStats, Spells, Character
+from back.models.domain.character import Stats, Skills, Equipment, CombatStats, Spells
+from back.models.domain.items import EquipmentItem
 from back.models.domain.npc import NPC
 from back.services.character_service import CharacterService
 from back.utils.logger import log_debug, log_error
@@ -104,22 +105,36 @@ class CombatService:
         # Default equipment generation logic
         equipment = Equipment()
         
+        def create_item(name: str, category: str, **kwargs) -> EquipmentItem:
+            return EquipmentItem(
+                id=str(uuid4()),
+                name=name,
+                category=category,
+                cost_gold=0,
+                cost_silver=0,
+                cost_copper=0,
+                weight=1.0,
+                quantity=1,
+                equipped=True,
+                **kwargs
+            )
+        
         # Simple logic to assign weapons based on name/archetype
         # This could be expanded with a proper lookup table
         if "goblin" in name.lower() or "goblin" in archetype.lower():
-            equipment.weapons.append({"name": "Scimitar", "damage": "1d6", "type": "melee"})
-            equipment.armor.append({"name": "Leather Armor", "defense": 2})
+            equipment.weapons.append(create_item("Scimitar", "weapons", damage="1d6", type="melee"))
+            equipment.armor.append(create_item("Leather Armor", "armor", protection=2))
         elif "orc" in name.lower() or "orc" in archetype.lower():
-            equipment.weapons.append({"name": "Greataxe", "damage": "1d12", "type": "melee"})
-            equipment.armor.append({"name": "Hide Armor", "defense": 3})
+            equipment.weapons.append(create_item("Greataxe", "weapons", damage="1d12", type="melee"))
+            equipment.armor.append(create_item("Hide Armor", "armor", protection=3))
         elif "skeleton" in name.lower():
-            equipment.weapons.append({"name": "Shortsword", "damage": "1d6", "type": "melee"})
+            equipment.weapons.append(create_item("Shortsword", "weapons", damage="1d6", type="melee"))
         elif "archer" in name.lower() or "bandit" in name.lower():
-             equipment.weapons.append({"name": "Shortbow", "damage": "1d6", "type": "ranged"})
-             equipment.armor.append({"name": "Leather Armor", "defense": 2})
+             equipment.weapons.append(create_item("Shortbow", "weapons", damage="1d6", type="ranged"))
+             equipment.armor.append(create_item("Leather Armor", "armor", protection=2))
         else:
             # Fallback weapon
-            equipment.weapons.append({"name": "Claws/Slam", "damage": "1d4", "type": "melee"})
+            equipment.weapons.append(create_item("Claws/Slam", "weapons", damage="1d4", type="melee"))
 
         return NPC(
             name=name,
@@ -270,7 +285,10 @@ class CombatService:
         if equipment and equipment.weapons:
             # TODO: Check for 'equipped' flag. For now, take the first one.
             # In a real implementation, we would filter by w.get('equipped', True)
-            return equipment.weapons[0]
+            weapon = equipment.weapons[0]
+            if isinstance(weapon, EquipmentItem):
+                return weapon.model_dump()
+            return weapon
             
         return {"name": "Unarmed Strike", "damage": "1", "type": "melee"}
 

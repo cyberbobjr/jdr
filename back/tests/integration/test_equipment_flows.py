@@ -17,6 +17,8 @@ def test_add_equipment_with_sufficient_gold(temp_data_dir, test_character, mock_
     data_service = CharacterDataService()
     char_service = CharacterService(character_id, data_service=data_service)
     equipment_service = EquipmentService(data_service)
+    # Inject mock manager
+    equipment_service.equipment_manager = mock_equipment_manager
     
     # Initial state: 100 gold
     character = char_service.get_character()
@@ -46,6 +48,8 @@ def test_add_equipment_insufficient_gold(temp_data_dir, test_character, mock_equ
     data_service = CharacterDataService()
     char_service = CharacterService(character_id, data_service=data_service)
     equipment_service = EquipmentService(data_service)
+    # Inject mock manager
+    equipment_service.equipment_manager = mock_equipment_manager
     
     # Set character gold to 10
     character = char_service.get_character()
@@ -70,7 +74,7 @@ def test_add_equipment_insufficient_gold(temp_data_dir, test_character, mock_equ
     assert saved_data["equipment"]["gold"] == 10
 
 
-def test_add_free_equipment(temp_data_dir, test_character):
+def test_add_free_equipment(temp_data_dir, test_character, mock_equipment_manager):
     """Test adding equipment without cost (loot)"""
     character_id, character_data = test_character
     
@@ -78,6 +82,8 @@ def test_add_free_equipment(temp_data_dir, test_character):
     data_service = CharacterDataService()
     char_service = CharacterService(character_id, data_service=data_service)
     equipment_service = EquipmentService(data_service)
+    # Inject mock manager
+    equipment_service.equipment_manager = mock_equipment_manager
     
     # Initial gold
     initial_gold = char_service.get_character().equipment.gold
