@@ -10,6 +10,7 @@ from back.graph.dto.combat import CombatSeedPayload
 from back.graph.dto.scenario import ScenarioEndPayload
 from back.models.schema import LLMConfig
 from back.services.game_session_service import GameSessionService
+from back.utils.history_processors import summarize_old_messages
 
 
 class NarrativeAgent:
@@ -55,7 +56,8 @@ class NarrativeAgent:
                 character_tools.character_apply_xp,
                 combat_tools.start_combat_tool,
                 scenario_tools.end_scenario_tool,
-            ]
+            ],
+            history_processors=[summarize_old_messages]
         )
 
         @self.agent.system_prompt

@@ -9,6 +9,7 @@ openai>=1.30
 pydantic-ai
 logfire[fastapi]
 opentelemetry-instrumentation-fastapi
+tiktoken
 
 # Validation de données & I/O
 pydantic>=2.7

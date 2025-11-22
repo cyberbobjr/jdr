@@ -47,16 +47,37 @@ class NarrativeNode(BaseNode[SessionGraphState, GameSessionService, DispatchResu
         
         system_prompt = await ctx.deps.build_narrative_system_prompt(language)
 
-        # Run the agent
+        # Load LLM-specific history (summarized)
+        llm_history = await ctx.deps.load_history_llm(HISTORY_NARRATIVE)
+        
+        # If LLM history is empty but full history exists (migration or first run), 
+        # we might want to seed it from full history or just start fresh.
+        # For now, if empty, we pass empty list (or let agent handle it).
+        # But we must ensure we don't lose context on first run.
+        if not llm_history:
+             # Fallback to full history if LLM history is missing (e.g. first run after feature add)
+             llm_history = await ctx.deps.load_history(HISTORY_NARRATIVE)
+
+        # Run the agent with LLM history
         result = await self.narrative_agent.run(
             user_message=ctx.state.pending_player_message.message,
-            message_history=ctx.state.model_messages or [],
+            message_history=llm_history,
             system_prompt=system_prompt,
             deps=ctx.deps
         )
 
-        # Persist the new messages
-        await ctx.deps.save_history(HISTORY_NARRATIVE, result.all_messages())
+        # Persist the new LLM history (which might include the summary now)
+        await ctx.deps.save_history_llm(HISTORY_NARRATIVE, result.all_messages())
+
+        # Update Full History (Source of Truth for UI)
+        # We load the full history, append the NEW messages from the agent result, and save.
+        full_history = await ctx.deps.load_history(HISTORY_NARRATIVE)
+        
+        # We need to append the user message and the model response(s)
+        # result.new_messages() contains exactly that.
+        full_history.extend(result.new_messages())
+        
+        await ctx.deps.save_history(HISTORY_NARRATIVE, full_history)
 
         # Handle structured output
         output = result.output
@@ -111,8 +132,30 @@ class NarrativeNode(BaseNode[SessionGraphState, GameSessionService, DispatchResu
             )
 
         # Use built-in JSON serialization methods
+        # We want to return the FULL history to the UI, not the summarized LLM history.
+        # We need to serialize full_history.
+        from back.storage.pydantic_jsonl_store import PydanticJsonlStore
+        # Helper to serialize list of messages
+        # Since we don't have a direct helper on result for arbitrary list, we use the store's helper or manual.
+        # PydanticJsonlStore has to_json methods? No, but we can use TypeAdapter or similar if needed.
+        # Actually, result.new_messages_json() is fine for the delta.
+        # For all_messages, we should return the full_history we just saved.
+        
+        # We can reuse the logic from PydanticJsonlStore or just rely on the fact that 
+        # the UI might reload history or we send it here.
+        # Let's try to serialize full_history using pydantic-ai's internal tools if accessible, 
+        # or just use the result's new messages and let the UI append them?
+        # The DispatchResult expects all_messages and new_messages.
+        
+        # Hack: We use the result's new_messages_json for the delta.
+        # For all_messages, we need to serialize full_history.
+        # Since full_history is a list of ModelMessage, we can use the same serialization as PydanticAI.
         import json
-        all_messages_json = json.loads(result.all_messages_json())
+        from pydantic_ai.messages import ModelMessage
+        from pydantic import TypeAdapter
+        
+        ta = TypeAdapter(list[ModelMessage])
+        all_messages_json = json.loads(ta.dump_json(full_history))
         new_messages_json = json.loads(result.new_messages_json())
 
         return End(DispatchResult(

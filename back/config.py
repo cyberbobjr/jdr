@@ -33,7 +33,7 @@ class Config:
         ### get_llm_config
         **Description :** Retourne la configuration du modèle LLM.
         **Returns :**
-        - (LLMConfig) : Configuration avec model, api_endpoint, api_key
+        - (LLMConfig) : Configuration avec model, api_endpoint, api_key, token_limit, keep_last_n_messages
         """
         llm_config = self._config.get("llm", {})
 
@@ -41,7 +41,9 @@ class Config:
         return LLMConfig(
             model=os.environ.get("DEEPSEEK_API_MODEL") or llm_config.get("model", "deepseek-chat"),
             api_endpoint=os.environ.get("DEEPSEEK_API_BASE_URL") or llm_config.get("api_endpoint", "https://api.deepseek.com"),
-            api_key=os.environ.get("DEEPSEEK_API_KEY") or llm_config.get("api_key", "")
+            api_key=os.environ.get("DEEPSEEK_API_KEY") or llm_config.get("api_key", ""),
+            token_limit=int(os.environ.get("LLM_TOKEN_LIMIT") or llm_config.get("token_limit", 4000)),
+            keep_last_n_messages=int(os.environ.get("LLM_KEEP_LAST_N_MESSAGES") or llm_config.get("keep_last_n_messages", 10))
         )
 
     def get_data_dir(self) -> str:

@@ -74,16 +74,27 @@ class CombatNode(BaseNode[SessionGraphState, GameSessionService, DispatchResult]
 
         system_prompt = await ctx.deps.build_combat_prompt(combat_state, language)
 
+        # Load LLM-specific history (summarized)
+        llm_history = await ctx.deps.load_history_llm(HISTORY_COMBAT)
+        
+        if not llm_history:
+             llm_history = await ctx.deps.load_history(HISTORY_COMBAT)
+
         # Run the agent
         result = await self.combat_agent.run(
             user_message=ctx.state.pending_player_message.message,
-            message_history=ctx.state.model_messages or [],
+            message_history=llm_history,
             system_prompt=system_prompt,
             deps=ctx.deps
         )
 
-        # Persist the new messages
-        await ctx.deps.save_history(HISTORY_COMBAT, result.all_messages())
+        # Persist the new LLM history
+        await ctx.deps.save_history_llm(HISTORY_COMBAT, result.all_messages())
+
+        # Update Full History
+        full_history = await ctx.deps.load_history(HISTORY_COMBAT)
+        full_history.extend(result.new_messages())
+        await ctx.deps.save_history(HISTORY_COMBAT, full_history)
 
         # Handle structured output
         output = result.output
@@ -106,7 +117,11 @@ class CombatNode(BaseNode[SessionGraphState, GameSessionService, DispatchResult]
 
         # Use built-in JSON serialization methods
         import json
-        all_messages_json = json.loads(result.all_messages_json())
+        from pydantic_ai.messages import ModelMessage
+        from pydantic import TypeAdapter
+        
+        ta = TypeAdapter(list[ModelMessage])
+        all_messages_json = json.loads(ta.dump_json(full_history))
         new_messages_json = json.loads(result.new_messages_json())
 
         return End(DispatchResult(

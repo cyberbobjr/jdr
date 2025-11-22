@@ -441,6 +441,37 @@ class GameSessionService:
             return store.load_raw_json_history()
         return []
 
+    async def save_history_llm(self, kind: str, messages: list) -> None:
+        """
+        ### save_history_llm
+        **Description:** Saves the summarized message history for LLM context.
+        This history is separate from the full UI history.
+
+        **Parameters:**
+        - `kind` (str): The type of history ("narrative" or "combat").
+        - `messages` (list): A list of `ModelMessage` objects to save.
+        """
+        history_path = os.path.join(get_data_dir(), "sessions", self.session_id, f"history_{kind}_llm.jsonl")
+        store = PydanticJsonlStore(history_path)
+        store.save_pydantic_history(messages)
+
+    async def load_history_llm(self, kind: str) -> List[ModelMessage]:
+        """
+        ### load_history_llm
+        **Description:** Loads the summarized message history for LLM context.
+
+        **Parameters:**
+        - `kind` (str): The type of history ("narrative" or "combat").
+
+        **Returns:**
+        - `List[ModelMessage]`: A list of loaded `ModelMessage` objects.
+        """
+        history_path = os.path.join(get_data_dir(), "sessions", self.session_id, f"history_{kind}_llm.jsonl")
+        if os.path.exists(history_path):
+            store = PydanticJsonlStore(history_path)
+            return store.load_pydantic_history()
+        return []
+
     async def update_game_state(self, game_state: Any) -> None:
         """
         ### update_game_state

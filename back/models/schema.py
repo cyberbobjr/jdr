@@ -14,6 +14,8 @@ class LLMConfig(BaseModel):
     api_endpoint: str
     api_key: str
     model: str
+    token_limit: int = 4000
+    keep_last_n_messages: int = 10
 
 
 

@@ -5,6 +5,7 @@ from pydantic_ai.providers.openai import OpenAIProvider
 from back.graph.dto.combat import CombatTurnContinuePayload, CombatTurnEndPayload
 from back.models.schema import LLMConfig
 from back.services.game_session_service import GameSessionService
+from back.utils.history_processors import summarize_old_messages
 
 
 class CombatAgent:
@@ -48,7 +49,8 @@ class CombatAgent:
                 combat_tools.get_combat_status_tool,
                 skill_tools.skill_check_with_character,
                 equipment_tools.inventory_remove_item,
-            ]
+            ],
+            history_processors=[summarize_old_messages]
         )
 
         @self.agent.system_prompt
