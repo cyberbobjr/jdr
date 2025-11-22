@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from uuid import UUID
-from typing import Dict, List, Optional, Any, TYPE_CHECKING
+from typing import Dict, List, Optional, Any, TYPE_CHECKING, Union
 from enum import Enum
 from back.models.enums import CharacterStatus, ItemType
 from back.models.domain.items import EquipmentItem
@@ -75,17 +75,22 @@ class ScenarioList(BaseModel):
 
 class MessagePart(BaseModel):
     """Model for a message part in conversation history"""
-    content: str
-    timestamp: str
+    content: Optional[Any] = None
+    timestamp: Optional[str] = None
     dynamic_ref: Optional[str] = None
     part_kind: str  # e.g., "system-prompt", "user-prompt", "text", "tool-call", "tool-return"
+    tool_name: Optional[str] = None
+    args: Optional[Union[Dict[str, Any], str]] = None
+    tool_call_id: Optional[str] = None
 
 class MessageUsage(BaseModel):
     """Model for token usage information"""
-    requests: int
-    request_tokens: int
-    response_tokens: int
-    total_tokens: int
+    requests: Optional[int] = None
+    request_tokens: Optional[int] = None
+    response_tokens: Optional[int] = None
+    total_tokens: Optional[int] = None
+    input_tokens: Optional[int] = None
+    output_tokens: Optional[int] = None
     details: Optional[Dict[str, Any]] = None
 
 class ConversationMessage(BaseModel):
@@ -133,12 +138,12 @@ class StartScenarioResponse(BaseModel):
 
 class PlayScenarioResponse(BaseModel):
     """Response model for the /scenarios/play endpoint"""
-    response: List[Dict[str, Any]]
+    response: List[ConversationMessage]
     session_id: UUID
 
 class ScenarioHistoryResponse(BaseModel):
     """Response model for the /scenarios/history/{session_id} endpoint"""
-    history: List[Dict[str, Any]]
+    history: List[ConversationMessage]
 
 class DeleteMessageResponse(BaseModel):
     """Response model for the DELETE /scenarios/history/{session_id}/{message_index} endpoint"""

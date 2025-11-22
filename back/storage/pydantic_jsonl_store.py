@@ -105,3 +105,70 @@ class PydanticJsonlStore:
             return []
 
     # Only modern PydanticAI methods are retained.
+
+    async def save_pydantic_history_async(self, messages: List[ModelMessage]) -> None:
+        """
+        ### save_pydantic_history_async
+        **Description:** Asynchronously serializes and saves a list of PydanticAI messages to the JSONL file.
+        **Parameters:**
+        - `messages` (List[ModelMessage]): List of PydanticAI messages to save.
+        """
+        import json
+        import aiofiles
+
+        # Use dump_json for consistent serialization with PydanticAI
+        json_bytes: bytes = ModelMessagesTypeAdapter.dump_json(messages, indent=2)
+        json_str: str = json_bytes.decode('utf-8')
+
+        async with aiofiles.open(self.filepath, "w", encoding="utf-8") as f:
+            await f.write(json_str)
+        log_debug("PydanticAI history saved async", action="save_pydantic_history_async", filepath=os.path.abspath(self.filepath), count=len(messages))
+
+    async def load_pydantic_history_async(self) -> List[ModelMessage]:
+        """
+        ### load_pydantic_history_async
+        **Description:** Asynchronously reloads the complete PydanticAI history from the JSONL file.
+        **Returns:** List of deserialized PydanticAI messages (List[ModelMessage]).
+        """
+        import json
+        import aiofiles
+        
+        if not os.path.exists(self.filepath):
+            return []
+        try:
+            async with aiofiles.open(self.filepath, "r", encoding="utf-8") as f:
+                content: str = (await f.read()).strip()
+                if not content:  # Empty file
+                    return []
+                data: Any = json.loads(content)
+
+            history: List[ModelMessage] = ModelMessagesTypeAdapter.validate_python(data)
+            log_debug("PydanticAI history reloaded async", action="load_pydantic_history_async", filepath=os.path.abspath(self.filepath), count=len(history))
+            return history
+        except Exception as e:
+            log_debug("Error reloading PydanticAI history async", error=str(e), filepath=os.path.abspath(self.filepath))
+            return []
+
+    async def load_raw_json_history_async(self) -> List[Dict[str, Any]]:
+        """
+        ### load_raw_json_history_async
+        **Description:** Asynchronously reloads the complete PydanticAI history as raw JSON data.
+        **Returns:** List of raw JSON message dictionaries.
+        """
+        import json
+        import aiofiles
+        
+        if not os.path.exists(self.filepath):
+            return []
+        try:
+            async with aiofiles.open(self.filepath, "r", encoding="utf-8") as f:
+                content: str = (await f.read()).strip()
+                if not content:  # Empty file
+                    return []
+                data: Any = json.loads(content)
+
+            log_debug("Raw JSON history reloaded async", action="load_raw_json_history_async", filepath=os.path.abspath(self.filepath), count=len(data) if isinstance(data, list) else 0)
+            return data if isinstance(data, list) else []
+        except Exception as e:
+            log_debug("Error reloading raw JSON history async", error=str(e), filepath=os.path.abspath(self.filepath))
+            return []

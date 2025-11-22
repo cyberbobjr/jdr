@@ -61,7 +61,7 @@ async def list_active_sessions() -> ActiveSessionsResponse:
     """
     log_debug("Endpoint call: gamesession/list_active_sessions")
     try:
-        sessions: List[Dict[str, Any]] = GameSessionService.list_all_sessions()
+        sessions: List[Dict[str, Any]] = await GameSessionService.list_all_sessions()
         enriched_sessions: List[SessionInfo] = []
         data_service = CharacterDataService()
         for session in sessions:
@@ -169,7 +169,7 @@ async def play_scenario(
             if character_data.status == CharacterStatus.DRAFT:
                 raise HTTPException(status_code=400, detail="Cannot start a scenario with a character in creation.")
             
-            session_info = GameSessionService.start_scenario(request.scenario_name, UUID(request.character_id))
+            session_info = await GameSessionService.start_scenario(request.scenario_name, UUID(request.character_id))
             session_id = UUID(session_info["session_id"])
             message = "Start the scenario and present the initial situation."  # Message de démarrage fixe
         except ValueError as e:
@@ -183,7 +183,7 @@ async def play_scenario(
 
     # Logique commune
     try:
-        session_service = GameSessionService(str(session_id))
+        session_service = await GameSessionService.load(str(session_id))
 
         game_state = await session_service.load_game_state()
         if game_state is None:
@@ -228,7 +228,7 @@ async def play_stream(session_id: UUID, message: PlayScenarioRequest):
 
     try:
         # Get session service
-        session_service = GameSessionService(str(session_id))
+        session_service = await GameSessionService.load(str(session_id))
 
         # Load or create game_state
         game_state = await session_service.load_game_state()
@@ -352,7 +352,7 @@ async def get_scenario_history(session_id: UUID) -> ScenarioHistoryResponse:
     """
     log_debug("Endpoint call: gamesession/get_scenario_history", session_id=str(session_id))
     try:
-        session = GameSessionService(str(session_id))
+        session = await GameSessionService.load(str(session_id))
         history: List[Dict[str, Any]] = await session.load_history_raw_json(HISTORY_NARRATIVE)
         return ScenarioHistoryResponse(history=history)
     except SessionNotFoundError as e:
@@ -398,7 +398,7 @@ async def delete_history_message(session_id: UUID, message_index: int) -> Delete
         raise HTTPException(status_code=400, detail=f"Index {message_index} cannot be negative.")
 
     try:
-        session = GameSessionService(str(session_id))
+        session = await GameSessionService.load(str(session_id))
 
         history: List[Dict[str, Any]] = await session.load_history_raw_json(HISTORY_NARRATIVE)
 
@@ -473,7 +473,7 @@ async def get_preferences(session_id: UUID) -> Dict[str, str]:
     """
     log_debug("Endpoint call: gamesession/get_preferences", session_id=str(session_id))
     try:
-        session_service = GameSessionService(str(session_id))
+        session_service = await GameSessionService.load(str(session_id))
         game_state = await session_service.load_game_state()
         if not game_state:
             raise HTTPException(status_code=404, detail="Game state not found")
