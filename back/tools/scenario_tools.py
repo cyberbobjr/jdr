@@ -18,24 +18,21 @@ def end_scenario_tool(
 ) -> ScenarioEndPayload:
     """
     End the current scenario.
-    
-    Use this tool when the player achieves or fails the main objective of the scenario.
-    The tool will signal the end of the scenario and apply any rewards.
-    
+
+    This tool signals the conclusion of the current scenario.
+    It should be used when the player achieves the main objective or fails irreversibly.
+    It applies any rewards (XP, gold) and returns a summary of the outcome.
+
     Args:
         outcome (Literal["success", "failure"]): The outcome of the scenario.
             - "success": The player achieved the main objective.
             - "failure": The player failed the main objective irreversibly.
         summary (str): A narrative summary of how the scenario concluded.
-        xp_reward (int): XP to award to the character (for success). Default: 0.
-        gold_reward (int): Gold to award to the character (for success). Default: 0.
-    
+        xp_reward (int): XP to award to the character (for success). Must be non-negative. Default is 0.
+        gold_reward (int): Gold to award to the character (for success). Must be non-negative. Default is 0.
+
     Returns:
-        ScenarioEndPayload: Structured payload containing the scenario end information.
-    
-    Important:
-        - Do NOT use this tool for player death - the system handles that automatically.
-        - After calling this tool, provide a final narrative message to close the adventure.
+        ScenarioEndPayload: A structured payload containing the scenario outcome, summary, and rewards.
     """
     log_debug(
         "Tool end_scenario_tool called",

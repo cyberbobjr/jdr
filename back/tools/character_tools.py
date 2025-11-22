@@ -10,18 +10,18 @@ def character_add_currency(
 ) -> dict:
     """
     Add currency (gold, silver, copper) to the character.
-    
-    WHEN TO USE:
-    - When the character finds money (loot, chest, etc.)
-    - When the character receives a monetary reward
-    
+
+    This tool adds the specified amount of gold, silver, and copper to the character's inventory.
+    It should be used when the character acquires money through looting, rewards, or other means.
+    This action persists the changes to the character's state.
+
     Args:
-        gold (int): Amount of gold to add. Default: 0.
-        silver (int): Amount of silver to add. Default: 0.
-        copper (int): Amount of copper to add. Default: 0.
-    
+        gold (int): Amount of gold to add. Must be non-negative. Default is 0.
+        silver (int): Amount of silver to add. Must be non-negative. Default is 0.
+        copper (int): Amount of copper to add. Must be non-negative. Default is 0.
+
     Returns:
-        dict: Updated currency totals.
+        dict: A dictionary containing a success message and the updated currency totals.
     """
     try:
         log_debug(
@@ -59,16 +59,17 @@ def character_add_currency(
 def character_take_damage(ctx: RunContext[GameSessionService], damage: int, source: str = "unknown") -> dict:
     """
     Apply damage to the character.
-    
-    WHEN TO USE:
-    - When the character takes damage from traps, environment, or narrative events outside of combat.
-    
+
+    This tool inflicts damage on the character from a specified source.
+    It should be used when the character takes damage from traps, environmental hazards,
+    or narrative events outside of combat. This updates the character's current hit points.
+
     Args:
-        damage (int): Amount of damage to take.
-        source (str): Source of the damage. Default: "unknown".
-    
+        damage (int): Amount of damage to take. Must be a positive integer.
+        source (str): The source of the damage (e.g., "trap", "fall"). Default is "unknown".
+
     Returns:
-        dict: Updated character status (HP).
+        dict: A dictionary containing the damage details and updated character status (HP, is_alive).
     """
     try:
         log_debug(
@@ -99,16 +100,17 @@ def character_take_damage(ctx: RunContext[GameSessionService], damage: int, sour
 def character_heal(ctx: RunContext[GameSessionService], amount: int, source: str = "magic") -> dict:
     """
     Heal the character.
-    
-    WHEN TO USE:
-    - When the character is healed by potions, spells, or rest.
-    
+
+    This tool restores the character's hit points.
+    It should be used when the character is healed by potions, spells, resting, or other means.
+    This updates the character's current hit points, up to their maximum.
+
     Args:
-        amount (int): Amount of HP to restore.
-        source (str): Source of healing. Default: "magic".
-    
+        amount (int): Amount of HP to restore. Must be a positive integer.
+        source (str): The source of the healing (e.g., "potion", "spell"). Default is "magic".
+
     Returns:
-        dict: Updated character status (HP).
+        dict: A dictionary containing the healing details and updated character status (HP).
     """
     try:
         log_debug(
@@ -138,16 +140,17 @@ def character_heal(ctx: RunContext[GameSessionService], amount: int, source: str
 def character_apply_xp(ctx: RunContext[GameSessionService], amount: int, reason: str = "milestone") -> dict:
     """
     Award experience points to the character.
-    
-    WHEN TO USE:
-    - When the character completes a quest, defeats enemies, or reaches a milestone.
-    
+
+    This tool adds experience points (XP) to the character.
+    It should be used when the character completes a quest, defeats enemies, or reaches a milestone.
+    This may result in the character leveling up if the XP threshold is reached.
+
     Args:
-        amount (int): Amount of XP to award.
-        reason (str): Reason for the award. Default: "milestone".
-    
+        amount (int): Amount of XP to award. Must be a positive integer.
+        reason (str): The reason for the award (e.g., "quest_completion"). Default is "milestone".
+
     Returns:
-        dict: Updated XP total.
+        dict: A dictionary containing the XP gained, total XP, and current level.
     """
     try:
         log_debug(

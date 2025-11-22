@@ -13,10 +13,14 @@ def start_combat_tool(ctx: RunContext[GameSessionService], location: str, descri
     """
     Starts a new combat with the given participants.
 
+    This tool initializes a new combat session.
+    It should be used when the narrative dictates a fight, ambush, or hostile encounter.
+    This creates a new combat state and saves it.
+
     Args:
-        location (str): Location of the combat.
-        description (str): Description of the combat setup.
-        participants (list[dict]): List of participants. Each participant should have:
+        location (str): The location where the combat takes place.
+        description (str): A description of the combat setup and environment.
+        participants (list[dict]): A list of participants in the combat. Each participant must be a dictionary containing:
             - name (str): Name of the participant.
             - role (str): "enemy" or "ally".
             - archetype (str): Description/Class (e.g., "Orc Warrior", "Goblin Archer").
@@ -24,7 +28,7 @@ def start_combat_tool(ctx: RunContext[GameSessionService], location: str, descri
             - is_unique_npc (bool, optional): If this is a specific named NPC from the scenario.
 
     Returns:
-        dict: Simplified CombatSeedPayload (combat_id, message).
+        dict: A dictionary containing the combat ID and a confirmation message.
     """
     log_debug("Tool start_combat_tool called", tool="start_combat_tool", location=location, description=description, participants=participants)
     
@@ -83,14 +87,17 @@ def start_combat_tool(ctx: RunContext[GameSessionService], location: str, descri
 def execute_attack_tool(ctx: RunContext[GameSessionService], attacker_id: str, target_id: str) -> dict:
     """
     Executes a full attack action from one combatant to another.
-    Handles weapon selection, attack roll, damage roll, and application.
+
+    This tool performs an attack, including weapon selection, attack roll, and damage application.
+    It should be used when a combatant (player or NPC) attacks another during their turn.
+    This updates the combat state and may result in damage or death.
 
     Args:
-        attacker_id (str): ID of the attacker.
-        target_id (str): ID of the target.
+        attacker_id (str): The UUID of the attacker.
+        target_id (str): The UUID of the target.
 
     Returns:
-        dict: Result of the attack (message, updated state summary).
+        dict: A dictionary containing the result of the attack (message, updated state summary, and auto-end info).
     """
     log_debug("Tool execute_attack_tool called", tool="execute_attack_tool", attacker_id=attacker_id, target_id=target_id)
     
@@ -141,15 +148,18 @@ def execute_attack_tool(ctx: RunContext[GameSessionService], attacker_id: str, t
 def apply_direct_damage_tool(ctx: RunContext[GameSessionService], target_id: str, amount: int, reason: str = "effect") -> dict:
     """
     Applies direct damage to a target (e.g., from a spell, trap, or environment).
-    Does NOT perform an attack roll.
+
+    This tool inflicts damage without an attack roll.
+    It should be used for spells (like Magic Missile), traps, or environmental effects.
+    This updates the target's health and checks for combat end conditions.
 
     Args:
-        target_id (str): ID of the target.
-        amount (int): Amount of damage to apply.
-        reason (str): Source/reason for the damage (optional).
+        target_id (str): The UUID of the target.
+        amount (int): Amount of damage to apply. Must be a positive integer.
+        reason (str): The source or reason for the damage (e.g., "fireball", "trap"). Default is "effect".
 
     Returns:
-        dict: Result of the damage application.
+        dict: A dictionary containing the result of the damage application.
     """
     log_debug("Tool apply_direct_damage_tool called", tool="apply_direct_damage_tool", target_id=target_id, amount=amount)
     
@@ -200,11 +210,15 @@ def end_turn_tool(ctx: RunContext[GameSessionService], combat_id: str) -> dict:
     """
     Ends the current turn and moves to the next combatant.
 
+    This tool advances the combat to the next participant's turn.
+    It should be used after the current combatant has completed their actions.
+    This updates the initiative order and current turn holder.
+
     Args:
-        combat_id (str): Combat identifier.
+        combat_id (str): The UUID of the current combat.
 
     Returns:
-        dict: Updated combat summary.
+        dict: A dictionary containing the updated combat summary and the name of the next combatant.
     """
     log_debug("Tool end_turn_tool called", tool="end_turn_tool", combat_id=combat_id)
     
@@ -233,11 +247,15 @@ def check_combat_end_tool(ctx: RunContext[GameSessionService], combat_id: str) -
     """
     Checks if the combat has ended and performs cleanup if so.
 
+    This tool verifies if victory or defeat conditions have been met.
+    It should be used periodically or after significant events (like a death) to see if combat is over.
+    If ended, it cleans up the combat state.
+
     Args:
-        combat_id (str): Combat identifier.
+        combat_id (str): The UUID of the current combat.
 
     Returns:
-        dict: Status of the combat.
+        dict: A dictionary containing the combat status (ended/ongoing) and end reason if applicable.
     """
     log_debug("Tool check_combat_end_tool called", tool="check_combat_end_tool", combat_id=combat_id)
     
@@ -286,12 +304,16 @@ def end_combat_tool(ctx: RunContext[GameSessionService], combat_id: str, reason:
     """
     Forcefully ends the combat.
 
+    This tool terminates the combat session immediately.
+    It should be used when the narrative requires combat to stop (e.g., surrender, interruption).
+    This deletes the combat state.
+
     Args:
-        combat_id (str): Combat identifier.
-        reason (str): Reason for ending.
+        combat_id (str): The UUID of the current combat.
+        reason (str): The reason for ending the combat (e.g., "fled", "negotiated").
 
     Returns:
-        dict: Final summary.
+        dict: A dictionary containing the final combat summary.
     """
     log_debug("Tool end_combat_tool called", tool="end_combat_tool", combat_id=combat_id, reason=reason)
     
@@ -314,11 +336,15 @@ def get_combat_status_tool(ctx: RunContext[GameSessionService], combat_id: str) 
     """
     Retrieves the current status of the combat.
 
+    This tool fetches the current state of the combat.
+    It should be used to get a summary of participants, health, and turn order.
+    This does not modify the combat state.
+
     Args:
-        combat_id (str): Combat identifier.
+        combat_id (str): The UUID of the current combat.
 
     Returns:
-        dict: Combat summary.
+        dict: A dictionary containing the combat summary.
     """
     log_debug("Tool get_combat_status_tool called", tool="get_combat_status_tool", combat_id=combat_id)
     

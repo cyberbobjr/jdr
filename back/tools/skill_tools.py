@@ -15,20 +15,18 @@ def skill_check_with_character(
 ) -> str:
     """
     Performs a skill check using the session character's data.
-    
-    This tool resolves skill checks by:
-    1. Looking up the skill in the character's skills groups
-    2. Falling back to base stats if the skill is not trained
-    3. Applying difficulty modifiers
-    4. Rolling 1d100 and determining success/failure with degrees
-    
+
+    This tool resolves skill checks by looking up the skill in the character's stats or skill groups.
+    It should be used when the character attempts an action with a chance of failure (e.g., climbing, persuading).
+    It calculates the target number based on stats/skills and difficulty, then rolls 1d100.
+
     Args:
         skill_name (str): Name of the skill or stat to test (e.g., "perception", "strength", "acrobatics").
-        difficulty_name (str): Difficulty level ("favorable", "normal", "unfavorable"). Default: "normal".
-        difficulty_modifier (int): Additional difficulty modifier (optional, default 0).
-    
+        difficulty_name (str): Difficulty level ("favorable", "normal", "unfavorable"). Default is "normal".
+        difficulty_modifier (int): Additional difficulty penalty (positive increases difficulty, negative decreases it). Default is 0.
+
     Returns:
-        dict: Detailed result of the test including roll, target, success status, and degree.
+        dict: A dictionary containing the detailed result of the test including roll, target, success status, and degree.
     """
     try:
         # Get character via CharacterService

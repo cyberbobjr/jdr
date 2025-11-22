@@ -6,25 +6,19 @@ from back.utils.logger import log_debug, log_warning
 def inventory_add_item(ctx: RunContext[GameSessionService], item_id: str, qty: int = 1) -> dict:
     """
     Add a free item to the character's inventory.
-    
-    This tool is for items received WITHOUT payment during the game
-    (rewards, loot, gifts, quest items, etc.).
-    
-    WHEN TO USE:
-    - When the character finds loot after combat
-    - When receiving a gift or reward
-    - When picking up a quest item
-    - Any item acquisition that does NOT involve payment
-    
+
+    This tool adds an item to the character's inventory without any cost.
+    It should be used for rewards, loot, gifts, or quest items found during the game.
+    This action persists the changes to the character's state.
     WHEN NOT TO USE:
     - DO NOT use this for purchases - use `inventory_buy_item` instead
     
     Args:
-        item_id (str): Identifier of the item to acquire (must be in English).
-        qty (int): Quantity to add. Default: 1.
-    
+        item_id (str): The unique identifier of the item to acquire (must be in English).
+        qty (int): The quantity of the item to add. Must be a positive integer. Default is 1.
+
     Returns:
-        dict: Summary with updated inventory.
+        dict: A dictionary containing a success message and the updated inventory list.
     """
     try:
         log_debug(
@@ -77,29 +71,18 @@ def inventory_buy_item(
 ) -> dict:
     """
     Purchase an item and add it to the character's inventory.
-    
-    This tool handles item purchases with automatic currency deduction.
-    The item's cost is retrieved from the equipment database and automatically
-    deducted from the character's currency (gold, silver, copper) with automatic
-    conversion if needed.
-    
-    WHEN TO USE:
-    - When the character wants to BUY an item from a merchant or shop
-    - When an item has a cost and should be paid for
-    
-    WORKFLOW:
-    1. ALWAYS use `list_available_equipment` FIRST to see available items and their costs
-    2. Use this tool to purchase the item (cost is automatic based on item_id)
-    3. The tool will check if the character can afford it
-    4. Currency is automatically deducted with conversion
-    
+
+    This tool handles item purchases by deducting the cost from the character's currency.
+    It should be used when the character buys an item from a shop or merchant.
+    It automatically checks affordability and performs currency conversion if necessary.
+
     Args:
-        item_id (str): Identifier of the item to purchase (must be in English, from equipment database).
-        qty (int): Quantity to purchase. Default: 1.
-    
+        item_id (str): The unique identifier of the item to purchase (must be in English, from equipment database).
+        qty (int): The quantity of the item to purchase. Must be a positive integer. Default is 1.
+
     Returns:
-        dict: Summary of the transaction with updated inventory and remaining currency.
-              On error, returns dict with "error" key and helpful message.
+        dict: A dictionary containing the transaction details, updated inventory, and remaining currency.
+              Returns an error if the item is not found or funds are insufficient.
     """
     try:
         log_debug(
@@ -176,13 +159,17 @@ def inventory_buy_item(
 def inventory_remove_item(ctx: RunContext[GameSessionService], item_id: str, qty: int = 1) -> dict:
     """
     Remove an item from the character's inventory.
-    
+
+    This tool removes a specified quantity of an item from the character's inventory.
+    It should be used when an item is consumed, lost, sold, or given away.
+    This action persists the changes to the character's state.
+
     Args:
-        item_id (str): Identifier of the item to remove (UUID or name).
-        qty (int): Quantity to remove. Default: 1.
-    
+        item_id (str): The unique identifier or name of the item to remove.
+        qty (int): The quantity of the item to remove. Must be a positive integer. Default is 1.
+
     Returns:
-        dict: Summary of the updated inventory.
+        dict: A dictionary containing a success message and the updated inventory list.
     """
     try:
         log_debug(
@@ -246,15 +233,16 @@ def inventory_remove_item(ctx: RunContext[GameSessionService], item_id: str, qty
 def list_available_equipment(ctx: RunContext[GameSessionService], category: str = "all") -> dict:
     """
     List available equipment items by category.
-    
-    This tool allows the LLM to query what items are available in the game,
-    ensuring that proposed items are consistent with the game rules.
-    
+
+    This tool retrieves a list of equipment items available in the game, filtered by category.
+    It should be used to check item availability, costs, and stats before making a purchase or rewarding loot.
+    This does not modify any state.
+
     Args:
-        category (str): Category to filter by. Options: "weapons", "armor", "accessories", "consumables", "all". Default: "all".
-    
+        category (str): The category to filter by. Options: "weapons", "armor", "accessories", "consumables", "all". Default is "all".
+
     Returns:
-        dict: List of available items with their item_id, name, cost, and description.
+        dict: A dictionary containing the list of available items with their details (id, name, cost, description, stats).
     """
     try:
         log_debug(
