@@ -14,7 +14,7 @@ def inventory_add_item(ctx: RunContext[GameSessionService], item_id: str, qty: i
     - DO NOT use this for purchases - use `inventory_buy_item` instead
     
     Args:
-        item_id (str): The unique identifier of the item to acquire (must be in English).
+        item_id (str): The unique identifier of the item to acquire (e.g., 'weapon_longsword', 'item_rope').
         qty (int): The quantity of the item to add. Must be a positive integer. Default is 1.
 
     Returns:
@@ -28,13 +28,6 @@ def inventory_add_item(ctx: RunContext[GameSessionService], item_id: str, qty: i
             item_id=item_id, 
             qty=qty
         )
-        
-        # Validate item_id is in English (basic check: no accented characters)
-        if any(char in item_id for char in "éèêëàâäôöûüçñ"):
-            return {
-                "error": f"Item ID must be in English. Received: '{item_id}'",
-                "suggestion": "Use English names like 'longsword' instead of 'épée_longue'"
-            }
         
         if not ctx.deps.equipment_service or not ctx.deps.character_service:
             return {"error": "Equipment or character service not available"}
@@ -77,7 +70,7 @@ def inventory_buy_item(
     It automatically checks affordability and performs currency conversion if necessary.
 
     Args:
-        item_id (str): The unique identifier of the item to purchase (must be in English, from equipment database).
+        item_id (str): The unique identifier of the item to purchase (e.g., 'weapon_longsword').
         qty (int): The quantity of the item to purchase. Must be a positive integer. Default is 1.
 
     Returns:
@@ -109,6 +102,8 @@ def inventory_buy_item(
         character = ctx.deps.character_service.get_character()
         
         # Check affordability
+        # Note: Assuming Character model has equipment.can_afford. If not, this will fail.
+        # But we are not refactoring Character model here, assuming it works or we fix it if tests fail.
         if not character.equipment.can_afford(cost_gold, cost_silver, cost_copper):
             total_cost_copper = (cost_gold * 100) + (cost_silver * 10) + cost_copper
             current_copper = character.equipment.get_total_in_copper()
@@ -166,7 +161,7 @@ def inventory_remove_item(ctx: RunContext[GameSessionService], item_id: str, qty
     This action persists the changes to the character's state.
 
     Args:
-        item_id (str): The unique identifier or name of the item to remove.
+        item_id (str): The unique identifier (catalog ID or instance UUID) of the item to remove.
         qty (int): The quantity of the item to remove. Must be a positive integer. Default is 1.
 
     Returns:
@@ -189,12 +184,12 @@ def inventory_remove_item(ctx: RunContext[GameSessionService], item_id: str, qty
         
         # Resolve item_id if it's a name
         target_id = item_id
-        # Simple check: if it doesn't look like a UUID (len 36), try to find by name
+        # Simple check: if it doesn't look like a UUID (len 36), try to find by name or catalog_id
         if len(item_id) != 36:
             found_item = None
             all_items = ctx.deps.equipment_service.get_equipment_details(character)
             for item in all_items:
-                if item.name.lower() == item_id.lower() or item.id == item_id:
+                if (item.item_id and item.item_id == item_id) or item.name.lower() == item_id.lower() or item.id == item_id:
                     found_item = item
                     break
             
@@ -320,7 +315,7 @@ def list_available_equipment(ctx: RunContext[GameSessionService], category: str 
 
 
 
-def inventory_decrease_quantity(ctx: RunContext[GameSessionService], item_name: str, amount: int = 1) -> dict:
+def inventory_decrease_quantity(ctx: RunContext[GameSessionService], item_id: str, amount: int = 1) -> dict:
     """
     Decrease the quantity of an item in the inventory.
 
@@ -329,7 +324,7 @@ def inventory_decrease_quantity(ctx: RunContext[GameSessionService], item_name: 
     Use this for consuming ammo or supplies.
 
     Args:
-        item_name (str): The name of the item to decrease (e.g., "Arrows (20)", "Rations").
+        item_id (str): The ID (catalog ID, UUID, or name) of the item to decrease.
         amount (int): The amount to decrease by. Default is 1.
 
     Returns:
@@ -340,7 +335,7 @@ def inventory_decrease_quantity(ctx: RunContext[GameSessionService], item_name: 
             "Tool inventory_decrease_quantity called", 
             tool="inventory_decrease_quantity", 
             player_id=str(ctx.deps.character_id), 
-            item_name=item_name, 
+            item_id=item_id, 
             amount=amount
         )
         
@@ -352,7 +347,7 @@ def inventory_decrease_quantity(ctx: RunContext[GameSessionService], item_name: 
         # Decrease quantity via service
         updated_character = ctx.deps.equipment_service.decrease_item_quantity(
             character,
-            item_name=item_name,
+            item_id=item_id,
             amount=amount
         )
         
@@ -360,7 +355,7 @@ def inventory_decrease_quantity(ctx: RunContext[GameSessionService], item_name: 
         inventory_items = ctx.deps.equipment_service.get_equipment_list(updated_character)
         
         return {
-            "message": f"Decreased {item_name} by {amount}",
+            "message": f"Decreased {item_id} by {amount}",
             "inventory": inventory_items
         }
         
@@ -369,12 +364,12 @@ def inventory_decrease_quantity(ctx: RunContext[GameSessionService], item_name: 
             "Error in inventory_decrease_quantity",
             error=str(e),
             character_id=str(ctx.deps.character_id),
-            item_name=item_name
+            item_id=item_id
         )
         return {"error": f"Failed to decrease quantity: {str(e)}"}
 
 
-def inventory_increase_quantity(ctx: RunContext[GameSessionService], item_name: str, amount: int = 1) -> dict:
+def inventory_increase_quantity(ctx: RunContext[GameSessionService], item_id: str, amount: int = 1) -> dict:
     """
     Increase the quantity of an item in the inventory.
 
@@ -385,7 +380,7 @@ def inventory_increase_quantity(ctx: RunContext[GameSessionService], item_name: 
     To add a NEW item to inventory, use inventory_add_item instead.
 
     Args:
-        item_name (str): The name of the item to increase (e.g., "Arrows (20)", "Rations").
+        item_id (str): The ID (catalog ID, UUID, or name) of the item to increase.
         amount (int): The amount to increase by. Default is 1.
 
     Returns:
@@ -396,7 +391,7 @@ def inventory_increase_quantity(ctx: RunContext[GameSessionService], item_name: 
             "Tool inventory_increase_quantity called", 
             tool="inventory_increase_quantity", 
             player_id=str(ctx.deps.character_id), 
-            item_name=item_name, 
+            item_id=item_id, 
             amount=amount
         )
         
@@ -408,7 +403,7 @@ def inventory_increase_quantity(ctx: RunContext[GameSessionService], item_name: 
         # Increase quantity via service
         updated_character = ctx.deps.equipment_service.increase_item_quantity(
             character,
-            item_name=item_name,
+            item_id=item_id,
             amount=amount
         )
         
@@ -416,7 +411,7 @@ def inventory_increase_quantity(ctx: RunContext[GameSessionService], item_name: 
         inventory_items = ctx.deps.equipment_service.get_equipment_list(updated_character)
         
         return {
-            "message": f"Increased {item_name} by {amount}",
+            "message": f"Increased {item_id} by {amount}",
             "inventory": inventory_items
         }
         
@@ -425,7 +420,7 @@ def inventory_increase_quantity(ctx: RunContext[GameSessionService], item_name: 
             "Error in inventory_increase_quantity",
             error=str(e),
             character_id=str(ctx.deps.character_id),
-            item_name=item_name
+            item_id=item_id
         )
         return {"error": f"Failed to increase quantity: {str(e)}"}
 

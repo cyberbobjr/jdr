@@ -45,3 +45,4 @@ class EquipmentItem(BaseModel):
     range: Optional[int] = None
     protection: Optional[int] = None
     type: Optional[str] = None
+

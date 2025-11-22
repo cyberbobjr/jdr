@@ -64,7 +64,7 @@ def test_inventory_decrease_quantity_success(mock_run_context, mock_character):
     assert result["message"] == "Decreased Arrows (20) by 1"
     assert result["inventory"] == ["Arrows (19)"]
     mock_run_context.deps.equipment_service.decrease_item_quantity.assert_called_once_with(
-        mock_character, item_name="Arrows (20)", amount=1
+        mock_character, item_id="Arrows (20)", amount=1
     )
 
 def test_inventory_decrease_quantity_service_unavailable(mock_run_context):

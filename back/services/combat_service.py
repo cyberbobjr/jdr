@@ -1,13 +1,14 @@
 from typing import List, Dict, Any, Tuple
 from uuid import UUID, uuid4
 import random
-import re
 from back.models.domain.combat_state import CombatState, Combatant, CombatantType
 from back.models.domain.character import Stats, Skills, Equipment, CombatStats, Spells
 from back.models.domain.items import EquipmentItem
+from back.models.domain.equipment_manager import EquipmentManager
 from back.models.domain.npc import NPC
 from back.services.character_service import CharacterService
 from back.utils.logger import log_debug, log_error
+from back.utils.dice import roll_dice
 
 class CombatService:
     def __init__(self):
@@ -19,6 +20,7 @@ class CombatService:
             This service handles all combat-related operations including participant
             management, attack resolution, damage application, and turn progression.
         """
+        self.equipment_manager = EquipmentManager()
 
     def start_combat(self, participants_data: List[Dict[str, Any]], session_service: Any = None) -> CombatState:
         """
@@ -105,36 +107,21 @@ class CombatService:
         # Default equipment generation logic
         equipment = Equipment()
         
-        def create_item(name: str, category: str, **kwargs) -> EquipmentItem:
-            return EquipmentItem(
-                id=str(uuid4()),
-                name=name,
-                category=category,
-                cost_gold=0,
-                cost_silver=0,
-                cost_copper=0,
-                weight=1.0,
-                quantity=1,
-                equipped=True,
-                **kwargs
-            )
-        
         # Simple logic to assign weapons based on name/archetype
-        # This could be expanded with a proper lookup table
         if "goblin" in name.lower() or "goblin" in archetype.lower():
-            equipment.weapons.append(create_item("Scimitar", "weapons", damage="1d6", type="melee"))
-            equipment.armor.append(create_item("Leather Armor", "armor", protection=2))
+            self._add_item_to_equipment(equipment, "weapon_scimitar", "weapons")
+            self._add_item_to_equipment(equipment, "armor_leather", "armor")
         elif "orc" in name.lower() or "orc" in archetype.lower():
-            equipment.weapons.append(create_item("Greataxe", "weapons", damage="1d12", type="melee"))
-            equipment.armor.append(create_item("Hide Armor", "armor", protection=3))
+            self._add_item_to_equipment(equipment, "weapon_greataxe", "weapons")
+            self._add_item_to_equipment(equipment, "armor_hide", "armor")
         elif "skeleton" in name.lower():
-            equipment.weapons.append(create_item("Shortsword", "weapons", damage="1d6", type="melee"))
+            self._add_item_to_equipment(equipment, "weapon_shortsword", "weapons")
         elif "archer" in name.lower() or "bandit" in name.lower():
-             equipment.weapons.append(create_item("Shortbow", "weapons", damage="1d6", type="ranged"))
-             equipment.armor.append(create_item("Leather Armor", "armor", protection=2))
+             self._add_item_to_equipment(equipment, "weapon_shortbow", "weapons")
+             self._add_item_to_equipment(equipment, "armor_leather", "armor")
         else:
             # Fallback weapon
-            equipment.weapons.append(create_item("Claws/Slam", "weapons", damage="1d4", type="melee"))
+            self._add_item_to_equipment(equipment, "weapon_natural", "weapons")
 
         return NPC(
             name=name,
@@ -149,6 +136,32 @@ class CombatService:
                 attack_bonus=data.get('attack_bonus', 2)
             ),
             spells=Spells()
+        )
+
+    def _add_item_to_equipment(self, equipment: Equipment, item_id: str, category_list: str):
+        item_data = self.equipment_manager.get_equipment_by_id(item_id)
+        if item_data:
+            item = self._dict_to_equipment_item(item_data)
+            if category_list == "weapons":
+                equipment.weapons.append(item)
+            elif category_list == "armor":
+                equipment.armor.append(item)
+
+    def _dict_to_equipment_item(self, data: Dict[str, Any]) -> EquipmentItem:
+         return EquipmentItem(
+            id=str(uuid4()),
+            name=data['name'],
+            category=data.get('category', 'misc'),
+            cost_gold=data.get('cost_gold', 0),
+            cost_silver=data.get('cost_silver', 0),
+            cost_copper=data.get('cost_copper', 0),
+            weight=float(data.get('weight', 0)),
+            quantity=1,
+            equipped=True,
+            damage=data.get('damage'),
+            range=data.get('range'),
+            protection=int(data.get('protection', 0)) if data.get('protection') else None,
+            type=data.get('type')
         )
 
     def roll_initiative(self, state: CombatState) -> CombatState:
@@ -241,9 +254,9 @@ class CombatService:
         result_msg = ""
         if hits:
             # 4. Roll Damage
-            damage = self._roll_dice(damage_dice)
+            damage = roll_dice(damage_dice)
             if is_crit:
-                damage += self._roll_dice(damage_dice) # Simple crit: roll twice
+                damage += roll_dice(damage_dice) # Simple crit: roll twice
                 log_msg += " CRITICAL HIT!"
             
             # Add ability mod to damage (simplified: same as attack bonus for now, or 0)
@@ -310,48 +323,6 @@ class CombatService:
         elif combatant.npc_ref:
             return combatant.npc_ref.combat_stats.attack_bonus
         return 0
-
-    def _roll_dice(self, dice_str: str) -> int:
-        """
-        Parses and rolls a dice string (e.g., '1d8', '2d6+1').
-
-        Purpose:
-            Utility method to simulate dice rolls based on standard RPG notation.
-
-        Args:
-            dice_str (str): The dice string to roll.
-
-        Returns:
-            int: The total result of the roll.
-        """
-        try:
-            # Remove whitespace
-            dice_str = dice_str.replace(" ", "")
-            
-            # Check for static number
-            if dice_str.isdigit():
-                return int(dice_str)
-                
-            # Parse XdY+Z
-            match = re.match(r"(\d+)d(\d+)(?:([+-])(\d+))?", dice_str)
-            if match:
-                count = int(match.group(1))
-                sides = int(match.group(2))
-                modifier_sign = match.group(3)
-                modifier = int(match.group(4)) if match.group(4) else 0
-                
-                total = sum(random.randint(1, sides) for _ in range(count))
-                
-                if modifier_sign == '-':
-                    total -= modifier
-                elif modifier_sign == '+':
-                    total += modifier
-                    
-                return max(1, total)
-            return 1 # Fallback
-        except Exception as e:
-            log_error(f"Error rolling dice {dice_str}: {e}")
-            return 1
 
     def apply_direct_damage(self, state: CombatState, target_id: str, amount: int, is_attack: bool = False) -> CombatState:
         """

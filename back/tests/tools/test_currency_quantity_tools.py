@@ -89,13 +89,13 @@ def test_character_remove_currency_service_unavailable(mock_run_context):
 # Tests for inventory_increase_quantity
 
 def test_inventory_increase_quantity_success(mock_run_context, mock_character):
-    result = inventory_increase_quantity(mock_run_context, "Arrows (20)", amount=5)
+    result = inventory_increase_quantity(mock_run_context, "item_arrows", amount=5)
     
     assert "message" in result
-    assert "Increased Arrows (20) by 5" in result["message"]
+    assert "Increased item_arrows by 5" in result["message"]
     assert "inventory" in result
     mock_run_context.deps.equipment_service.increase_item_quantity.assert_called_once_with(
-        mock_character, item_name="Arrows (20)", amount=5
+        mock_character, item_id="item_arrows", amount=5
     )
 
 def test_inventory_increase_quantity_service_unavailable(mock_run_context):

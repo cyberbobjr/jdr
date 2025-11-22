@@ -63,27 +63,15 @@ def test_inventory_add_item_free(mock_run_context, mock_character):
     """Test adding a free item to inventory"""
     # Setup mocks
     mock_run_context.deps.equipment_service.add_item.return_value = mock_character
-    mock_run_context.deps.equipment_service.get_equipment_list.return_value = ["sword"]
+    mock_run_context.deps.equipment_service.get_equipment_list.return_value = ["weapon_sword"]
     
     # Execute
-    result = inventory_add_item(mock_run_context, "sword", qty=1)
+    result = inventory_add_item(mock_run_context, "weapon_sword", qty=1)
     
     # Assert
-    assert result["message"] == "Added 1 x sword"
-    assert result["inventory"] == ["sword"]
+    assert result["message"] == "Added 1 x weapon_sword"
+    assert result["inventory"] == ["weapon_sword"]
     mock_run_context.deps.equipment_service.add_item.assert_called_once()
-
-
-def test_inventory_add_item_french_name_rejected(mock_run_context):
-    """Test that French item names are rejected"""
-    # Execute
-    result = inventory_add_item(mock_run_context, "épée_longue", qty=1)
-    
-    # Assert
-    assert "error" in result
-    assert "must be in English" in result["error"]
-    assert "suggestion" in result
-    mock_run_context.deps.equipment_service.add_item.assert_not_called()
 
 
 def test_inventory_add_item_service_unavailable(mock_run_context):

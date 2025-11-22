@@ -6,7 +6,6 @@ These tests use explicit prompts to force the LLM to use specific tools.
 import pytest
 from uuid import uuid4
 from back.services.game_session_service import GameSessionService
-from back.services.character_service import CharacterService
 from back.services.combat_state_service import CombatStateService
 from back.agents.narrative_agent import NarrativeAgent
 from back.agents.combat_agent import CombatAgent
@@ -27,7 +26,7 @@ async def agent_service_setup(test_character, temp_data_dir):
     scenario_filename = "test_scenario.yaml" # Dummy
     
     session_service = GameSessionService(session_id, character_id, scenario_filename)
-    char_service = CharacterService(character_id)
+    char_service = session_service.character_service
     agent = NarrativeAgent(llm_config)
     
     return agent, session_service, char_service
@@ -60,9 +59,10 @@ async def test_tool_inventory_add(agent_service_setup):
     """Test inventory_add_item tool"""
     agent, session_service, char_service = agent_service_setup
     
-    # Prompt - using a valid item from equipment.yaml (Longsword)
+    # Prompt - using a valid item from equipment.yaml (Longsword -> weapon_longsword)
     item_name = "Longsword"
-    prompt = f"I found a '{item_name}'. Please add it to my inventory using the inventory_add_item tool. Call the tool immediately."
+    item_id = "weapon_longsword"
+    prompt = f"I found a '{item_name}'. Please add it to my inventory using the inventory_add_item tool with item_id='{item_id}'. Call the tool immediately."
     print(f"\n[Inv Add] User: {prompt}")
     
     result = await agent.run(prompt, deps=session_service)
@@ -87,16 +87,17 @@ async def test_tool_inventory_remove(agent_service_setup):
     
     # Setup: Add item first manually
     item_name = "Dagger"
+    item_id = "weapon_dagger"
     # Use session_service's character to ensure it knows about the item
     char = session_service.character_service.get_character()
-    session_service.equipment_service.add_item(char, "dagger", 1)
+    session_service.equipment_service.add_item(char, item_id, 1)
     
     # Debug: Check inventory
     inv = session_service.character_service.get_character().equipment
     print(f"Inventory before: {[i.name for i in inv.weapons + inv.armor + inv.accessories + inv.consumables]}")
     
     # Prompt
-    prompt = f"I lost my '{item_name}'. Please remove it from my inventory using the inventory_remove_item tool with item_id='{item_name}'. The system accepts names as IDs, so just use '{item_name}'. Call the tool immediately."
+    prompt = f"I lost my '{item_name}'. Please remove it from my inventory using the inventory_remove_item tool with item_id='{item_id}'. I confirm '{item_id}' is the correct ID. Call the tool immediately."
     print(f"\n[Inv Remove] User: {prompt}")
     
     result = await agent.run(prompt, deps=session_service)
@@ -140,7 +141,8 @@ async def test_tool_inventory_buy(agent_service_setup):
     
     # Prompt
     item_name = "Dagger" # Cost 0G 5S 0C usually, or cheap
-    prompt = f"I want to buy a '{item_name}'. I have enough money. Please buy it for me using the inventory_buy_item tool. Call the tool immediately."
+    item_id = "weapon_dagger"
+    prompt = f"I want to buy a '{item_name}'. I have enough money. Please buy it for me using the inventory_buy_item tool with item_id='{item_id}'. Call the tool immediately."
     print(f"\n[Buy] User: {prompt}")
     
     result = await agent.run(prompt, deps=session_service)
@@ -177,6 +179,7 @@ async def test_tool_inventory_decrease_quantity(agent_service_setup):
     char = session_service.character_service.get_character()
     arrows = EquipmentItem(
         id=str(uuid4()),
+        item_id="item_arrows",
         name="Arrows (20)",
         category="consumable",
         cost_gold=0, cost_silver=2, cost_copper=0,
@@ -192,7 +195,7 @@ async def test_tool_inventory_decrease_quantity(agent_service_setup):
     assert initial_quantity == 20
     
     # Prompt
-    prompt = "I shoot 3 arrows at the target. Please decrease my arrow count by 3 using the inventory_decrease_quantity tool. Call the tool immediately."
+    prompt = "I shoot 3 arrows at the target. Please decrease my arrow count by 3 using the inventory_decrease_quantity tool with item_id='item_arrows'. Call the tool immediately."
     print(f"\n[Decrease Qty] User: {prompt}")
     
     result = await agent.run(prompt, deps=session_service)
@@ -248,6 +251,7 @@ async def test_tool_inventory_increase_quantity(agent_service_setup):
     char = session_service.character_service.get_character()
     arrows = EquipmentItem(
         id=str(uuid4()),
+        item_id="item_arrows",
         name="Arrows (20)",
         category="consumable",
         cost_gold=0, cost_silver=2, cost_copper=0,
@@ -263,7 +267,7 @@ async def test_tool_inventory_increase_quantity(agent_service_setup):
     assert initial_quantity == 10
     
     # Prompt
-    prompt = "I found 5 more arrows on the enemy's corpse. Please increase my arrow count by 5 using the inventory_increase_quantity tool. Call the tool immediately."
+    prompt = "I found 5 more arrows on the enemy's corpse. Please increase my arrow count by 5 using the inventory_increase_quantity tool with item_id='item_arrows'. Call the tool immediately."
     print(f"\n[Increase Qty] User: {prompt}")
     
     result = await agent.run(prompt, deps=session_service)

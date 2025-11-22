@@ -62,8 +62,8 @@ class EquipmentManager:
         **Parameters:** None
         **Returns:** Equipment data dictionary.
         """
+        data_path = os.path.join(get_data_dir(), 'equipment.yaml')
         try:
-            data_path = os.path.join(get_data_dir(), 'equipment.yaml')
             with open(data_path, 'r', encoding='utf-8') as file:
                 return yaml.safe_load(file)
         except FileNotFoundError:
@@ -143,18 +143,7 @@ class EquipmentManager:
         **Retour:** Dictionnaire des objets.
         """
         return self.equipment_data.get("items", {})
-    
-    def get_equipment_by_name(self, name: str) -> Optional[Dict[str, Any]]:
-        """
-        ### get_equipment_by_name
-        **Description:** Recherche un équipement par son nom.
-        **Paramètres:**
-        - `name` (str): Nom de l'équipement recherché.
-        **Retour:** Dictionnaire des données de l'équipement ou None si non trouvé.        """
-        for category in self.equipment_data.values():
-            if isinstance(category, dict) and name in category:
-                return category[name]
-        return None
+
 
     # --- Standardization helpers ---
     @staticmethod
@@ -179,7 +168,7 @@ class EquipmentManager:
             category = 'consumable' if str(src.get('type', '')).lower() == 'consumable' else 'accessory'
 
         out: Dict[str, Any] = {
-            'id': self._slugify(name),
+            'id': str(src.get('id') or self._slugify(name)),
             'name': name,
             'category': category or str(src.get('type', '')).lower() or 'accessory',
             'cost_gold': int(src.get('cost_gold', 0)),

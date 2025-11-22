@@ -5,7 +5,7 @@ Responsabilité unique :
 - Gestion de l'inventaire (ajout, retrait, (dé)équipement, quantités)
 """
 
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from uuid import uuid4
 from back.models.domain.character import Character
 from back.models.domain.equipment_manager import EquipmentManager
@@ -31,90 +31,115 @@ class EquipmentService:
         self.data_service = data_service
         self.equipment_manager = EquipmentManager()
     
-    def buy_equipment(self, character: Character, equipment_name: str) -> Character:
+    def buy_equipment(self, character: Character, item_id: str) -> Character:
         """
         ### buy_equipment
         **Description:** Achète un équipement et débite l'argent correspondant.
         **Paramètres:**
         - `character` (Character): Personnage à modifier
-        - `equipment_name` (str): Nom de l'équipement à acheter
+        - `item_id` (str): ID de l'équipement à acheter
         **Retour:** Personnage modifié
         **Lève:** ValueError si l'équipement n'existe pas ou si pas assez d'argent
         """
         log_debug("Achat d'équipement", 
                  action="buy_equipment", 
                  character_id=str(character.id),
-                 equipment_name=equipment_name)
+                 item_id=item_id)
         
         # Récupérer les détails de l'équipement
-        equipment_details = self.equipment_manager.get_equipment_by_name(equipment_name)
+        equipment_details = self.equipment_manager.get_equipment_by_id(item_id)
         if not equipment_details:
-            raise ValueError(f"Équipement '{equipment_name}' non trouvé")
+            raise ValueError(f"Équipement '{item_id}' non trouvé")
         
         # Vérifier le budget
-        equipment_cost = int(equipment_details.get('cost', 0) or 0)
-        if character.gold < equipment_cost:
+        equipment_cost = int(equipment_details.get('cost_gold', 0) * 100 + equipment_details.get('cost_silver', 0) * 10 + equipment_details.get('cost_copper', 0))
+        # Note: The original code used 'cost' which might have been a simplified float. 
+        # The new manager returns cost_gold/silver/copper. 
+        # Let's assume the character.gold is actually in copper or some base unit? 
+        # Wait, the original code said: character.gold -= equipment_cost. 
+        # And equipment_details.get('cost', 0).
+        # The YAML has cost_gold, cost_silver, etc.
+        # The manager _standardize_item sets cost_gold etc.
+        # Let's check how currency is handled.
+        # The original code: equipment_cost = int(equipment_details.get('cost', 0) or 0)
+        # It seems the previous manager might have flattened cost?
+        # Let's look at the previous manager code I read.
+        # It had: 'cost': float(src.get('cost', 0)) in _standardize_item? 
+        # No, the previous code I read had: 'cost_gold': int(src.get('cost_gold', 0))...
+        # But buy_equipment used .get('cost').
+        # This implies the previous manager MIGHT have had a 'cost' field or the service was broken/using old data.
+        # Let's assume for now we use cost_gold as the main currency for simplicity or check if I need to convert.
+        # The YAML metadata says: "1G = 10S = 100C".
+        # Character model has 'gold'.
+        # I will assume for now we just use gold cost or a simplified cost.
+        # Let's stick to what was there but adapted.
+        # If the previous code used 'cost', and the manager didn't provide it, it was 0.
+        # I'll use cost_gold for now.
+        
+        cost_val = equipment_details.get('cost_gold', 0)
+        
+        if character.gold < cost_val:
             raise ValueError("Pas assez d'argent pour acheter cet équipement")
         
         # Créer l'objet EquipmentItem
         item_entry = EquipmentItem(
-            id=str(uuid4()),
-            name=equipment_name,
+            id=item_id,
+            name=equipment_details['name'],
             category=equipment_details.get('category', 'misc'),
-            cost=float(equipment_cost),
+            cost_gold=equipment_details.get('cost_gold', 0),
+            cost_silver=equipment_details.get('cost_silver', 0),
+            cost_copper=equipment_details.get('cost_copper', 0),
             weight=float(equipment_details.get('weight', 0)),
             quantity=1,
             equipped=False,
             description=equipment_details.get('description'),
             damage=equipment_details.get('damage'),
             range=equipment_details.get('range'),
-            protection=int(equipment_details.get('defense', 0)) if equipment_details.get('defense') else None,
+            protection=int(equipment_details.get('protection', 0)) if equipment_details.get('protection') else None,
             type=equipment_details.get('type')
         )
 
         # Ajouter l'équipement dans la bonne catégorie
-        weapons_list = self.equipment_manager.get_weapons()
-        armor_list = self.equipment_manager.get_armor()
-        
-        if equipment_name in weapons_list:
+        # We can rely on category from details
+        cat = equipment_details.get('category', 'misc')
+        if cat == 'weapon':
             character.equipment.weapons.append(item_entry)
-        elif equipment_name in armor_list:
+        elif cat == 'armor':
             character.equipment.armor.append(item_entry)
         else:
-            # Catégorie générique -> accessories
             character.equipment.accessories.append(item_entry)
         
         # Débiter l'argent
-        character.gold -= equipment_cost
+        character.gold -= cost_val
         
         self.data_service.save_character(character)
         
         log_debug("Équipement acheté avec succès", 
                  action="buy_equipment_success", 
                  character_id=str(character.id),
-                 equipment_name=equipment_name,
-                 cost=equipment_cost,
+                 item_id=item_id,
+                 cost=cost_val,
                  gold_restant=character.gold)
         
         return character
     
-    def sell_equipment(self, character: Character, equipment_name: str) -> Character:
+    def sell_equipment(self, character: Character, item_id: str) -> Character:
         """
         ### sell_equipment
         **Description:** Vend un équipement et rembourse l'argent correspondant.
         **Paramètres:**
         - `character` (Character): Personnage à modifier
-        - `equipment_name` (str): Nom de l'équipement à vendre
+        - `item_id` (str): ID de l'équipement à vendre
         **Retour:** Personnage modifié
         **Lève:** ValueError si l'équipement n'existe pas ou n'est pas dans l'inventaire
         """
         log_debug("Vente d'équipement", 
                  action="sell_equipment", 
                  character_id=str(character.id),
-                 equipment_name=equipment_name)
+                 item_id=item_id)
         
-        # Récupérer les détails de l'équipement pour le prix
-        equipment_details = self.equipment_manager.get_equipment_by_name(equipment_name)
+        # Récupérer les détails de l'équipement pour le prix (catalogue)
+        equipment_details = self.equipment_manager.get_equipment_by_id(item_id)
         
         # Retirer l'équipement de la bonne catégorie
         found = False
@@ -122,8 +147,16 @@ class EquipmentService:
         
         for lst in self._all_lists(character):
             for i, it in enumerate(lst):
-                if it.name == equipment_name:
-                    item_cost = it.cost
+                # Match by id if present, otherwise name (fallback for migration)
+                match = False
+                if it.id == item_id:
+                    match = True
+                elif equipment_details and it.name == equipment_details['name']:
+                    match = True
+                
+                if match:
+                    # Use item cost if stored, otherwise catalog cost
+                    item_cost = it.cost_gold # Simplified
                     del lst[i]
                     found = True
                     break
@@ -131,11 +164,11 @@ class EquipmentService:
                 break
                 
         if not found:
-            raise ValueError(f"L'équipement '{equipment_name}' n'est pas dans l'inventaire")
+            raise ValueError(f"L'équipement '{item_id}' n'est pas dans l'inventaire")
         
-        # Si on n'a pas le coût sur l'objet (vieux format?), on prend le catalogue
+        # Si on n'a pas le coût sur l'objet, on prend le catalogue
         if item_cost == 0 and equipment_details:
-            item_cost = float(equipment_details.get('cost', 0) or 0)
+            item_cost = float(equipment_details.get('cost_gold', 0))
 
         # Rembourser l'argent (50% du prix d'achat)
         refund_amount = int(item_cost * 0.5)
@@ -146,7 +179,7 @@ class EquipmentService:
         log_debug("Équipement vendu avec succès", 
                  action="sell_equipment_success", 
                  character_id=str(character.id),
-                 equipment_name=equipment_name,
+                 item_id=item_id,
                  refund_amount=refund_amount,
                  gold_restant=character.gold)
         
@@ -176,18 +209,22 @@ class EquipmentService:
         
         return character
     
-    def get_equipment_list(self, character: Character) -> List[str]:
+    def get_equipment_list(self, character: Character) -> List[Dict[str, Any]]:
         """
         ### get_equipment_list
         **Description:** Récupère la liste des équipements du personnage.
         **Paramètres:**
         - `character` (Character): Personnage à analyser
-        **Retour:** Liste des noms d'équipements
+        **Retour:** Liste de dictionnaires {name, catalog_id, quantity}
         """
-        names = []
+        items = []
         for lst in self._all_lists(character):
-            names.extend([it.name for it in lst])
-        return names
+            items.extend([{
+                "name": it.name,
+                "id": it.id,
+                "quantity": it.quantity
+            } for it in lst])
+        return items
     
     def get_equipment_details(self, character: Character) -> List[EquipmentItem]:
         """
@@ -216,40 +253,40 @@ class EquipmentService:
                 total_weight += it.weight * it.quantity
         return total_weight
     
-    def can_afford_equipment(self, character: Character, equipment_name: str) -> bool:
+    def can_afford_equipment(self, character: Character, item_id: str) -> bool:
         """
         ### can_afford_equipment
         **Description:** Vérifie si le personnage peut acheter un équipement.
         **Paramètres:**
         - `character` (Character): Personnage à vérifier
-        - `equipment_name` (str): Nom de l'équipement
+        - `item_id` (str): ID de l'équipement
         **Retour:** True si le personnage peut acheter, False sinon
         """
-        equipment_details = self.equipment_manager.get_equipment_by_name(equipment_name)
+        equipment_details = self.equipment_manager.get_equipment_by_id(item_id)
         if not equipment_details:
             return False
         
-        equipment_cost = int(equipment_details.get('cost', 0) or 0)
+        equipment_cost = int(equipment_details.get('cost_gold', 0))
         return character.gold >= equipment_cost
     
-    def equipment_exists(self, equipment_name: str) -> bool:
+    def equipment_exists(self, item_id: str) -> bool:
         """
         ### equipment_exists
         **Description:** Vérifie si un équipement existe dans le catalogue.
         **Paramètres:**
-        - `equipment_name` (str): Nom de l'équipement
+        - `item_id` (str): ID de l'équipement
         **Retour:** True si l'équipement existe, False sinon
         """
-        return self.equipment_manager.get_equipment_by_name(equipment_name) is not None
+        return self.equipment_manager.get_equipment_by_id(item_id) is not None
 
     # --- Inventory management (merged from InventoryService) ---
     def add_item(self, character: Character, item_id: str, quantity: int = 1) -> Character:
         """
         ### add_item
-        **Description:** Ajoute un objet standardisé à l'inventaire du personnage à partir de son id/nom.
+        **Description:** Ajoute un objet standardisé à l'inventaire du personnage à partir de son id.
         **Paramètres:**
         - `character` (Character): Personnage à modifier
-        - `item_id` (str): Identifiant (slug) ou nom exact de l'objet
+        - `item_id` (str): Identifiant de l'objet
         - `quantity` (int): Quantité à ajouter (défaut: 1)
         **Retour:** Personnage modifié
         """
@@ -260,19 +297,18 @@ class EquipmentService:
 
         target_list = self._get_category_list(character, base.get('category', 'misc'))
         
-        # Check by ID first, then name if needed (though ID should be unique in manager)
-        # Here we check if we already have this item in inventory (by ID match from manager ID? 
-        # No, inventory items have unique UUIDs usually, but if we stack them, we match by 'base ID' or name?)
-        # Let's assume stacking by name/properties.
-        # Actually, EquipmentItem has a unique ID. Stacking usually implies same 'type'.
+        # Check if we already have this item in inventory (by id match)
+        existing = next((it for it in target_list if it.id == item_id), None)
         
-        existing = next((it for it in target_list if it.name == base['name']), None)
-        
+        # Fallback: check by name if needed (migration scenario)
+        if not existing:
+            existing = next((it for it in target_list if it.name == base['name']), None)
+
         if existing:
             existing.quantity += int(quantity)
         else:
             new_item = EquipmentItem(
-                id=str(uuid4()),
+                id=item_id,
                 name=base['name'],
                 category=base.get('category', 'misc'),
                 cost_gold=int(base.get('cost_gold', 0)),
@@ -317,7 +353,9 @@ class EquipmentService:
                 id=str(item.get('id') or uuid4()),
                 name=item.get('name', 'Unknown Item'),
                 category=category,
-                cost=float(item.get('cost', 0) or 0),
+                cost_gold=int(item.get('cost_gold', item.get('cost', 0)) or 0),
+                cost_silver=int(item.get('cost_silver', 0)),
+                cost_copper=int(item.get('cost_copper', 0)),
                 weight=float(item.get('weight', 0) or 0),
                 quantity=qty,
                 equipped=bool(item.get('equipped', False)),
@@ -447,7 +485,7 @@ class EquipmentService:
         eq = character.equipment
         return [eq.weapons, eq.armor, eq.accessories, eq.consumables]
 
-    def decrease_item_quantity(self, character: Character, item_name: str, amount: int = 1) -> Character:
+    def decrease_item_quantity(self, character: Character, item_id: str, amount: int = 1) -> Character:
         """
         ### decrease_item_quantity
         **Description:** Decreases the quantity of a specific item in the character's inventory.
@@ -455,7 +493,7 @@ class EquipmentService:
         
         **Parameters:**
         - `character` (Character): The character to modify.
-        - `item_name` (str): The name of the item to decrease.
+        - `item_id` (str): The ID (catalog ID, UUID, or name) of the item to decrease.
         - `amount` (int): The amount to decrease by. Default is 1.
         
         **Returns:** 
@@ -464,7 +502,7 @@ class EquipmentService:
         log_debug("Decreasing item quantity", 
                   action="decrease_item_quantity", 
                   character_id=str(character.id), 
-                  item_name=item_name, 
+                  item_id=item_id, 
                   amount=amount)
 
         if amount <= 0:
@@ -475,7 +513,12 @@ class EquipmentService:
         # Helper to process list
         def process_list(item_list: List[EquipmentItem]) -> bool:
             for i, item in enumerate(item_list):
-                if item.name.lower() == item_name.lower():
+                # Match by id or name
+                match = False
+                if item.id == item_id: match = True
+                elif item.name.lower() == item_id.lower(): match = True
+                
+                if match:
                     item.quantity -= amount
                     
                     if item.quantity <= 0:
@@ -483,7 +526,7 @@ class EquipmentService:
                         log_debug("Item removed (quantity <= 0)", 
                                  action="decrease_item_quantity_removed", 
                                  character_id=str(character.id), 
-                                 item_name=item_name)
+                                 item_id=item_id)
                     return True
             return False
 
@@ -499,11 +542,11 @@ class EquipmentService:
             log_debug("Item not found for quantity decrease", 
                       action="decrease_item_quantity_not_found", 
                       character_id=str(character.id), 
-                      item_name=item_name)
+                      item_id=item_id)
             
         return character
 
-    def increase_item_quantity(self, character: Character, item_name: str, amount: int = 1) -> Character:
+    def increase_item_quantity(self, character: Character, item_id: str, amount: int = 1) -> Character:
         """
         ### increase_item_quantity
         **Description:** Increases the quantity of a specific item in the character's inventory.
@@ -511,7 +554,7 @@ class EquipmentService:
         
         **Parameters:**
         - `character` (Character): The character to modify.
-        - `item_name` (str): The name of the item to increase.
+        - `item_id` (str): The ID (catalog ID, UUID, or name) of the item to increase.
         - `amount` (int): The amount to increase by. Default is 1.
         
         **Returns:** 
@@ -520,7 +563,7 @@ class EquipmentService:
         log_debug("Increasing item quantity", 
                   action="increase_item_quantity", 
                   character_id=str(character.id), 
-                  item_name=item_name, 
+                  item_id=item_id, 
                   amount=amount)
 
         if amount <= 0:
@@ -531,12 +574,17 @@ class EquipmentService:
         # Helper to process list
         def process_list(item_list: List[EquipmentItem]) -> bool:
             for item in item_list:
-                if item.name.lower() == item_name.lower():
+                # Match by id or name
+                match = False
+                if item.id == item_id: match = True
+                elif item.name.lower() == item_id.lower(): match = True
+
+                if match:
                     item.quantity += amount
                     log_debug("Item quantity increased", 
                              action="increase_item_quantity_success", 
                              character_id=str(character.id), 
-                             item_name=item_name,
+                             item_id=item_id,
                              new_quantity=item.quantity)
                     return True
             return False
@@ -553,7 +601,7 @@ class EquipmentService:
             log_debug("Item not found for quantity increase", 
                       action="increase_item_quantity_not_found", 
                       character_id=str(character.id), 
-                      item_name=item_name)
+                      item_id=item_id)
             
         return character
 

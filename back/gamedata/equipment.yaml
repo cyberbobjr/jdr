@@ -6,6 +6,7 @@ _metadata:
   damage_format: 'dice + bonus format (e.g., 1d8+4)'
 weapons:
   Longsword:
+    id: weapon_longsword
     type: weapon
     category: melee
     damage: 1d8+4
@@ -15,6 +16,7 @@ weapons:
     cost_copper: 0
     description: Balanced and versatile one-handed sword
   Longbow:
+    id: weapon_longbow
     type: weapon
     category: ranged
     damage: 1d8+2
@@ -25,6 +27,7 @@ weapons:
     cost_copper: 0
     description: Powerful bow for ranged combat
   Dagger:
+    id: weapon_dagger
     type: weapon
     category: melee
     damage: 1d4+2
@@ -34,6 +37,7 @@ weapons:
     cost_copper: 0
     description: Small, discrete and quick blade
   Staff:
+    id: weapon_staff
     type: weapon
     category: melee
     damage: 1d6+3
@@ -42,8 +46,60 @@ weapons:
     cost_silver: 2
     cost_copper: 0
     description: Combat staff, often used by mages
+  Scimitar:
+    id: weapon_scimitar
+    type: weapon
+    category: melee
+    damage: 1d6
+    weight: 1.5
+    cost_gold: 1
+    cost_silver: 5
+    cost_copper: 0
+    description: Curved blade
+  Greataxe:
+    id: weapon_greataxe
+    type: weapon
+    category: melee
+    damage: 1d12
+    weight: 3.0
+    cost_gold: 3
+    cost_silver: 0
+    cost_copper: 0
+    description: Heavy two-handed axe
+  Shortsword:
+    id: weapon_shortsword
+    type: weapon
+    category: melee
+    damage: 1d6
+    weight: 1.0
+    cost_gold: 1
+    cost_silver: 0
+    cost_copper: 0
+    description: Light one-handed sword
+  Shortbow:
+    id: weapon_shortbow
+    type: weapon
+    category: ranged
+    damage: 1d6
+    range: 80
+    weight: 1.0
+    cost_gold: 1
+    cost_silver: 0
+    cost_copper: 0
+    description: Small bow
+  Natural Weapon:
+    id: weapon_natural
+    type: weapon
+    category: melee
+    damage: 1d4
+    weight: 0
+    cost_gold: 0
+    cost_silver: 0
+    cost_copper: 0
+    description: Claws, slam, or bite
 armor:
   Leather Armor:
+    id: armor_leather
     type: armor
     protection: 3
     weight: 5.0
@@ -52,6 +108,7 @@ armor:
     cost_copper: 0
     description: Light armor made of hardened leather
   Chain Mail:
+    id: armor_chain_mail
     type: armor
     protection: 6
     weight: 15.0
@@ -60,6 +117,7 @@ armor:
     cost_copper: 0
     description: Armor made of interlinked chain links
   Plate Armor:
+    id: armor_plate
     type: armor
     protection: 10
     weight: 25.0
@@ -67,8 +125,18 @@ armor:
     cost_silver: 0
     cost_copper: 0
     description: Heavy armor made of metal plates
+  Hide Armor:
+    id: armor_hide
+    type: armor
+    protection: 4
+    weight: 10.0
+    cost_gold: 2
+    cost_silver: 0
+    cost_copper: 0
+    description: Crude armor made of thick hides
 items:
   Rope (10m):
+    id: item_rope
     type: equipment
     weight: 2.0
     cost_gold: 0
@@ -76,6 +144,7 @@ items:
     cost_copper: 0
     description: Sturdy rope, 10 meters long
   Rations (1 day):
+    id: item_rations
     type: consumable
     weight: 0.5
     cost_gold: 0
@@ -83,6 +152,7 @@ items:
     cost_copper: 5
     description: Food for one day
   Torch:
+    id: item_torch
     type: equipment
     weight: 0.5
     cost_gold: 0
@@ -90,6 +160,7 @@ items:
     cost_copper: 2
     description: Portable light source
   Herb Bag:
+    id: item_herb_bag
     type: equipment
     weight: 1.0
     cost_gold: 0
@@ -97,6 +168,7 @@ items:
     cost_copper: 0
     description: Assortment of medicinal and magical herbs
   First Aid Kit:
+    id: item_first_aid_kit
     type: equipment
     weight: 1.0
     cost_gold: 0
@@ -104,6 +176,7 @@ items:
     cost_copper: 0
     description: First aid medical kit
   Arrows (20):
+    id: item_arrows
     type: consumable
     weight: 1.0
     quantity: 20
