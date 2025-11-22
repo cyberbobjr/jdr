@@ -4,7 +4,7 @@ Tests for GenericAgent.
 
 import pytest
 from pydantic import ValidationError
-from back.agents.gm_agent_pydantic import GenericAgent
+from back.agents.generic_agent import GenericAgent
 from back.models.schema import LLMConfig
 
 

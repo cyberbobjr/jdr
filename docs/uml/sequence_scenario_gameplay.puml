@@ -4,7 +4,7 @@ title Scenario Gameplay Sequence
 actor User
 participant "FastAPI Router\n(scenarios.py)" as Router
 participant "GameSessionService" as GameSessionService
-participant "GM Agent\n(gm_agent_pydantic.py)" as GmAgent
+participant "GM Agent\n(generic_agent.py)" as GmAgent
 participant "PydanticJSONLStore" as JsonlStore
 database "Session History" as SessionDB
 

@@ -1,7 +1,7 @@
 @startuml
 title Combat Turn Sequence
 
-participant "GM Agent\n(gm_agent_pydantic.py)" as GmAgent
+participant "GM Agent\n(generic_agent.py)" as GmAgent
 participant "Combat Tools\n(combat_tools.py)" as CombatTools
 participant "CombatService" as CombatService
 participant "CombatStateService" as CombatStateService

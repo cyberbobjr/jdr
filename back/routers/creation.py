@@ -16,7 +16,7 @@ from back.models.domain.stats_manager import StatsManager
 from back.models.domain.equipment_manager import EquipmentManager
 from back.models.domain.unified_skills_manager import UnifiedSkillsManager
 from back.models.schema import RaceData, SkillsResponse, EquipmentResponse, StatsResponse, EquipmentItem
-from back.agents.gm_agent_pydantic import build_simple_gm_agent
+from back.agents.generic_agent import build_simple_gm_agent
 import random
 
 router = APIRouter(tags=["creation"])

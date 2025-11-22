@@ -3,7 +3,7 @@ Script de debug pour diagnostiquer le problème avec les outils de combat Pydant
 """
 
 import asyncio
-from back.agents.gm_agent_pydantic import build_gm_agent_pydantic
+from back.agents.generic_agent import build_gm_agent_pydantic
 from back.services.combat_state_service import CombatStateService
 import uuid
 

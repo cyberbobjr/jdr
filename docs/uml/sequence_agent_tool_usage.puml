@@ -1,7 +1,7 @@
 @startuml
 title Agent Tool Usage Sequence (Skill Check)
 
-participant "GM Agent\n(gm_agent_pydantic.py)" as GmAgent
+participant "GM Agent\n(generic_agent.py)" as GmAgent
 participant "Skill Check Tool\n(skill_tools.py)" as SkillTool
 participant "CharacterService" as CharacterService
 participant "CharacterDataService" as DataService

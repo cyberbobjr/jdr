@@ -5,7 +5,32 @@ from typing import Optional
 from pydantic import BaseModel
 
 class EquipmentItem(BaseModel):
-    """Standardized equipment item model"""
+    """
+    Standardized equipment item model.
+    
+    Purpose:
+    This model represents any equipment item in the game, including weapons, armor,
+    and general items. It provides a unified structure for inventory management,
+    ensuring type safety and validation of all equipment data loaded from YAML files.
+    The model supports various equipment types with optional fields for specific
+    attributes like weapon damage/range or armor protection values.
+    
+    Attributes:
+        id (str): Unique identifier for this specific item instance (UUID).
+        name (str): Display name of the item (e.g., "Longbow", "Leather Armor").
+        category (str): Equipment category (e.g., "melee", "ranged", "armor", "equipment").
+        cost_gold (int): Gold cost of the item. Default: 0.
+        cost_silver (int): Silver cost of the item. Default: 0.
+        cost_copper (int): Copper cost of the item. Default: 0.
+        weight (float): Weight of the item in kilograms.
+        quantity (int): Number of items in this stack.
+        equipped (bool): Whether the item is currently equipped by the character.
+        description (Optional[str]): Textual description of the item.
+        damage (Optional[str]): Damage dice formula for weapons (e.g., "1d8+2").
+        range (Optional[int]): Range in meters for ranged weapons (e.g., 150 for Longbow).
+        protection (Optional[int]): Armor protection value (e.g., 3 for Leather Armor).
+        type (Optional[str]): Specific type classification (e.g., "weapon", "armor", "consumable").
+    """
     id: str
     name: str
     category: str
@@ -17,6 +42,6 @@ class EquipmentItem(BaseModel):
     equipped: bool
     description: Optional[str] = None
     damage: Optional[str] = None
-    range: Optional[str] = None
+    range: Optional[int] = None
     protection: Optional[int] = None
     type: Optional[str] = None

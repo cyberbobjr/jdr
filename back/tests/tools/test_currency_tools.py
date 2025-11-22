@@ -162,3 +162,68 @@ def test_character_add_currency(mock_run_context, mock_character):
     # So we shouldn't assert save_character is called unless we call it in side_effect.
     # But the tool doesn't call save_character directly. It relies on service.
     # So we should NOT assert save_character called here because we mocked the service method that does it.
+
+def test_inventory_buy_ranged_weapon(mock_run_context, mock_character):
+    """Test buying a ranged weapon with range field (regression test for Longbow bug)"""
+    # Setup mocks - simulate Longbow data with range as integer
+    mock_item = {
+        "id": "longbow",
+        "name": "Longbow",
+        "category": "ranged",
+        "cost_gold": 1,
+        "cost_silver": 5,
+        "cost_copper": 0,
+        "weight": 1.0,
+        "damage": "1d8+2",
+        "range": 150,  # Integer value, not string - this was causing the bug
+        "type": "weapon"
+    }
+    mock_run_context.deps.equipment_service.equipment_manager.get_equipment_by_id.return_value = mock_item
+    mock_run_context.deps.equipment_service.add_item.return_value = mock_character
+    mock_run_context.deps.equipment_service.get_equipment_list.return_value = ["Longbow"]
+    
+    # Execute
+    result = inventory_buy_item(mock_run_context, "longbow", qty=1)
+    
+    # Assert
+    assert "Purchased 1 x longbow" in result["message"]
+    assert result["transaction"]["cost"]["gold"] == 1
+    assert result["transaction"]["cost"]["silver"] == 5
+    # Initial: 10G 5S 50C = 1100C. Cost: 1G 5S = 150C. Remaining: 950C.
+    # Greedy redistribution: 9G 5S 0C.
+    assert mock_character.gold == 9
+    assert mock_character.silver == 5
+    assert mock_character.copper == 0
+    mock_run_context.deps.equipment_service.add_item.assert_called_once()
+
+def test_inventory_buy_armor_with_protection(mock_run_context, mock_character):
+    """Test buying armor with protection field"""
+    # Setup mocks - simulate Leather Armor data with protection field
+    mock_item = {
+        "id": "leather_armor",
+        "name": "Leather Armor",
+        "category": "armor",
+        "cost_gold": 1,
+        "cost_silver": 0,
+        "cost_copper": 0,
+        "weight": 5.0,
+        "protection": 3,  # Integer protection value
+        "type": "armor"
+    }
+    mock_run_context.deps.equipment_service.equipment_manager.get_equipment_by_id.return_value = mock_item
+    mock_run_context.deps.equipment_service.add_item.return_value = mock_character
+    mock_run_context.deps.equipment_service.get_equipment_list.return_value = ["Leather Armor"]
+    
+    # Execute
+    result = inventory_buy_item(mock_run_context, "leather_armor", qty=1)
+    
+    # Assert
+    assert "Purchased 1 x leather_armor" in result["message"]
+    assert result["transaction"]["cost"]["gold"] == 1
+    # Initial: 10G 5S 50C = 1100C. Cost: 1G = 100C. Remaining: 1000C.
+    # Greedy redistribution: 10G 0S 0C.
+    assert mock_character.gold == 10
+    assert mock_character.silver == 0
+    assert mock_character.copper == 0
+    mock_run_context.deps.equipment_service.add_item.assert_called_once()
+

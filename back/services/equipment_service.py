@@ -265,7 +265,6 @@ class EquipmentService:
         # No, inventory items have unique UUIDs usually, but if we stack them, we match by 'base ID' or name?)
         # Let's assume stacking by name/properties.
         # Actually, EquipmentItem has a unique ID. Stacking usually implies same 'type'.
-        # Let's match by name for stacking as per previous logic.
         
         existing = next((it for it in target_list if it.name == base['name']), None)
         
@@ -276,14 +275,16 @@ class EquipmentService:
                 id=str(uuid4()),
                 name=base['name'],
                 category=base.get('category', 'misc'),
-                cost=float(base.get('cost', 0)),
+                cost_gold=int(base.get('cost_gold', 0)),
+                cost_silver=int(base.get('cost_silver', 0)),
+                cost_copper=int(base.get('cost_copper', 0)),
                 weight=float(base.get('weight', 0)),
                 quantity=int(quantity),
                 equipped=False,
                 description=base.get('description'),
                 damage=base.get('damage'),
                 range=base.get('range'),
-                protection=int(base.get('defense', 0)) if base.get('defense') else None,
+                protection=int(base.get('protection', 0)) if base.get('protection') else None,
                 type=base.get('type')
             )
             target_list.append(new_item)
